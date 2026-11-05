@@ -10,6 +10,7 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import retrofit2.Retrofit;
 
 /**
@@ -117,6 +118,13 @@ interface PostRowHost {
     FragmentManager childFragmentManager();
 
     void openMedia(Post post, boolean peekMedia);
+
+    double startAutoplayVisibleAreaOffset();
+
+    boolean canPlayVideo();
+
+    @Nullable
+    PlayerSelector playerSelector();
 
     @Nullable
     Post getItem(int position);

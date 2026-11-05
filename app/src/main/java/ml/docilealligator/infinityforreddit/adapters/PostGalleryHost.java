@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestManager;
 
 import ml.docilealligator.infinityforreddit.post.Post;
-import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 
 /**
@@ -26,13 +25,6 @@ interface PostGalleryHost extends PostRowHost {
     SaveMemoryCenterInisdeDownsampleStrategy saveMemoryDownsampleStrategy();
 
     boolean hideImageCountInGallery();
-
-    double startAutoplayVisibleAreaOffset();
-
-    boolean canPlayVideo();
-
-    @Nullable
-    PlayerSelector playerSelector();
 
     RecyclerView.RecycledViewPool galleryRecycledViewPool();
 

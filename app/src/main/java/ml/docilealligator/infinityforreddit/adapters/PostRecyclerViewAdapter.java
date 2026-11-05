@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -31,22 +30,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.media3.common.C;
-import androidx.media3.common.PlaybackException;
-import androidx.media3.common.Player;
-import androidx.media3.common.TrackSelectionOverride;
-import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
-import androidx.media3.common.util.Util;
-import androidx.media3.ui.AspectRatioFrameLayout;
-import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.PlayerView;
-import androidx.media3.ui.TimeBar;
-import androidx.media3.ui.TrackSelectionDialogBuilder;
 import androidx.paging.ItemSnapshotList;
 import androidx.paging.PagingDataAdapter;
 import androidx.recyclerview.widget.DiffUtil;
@@ -65,7 +52,6 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,7 +64,6 @@ import java.util.function.Supplier;
 import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
-import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
 import ml.docilealligator.infinityforreddit.PostGalleryGridLayoutItemDecoration;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -101,7 +86,6 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.BadgedNameTextView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
-import ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout;
 import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3GalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3TextBinding;
@@ -121,18 +105,14 @@ import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFr
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
-import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
-import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.HidePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
-import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.user.UserMarkChanges;
 import ml.docilealligator.infinityforreddit.user.UserMarks;
-import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.NewWindowUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -142,9 +122,7 @@ import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
-import ml.docilealligator.infinityforreddit.videoautoplay.ExoPlayerViewHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.MultiPlayPlayerSelector;
-import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
 import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
@@ -152,8 +130,6 @@ import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
-import pl.droidsonroids.gif.GifImageView;
-import retrofit2.Call;
 import retrofit2.Retrofit;
 
 /**
@@ -494,7 +470,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     /** Hands the row classes live values from this adapter; see {@link PostRowHost}. */
     private final RowHost mRowHost = new RowHost();
 
-    private final class RowHost implements PostCompactHost, PostGalleryHost {
+    private final class RowHost implements PostCompactHost, PostGalleryHost, PostVideoHost {
         @Override public BaseActivity activity() { return mActivity; }
         @Override public Callback callback() { return mCallback; }
         @Override public String accountName() { return mAccountName; }
@@ -557,6 +533,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override public void openMedia(Post post, boolean peekMedia) { PostRecyclerViewAdapter.this.openMedia(post, peekMedia); }
         @Override public int subredditColor() { return mSubredditColor; }
         @Override public int usernameColor() { return mUsernameColor; }
+        @Override public PostFragmentBase fragment() { return mFragment; }
+        @Override public CustomThemeWrapper customThemeWrapper() { return mCustomThemeWrapper; }
+        @Override public boolean easierToWatchInFullScreen() { return mEasierToWatchInFullScreen; }
+        @Override public boolean dataSavingMode() { return mDataSavingMode; }
+        @Override public int dataSavingModeDefaultResolution() { return mDataSavingModeDefaultResolution; }
+        @Override public int nonDataSavingModeDefaultResolution() { return mNonDataSavingModeDefaultResolution; }
+        @Override public Provider<StreamableAPI> streamableApiProvider() { return mStreamableApiProvider; }
+        @Override public OkHttpClient shortClipOkHttpClient() { return mShortClipOkHttpClient; }
+        @Override public ExoCreator exoCreator() { return mExoCreator; }
+        @Override public void applyNoPreviewPlaceholder(ImageView previewImageView) { PostRecyclerViewAdapter.this.applyNoPreviewPlaceholder(previewImageView); }
+        @Override public void scheduleGifAutoplayUpdate() { PostRecyclerViewAdapter.this.scheduleGifAutoplayUpdate(); }
+        @Override public void notifyItemChanged(int position) { PostRecyclerViewAdapter.this.notifyItemChanged(position); }
+        @Override public void openMedia(Post post, long videoProgress) { PostRecyclerViewAdapter.this.openMedia(post, videoProgress); }
         @Override public int primaryTextColor() { return mPrimaryTextColor; }
         @Override public SharedPreferences sharedPreferences() { return mSharedPreferences; }
         @Override public RequestManager glide() { return mGlide; }
@@ -868,9 +857,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             if (mLegacyAutoplayVideoControllerUI) {
-                return new PostVideoAutoplayLegacyControllerViewHolder(ItemPostVideoTypeAutoplayLegacyControllerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostVideoAutoplayLegacyControllerViewHolder(ItemPostVideoTypeAutoplayLegacyControllerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
-                return new PostVideoAutoplayViewHolder(ItemPostVideoTypeAutoplayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostVideoAutoplayViewHolder(ItemPostVideoTypeAutoplayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE) {
             return new PostWithPreviewTypeViewHolder(ItemPostWithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -893,9 +882,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return new PostMaterial3CardWithPreviewViewHolder(ItemPostCard3WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             }
             if (mLegacyAutoplayVideoControllerUI) {
-                return new PostMaterial3CardVideoAutoplayLegacyControllerViewHolder(ItemPostCard3VideoTypeAutoplayLegacyControllerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostMaterial3CardVideoAutoplayLegacyControllerViewHolder(ItemPostCard3VideoTypeAutoplayLegacyControllerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
-                return new PostMaterial3CardVideoAutoplayViewHolder(ItemPostCard3VideoTypeAutoplayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostMaterial3CardVideoAutoplayViewHolder(ItemPostCard3VideoTypeAutoplayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE) {
             return new PostMaterial3CardWithPreviewViewHolder(ItemPostCard3WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -4025,821 +4014,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
 
-    @UnstableApi
-    public abstract class VideoAutoplayImpl implements ToroPlayer {
-        View itemView;
-        MaxHeightSquareFrameLayout previewFrameLayout;
-        AspectRatioFrameLayout aspectRatioFrameLayout;
-        GifImageView previewImageView;
-        ImageView errorLoadingRedgifsImageView;
-        PlayerView videoPlayer;
-        ImageView videoQualityButton;
-        ImageView muteButton;
-        ImageView fullscreenButton;
-        ImageView playPauseButton;
-        @Nullable
-        Container container;
-        @Nullable
-        ExoPlayerViewHelper helper;
-        @Nullable
-        private Uri mediaUri;
-        /**
-         * The URI {@link #helper} was built for, which is not always the one this card shows now:
-         * a helper is created once and goes on rendering into this surface until it is released.
-         */
-        @Nullable
-        private Uri initializedUri;
-        /**
-         * Puts the no-preview glyph up when a still fails to load, so a card whose preview could
-         * not be fetched shows what a card with no preview at all shows, rather than a blank box
-         * that stays blank until the clip's first frame.
-         */
-        private final RequestListener<Drawable> previewRequestListener = new RequestListener<>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                applyNoPreviewPlaceholder(previewImageView);
-                // Handled here: returning false lets Glide put its own error drawable up instead,
-                // and there is none, which is the blank box this exists to replace.
-                return true;
-            }
-
-            @Override
-            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                return false;
-            }
-        };
-        private float volume;
-        @Nullable
-        public Call<String> fetchRedgifsOrStreamableVideoCall;
-        @Nullable
-        public FetchShortClipVideo.Cancellable fetchShortClipVideoCancellable;
-        private boolean isManuallyPaused;
-        private Drawable playDrawable;
-        private Drawable pauseDrawable;
-        private boolean setDefaultResolutionAlready;
-
-        public VideoAutoplayImpl(View itemView, MaxHeightSquareFrameLayout previewFrameLayout,
-                                 AspectRatioFrameLayout aspectRatioFrameLayout,
-                                 GifImageView previewImageView, ImageView errorLoadingRedgifsImageView,
-                                 PlayerView videoPlayer, ImageView videoQualityButton, ImageView muteButton, ImageView fullscreenButton,
-                                 ImageView playPauseButton, DefaultTimeBar progressBar,
-                                 Drawable playDrawable, Drawable pauseDrawable) {
-            this.itemView = itemView;
-            this.previewFrameLayout = previewFrameLayout;
-            this.aspectRatioFrameLayout = aspectRatioFrameLayout;
-            this.previewImageView = previewImageView;
-            this.errorLoadingRedgifsImageView = errorLoadingRedgifsImageView;
-            this.videoPlayer = videoPlayer;
-            this.videoQualityButton = videoQualityButton;
-            this.muteButton = muteButton;
-            this.fullscreenButton = fullscreenButton;
-            this.playPauseButton = playPauseButton;
-            this.playDrawable = playDrawable;
-            this.pauseDrawable = pauseDrawable;
-
-            aspectRatioFrameLayout.setOnClickListener(null);
-
-            muteButton.setOnClickListener(view -> {
-                if (helper != null) {
-                    if (helper.getVolume() != 0) {
-                        muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_mute_24dp));
-                        helper.setVolume(0f);
-                        volume = 0f;
-                        mFragment.videoAutoplayChangeMutingOption(true);
-                    } else {
-                        muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
-                        helper.setVolume(1f);
-                        volume = 1f;
-                        mFragment.videoAutoplayChangeMutingOption(false);
-                    }
-                }
-            });
-
-            fullscreenButton.setOnClickListener(view -> {
-                Post post = getPost();
-                if (post != null) {
-                    markPostRead(post, true);
-
-                    if (helper != null) {
-                        openMedia(post, helper.getLatestPlaybackInfo().getResumePosition());
-                    } else {
-                        openMedia(post, -1);
-                    }
-                }
-            });
-
-            playPauseButton.setOnClickListener(view -> {
-                if (isPlaying()) {
-                    pause();
-                    isManuallyPaused = true;
-                    savePlaybackInfo(getPlayerOrder(), getCurrentPlaybackInfo());
-                } else {
-                    isManuallyPaused = false;
-                    play();
-                }
-            });
-
-            progressBar.addListener(new TimeBar.OnScrubListener() {
-                @Override
-                public void onScrubStart(TimeBar timeBar, long position) {
-
-                }
-
-                @Override
-                public void onScrubMove(TimeBar timeBar, long position) {
-
-                }
-
-                @Override
-                public void onScrubStop(TimeBar timeBar, long position, boolean canceled) {
-                    if (!canceled) {
-                        savePlaybackInfo(getPlayerOrder(), getCurrentPlaybackInfo());
-                    }
-                }
-            });
-
-            previewImageView.setOnClickListener(view -> fullscreenButton.performClick());
-
-            videoPlayer.setOnClickListener(view -> {
-                if (mEasierToWatchInFullScreen && videoPlayer.isControllerFullyVisible()) {
-                    fullscreenButton.performClick();
-                }
-            });
-        }
-
-        void bindVideoUri(Uri videoUri) {
-            // A helper is built once, for one URI, and keeps rendering into this card's surface
-            // until something releases it. A holder rebound off the scrap list never passes
-            // through onViewRecycled, so without this the clip of the post this card last held
-            // plays on under the new post's still -- and takes that still down with its next
-            // frame. Letting it go here is also what makes a switch to the direct-URL fallback
-            // take effect, since the old helper would otherwise keep the source that just failed.
-            if (helper != null && initializedUri != null && !initializedUri.equals(videoUri)) {
-                release();
-            }
-            mediaUri = videoUri;
-        }
-
-        void setVolume(float volume) {
-            this.volume = volume;
-        }
-
-        void resetVolume() {
-            volume = 0f;
-        }
-
-        private void savePlaybackInfo(int order, @Nullable PlaybackInfo playbackInfo) {
-            if (container != null) container.savePlaybackInfo(order, playbackInfo);
-        }
-
-        /**
-         * The fetch callbacks below re-check that this holder is still showing the post the
-         * fetch was started for. That used to be a position captured at bind time compared
-         * against getAdapterPosition(); comparing the post itself says what is actually meant
-         * and stays right when the list shifts under a holder that never rebound.
-         */
-        void loadVideo() {
-            Post post = getPost();
-            /*if (post.isRedgifs() && !post.isLoadedStreamableVideoAlready()) {
-                fetchRedgifsOrStreamableVideoCall =
-                        mRedgifsRetrofit.create(RedgifsAPI.class).getRedgifsData(
-                                APIUtils.getRedgifsOAuthHeader(mCurrentAccountSharedPreferences
-                                        .getString(SharedPreferencesUtils.REDGIFS_ACCESS_TOKEN, "")),
-                                post.getRedgifsId(), APIUtils.USER_AGENT);
-                FetchRedgifsVideoLinks.fetchRedgifsVideoLinksInRecyclerViewAdapter(mExecutor, new Handler(),
-                        fetchRedgifsOrStreamableVideoCall,
-                        new FetchVideoLinkListener() {
-                            @Override
-                            public void onFetchRedgifsVideoLinkSuccess(String webm, String mp4) {
-                                post.setVideoDownloadUrl(mp4);
-                                post.setVideoUrl(mp4);
-                                post.setLoadedStreamableVideoAlready(true);
-                                if (post == getPost()) {
-                                    bindVideoUri(Uri.parse(post.getVideoUrl()));
-                                }
-                            }
-
-                            @Override
-                            public void failed(@Nullable Integer messageRes) {
-                                if (post == getPost()) {
-                                    loadFallbackDirectVideo();
-                                }
-                            }
-                        });
-            } else */if(post.isStreamable() && !post.isLoadedStreamableVideoAlready()) {
-                String streamableShortCode = post.getStreamableShortCode();
-                if (streamableShortCode != null) {
-                    fetchRedgifsOrStreamableVideoCall =
-                            mStreamableApiProvider.get().getStreamableData(streamableShortCode);
-                    FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
-                            fetchRedgifsOrStreamableVideoCall,
-                            new FetchVideoLinkListener() {
-                                // Reference equality is the point, not an oversight: this asks
-                                // whether the holder is still bound to the very object the fetch was
-                                // started for. Post.equals() compares id *plus* mutable state
-                                // (voteType, saved, isRead...), so upvoting the post while the video
-                                // URL was in flight would make equals() false and drop the binding
-                                // for a post still on screen.
-                                @SuppressWarnings("ReferenceEquality")
-                                @Override
-                                public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
-                                    StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
-                                    if (media == null) {
-                                        return;
-                                    }
-                                    post.setVideoDownloadUrl(media.url);
-                                    post.setVideoUrl(media.url);
-                                    post.setLoadedStreamableVideoAlready(true);
-                                    if (post == getPost()) {
-                                        rebindResolvedVideo();
-                                    }
-                                }
-
-                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
-                                @Override
-                                public void failed(@Nullable Integer messageRes) {
-                                    if (post == getPost()) {
-                                        loadFallbackDirectVideo();
-                                    }
-                                }
-                            });
-                }
-            } else if (post.isShortClip() && !post.isLoadedStreamableVideoAlready()) {
-                ShortClipHostUtils.Host shortClipHost = post.getShortClipHost();
-                String shortClipId = post.getShortClipId();
-                if (shortClipHost != null && shortClipId != null) {
-                    fetchShortClipVideoCancellable = new FetchShortClipVideo.Cancellable();
-                    FetchShortClipVideo.fetchShortClipVideoInRecyclerViewAdapter(mExecutor, new Handler(),
-                            mShortClipOkHttpClient, shortClipHost, shortClipId, post.getUrl(),
-                            fetchShortClipVideoCancellable,
-                            new FetchVideoLinkListener() {
-                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
-                                @Override
-                                public void onFetchShortClipVideoLinkSuccess(String videoUrl) {
-                                    post.setVideoDownloadUrl(videoUrl);
-                                    post.setVideoUrl(videoUrl);
-                                    post.setLoadedStreamableVideoAlready(true);
-                                    if (post == getPost()) {
-                                        rebindResolvedVideo();
-                                    }
-                                }
-
-                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
-                                @Override
-                                public void failed(@Nullable Integer messageRes) {
-                                    if (post == getPost()) {
-                                        demoteToLinkPost(post);
-                                    }
-                                }
-                            });
-                }
-            } else {
-                bindVideoUri(Uri.parse(post.getVideoUrl()));
-            }
-        }
-
-        /**
-         * Rebinds the row now that its video URL is known.
-         *
-         * <p>Rebinding rather than writing the URI onto the holder the fetch was dispatched from,
-         * which may since have been recycled or rebound. A rebind runs the same branch that serves
-         * a post whose URL was already known, so a resolved clip and a cached one take one code
-         * path, and Toro starts playback the way it does for every other row. It also matches the
-         * failure path, which rebinds to swap in the link card.
-         */
-        void rebindResolvedVideo() {
-            int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION) {
-                notifyItemChanged(position);
-            }
-        }
-
-        /**
-         * Renders {@code post} as the link card it was parsed from, after its video could not
-         * be resolved.
-         *
-         * <p>Runs from a fetch callback, which is a later main-loop turn than the bind that started
-         * it -- notifyItemChanged during a layout pass throws. getItemViewType reads the post type
-         * live, so re-binding is all it takes to swap in the link holder.
-         *
-         * <p>The feed is a paging adapter, so this lasts until the next PagingData submission and
-         * then has to happen again. That is the right trade: making it durable would mean writing a
-         * host's outage into the post cache.
-         */
-        void demoteToLinkPost(Post post) {
-            post.demoteToLinkPost();
-            int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION) {
-                notifyItemChanged(position);
-            }
-        }
-
-        void loadFallbackDirectVideo() {
-            Post post = getPost();
-            if (post.getVideoFallBackDirectUrl() != null) {
-                // Held across the rebind below: binding a different URI lets go of the player that
-                // just failed, and a released player has no container to ask for the pass that
-                // starts the replacement.
-                Container settled = container;
-                bindVideoUri(Uri.parse(post.getVideoFallBackDirectUrl()));
-                post.setVideoDownloadUrl(post.getVideoFallBackDirectUrl());
-                post.setVideoUrl(post.getVideoFallBackDirectUrl());
-                post.setLoadedStreamableVideoAlready(true);
-                if (settled != null) {
-                    settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
-                }
-            }
-        }
-
-        @NonNull
-        @Override
-        public View getPlayerView() {
-            return videoPlayer;
-        }
-
-        @NonNull
-        @Override
-        public PlaybackInfo getCurrentPlaybackInfo() {
-            return helper != null && mediaUri != null ? helper.getLatestPlaybackInfo() : new PlaybackInfo();
-        }
-
-        @OptIn(markerClass = UnstableApi.class)
-        @Override
-        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
-            if (this.container == null) {
-                this.container = container;
-                this.container.setPlayerSelector(multiPlayPlayerSelector);
-            }
-            if (mediaUri == null) {
-                return;
-            }
-            // A finished clip is already set up and resting on its last frame, and re-initializing it
-            // does harm: onCompleted() leaves SCRAP in the playback cache, so the PlaybackInfo passed
-            // here is the fragment initializer's, which is muted. Since a finished clip no longer
-            // counts as playing, the Container re-initializes it on every selection pass -- including
-            // the one onPlaybackFinished() triggers -- so a clip the reader had unmuted would come back
-            // silent when they pressed play.
-            if (helper != null && helper.isEnded()) {
-                return;
-            }
-            if (helper == null) {
-                helper = new ExoPlayerViewHelper(this, mediaUri, null, mExoCreator);
-                initializedUri = mediaUri;
-                helper.addEventListener(new Playable.DefaultEventListener() {
-                    @Override
-                    public void onEvents(@NonNull Player player, @NonNull Player.Events events) {
-                        if (events.containsAny(
-                                Player.EVENT_PLAY_WHEN_READY_CHANGED,
-                                Player.EVENT_PLAYBACK_STATE_CHANGED,
-                                Player.EVENT_PLAYBACK_SUPPRESSION_REASON_CHANGED)) {
-                            playPauseButton.setImageDrawable(Util.shouldShowPlayButton(player) ? playDrawable : pauseDrawable);
-                        }
-                        if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
-                                && player.getPlaybackState() == Player.STATE_ENDED) {
-                            onPlaybackFinished();
-                        }
-                    }
-
-                    @Override
-                    public void onTracksChanged(@NonNull Tracks tracks) {
-                        if (helper == null) {
-                            return;
-                        }
-                        ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
-                        if (!trackGroups.isEmpty()) {
-                            if (getPost().isNormalVideo()) {
-                                videoQualityButton.setVisibility(View.VISIBLE);
-                                videoQualityButton.setOnClickListener(view -> {
-                                    if (helper == null) {
-                                        return;
-                                    }
-                                    TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(mActivity, mActivity.getString(R.string.select_video_quality), helper.getPlayer(), C.TRACK_TYPE_VIDEO);
-                                    builder.setShowDisableOption(true);
-                                    builder.setAllowAdaptiveSelections(false);
-                                    Dialog dialog = builder.setTheme(R.style.MaterialAlertDialogTheme).build();
-                                    dialog.show();
-                                    if (dialog instanceof AlertDialog) {
-                                        ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
-                                        ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
-                                    }
-                                });
-
-                                if (!setDefaultResolutionAlready) {
-                                    int desiredResolution = 0;
-                                    if (mDataSavingMode) {
-                                        if (mDataSavingModeDefaultResolution > 0) {
-                                            desiredResolution = mDataSavingModeDefaultResolution;
-                                        }
-                                    } else if (mNonDataSavingModeDefaultResolution > 0) {
-                                        desiredResolution = mNonDataSavingModeDefaultResolution;
-                                    }
-
-                                    if (desiredResolution > 0) {
-                                        TrackSelectionOverride trackSelectionOverride = null;
-                                        int bestTrackIndex = -1;
-                                        int bestResolution = -1;
-                                        int worstResolution = Integer.MAX_VALUE;
-                                        int worstTrackIndex = -1;
-                                        Tracks.Group bestTrackGroup = null;
-                                        Tracks.Group worstTrackGroup = null;
-                                        for (Tracks.Group trackGroup : tracks.getGroups()) {
-                                            if (trackGroup.getType() == C.TRACK_TYPE_VIDEO) {
-                                                for (int trackIndex = 0; trackIndex < trackGroup.length; trackIndex++) {
-                                                    int trackResolution = Math.min(trackGroup.getTrackFormat(trackIndex).height, trackGroup.getTrackFormat(trackIndex).width);
-                                                    if (trackResolution <= desiredResolution && trackResolution > bestResolution) {
-                                                        bestTrackIndex = trackIndex;
-                                                        bestResolution = trackResolution;
-                                                        bestTrackGroup = trackGroup;
-                                                    }
-                                                    if (trackResolution < worstResolution) {
-                                                        worstTrackIndex = trackIndex;
-                                                        worstResolution = trackResolution;
-                                                        worstTrackGroup = trackGroup;
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        if (bestTrackIndex != -1 && bestTrackGroup != null) {
-                                            trackSelectionOverride = new TrackSelectionOverride(
-                                                    bestTrackGroup.getMediaTrackGroup(),
-                                                    ImmutableList.of(bestTrackIndex)
-                                            );
-                                        } else if (worstTrackIndex != -1 && worstTrackGroup != null) {
-                                            trackSelectionOverride = new TrackSelectionOverride(
-                                                    worstTrackGroup.getMediaTrackGroup(),
-                                                    ImmutableList.of(worstTrackIndex)
-                                            );
-                                        }
-
-                                        if (trackSelectionOverride != null) {
-                                            helper.getPlayer().setTrackSelectionParameters(
-                                                    helper.getPlayer().getTrackSelectionParameters()
-                                                            .buildUpon()
-                                                            .addOverride(trackSelectionOverride)
-                                                            .build()
-                                            );
-                                        }
-                                    }
-                                    setDefaultResolutionAlready = true;
-                                }
-                            }
-
-                            for (int i = 0; i < trackGroups.size(); i++) {
-                                String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
-                                if (mimeType != null && mimeType.contains("audio")) {
-                                    if (mFragment.getMasterMutingOption() != null) {
-                                        volume = mFragment.getMasterMutingOption() ? 0f : 1f;
-                                    }
-                                    helper.setVolume(volume);
-                                    muteButton.setVisibility(View.VISIBLE);
-                                    if (volume != 0f) {
-                                        muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
-                                    } else {
-                                        muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_mute_24dp));
-                                    }
-                                    break;
-                                }
-                            }
-                        } else {
-                            muteButton.setVisibility(View.GONE);
-                        }
-                    }
-
-                    @Override
-                    public void onRenderedFirstFrame() {
-                        // Only the clip this card is bound to now may take its still down. This
-                        // listener outlives the post it was made for: a player released on a
-                        // posted pass, or one under a holder rebound off the scrap list, can put
-                        // a frame of the previous post's video up after the card has moved on,
-                        // and hiding the still for it leaves a video card showing nothing until
-                        // the new clip starts -- the blank preview that came and went while
-                        // scrolling a feed of videos.
-                        if (mediaUri == null || !mediaUri.equals(initializedUri)) {
-                            return;
-                        }
-                        // Don't clear the preview image - just hide it
-                        // This allows it to be shown again if the player is released while scrolling
-                        previewImageView.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onPlayerError(@NonNull PlaybackException error) {
-                        Post post = getPost();
-                        if (post.getVideoFallBackDirectUrl() == null || post.getVideoFallBackDirectUrl().equals(java.util.Objects.requireNonNull(mediaUri).toString())) {
-                            errorLoadingRedgifsImageView.setVisibility(View.VISIBLE);
-                        } else {
-                            loadFallbackDirectVideo();
-                        }
-                    }
-                });
-            }
-            helper.initialize(container, playbackInfo);
-        }
-
-        @Override
-        public void play() {
-            if (helper != null && mediaUri != null) {
-                if (!isPlaying() && isManuallyPaused) {
-                    helper.play();
-                    pause();
-                    helper.setVolume(volume);
-                } else {
-                    helper.play();
-                }
-            }
-        }
-
-        @Override
-        public void pause() {
-            if (helper != null) helper.pause();
-        }
-
-        /**
-         * Hands the autoplay slot on once this clip has run out.
-         *
-         * <p>Finishing releases the slot -- wantsToPlay() stops asking for it -- but nothing
-         * re-runs the selection, and the Container only re-selects when the feed scrolls. Without
-         * this the reader who sits still after a video ends is left with a feed where nothing
-         * plays at all, which is no better than the finished clip holding the slot.
-         *
-         * <p>Posted rather than called here: this arrives inside an ExoPlayer callback, and the
-         * re-selection starts and stops other players. Only while the feed is at rest, because a
-         * forced idle pass during a fling would start a player that is on its way off screen.
-         */
-        private void onPlaybackFinished() {
-            Container settled = container;
-            if (settled == null) {
-                return;
-            }
-            settled.post(() -> {
-                if (settled.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
-                    settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
-                    // The Container's own dispatch does not reach the adapter's scroll listener,
-                    // so the gif cards are told separately.
-                    scheduleGifAutoplayUpdate();
-                }
-            });
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return helper != null && helper.isPlaying();
-        }
-
-        @Override
-        public void release() {
-            if (helper != null) {
-                helper.release();
-                helper = null;
-            }
-            initializedUri = null;
-            // Show the preview image again when player is released
-            if (previewImageView != null) {
-                previewImageView.setVisibility(View.VISIBLE);
-            }
-            isManuallyPaused = false;
-            container = null;
-        }
-
-        @Override
-        public boolean wantsToPlay() {
-            // A clip that has run out stops asking for the slot, so the next card down gets it.
-            // Otherwise, with looping off, one finished video at the top of the screen held the
-            // only autoplay slot and nothing below it ever started. It keeps its last frame -- the
-            // Container leaves a player it did not select alone -- and the play button restarts it,
-            // because play() re-prepares a finished player.
-            if (helper != null && helper.isEnded()) {
-                return false;
-            }
-            return canPlayVideo && mediaUri != null && ToroUtil.visibleAreaOffset(this, itemView.getParent()) >= mStartAutoplayVisibleAreaOffset;
-        }
-
-        abstract int getAdapterPosition();
-
-        abstract Post getPost();
-
-        abstract void markPostRead(Post post, boolean changePostItemColor);
-    }
-
-    @UnstableApi
-    abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implements ToroPlayer {
-        VideoAutoplayImpl toroPlayer;
-
-        @OptIn(markerClass = UnstableApi.class)
-        PostBaseVideoAutoplayViewHolder(View rootView,
-                                        AspectRatioGifImageView iconGifImageView,
-                                        TextView subredditTextView,
-                                        TextView userTextView,
-                                        ImageView stickiedPostImageView,
-                                        TextView postTimeTextView,
-                                        TextView titleTextView,
-                                        @Nullable CustomTextView typeTextView,
-                                        @Nullable ImageView crosspostImageView,
-                                        @Nullable ImageView archivedImageView,
-                                        @Nullable ImageView lockedImageView,
-                                        @Nullable CustomTextView nsfwTextView,
-                                        @Nullable CustomTextView spoilerTextView,
-                                        @Nullable CustomTextView flairTextView,
-                                        MaxHeightSquareFrameLayout previewFrameLayout,
-                                        AspectRatioFrameLayout aspectRatioFrameLayout,
-                                        GifImageView previewImageView,
-                                        ImageView errorLoadingRedgifsImageView,
-                                        PlayerView videoPlayer,
-                                        ImageView videoQualityButton,
-                                        ImageView muteButton,
-                                        ImageView fullscreenButton,
-                                        ImageView playPauseButton,
-                                        DefaultTimeBar progressBar,
-                                        ConstraintLayout bottomConstraintLayout,
-                                        MaterialButton upvoteButton,
-                                        TextView scoreTextView,
-                                        MaterialButton downvoteButton,
-                                        MaterialButton commentsCountButton,
-                                        MaterialButton saveButton,
-                                        MaterialButton shareButton) {
-            super(rootView, mRowHost);
-            setBaseView(
-                    iconGifImageView,
-                    subredditTextView,
-                    userTextView,
-                    stickiedPostImageView,
-                    postTimeTextView,
-                    titleTextView,
-                    typeTextView,
-                    archivedImageView,
-                    lockedImageView,
-                    crosspostImageView,
-                    nsfwTextView,
-                    spoilerTextView,
-                    flairTextView,
-                    bottomConstraintLayout,
-                    upvoteButton,
-                    scoreTextView,
-                    downvoteButton,
-                    commentsCountButton,
-                    saveButton,
-                    shareButton);
-
-            toroPlayer = new VideoAutoplayImpl(rootView, previewFrameLayout, aspectRatioFrameLayout, previewImageView,
-                    errorLoadingRedgifsImageView, videoPlayer, videoQualityButton, muteButton, fullscreenButton, playPauseButton,
-                    progressBar,
-                    AppCompatResources.getDrawable(mActivity, R.drawable.ic_play_arrow_24dp),
-                    AppCompatResources.getDrawable(mActivity, R.drawable.ic_pause_24dp)) {
-                @Override
-                public int getPlayerOrder() {
-                    return getBindingAdapterPosition();
-                }
-
-                @Override
-                int getAdapterPosition() {
-                    return getBindingAdapterPosition();
-                }
-
-                @Override
-                Post getPost() {
-                    return post;
-                }
-
-                @Override
-                void markPostRead(Post post, boolean changePostItemColor) {
-                    PostBaseVideoAutoplayViewHolder.this.markPostRead(post, changePostItemColor);
-                }
-            };
-        }
-
-        @NonNull
-        @Override
-        public View getPlayerView() {
-            return toroPlayer.getPlayerView();
-        }
-
-        @NonNull
-        @Override
-        public PlaybackInfo getCurrentPlaybackInfo() {
-            return toroPlayer.getCurrentPlaybackInfo();
-        }
-
-        @Override
-        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
-            toroPlayer.initialize(container, playbackInfo);
-        }
-
-        @Override
-        public void play() {
-            toroPlayer.play();
-        }
-
-        @Override
-        public void pause() {
-            toroPlayer.pause();
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return toroPlayer.isPlaying();
-        }
-
-        @Override
-        public void release() {
-            toroPlayer.release();
-        }
-
-        @Override
-        public boolean wantsToPlay() {
-            return toroPlayer.wantsToPlay();
-        }
-
-        @Override
-        public int getPlayerOrder() {
-            return toroPlayer.getPlayerOrder();
-        }
-    }
-
-    @UnstableApi
-    class PostVideoAutoplayViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostVideoAutoplayViewHolder(ItemPostVideoTypeAutoplayBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostVideoTypeAutoplay,
-                    binding.subredditNameTextViewItemPostVideoTypeAutoplay,
-                    binding.userTextViewItemPostVideoTypeAutoplay,
-                    binding.stickiedPostImageViewItemPostVideoTypeAutoplay,
-                    binding.postTimeTextViewItemPostVideoTypeAutoplay,
-                    binding.titleTextViewItemPostVideoTypeAutoplay,
-                    binding.typeTextViewItemPostVideoTypeAutoplay,
-                    binding.crosspostImageViewItemPostVideoTypeAutoplay,
-                    binding.archivedImageViewItemPostVideoTypeAutoplay,
-                    binding.lockedImageViewItemPostVideoTypeAutoplay,
-                    binding.nsfwTextViewItemPostVideoTypeAutoplay,
-                    binding.spoilerCustomTextViewItemPostVideoTypeAutoplay,
-                    binding.flairCustomTextViewItemPostVideoTypeAutoplay,
-                    binding.previewFrameLayoutItemPostVideoTypeAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostVideoTypeAutoplay,
-                    binding.previewImageViewItemPostVideoTypeAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostVideoTypeAutoplay,
-                    binding.playerViewItemPostVideoTypeAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostVideoTypeAutoplay,
-                    binding.upvoteButtonItemPostVideoTypeAutoplay,
-                    binding.scoreTextViewItemPostVideoTypeAutoplay,
-                    binding.downvoteButtonItemPostVideoTypeAutoplay,
-                    binding.commentsCountButtonItemPostVideoTypeAutoplay,
-                    binding.saveButtonItemPostVideoTypeAutoplay,
-                    binding.shareButtonItemPostVideoTypeAutoplay);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor));
-        }
-    }
-
-    @UnstableApi
-    class PostVideoAutoplayLegacyControllerViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostVideoAutoplayLegacyControllerViewHolder(ItemPostVideoTypeAutoplayLegacyControllerBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostVideoTypeAutoplay,
-                    binding.subredditNameTextViewItemPostVideoTypeAutoplay,
-                    binding.userTextViewItemPostVideoTypeAutoplay,
-                    binding.stickiedPostImageViewItemPostVideoTypeAutoplay,
-                    binding.postTimeTextViewItemPostVideoTypeAutoplay,
-                    binding.titleTextViewItemPostVideoTypeAutoplay,
-                    binding.typeTextViewItemPostVideoTypeAutoplay,
-                    binding.crosspostImageViewItemPostVideoTypeAutoplay,
-                    binding.archivedImageViewItemPostVideoTypeAutoplay,
-                    binding.lockedImageViewItemPostVideoTypeAutoplay,
-                    binding.nsfwTextViewItemPostVideoTypeAutoplay,
-                    binding.spoilerCustomTextViewItemPostVideoTypeAutoplay,
-                    binding.flairCustomTextViewItemPostVideoTypeAutoplay,
-                    binding.previewFrameLayoutItemPostVideoTypeAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostVideoTypeAutoplay,
-                    binding.previewImageViewItemPostVideoTypeAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostVideoTypeAutoplay,
-                    binding.playerViewItemPostVideoTypeAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostVideoTypeAutoplay,
-                    binding.upvoteButtonItemPostVideoTypeAutoplay,
-                    binding.scoreTextViewItemPostVideoTypeAutoplay,
-                    binding.downvoteButtonItemPostVideoTypeAutoplay,
-                    binding.commentsCountButtonItemPostVideoTypeAutoplay,
-                    binding.saveButtonItemPostVideoTypeAutoplay,
-                    binding.shareButtonItemPostVideoTypeAutoplay);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor));
-        }
-    }
-
     class PostWithPreviewTypeViewHolder extends PostBaseViewHolder {
         TextView linkTextView;
         ImageView imageViewNoPreviewGallery;
@@ -5457,90 +4631,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
-
-    @UnstableApi
-    public class PostMaterial3CardVideoAutoplayViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostMaterial3CardVideoAutoplayViewHolder(ItemPostCard3VideoTypeAutoplayBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.subredditNameTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.userTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.stickiedPostImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.postTimeTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.titleTextViewItemPostCard3VideoTypeAutoplay,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    binding.previewFrameLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.previewImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.playerViewItemPostCard3VideoTypeAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.upvoteButtonItemPostCard3VideoTypeAutoplay,
-                    binding.scoreTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.downvoteButtonItemPostCard3VideoTypeAutoplay,
-                    binding.commentsCountButtonItemPostCard3VideoTypeAutoplay,
-                    binding.saveButtonItemPostCard3VideoTypeAutoplay,
-                    binding.shareButtonItemPostCard3VideoTypeAutoplay);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? mReadPostFilledCardViewBackgroundColor : mFilledCardViewBackgroundColor));
-        }
-    }
-
-    @UnstableApi
-    public class PostMaterial3CardVideoAutoplayLegacyControllerViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostMaterial3CardVideoAutoplayLegacyControllerViewHolder(ItemPostCard3VideoTypeAutoplayLegacyControllerBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.subredditNameTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.userTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.stickiedPostImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.postTimeTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.titleTextViewItemPostCard3VideoTypeAutoplay,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    binding.previewFrameLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.previewImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostCard3VideoTypeAutoplay,
-                    binding.playerViewItemPostCard3VideoTypeAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostCard3VideoTypeAutoplay,
-                    binding.upvoteButtonItemPostCard3VideoTypeAutoplay,
-                    binding.scoreTextViewItemPostCard3VideoTypeAutoplay,
-                    binding.downvoteButtonItemPostCard3VideoTypeAutoplay,
-                    binding.commentsCountButtonItemPostCard3VideoTypeAutoplay,
-                    binding.saveButtonItemPostCard3VideoTypeAutoplay,
-                    binding.shareButtonItemPostCard3VideoTypeAutoplay);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? mReadPostFilledCardViewBackgroundColor : mFilledCardViewBackgroundColor));
-        }
-    }
 
     public class PostMaterial3CardWithPreviewViewHolder extends PostWithPreviewTypeViewHolder {
         PostMaterial3CardWithPreviewViewHolder(@NonNull ItemPostCard3WithPreviewBinding binding) {
