@@ -943,7 +943,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         if (this instanceof SettingsActivity || menu.findItem(R.id.action_open_settings_overflow) != null) {
             return;
         }
-        MenuItem item = menu.add(Menu.NONE, R.id.action_open_settings_overflow, Integer.MAX_VALUE, R.string.settings);
+        MenuItem item = menu.add(Menu.NONE, R.id.action_open_settings_overflow, Menu.CATEGORY_SECONDARY | 0xFFFF, R.string.settings);
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         item.setOnMenuItemClickListener(menuItem -> {
             startActivity(new Intent(this, SettingsActivity.class));
