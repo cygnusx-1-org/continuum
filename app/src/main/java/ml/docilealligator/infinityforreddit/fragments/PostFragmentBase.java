@@ -53,7 +53,11 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
+import ml.docilealligator.infinityforreddit.adapters.PostBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostCompactBaseViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardTextTypeViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
@@ -722,7 +726,7 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     protected int calculateMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        if (!(viewHolder instanceof PostRecyclerViewAdapter.PostBaseViewHolder) &&
+        if (!(viewHolder instanceof PostBaseViewHolder) &&
                 !(viewHolder instanceof PostCompactBaseViewHolder)) {
             return 0;
         } else if (viewHolder instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) {
@@ -1537,11 +1541,11 @@ public abstract class PostFragmentBase extends Fragment {
 
             if (parent.getAdapter() != null) {
                 RecyclerView.ViewHolder viewHolder = parent.getChildViewHolder(view);
-                if (viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardVideoAutoplayViewHolder ||
-                        viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
+                if (viewHolder instanceof PostMaterial3CardVideoAutoplayViewHolder ||
+                        viewHolder instanceof PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
-                        viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardTextTypeViewHolder) {
+                        viewHolder instanceof PostMaterial3CardTextTypeViewHolder) {
                     outRect.set(left - mCard3Margin, mCard3VerticalSpace,
                             right - mCard3Margin, mCard3VerticalSpace);
                     return;

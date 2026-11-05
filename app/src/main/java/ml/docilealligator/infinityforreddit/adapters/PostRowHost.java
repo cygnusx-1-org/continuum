@@ -3,12 +3,14 @@ package ml.docilealligator.infinityforreddit.adapters;
 import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
 
 import java.util.concurrent.Executor;
 
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import retrofit2.Retrofit;
 
 /**
@@ -58,6 +60,71 @@ interface PostRowHost {
     int downvotedColor();
 
     int postIconAndInfoColor();
+
+    int cardViewBackgroundColor();
+
+    int colorAccent();
+
+    int noPreviewPostTypeBackgroundColor();
+
+    int noPreviewPostTypeIconTint();
+
+    int mediaIndicatorIconTint();
+
+    int mediaIndicatorBackgroundColor();
+
+    int readPostCardViewBackgroundColor();
+
+    boolean markPostsAsRead();
+
+    void openMedia(Post post);
+
+    int stickiedPostIconTint();
+
+    int secondaryTextColor();
+
+    int spoilerBackgroundColor();
+
+    int spoilerTextColor();
+
+    int nsfwBackgroundColor();
+
+    int nsfwTextColor();
+
+    int flairBackgroundColor();
+
+    int flairTextColor();
+
+    int archivedIconTint();
+
+    int lockedIconTint();
+
+    int crosspostIconTint();
+
+    int postTypeTextColor();
+
+    int filledCardViewBackgroundColor();
+
+    int readPostFilledCardViewBackgroundColor();
+
+    int subredditColor();
+
+    int usernameColor();
+
+    boolean voteButtonsOnTheRight();
+
+    String longPressPostNonMediaAreaAction();
+
+    FragmentManager childFragmentManager();
+
+    void openMedia(Post post, boolean peekMedia);
+
+    double startAutoplayVisibleAreaOffset();
+
+    boolean canPlayVideo();
+
+    @Nullable
+    PlayerSelector playerSelector();
 
     @Nullable
     Post getItem(int position);

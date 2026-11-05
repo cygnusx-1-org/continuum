@@ -78,6 +78,14 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         this.mActivity = host.activity();
     }
 
+    /**
+     * The host, for subclasses whose overrides run while setBaseView is still inside their
+     * superclass constructor, before any field of their own has been assigned.
+     */
+    final PostRowHost rowHost() {
+        return host;
+    }
+
     void startSubredditOrUserActivity(String subredditName) {
         if (subredditName.startsWith("u_")) {
             Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
@@ -716,8 +724,8 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         host.storeReadState(post, read);
         setItemViewBackgroundColor(read);
         titleTextView.setTextColor(read ? host.readPostTitleColor() : host.postTitleColor());
-        if (this instanceof PostRecyclerViewAdapter.PostTextTypeViewHolder) {
-            ((PostRecyclerViewAdapter.PostTextTypeViewHolder) this).contentTextView.setTextColor(
+        if (this instanceof PostTextTypeViewHolder) {
+            ((PostTextTypeViewHolder) this).contentTextView.setTextColor(
                     read ? host.readPostContentColor() : host.postContentColor());
         }
         if (!read) {

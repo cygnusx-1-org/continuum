@@ -895,7 +895,6 @@
     <string name="favorites">"Избранное"</string>
     <string name="all">"Все"</string>
     <string name="link_post_layout_auto">"Автовыбор"</string>
-    <string name="post_layout_compact_2">"Компактная компоновка 2"</string>
     <string name="post_layout_gallery">"Галерея"</string>
     <string name="elapsed_time_just_now">"Только что"</string>
     <string name="elapsed_time_a_minute_ago">"1 минута"</string>

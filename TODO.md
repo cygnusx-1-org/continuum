@@ -2,25 +2,35 @@
 
 Things deliberately left alone, and why.
 
-- [ ] **Split up `PostRecyclerViewAdapter`.** The repeated casts are gone, but the file is still about 7,900 lines. Do this only when there is a reason to change that code. When you do, give me this prompt and I will follow it:
+- [ ] **Split up `PostRecyclerViewAdapter`.** In progress; resume with the card previews family (below). The adapter went from 7,911 lines to about 4,700. Each family is its own pull request and its own beta, and the owner confirms on a phone before the next one starts.
 
-  > Split the post list's row classes out of `PostRecyclerViewAdapter` into their own files, one family per pull request: compact, then gallery, then text, then video, then card previews. Read the family's classes and everything in the adapter they use first, and tell me the plan before changing anything.
+  **Where we left off (2026-11-05).**
+  - Compact Layout and Card Layout 2 were deleted, Card Layout became *Card Bottom*, Card Layout 3 became *Card Top*, and Compact Layout 2 became *Compact Layout* (display names only; the resource names and stored values `0`, `2`, `4`, `5` are unchanged, and `SharedPreferencesUtils.normalizePostLayout` maps the old `1` and `3` to Compact 2 and Card).
+  - Moved out so far, each into its own file(s) in `adapters/`: `PostViewHolder`, the compact rows (`PostCompactBaseViewHolder` and `PostCompact2Left/RightThumbnailViewHolder`), the gallery rows (`PostGalleryViewHolder`, `PostGalleryBaseGalleryTypeViewHolder`, `PostGalleryGalleryTypeViewHolder`), `PostBaseViewHolder` with the text rows (`PostTextTypeViewHolder`, `PostMaterial3CardTextTypeViewHolder`), and the video rows (`VideoAutoplayImpl`, `PostBaseVideoAutoplayViewHolder` and its four leaf rows).
+  - Shipped and confirmed on the phone: up to `8.3.3.9.1.25-beta.1` (PostViewHolder, compact, and the layout removal). Merged and released but **not yet confirmed on a phone**: gallery (`beta.3`), text and `PostBaseViewHolder` (`beta.4`), video (`beta.5`); `beta.2` is only the Compact Layout rename. Do not start the next family until the owner has tried those.
+  - **Still inside the adapter:** `PostWithPreviewTypeViewHolder`, `PostBaseGalleryTypeViewHolder` (a Toro player), `PostGalleryTypeViewHolder`, and the Material3 preview and gallery-type rows (`PostMaterial3CardWithPreviewViewHolder`, `PostMaterial3CardGalleryTypeViewHolder`), plus `StickiedCollapsedViewHolder`. Moving them leaves only binding, recycling and view-type code in the adapter. `PostBaseViewHolder` still names `PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder` by its adapter-qualified name; that goes away with this family.
 
-  **What is there.** About 3,800 lines (from `PostViewHolder` to the end of the file) are the row classes, one per layout and post type. They are inner classes, so they read the adapter's fields directly: `mActivity`, `mGlide`, the colors, the settings flags, the autoplay state and the click handling. The adapter's own code binds, recycles and updates them through `instanceof` checks.
+  **How a family is moved (it worked five times).**
+  1. Read the family's classes and list every adapter field and method they touch. Put those on a host interface that extends `PostRowHost` (see `PostCompactHost`, `PostGalleryHost`, `PostVideoHost`). The adapter's named inner class `RowHost` implements all of them and reads the adapter's fields **at call time**, so settings the fragment changes while a feed is open still reach rows that already exist. Anything two families share goes up into `PostRowHost`.
+  2. Move the classes to top-level classes in the same package, with no logic changes. Each class that needs the activity keeps its own `private final BaseActivity mActivity` and its own `host`; do not make them package-private, or the adapter's remaining inner subclasses will bind to the wrong `mActivity`.
+  3. Change the adapter only where it creates the rows (pass `mRowHost` as the last constructor argument) and where it uses `instanceof` or casts. `PostFragmentBase` names some row classes too; update it and its imports.
+  4. Bump the version, add a changelog entry, push a branch, open the pull request with `gh pr create --repo jayblah/redditjr` (without `--repo` it opens a pull request in the upstream project), and let CI compile it. There is no JDK on the work machine, so CI is the only compiler.
 
-  **Plan for each family.**
-  1. List every adapter field and method the family's classes touch. That list is the whole job. Put the colors and settings the rows read in one small object that the adapter builds and passes in, and give actions such as vote, hide and open a post to the rows as interfaces or functions, not as references to the adapter.
-  2. Move the family's classes to top-level classes in the same package. Keep their names, the fields other code reads (`post`, `animatingGif`, `preview`, the views), and every listener behaving the same. No renames, no reformatting and no logic changes in the same pull request.
-  3. Change the adapter only where it creates, binds or recycles those rows.
-  4. Settings that change while a feed is open (the `set...` methods the fragment calls, then `refreshAdapter()`) must still reach the rows, so check the object holding them is updated, not copied once.
+  **Things that went wrong, so they do not again.**
+  - A row's `setItemViewBackgroundColor` override can run inside its superclass constructor, before the row's own fields exist. Rows like that must read the host through `rowHost()` on `PostViewHolder`, not a field of their own (a field would be null and crash the row on creation, and CI would not catch it).
+  - Fields the adapter reads from a moved class (`toroPlayer.isManuallyPaused`, `mediaUri` and so on) were `private` while the class was inner; they must become package-private.
+  - NullAway wants `@SuppressWarnings("NullAway.Init")` on classes whose views or `post` are assigned after construction, and `@Nullable` on host methods that return nullable fields.
+  - Script edits left behind annotations of deleted classes (`@UnstableApi`) and doubled a `)` in a constructor call; read the diff for those.
+  - A string removed from `values/strings.xml` must also be removed from every `values-*/strings.xml`, and `SettingsSearchRegistryTest` and `AccountScopedKeysTest` list preference keys and titles, so a removed setting needs them updated.
 
-  **Take care with.**
-  - Video and gallery rows are Toro players. Their play, pause, release and "manually paused" state must move as they are. Do the video family last.
+  **Take care with the card previews family.**
+  - `PostBaseGalleryTypeViewHolder` is a Toro player. Its play, pause, release and "manually paused" state must move as they are; its logic lives in `GalleryGifAutoplay` and the adapter's bind and recycle code, not in the holder.
   - Rows are recycled. The bind code sets and clears things in both directions because a row can arrive carrying the last post's state. Keep every "set it back" line.
   - Do not change how the adapter picks a view type, the stickied one-line row, the card top border or the vote hiding.
-  - The build uses NullAway and Error Prone. Run the build in CI before each step; a failing compile there is cheaper than finding it on a phone.
 
-  **How to check it.** The layout snapshot tests (`RoborazziLayoutTest`, `PostPreviewSnapshotTest`) cover the XML layouts, not the adapter's binding, so a green build is not enough. For each family, after CI passes, I give you a checklist of exactly what to open on your phone: every layout that family appears in (Card, Card 2, Card 3, Compact, Compact 2, Gallery), with a text post, an image, a GIF, a video, a gallery and an NSFW post, plus scrolling through a long feed, voting, hiding and undoing, and rotating the phone. Ship each family as its own release and wait for your "looks good" before starting the next.
+  **How to check a family.** The layout snapshot tests (`RoborazziLayoutTest`, `PostPreviewSnapshotTest`) cover the XML layouts, not the adapter's binding, so a green build is not enough. After CI passes and the beta is out, the owner gets a checklist of what to open on the phone: every layout the family appears in (Card Bottom, Card Top, Compact Layout, Gallery) with a text post, an image, a GIF, a video, a gallery and an NSFW post, plus scrolling a long feed, voting, saving, hiding and undoing, read and unread swipes, and rotating the phone. Wait for the "looks good" before starting the next family.
+
+  **After the last family: the real DRY work, one release each.** The moves above deliberately changed no logic, so the duplication is still there: upvote and downvote in `PostViewHolder` are two near-identical 100-line blocks, `PostViewHolder` has two near-identical `setBaseView` overloads, each card type repeats long binding lists, and the host getters are written twice (interface and `RowHost`). Merging the vote blocks is the biggest and best-tested win; give each its own release and a vote-by-vote phone check.
 
   **Stop and ask if** a row needs something from the adapter that cannot be passed in cleanly, or a family cannot be moved without changing how its rows behave.
 - [ ] **Audit leftovers.** Found but left alone as larger or riskier than a quick win:
