@@ -2,9 +2,11 @@
 
 Things deliberately left alone, and why.
 
-- [ ] **Split up `PostRecyclerViewAdapter`.** In progress; resume with the card previews family (below). The adapter went from 7,911 lines to about 4,700. Each family is its own pull request and its own beta, and the owner confirms on a phone before the next one starts.
+- [ ] **Split up `PostRecyclerViewAdapter`.** All families are moved; what remains is the phone check of `beta.6` and then the DRY pass (below). The adapter went from 7,911 lines to about 4,030. Each family is its own pull request and its own beta, and the owner confirms on a phone before the next one starts.
 
-  **Where we left off (2026-11-05).**
+  **Where we left off (2026-11-05, later).** The card previews family shipped as `beta.6` (not yet confirmed on a phone, nor are `beta.3` to `beta.5`). Moved: `PostWithPreviewTypeViewHolder`, `PostBaseGalleryTypeViewHolder`, `PostGalleryTypeViewHolder` and the two Material3 rows, behind `PostPreviewHost`. Only `StickiedCollapsedViewHolder` and `RowHost` remain inside the adapter on purpose. The "Still inside the adapter" bullet and the card previews notes below are history now.
+
+**Earlier note (2026-11-05).**
   - Compact Layout and Card Layout 2 were deleted, Card Layout became *Card Bottom*, Card Layout 3 became *Card Top*, and Compact Layout 2 became *Compact Layout* (display names only; the resource names and stored values `0`, `2`, `4`, `5` are unchanged, and `SharedPreferencesUtils.normalizePostLayout` maps the old `1` and `3` to Compact 2 and Card).
   - Moved out so far, each into its own file(s) in `adapters/`: `PostViewHolder`, the compact rows (`PostCompactBaseViewHolder` and `PostCompact2Left/RightThumbnailViewHolder`), the gallery rows (`PostGalleryViewHolder`, `PostGalleryBaseGalleryTypeViewHolder`, `PostGalleryGalleryTypeViewHolder`), `PostBaseViewHolder` with the text rows (`PostTextTypeViewHolder`, `PostMaterial3CardTextTypeViewHolder`), and the video rows (`VideoAutoplayImpl`, `PostBaseVideoAutoplayViewHolder` and its four leaf rows).
   - Shipped and confirmed on the phone: up to `8.3.3.9.1.25-beta.1` (PostViewHolder, compact, and the layout removal). Merged and released but **not yet confirmed on a phone**: gallery (`beta.3`), text and `PostBaseViewHolder` (`beta.4`), video (`beta.5`); `beta.2` is only the Compact Layout rename. Do not start the next family until the owner has tried those.
