@@ -921,6 +921,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
     @SuppressLint("RestrictedApi")
     protected boolean applyMenuItemTheme(Menu menu) {
+        addSettingsMenuItem(menu);
         if (customThemeWrapper != null) {
             for (int i = 0; i < menu.size(); i++) {
                 MenuItem item = menu.getItem(i);
@@ -932,6 +933,22 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             }
         }
         return true;
+    }
+
+    /**
+     * Puts Settings at the bottom of the three-dot menu of every screen that themes its menu here,
+     * so it is one tap away without opening the navigation drawer. Settings itself has no use for it.
+     */
+    private void addSettingsMenuItem(Menu menu) {
+        if (this instanceof SettingsActivity || menu.findItem(R.id.action_open_settings_overflow) != null) {
+            return;
+        }
+        MenuItem item = menu.add(Menu.NONE, R.id.action_open_settings_overflow, Integer.MAX_VALUE, R.string.settings);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        item.setOnMenuItemClickListener(menuItem -> {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        });
     }
 
     protected void applyTabLayoutTheme(TabLayout tabLayout) {
