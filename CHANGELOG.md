@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.23 / 2026-11-5
+============
+* Internal clean-up with no change in what you see: the shared base of every post row (voting, saving, sharing, tapping names) now lives in its own file
+
 8.3.3.9.1.22 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: the post list code uses one named variable per row type instead of repeating the same cast several hundred times, and post filters split their comma-separated lists once instead of for every post
