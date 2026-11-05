@@ -59,6 +59,24 @@ interface PostRowHost {
 
     int postIconAndInfoColor();
 
+    int cardViewBackgroundColor();
+
+    int colorAccent();
+
+    int noPreviewPostTypeBackgroundColor();
+
+    int noPreviewPostTypeIconTint();
+
+    int mediaIndicatorIconTint();
+
+    int mediaIndicatorBackgroundColor();
+
+    int readPostCardViewBackgroundColor();
+
+    boolean markPostsAsRead();
+
+    void openMedia(Post post);
+
     @Nullable
     Post getItem(int position);
 

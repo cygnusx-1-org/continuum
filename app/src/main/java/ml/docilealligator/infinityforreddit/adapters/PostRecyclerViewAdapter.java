@@ -495,7 +495,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /** Hands the row classes live values from this adapter; see {@link PostRowHost}. */
-    private final PostCompactHost mRowHost = new PostCompactHost() {
+    private final RowHost mRowHost = new RowHost();
+
+    private final class RowHost implements PostCompactHost, PostGalleryHost {
         @Override public BaseActivity activity() { return mActivity; }
         @Override public Callback callback() { return mCallback; }
         @Override public String accountName() { return mAccountName; }
@@ -556,7 +558,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override public GradientDrawable createRoundedBackground(int color, float cornerRadiusDp) { return PostRecyclerViewAdapter.this.createRoundedBackground(color, cornerRadiusDp); }
         @Override public void openMedia(Post post) { PostRecyclerViewAdapter.this.openMedia(post); }
         @Override public void openMedia(Post post, boolean peekMedia) { PostRecyclerViewAdapter.this.openMedia(post, peekMedia); }
-    };
+        @Override public int primaryTextColor() { return mPrimaryTextColor; }
+        @Override public SharedPreferences sharedPreferences() { return mSharedPreferences; }
+        @Override public RequestManager glide() { return mGlide; }
+        @Override public SaveMemoryCenterInisdeDownsampleStrategy saveMemoryDownsampleStrategy() { return mSaveMemoryCenterInsideDownsampleStrategy; }
+        @Override public boolean hideImageCountInGallery() { return mHideImageCountInGallery; }
+        @Override public double startAutoplayVisibleAreaOffset() { return mStartAutoplayVisibleAreaOffset; }
+        @Override public boolean canPlayVideo() { return canPlayVideo; }
+        @Override @Nullable public PlayerSelector playerSelector() { return multiPlayPlayerSelector; }
+        @Override public RecyclerView.RecycledViewPool galleryRecycledViewPool() { return mGalleryRecycledViewPool; }
+        @Override public boolean swipingBetweenTabsDisabled() { return isSwipingBetweenTabsDisabled(); }
+        @Override public void openMedia(Post post, int galleryItemIndex, boolean peekMedia) { PostRecyclerViewAdapter.this.openMedia(post, galleryItemIndex, peekMedia); }
+    }
 
     @Override
     public int getItemViewType(int position) {
@@ -873,9 +886,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
-            return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
         } else if (viewType == VIEW_TYPE_POST_GALLERY_GALLERY_TYPE) {
-            return new PostGalleryGalleryTypeViewHolder(ItemPostGalleryGalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            return new PostGalleryGalleryTypeViewHolder(ItemPostGalleryGalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
         } else if (viewType == VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE) {
             if (mDataSavingMode) {
                 return new PostMaterial3CardWithPreviewViewHolder(ItemPostCard3WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -5739,395 +5752,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
-    class PostGalleryViewHolder extends RecyclerView.ViewHolder {
-        ItemPostGalleryBinding binding;
-        RequestListener<Drawable> requestListener;
-        Post post;
-        @Nullable
-        Post.Preview preview;
-        /** Whether this card is currently showing the animation rather than the still. */
-        boolean animatingGif;
-
-        public PostGalleryViewHolder(@NonNull ItemPostGalleryBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-
-            if (mActivity.typeface != null) {
-                binding.loadImageErrorTextViewItemGallery.setTypeface(mActivity.typeface);
-            }
-            if (mActivity.titleTypeface != null) {
-                binding.titleTextViewItemPostGallery.setTypeface(mActivity.titleTypeface);
-            }
-            itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
-            binding.titleTextViewItemPostGallery.setTextColor(mPostTitleColor);
-            binding.progressBarItemPostGallery.setIndicatorColor(mColorAccent);
-            binding.progressBarItemPostGallery.setVisibility(View.GONE);
-            binding.imageViewNoPreviewItemPostGallery.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
-            binding.imageViewNoPreviewItemPostGallery.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
-            binding.videoOrGifIndicatorImageViewItemPostGallery.setColorFilter(mMediaIndicatorIconTint, PorterDuff.Mode.SRC_IN);
-            binding.videoOrGifIndicatorImageViewItemPostGallery.setBackgroundTintList(ColorStateList.valueOf(mMediaIndicatorBackgroundColor));
-            binding.loadImageErrorTextViewItemGallery.setTextColor(mPrimaryTextColor);
-
-            itemView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position >= 0 && canStartActivity) {
-                    Post post = getItem(position);
-                    if (post != null) {
-                        markPostRead(post, true);
-
-                        if (post.getPostType() == Post.TEXT_TYPE || !mSharedPreferences.getBoolean(SharedPreferencesUtils.CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT, true)) {
-                            openViewPostDetailActivity(post, getBindingAdapterPosition());
-                        } else {
-                            openMedia(post);
-                        }
-                    }
-                }
-            });
-
-            itemView.setOnLongClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position >= 0 && canStartActivity) {
-                    Post post = getItem(position);
-                    if (post != null) {
-                        markPostRead(post, true);
-
-                        if (post.getPostType() == Post.TEXT_TYPE || mSharedPreferences.getBoolean(SharedPreferencesUtils.CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT, true)) {
-                            openViewPostDetailActivity(post, getBindingAdapterPosition());
-                        } else {
-                            openMedia(post);
-                        }
-                    }
-                }
-
-                return true;
-            });
-
-            binding.imageViewNoPreviewItemPostGallery.setOnClickListener(view -> {
-                itemView.performClick();
-            });
-
-            requestListener = new RequestListener<>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    binding.progressBarItemPostGallery.setVisibility(View.GONE);
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    binding.loadImageErrorTextViewItemGallery.setVisibility(View.GONE);
-                    binding.progressBarItemPostGallery.setVisibility(View.GONE);
-                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
-                        binding.imageViewItemPostGallery.setBackgroundResource(R.drawable.transparent_image_backdrop);
-                    }
-                    return false;
-                }
-            };
-        }
-
-        void markPostRead(Post post, boolean changePostItemColor) {
-            if (!mHandleReadPost) {
-                return;
-            }
-
-            if (!post.isRead() && mMarkPostsAsRead) {
-                post.markAsRead();
-                if (changePostItemColor) {
-                    itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
-                    binding.titleTextViewItemPostGallery.setTextColor(mReadPostTitleColor);
-                }
-                if (mActivity != null && mActivity instanceof MarkPostAsReadInterface) {
-                    ((MarkPostAsReadInterface) mActivity).markPostAsRead(post);
-                }
-            }
-        }
-    }
-
-    class PostGalleryBaseGalleryTypeViewHolder extends RecyclerView.ViewHolder implements ToroPlayer {
-
-        FrameLayout frameLayout;
-        RecyclerView recyclerView;
-        CustomTextView imageIndexTextView;
-        ImageView noPreviewImageView;
-        /** The album scrape behind an image-host gallery, so a recycled row stops paying for it. */
-        @Nullable
-        FetchImageHostMedia.Cancellable fetchAlbumCancellable;
-
-        PostGalleryTypeImageRecyclerViewAdapter adapter;
-        GalleryGifAutoplay toroPlayer;
-        private final LinearLayoutManagerBugFixed layoutManager;
-
-        Post post;
-        @Nullable
-        Post.Preview preview;
-
-        public PostGalleryBaseGalleryTypeViewHolder(@NonNull View itemView,
-                                                    FrameLayout frameLayout,
-                                                    RecyclerView recyclerView,
-                                                    CustomTextView imageIndexTextView,
-                                                    ImageView noPreviewImageView) {
-            super(itemView);
-
-            this.frameLayout = frameLayout;
-            this.recyclerView = recyclerView;
-            this.imageIndexTextView = imageIndexTextView;
-            this.noPreviewImageView = noPreviewImageView;
-
-            if (mActivity.typeface != null) {
-                imageIndexTextView.setTypeface(mActivity.typeface);
-            }
-
-            itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
-            noPreviewImageView.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
-            noPreviewImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
-
-            imageIndexTextView.setTextColor(mMediaIndicatorIconTint);
-            imageIndexTextView.setBackgroundColor(mMediaIndicatorBackgroundColor);
-            imageIndexTextView.setBorderColor(mMediaIndicatorBackgroundColor);
-            if (mHideImageCountInGallery) {
-                imageIndexTextView.setVisibility(View.GONE);
-            }
-
-            adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
-                    mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor);
-            toroPlayer = new GalleryGifAutoplay(itemView, recyclerView, adapter) {
-                @Override
-                protected boolean canPlay() {
-                    return canPlayVideo;
-                }
-
-                @Override
-                protected double visibleAreaThreshold() {
-                    return mStartAutoplayVisibleAreaOffset;
-                }
-
-                @Override
-                @Nullable
-                protected PlayerSelector playerSelector() {
-                    return multiPlayPlayerSelector;
-                }
-
-                @Override
-                public int getPlayerOrder() {
-                    return getBindingAdapterPosition();
-                }
-            };
-            recyclerView.setAdapter(adapter);
-            new PagerSnapHelper().attachToRecyclerView(recyclerView);
-            recyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
-            // Keep neighbouring gallery pages attached so swiping one over and back doesn't recycle
-            // (and glide.clear()) the previous image, which forces a reload. Default is 2.
-            recyclerView.setItemViewCacheSize(3);
-            layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        toroPlayer.onGalleryPageSettled(layoutManager.findFirstVisibleItemPosition());
-                    }
-                }
-
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    imageIndexTextView.setText(mActivity.getString(R.string.image_index_in_gallery, layoutManager.findFirstVisibleItemPosition() + 1, post.getGallery().size()));
-                }
-            });
-            recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-                private float downX;
-                private float downY;
-                private boolean dragged;
-                private long downTime;
-                private final int minTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
-                private final int longClickThreshold = ViewConfiguration.getLongPressTimeout();
-                private boolean longPressed;
-
-                @Override
-                public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                    int action = e.getAction();
-                    switch (action) {
-                        case MotionEvent.ACTION_DOWN:
-                            downX = e.getRawX();
-                            downY = e.getRawY();
-                            downTime = System.currentTimeMillis();
-
-                            if (mActivity.mSliderPanel != null) {
-                                mActivity.mSliderPanel.requestDisallowInterceptTouchEvent(true);
-                            }
-                            if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(false);
-                            }
-                            mActivity.lockSwipeRightToGoBack();
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            if (Math.abs(e.getRawX() - downX) > minTouchSlop || Math.abs(e.getRawY() - downY) > minTouchSlop) {
-                                dragged = true;
-                            }
-                            if (!dragged && !longPressed) {
-                                if (System.currentTimeMillis() - downTime >= longClickThreshold) {
-                                    onLongClick();
-                                    longPressed = true;
-                                }
-                            }
-
-                            if (mActivity.mSliderPanel != null) {
-                                mActivity.mSliderPanel.requestDisallowInterceptTouchEvent(true);
-                            }
-                            if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(false);
-                            }
-                            mActivity.lockSwipeRightToGoBack();
-                            break;
-                        case MotionEvent.ACTION_UP:
-                        case MotionEvent.ACTION_CANCEL:
-                            if (e.getActionMasked() == MotionEvent.ACTION_UP && !dragged) {
-                                if (System.currentTimeMillis() - downTime < longClickThreshold) {
-                                    onClick();
-                                }
-                            }
-                            downX = 0;
-                            downY = 0;
-                            dragged = false;
-                            longPressed = false;
-
-                            if (mActivity.mSliderPanel != null) {
-                                mActivity.mSliderPanel.requestDisallowInterceptTouchEvent(false);
-                            }
-
-                            if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(!isSwipingBetweenTabsDisabled());
-                            }
-                            mActivity.unlockSwipeRightToGoBack();
-                    }
-                    return false;
-                }
-
-                @Override
-                public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-                }
-
-                @Override
-                public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-                }
-            });
-
-            noPreviewImageView.setOnClickListener(view -> {
-                onClick();
-            });
-
-            noPreviewImageView.setOnLongClickListener(view -> onLongClick());
-        }
-
-        void onClick() {
-            int position = getBindingAdapterPosition();
-            if (position >= 0 && canStartActivity) {
-                Post post = getItem(position);
-                if (post != null) {
-                    markPostRead(post, true);
-
-                    if (post.getPostType() == Post.TEXT_TYPE || !mSharedPreferences.getBoolean(SharedPreferencesUtils.CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT, true)) {
-                        openViewPostDetailActivity(post, getBindingAdapterPosition());
-                    } else {
-                        openMedia(post, layoutManager.findFirstVisibleItemPosition(), false);
-                    }
-                }
-            }
-        }
-
-        boolean onLongClick() {
-            int position = getBindingAdapterPosition();
-            if (position >= 0 && canStartActivity) {
-                Post post = getItem(position);
-                if (post != null) {
-                    markPostRead(post, true);
-
-                    if (post.getPostType() == Post.TEXT_TYPE || mSharedPreferences.getBoolean(SharedPreferencesUtils.CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT, true)) {
-                        openViewPostDetailActivity(post, getBindingAdapterPosition());
-                    } else {
-                        openMedia(post, layoutManager.findFirstVisibleItemPosition(), false);
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        void markPostRead(Post post, boolean changePostItemColor) {
-            if (!mHandleReadPost) {
-                return;
-            }
-
-            if (!post.isRead() && mMarkPostsAsRead) {
-                post.markAsRead();
-                if (changePostItemColor) {
-                    itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
-                }
-                if (mActivity != null && mActivity instanceof MarkPostAsReadInterface) {
-                    ((MarkPostAsReadInterface) mActivity).markPostAsRead(post);
-                }
-            }
-        }
-
-        @NonNull
-        @Override
-        public View getPlayerView() {
-            return toroPlayer.getPlayerView();
-        }
-
-        @NonNull
-        @Override
-        public PlaybackInfo getCurrentPlaybackInfo() {
-            return toroPlayer.getCurrentPlaybackInfo();
-        }
-
-        @Override
-        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
-            toroPlayer.initialize(container, playbackInfo);
-        }
-
-        @Override
-        public void play() {
-            toroPlayer.play();
-        }
-
-        @Override
-        public void pause() {
-            toroPlayer.pause();
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return toroPlayer.isPlaying();
-        }
-
-        @Override
-        public void release() {
-            toroPlayer.release();
-        }
-
-        @Override
-        public boolean wantsToPlay() {
-            return toroPlayer.wantsToPlay();
-        }
-
-        @Override
-        public int getPlayerOrder() {
-            return toroPlayer.getPlayerOrder();
-        }
-    }
-
-    class PostGalleryGalleryTypeViewHolder extends PostGalleryBaseGalleryTypeViewHolder {
-
-        public PostGalleryGalleryTypeViewHolder(@NonNull ItemPostGalleryGalleryTypeBinding binding) {
-            super(binding.getRoot(), binding.galleryFrameLayoutItemPostGalleryGalleryType,
-                    binding.galleryRecyclerViewItemPostGalleryGalleryType, binding.imageIndexTextViewItemPostGalleryGalleryType,
-                    binding.imageViewNoPreviewItemPostGalleryGalleryType);
-        }
-    }
 
     @UnstableApi
     public class PostMaterial3CardVideoAutoplayViewHolder extends PostBaseVideoAutoplayViewHolder {

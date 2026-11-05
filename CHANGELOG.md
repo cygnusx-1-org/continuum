@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.25-beta.3 / 2026-11-5
+============
+* Internal clean-up with no change in what you see: the Gallery layout rows now live in their own files
+
 8.3.3.9.1.25-beta.2 / 2026-11-5
 ============
 * Renamed Compact Layout 2 to Compact Layout

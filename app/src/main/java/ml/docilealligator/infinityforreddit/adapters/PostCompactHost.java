@@ -13,10 +13,6 @@ import ml.docilealligator.infinityforreddit.post.Post;
 interface PostCompactHost extends PostRowHost {
     int archivedIconTint();
 
-    int cardViewBackgroundColor();
-
-    int colorAccent();
-
     int compactThumbnailBoxSizePx();
 
     int crosspostIconTint();
@@ -31,23 +27,13 @@ interface PostCompactHost extends PostRowHost {
 
     int lockedIconTint();
 
-    int mediaIndicatorBackgroundColor();
-
-    int mediaIndicatorIconTint();
-
     int nsfwBackgroundColor();
 
     int nsfwTextColor();
 
-    int noPreviewPostTypeBackgroundColor();
-
-    int noPreviewPostTypeIconTint();
-
     int postLayout();
 
     int postTypeTextColor();
-
-    int readPostCardViewBackgroundColor();
 
     int readPostFilledCardViewBackgroundColor();
 
@@ -61,8 +47,6 @@ interface PostCompactHost extends PostRowHost {
 
     boolean longPressToHideToolbarInCompactLayout();
 
-    boolean markPostsAsRead();
-
     boolean voteButtonsOnTheRight();
 
     String longPressPostMediaAction();
@@ -74,8 +58,6 @@ interface PostCompactHost extends PostRowHost {
     FragmentManager childFragmentManager();
 
     GradientDrawable createRoundedBackground(int color, float cornerRadiusDp);
-
-    void openMedia(Post post);
 
     void openMedia(Post post, boolean peekMedia);
 }
