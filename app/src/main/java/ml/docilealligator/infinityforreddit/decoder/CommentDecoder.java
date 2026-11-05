@@ -40,6 +40,7 @@ public final class CommentDecoder {
             "babepedia.com",
     };
 
+    private static final Pattern WHITESPACE = Pattern.compile("\s");
     private static final Pattern PARAGRAPH_BREAK = Pattern.compile("\\n[ \\t]*\\n");
     private static final Pattern BINARY = Pattern.compile("\\b(?:[01]{8}\\s*){2,}\\b");
     // Sixteen or more base64 characters in groups of four, with the padding that closes it, not
@@ -129,7 +130,7 @@ public final class CommentDecoder {
     }
 
     static String binaryToText(String bits) {
-        String clean = bits.replaceAll("\\s", "");
+        String clean = WHITESPACE.matcher(bits).replaceAll("");
         if (clean.length() % 8 != 0) return null;
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < clean.length(); i += 8) {
