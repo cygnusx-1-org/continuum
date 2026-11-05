@@ -253,7 +253,7 @@ public class PostCompactBaseViewHolder extends PostViewHolder {
         noPreviewLinkImageFrameLayout.setBackground(host.createRoundedBackground(
                 host.noPreviewPostTypeBackgroundColor(),
                 host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD ? 16 :
-                        host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? 12 : 8));
+                        SharedPreferencesUtils.isCardTop(host.postLayout()) ? 12 : 8));
         noPreviewLinkImageView.setBackground(null);
         noPreviewLinkImageView.setColorFilter(host.noPreviewPostTypeIconTint(), android.graphics.PorterDuff.Mode.SRC_IN);
         upvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
@@ -358,8 +358,8 @@ public class PostCompactBaseViewHolder extends PostViewHolder {
             return;
         }
 
-        int horizontalMargin = host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (16 * host.scale()) : 0;
-        int verticalMargin = host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (8 * host.scale()) : 0;
+        int horizontalMargin = SharedPreferencesUtils.isCardTop(host.postLayout()) ? (int) (16 * host.scale()) : 0;
+        int verticalMargin = SharedPreferencesUtils.isCardTop(host.postLayout()) ? (int) (8 * host.scale()) : 0;
         ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) params;
 
         if (marginLayoutParams.leftMargin == horizontalMargin
@@ -377,7 +377,7 @@ public class PostCompactBaseViewHolder extends PostViewHolder {
         if (host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD) {
             int backgroundColor = isReadPost ? host.readPostCardViewBackgroundColor() : host.cardViewBackgroundColor();
             setRoundedItemViewBackground(backgroundColor, 16);
-        } else if (host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD_3) {
+        } else if (SharedPreferencesUtils.isCardTop(host.postLayout())) {
             int backgroundColor = isReadPost ? host.readPostFilledCardViewBackgroundColor() : host.filledCardViewBackgroundColor();
             setRoundedItemViewBackground(backgroundColor, 12);
         } else {

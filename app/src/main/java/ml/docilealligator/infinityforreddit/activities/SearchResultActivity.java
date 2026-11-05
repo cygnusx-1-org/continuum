@@ -609,9 +609,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                 sectionsPagerAdapter.refresh();
             }
             return true;
-        } else if (itemId == R.id.action_change_post_layout_search_result_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         }
         return super.onOptionsItemSelected(item);

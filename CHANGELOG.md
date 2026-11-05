@@ -2,6 +2,15 @@
 
 ---
 
+8.3.3.9.1.26-beta.4 / 2026-11-5
+============
+* Change Post Layout in the three-dot menu now opens a short list of the layouts instead of a bottom sheet
+
+8.3.3.9.1.26-beta.3 / 2026-11-5
+============
+* New Card Clean layout: Card Top without the row of buttons under the post, for people who swipe to vote, save and share. Pick it from the layout menu or the default layout settings
+* A feed that was still set to the long-gone Compact or Card 2 layout is no longer converted; it shows as Card Top until you choose a layout
+
 8.3.3.9.1.26-beta.2 / 2026-11-5
 ============
 * Backing up your settings no longer asks for a password, and restoring no longer asks for one either. The backup file is a plain zip, so keep it somewhere private

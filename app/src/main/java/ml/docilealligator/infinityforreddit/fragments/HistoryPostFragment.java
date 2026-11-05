@@ -254,7 +254,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                                 : null);
         Locale locale = getResources().getConfiguration().locale;
 
-        postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout));
+        postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout);
 
         mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                 mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,

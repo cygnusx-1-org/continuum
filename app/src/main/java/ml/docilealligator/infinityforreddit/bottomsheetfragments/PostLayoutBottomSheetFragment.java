@@ -49,6 +49,10 @@ public class PostLayoutBottomSheetFragment extends LandscapeExpandedRoundedBotto
             ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_CARD_3);
             dismiss();
         });
+        binding.cardLayoutCleanTextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
+            ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN);
+            dismiss();
+        });
 
         if (activity.typeface != null) {
             Utils.setFontToAllTextViews(binding.getRoot(), activity.typeface);
