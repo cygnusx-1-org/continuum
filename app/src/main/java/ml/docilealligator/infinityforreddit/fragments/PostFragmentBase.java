@@ -53,6 +53,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
+import ml.docilealligator.infinityforreddit.adapters.PostCompactBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
@@ -730,7 +731,7 @@ public abstract class PostFragmentBase extends Fragment {
 
     protected int calculateMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         if (!(viewHolder instanceof PostRecyclerViewAdapter.PostBaseViewHolder) &&
-                !(viewHolder instanceof PostRecyclerViewAdapter.PostCompactBaseViewHolder)) {
+                !(viewHolder instanceof PostCompactBaseViewHolder)) {
             return 0;
         } else if (viewHolder instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) {
             if (((PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) viewHolder).isSwipeLocked()) {
