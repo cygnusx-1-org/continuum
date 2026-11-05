@@ -736,7 +736,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_category_backup_and_restore_title">"Copia de seguridad y restauración"</string>
     <string name="settings_backup_and_restore_summary">"Guarde la configuración de cada cuenta en un archivo cifrado o vuelva a leer uno"</string>
     <string name="settings_backup_settings_title">"Respaldar ajustes"</string>
-    <string name="settings_backup_settings_summary">"Incluye cuentas, ID de cliente y clave de la API de Giphy. Se te pedirá una contraseña al crear la copia de seguridad."</string>
     <string name="settings_restore_settings_title">"Restablecer ajustes"</string>
     <string name="settings_credits_love_animation_title">"Animación de amor"</string>
     <string name="settings_swipe_between_posts_title">"Deslizar entre posts"</string>

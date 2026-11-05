@@ -724,7 +724,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_category_backup_and_restore_title">"Sauvegarde et restauration"</string>
     <string name="settings_backup_and_restore_summary">"Enregistrez les paramètres de chaque compte dans une archive cryptée ou relisez-en une"</string>
     <string name="settings_backup_settings_title">"Paramètres de Sauvegarde"</string>
-    <string name="settings_backup_settings_summary">"Inclut les comptes, l\'identifiant client et la clé API Giphy. Un mot de passe te sera demandé lors de la création de la sauvegarde."</string>
     <string name="settings_restore_settings_title">"Restaurer les Paramètres"</string>
     <string name="settings_credits_love_animation_title">"Animation d'amour"</string>
     <string name="settings_swipe_between_posts_title">"Swiper entre les publications"</string>

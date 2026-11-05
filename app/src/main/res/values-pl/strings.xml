@@ -729,7 +729,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_category_backup_and_restore_title">"Kopia zapasowa i przywracanie"</string>
     <string name="settings_backup_and_restore_summary">"Zapisz ustawienia każdego konta w zaszyfrowanym archiwum lub przeczytaj je ponownie"</string>
     <string name="settings_backup_settings_title">"Opcje backupu"</string>
-    <string name="settings_backup_settings_summary">"Zawiera konta, identyfikator klienta i klucz Giphy API. Podczas tworzenia kopii zapasowej zostaniesz poproszony o podanie hasła."</string>
     <string name="settings_restore_settings_title">"Przywróć ustawienia"</string>
     <string name="settings_credits_love_animation_title">"Animacja miłości"</string>
     <string name="settings_swipe_between_posts_title">"Przesuwaj pomiędzy postami"</string>

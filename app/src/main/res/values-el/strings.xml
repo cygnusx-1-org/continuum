@@ -729,7 +729,6 @@
     <string name="settings_category_backup_and_restore_title">"Δημιουργία αντιγράφων ασφαλείας και επαναφορά"</string>
     <string name="settings_backup_and_restore_summary">"Αποθήκευσε τις ρυθμίσεις κάθε λογαριασμού σε ένα κρυπτογραφημένο αρχείο ή διάβασε ένα πίσω"</string>
     <string name="settings_backup_settings_title">"Ρυθμίσεις Αντιγράφων ασφαλείας"</string>
-    <string name="settings_backup_settings_summary">"Περιλαμβάνει λογαριασμούς, Client ID και Giphy API Key. Θα σου ζητηθεί να εισάγεις έναν κωδικό πρόσβασης κατά τη δημιουργία του αντιγράφου ασφαλείας."</string>
     <string name="settings_restore_settings_title">"Ανάκτηση Ρυθμίσεων"</string>
     <string name="settings_credits_love_animation_title">"Εφέ Μου αρέσει"</string>
     <string name="settings_swipe_between_posts_title">"Σύρε Μεταξύ Αναρτήσεων"</string>

@@ -727,7 +727,6 @@
     <string name="settings_category_backup_and_restore_title">"बैकअप और पुनर्स्थापना"</string>
     <string name="settings_backup_and_restore_summary">"प्रत्येक खाते की सेटिंग्स को एन्क्रिप्टेड संग्रह में सहेजें, या एक को वापस पढ़ें"</string>
     <string name="settings_backup_settings_title">"बैकअप सेटिंग्स"</string>
-    <string name="settings_backup_settings_summary">"में खाते, क्लाइंट आईडी और Giphy API कुंजी शामिल हैं। बैकअप बनाते समय आपको पासवर्ड दर्ज करने के लिए कहा जाएगा।"</string>
     <string name="settings_restore_settings_title">"सेटिंग्स पुनर्स्थापित करें"</string>
     <string name="settings_credits_love_animation_title">"लव एनिमेशन"</string>
     <string name="settings_swipe_between_posts_title">"पोस्ट के बीच स्वाइप करें"</string>

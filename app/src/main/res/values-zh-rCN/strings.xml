@@ -736,7 +736,6 @@ Reddit 视频分辨率较低。
     <string name="settings_category_backup_and_restore_title">"备份与恢复"</string>
     <string name="settings_backup_and_restore_summary">"将每个帐户的设置保存到加密存档，或读回"</string>
     <string name="settings_backup_settings_title">"备份设置"</string>
-    <string name="settings_backup_settings_summary">"包含帐户、客户端 ID 和 Giphy API 密钥。创建备份时，系统将提示您输入密码。"</string>
     <string name="settings_restore_settings_title">"恢复设置"</string>
     <string name="settings_credits_love_animation_title">"喜爱动画"</string>
     <string name="settings_swipe_between_posts_title">"在帖子间滑动"</string>

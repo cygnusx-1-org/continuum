@@ -720,7 +720,6 @@
     <string name="settings_category_backup_and_restore_title">"Sigurnosno kopiranje i vraćanje"</string>
     <string name="settings_backup_and_restore_summary">"Spremi postavke svakog računa u šifriranu arhivu ili ih pročitaj"</string>
     <string name="settings_backup_settings_title">"Postavke sigurnosne kopije"</string>
-    <string name="settings_backup_settings_summary">"Uključuje račune, ID klijenta i Giphy API ključ. Prilikom izrade sigurnosne kopije od tebe će se tražiti lozinka."</string>
     <string name="settings_restore_settings_title">"Vrati postavke"</string>
     <string name="settings_credits_love_animation_title">"Ljubavna animacija"</string>
     <string name="settings_swipe_between_posts_title">"Prijeđi prstom između objava"</string>

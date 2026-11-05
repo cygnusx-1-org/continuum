@@ -736,7 +736,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_category_backup_and_restore_title">"Zálohování a obnovení"</string>
     <string name="settings_backup_and_restore_summary">"Ulož nastavení každého účtu do šifrovaného archivu nebo si jej přečti zpět"</string>
     <string name="settings_backup_settings_title">"Nastavení zálohování"</string>
-    <string name="settings_backup_settings_summary">"Zahrnuje účty, ID klienta a klíč Giphy API. Při vytváření zálohy budeš vyzván k zadání hesla."</string>
     <string name="settings_restore_settings_title">"Obnovit nastavení"</string>
     <string name="settings_credits_love_animation_title">"Animace lásky"</string>
     <string name="settings_swipe_between_posts_title">"Posouvání mezi příspěvky"</string>

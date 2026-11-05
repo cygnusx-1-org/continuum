@@ -729,7 +729,6 @@
     <string name="settings_category_backup_and_restore_title">"백업 및 복원"</string>
     <string name="settings_backup_and_restore_summary">"모든 계정의 설정을 암호화된 아카이브에 저장하거나 다시 읽어보세요"</string>
     <string name="settings_backup_settings_title">"백업 설정"</string>
-    <string name="settings_backup_settings_summary">"계정, 클라이언트 ID, Giphy API 키가 포함됩니다. 백업을 생성할 때 비밀번호를 입력하라는 메시지가 표시됩니다."</string>
     <string name="settings_restore_settings_title">"복원 설정"</string>
     <string name="settings_credits_love_animation_title">"사랑 애니메이션"</string>
     <string name="settings_swipe_between_posts_title">"게시물 간 스와이프"</string>

@@ -736,7 +736,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_category_backup_and_restore_title">"Backup și restaurare"</string>
     <string name="settings_backup_and_restore_summary">"Salvează setările fiecărui cont într-o arhivă criptată sau citești una înapoi"</string>
     <string name="settings_backup_settings_title">"Setări pentru Copie de Rezervă"</string>
-    <string name="settings_backup_settings_summary">"Include conturi, ID client și cheie API Giphy. Ți se va solicita să introduci o parolă la crearea copiei de rezervă."</string>
     <string name="settings_restore_settings_title">"Restabilirea Setărilor"</string>
     <string name="settings_credits_love_animation_title">"Animație de Dragoste"</string>
     <string name="settings_swipe_between_posts_title">"Glisează între Postări"</string>

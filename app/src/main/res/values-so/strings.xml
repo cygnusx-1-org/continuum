@@ -719,7 +719,6 @@
     <string name="settings_category_backup_and_restore_title">"Soo celinta iyo soo celinta"</string>
     <string name="settings_backup_and_restore_summary">"Ku keydi dejinta akoon kasta kayd sir ah, ama mid dib u akhri"</string>
     <string name="settings_backup_settings_title">"Settings Backup"</string>
-    <string name="settings_backup_settings_summary">"Waxa ku jira akoonnada, Aqoonsiga Macmiilka iyo furaha Giphy API. Waxaa lagaa codsan doonaa inaad geliso furaha sirta ah marka la abuurayo kaydka."</string>
     <string name="settings_restore_settings_title">"Soo Celinta Dejinta"</string>
     <string name="settings_credits_love_animation_title">"Animation Jacaylka"</string>
     <string name="settings_swipe_between_posts_title">"Ku dhufo Boostada dhexdooda"</string>

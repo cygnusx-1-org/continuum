@@ -729,7 +729,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_category_backup_and_restore_title">"Sao lưu và khôi phục"</string>
     <string name="settings_backup_and_restore_summary">"Lưu cài đặt của mọi tài khoản vào kho lưu trữ được mã hóa hoặc đọc lại"</string>
     <string name="settings_backup_settings_title">"Sao lưu cài đặt"</string>
-    <string name="settings_backup_settings_summary">"Bao gồm tài khoản, ID khách hàng và Khóa Giphy API. Bạn sẽ được nhắc nhập mật khẩu khi tạo bản sao lưu."</string>
     <string name="settings_restore_settings_title">"Khôi phục cài đặt"</string>
     <string name="settings_credits_love_animation_title">"Hoạt ảnh yêu"</string>
     <string name="settings_swipe_between_posts_title">"Vuốt giữa các bài đăng"</string>

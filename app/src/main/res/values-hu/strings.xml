@@ -724,7 +724,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_category_backup_and_restore_title">"Biztonsági mentés és visszaállítás"</string>
     <string name="settings_backup_and_restore_summary">"Mentsd el minden fiók beállításait egy titkosított archívumba, vagy olvassa vissza"</string>
     <string name="settings_backup_settings_title">"Beállítások biztonsági mentése"</string>
-    <string name="settings_backup_settings_summary">"Tartalmazza a fiókokat, az ügyfél-azonosítót és a Giphy API kulcsot. A biztonsági mentés létrehozásakor meg kell adnia egy jelszót."</string>
     <string name="settings_restore_settings_title">"Beállítások visszaállítása"</string>
     <string name="settings_credits_love_animation_title">"Love animáció"</string>
     <string name="settings_swipe_between_posts_title">"Váltás "</string>

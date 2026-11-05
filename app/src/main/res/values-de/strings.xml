@@ -736,7 +736,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_category_backup_and_restore_title">"Sicherung und Wiederherstellung"</string>
     <string name="settings_backup_and_restore_summary">"Die Einstellungen aller Konten in einem verschlüsselten Archiv speichern oder eines wieder einlesen"</string>
     <string name="settings_backup_settings_title">"Einstellungen sichern"</string>
-    <string name="settings_backup_settings_summary">"Enthält Konten, Client-ID und Giphy-API-Schlüssel. Beim Erstellen des Backups wirst du nach einem Passwort gefragt."</string>
     <string name="settings_restore_settings_title">"Einstellungen wiederherstellen"</string>
     <string name="settings_credits_love_animation_title">"Liebes-Animation"</string>
     <string name="settings_swipe_between_posts_title">"Zwischen Beiträgen wischen"</string>

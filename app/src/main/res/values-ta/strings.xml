@@ -726,7 +726,6 @@
     <string name="settings_category_backup_and_restore_title">"காப்புப்பிரதி மற்றும் மீட்டமை"</string>
     <string name="settings_backup_and_restore_summary">"ஒவ்வொரு கணக்கின் அமைப்புகளையும் மறைகுறியாக்கப்பட்ட காப்பகத்தில் சேமிக்கவும் அல்லது மீண்டும் படிக்கவும்"</string>
     <string name="settings_backup_settings_title">"அமைவுகளைப் பிரதியெடு"</string>
-    <string name="settings_backup_settings_summary">"கணக்குகள், கிளையண்ட் ஐடி மற்றும் Giphy API சாவியை உள்ளடக்கியது. காப்புப்பிரதியை உருவாக்கும்போது கடவுச்சொல்லை உள்ளிடும்படி கேட்கப்படும்."</string>
     <string name="settings_restore_settings_title">"அமைவுகளை மீட்டமை"</string>
     <string name="settings_credits_love_animation_title">"காதல் அனிமேஷன்"</string>
     <string name="settings_swipe_between_posts_title">"இடுகைகளுக்கிடையே தேய்"</string>

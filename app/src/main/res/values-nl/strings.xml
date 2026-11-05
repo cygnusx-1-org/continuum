@@ -732,7 +732,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_category_backup_and_restore_title">"Back-up en herstel"</string>
     <string name="settings_backup_and_restore_summary">"Bewaar de instellingen van ieder account in een gecodeerd archief, of lees er één terug"</string>
     <string name="settings_backup_settings_title">"Backup Instellingen"</string>
-    <string name="settings_backup_settings_summary">"Inclusief accounts, client-ID en Giphy-API-sleutel. Bij het maken van de back-up wordt je om een wachtwoord gevraagd."</string>
     <string name="settings_restore_settings_title">"Instellingen Herstellen"</string>
     <string name="settings_credits_love_animation_title">"Liefde animatie"</string>
     <string name="settings_swipe_between_posts_title">"Swipen Tussen Posts"</string>

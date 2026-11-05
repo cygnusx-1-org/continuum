@@ -732,7 +732,6 @@
     <string name="settings_category_backup_and_restore_title">"バックアップと復元"</string>
     <string name="settings_backup_and_restore_summary">"すべてのアカウントの設定を暗号化されたアーカイブに保存するか、再度読み取ります"</string>
     <string name="settings_backup_settings_title">"設定をバックアップ"</string>
-    <string name="settings_backup_settings_summary">"アカウント、クライアント ID、Giphy API キーが含まれます。バックアップを作成するときに、パスワードの入力を求められます。"</string>
     <string name="settings_restore_settings_title">"設定を復元"</string>
     <string name="settings_credits_love_animation_title">"愛のアニメーション"</string>
     <string name="settings_swipe_between_posts_title">"投稿をスワイプで移動"</string>

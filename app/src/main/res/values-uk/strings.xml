@@ -736,7 +736,6 @@
     <string name="settings_category_backup_and_restore_title">"Резервне копіювання та відновлення"</string>
     <string name="settings_backup_and_restore_summary">"Збережи налаштування кожного облікового запису в зашифрованому архіві або прочитай їх назад"</string>
     <string name="settings_backup_settings_title">"Резервне копіювання налаштувань"</string>
-    <string name="settings_backup_settings_summary">"Містить облікові записи, ідентифікатор клієнта та ключ Giphy API. Під час створення резервної копії тобі буде запропоновано ввести пароль."</string>
     <string name="settings_restore_settings_title">"Відновити налаштування"</string>
     <string name="settings_credits_love_animation_title">"Анімація любові"</string>
     <string name="settings_swipe_between_posts_title">"Ковзати між дописами"</string>
