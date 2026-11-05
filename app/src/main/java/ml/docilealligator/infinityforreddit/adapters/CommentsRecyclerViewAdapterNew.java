@@ -614,12 +614,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     }
                 }
 
-                if (mShowElapsedTime) {
-                    ((CommentBaseViewHolder) holder).commentTimeTextView.setText(
-                            Utils.getElapsedTime(mActivity, comment.getCommentTimeMillis()));
-                } else {
-                    ((CommentBaseViewHolder) holder).commentTimeTextView.setText(Utils.getFormattedTime(mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
-                }
+                ((CommentBaseViewHolder) holder).commentTimeTextView.setText(Utils.getTimeText(
+                        mActivity, mShowElapsedTime, mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
 
                 if (mCommentToolbarHidden) {
                     ((CommentBaseViewHolder) holder).bottomConstraintLayout.getLayoutParams().height = 0;
@@ -833,11 +829,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 // row runs out of room, so the child count's own visibility is its to decide.
                 ((CommentFullyCollapsedViewHolder) holder).binding.headerLinearLayoutItemCommentFullyCollapsed
                         .setOptionalVisibility(comment.getChildCount() > 0);
-                if (mShowElapsedTime) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getElapsedTime(mActivity, comment.getCommentTimeMillis()));
-                } else {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getFormattedTime(mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
-                }
+                ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getTimeText(
+                        mActivity, mShowElapsedTime, mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
                 // Mirrors the full row's header, which a comment switches away from when it
                 // collapses into this one. That row shows no score at all once vote counts are
                 // hidden, so "Vote" here - a call to action with no vote buttons beside it - both
@@ -1352,9 +1345,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             editedTextView.setOnClickListener(view -> {
                 Comment comment = getItem(getBindingAdapterPosition());
                 if (comment != null) {
-                    Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time, mShowElapsedTime ?
-                            Utils.getElapsedTime(mActivity, comment.getEditedTimeMillis()) :
-                            Utils.getFormattedTime(mLocale, comment.getEditedTimeMillis(), mTimeFormatPattern)
+                    Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time,
+                            Utils.getTimeText(mActivity, mShowElapsedTime, mLocale, comment.getEditedTimeMillis(), mTimeFormatPattern)
                     ), Toast.LENGTH_SHORT).show();
                 }
             });

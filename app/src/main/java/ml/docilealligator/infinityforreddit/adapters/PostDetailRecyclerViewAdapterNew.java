@@ -876,9 +876,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         moderatorDrawable, null, null, null);
             }
 
-            String postTime = mShowElapsedTime
-                    ? Utils.getElapsedTime(mActivity, mPost.getPostTimeMillis())
-                    : Utils.getFormattedTime(mLocale, mPost.getPostTimeMillis(), mTimeFormatPattern);
+            String postTime = Utils.getTimeText(
+                    mActivity, mShowElapsedTime, mLocale, mPost.getPostTimeMillis(), mTimeFormatPattern);
             // The marker stays wordless because this text view only gets 40% of the header width;
             // the edit time itself is a tap away, as it is on a comment.
             ((PostDetailBaseViewHolder) holder).postTimeTextView.setText(mPost.isEdited()
@@ -2116,9 +2115,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 if (mPost == null || !mPost.isEdited()) {
                     return;
                 }
-                Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time, mShowElapsedTime ?
-                        Utils.getElapsedTime(mActivity, mPost.getEditedTimeMillis()) :
-                        Utils.getFormattedTime(mLocale, mPost.getEditedTimeMillis(), mTimeFormatPattern)
+                Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time,
+                        Utils.getTimeText(mActivity, mShowElapsedTime, mLocale, mPost.getEditedTimeMillis(), mTimeFormatPattern)
                 ), Toast.LENGTH_SHORT).show();
             });
             // A clickable child consumes the touch, so without this the timestamp would swallow the

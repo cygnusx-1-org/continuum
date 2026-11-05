@@ -30,6 +30,24 @@ public class PostFilter implements Parcelable {
     private static final java.util.Map<String, java.util.Optional<Pattern>> COMPILED_REGEXES =
             new java.util.concurrent.ConcurrentHashMap<>();
 
+    // The comma-separated lists a filter holds, split once. isPostAllowed runs for every post of every
+    // page, and splitting the same few strings each time allocated a fresh array per list per post.
+    // The arrays are only read.
+    private static final java.util.Map<String, String[]> SPLIT_LISTS =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static String[] splitList(String commaSeparated) {
+        if (SPLIT_LISTS.size() > 256) {
+            SPLIT_LISTS.clear();
+        }
+        String[] parts = SPLIT_LISTS.get(commaSeparated);
+        if (parts == null) {
+            parts = commaSeparated.split(",", 0);
+            SPLIT_LISTS.put(commaSeparated, parts);
+        }
+        return parts;
+    }
+
     @Nullable
     private static Pattern compiledRegex(String regex) {
         if (COMPILED_REGEXES.size() > 256) {
@@ -341,7 +359,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.postTitleExcludesStrings != null && !postFilter.postTitleExcludesStrings.equals("")) {
-            String[] titles = postFilter.postTitleExcludesStrings.split(",", 0);
+            String[] titles = splitList(postFilter.postTitleExcludesStrings);
             for (String t : titles) {
                 // Locale.ROOT, like the subreddit/domain matching below: on a Turkish/Azeri device
                 // the device locale lower-cases "I" to dotless "i", so a keyword would stop matching
@@ -352,7 +370,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.postTitleContainsStrings != null && !postFilter.postTitleContainsStrings.equals("")) {
-            String[] titles = postFilter.postTitleContainsStrings.split(",", 0);
+            String[] titles = splitList(postFilter.postTitleContainsStrings);
             boolean hasRequiredString = false;
             for (String t : titles) {
                 if (post.getTitle().toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT).trim())) {
@@ -365,7 +383,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.excludeSubreddits != null && !postFilter.excludeSubreddits.equals("")) {
-            String[] subreddits = postFilter.excludeSubreddits.split(",", 0);
+            String[] subreddits = splitList(postFilter.excludeSubreddits);
             String subredditName = post.getSubredditName();
             for (String s : subreddits) {
                 String filter = s.trim();
@@ -401,7 +419,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.containSubreddits != null && !postFilter.containSubreddits.equals("")) {
-            String[] subreddits = postFilter.containSubreddits.split(",", 0);
+            String[] subreddits = splitList(postFilter.containSubreddits);
             boolean hasRequiredSubreddit = false;
             // An "only show these subreddits" term hides every post that does not match it, so a
             // term that cannot match on this feed must not count as a requirement at all -- treating
@@ -427,7 +445,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.excludeUsers != null && !postFilter.excludeUsers.equals("")) {
-            String[] users = postFilter.excludeUsers.split(",", 0);
+            String[] users = splitList(postFilter.excludeUsers);
             for (String u : users) {
                 if (!u.trim().equals("") && post.getAuthor().equalsIgnoreCase(u.trim())) {
                     return false;
@@ -435,7 +453,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.containUsers != null && !postFilter.containUsers.equals("")) {
-            String[] users = postFilter.containUsers.split(",", 0);
+            String[] users = splitList(postFilter.containUsers);
             boolean hasRequiredUser = false;
             String user = post.getAuthor();
             for (String s : users) {
@@ -449,7 +467,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.excludeFlairs != null && !postFilter.excludeFlairs.equals("")) {
-            String[] flairs = postFilter.excludeFlairs.split(",", 0);
+            String[] flairs = splitList(postFilter.excludeFlairs);
             for (String f : flairs) {
                 if (!f.trim().equals("") && post.getFlair().trim().equalsIgnoreCase(f.trim())) {
                     return false;
@@ -457,7 +475,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (post.getUrl() != null && postFilter.excludeDomains != null && !postFilter.excludeDomains.equals("")) {
-            String[] domains = postFilter.excludeDomains.split(",", 0);
+            String[] domains = splitList(postFilter.excludeDomains);
             String url = post.getUrl().toLowerCase(Locale.US);
             for (String f : domains) {
                 if (!f.trim().equals("") && url.contains(f.trim().toLowerCase(Locale.US))) {
@@ -466,7 +484,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (post.getUrl() != null && postFilter.containDomains != null && !postFilter.containDomains.equals("")) {
-            String[] domains = postFilter.containDomains.split(",", 0);
+            String[] domains = splitList(postFilter.containDomains);
             String url = post.getUrl().toLowerCase(Locale.US);
             boolean hasRequiredDomain = false;
             for (String f : domains) {
@@ -480,7 +498,7 @@ public class PostFilter implements Parcelable {
             }
         }
         if (postFilter.containFlairs != null && !postFilter.containFlairs.equals("")) {
-            String[] flairs = postFilter.containFlairs.split(",", 0);
+            String[] flairs = splitList(postFilter.containFlairs);
             if (flairs.length > 0) {
                 boolean match = false;
                 for (int i = 0; i < flairs.length; i++) {
@@ -638,7 +656,7 @@ public class PostFilter implements Parcelable {
             return Collections.emptyMap();
         }
         Map<String, String> owners = new HashMap<>();
-        for (String s : postFilter.excludeSubreddits.split(",", 0)) {
+        for (String s : splitList(postFilter.excludeSubreddits)) {
             String term = s.trim();
             if (!term.isEmpty() && SubredditMatcher.isWildcard(term)) {
                 owners.putIfAbsent(term.toLowerCase(Locale.ENGLISH), postFilter.name);

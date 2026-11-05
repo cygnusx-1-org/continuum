@@ -152,11 +152,8 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
             if (holder instanceof MessageViewHolder) {
                 mMarkwon.setMarkdown(((MessageViewHolder) holder).messageTextView, message.getBody());
 
-                if (mShowElapsedTime) {
-                    ((MessageViewHolder) holder).timeTextView.setText(Utils.getElapsedTime(mViewPrivateMessagesActivity, message.getTimeUTC()));
-                } else {
-                    ((MessageViewHolder) holder).timeTextView.setText(Utils.getFormattedTime(mLocale, message.getTimeUTC(), mTimeFormatPattern));
-                }
+                ((MessageViewHolder) holder).timeTextView.setText(Utils.getTimeText(
+                        mViewPrivateMessagesActivity, mShowElapsedTime, mLocale, message.getTimeUTC(), mTimeFormatPattern));
             }
 
             if (holder instanceof SentMessageViewHolder) {

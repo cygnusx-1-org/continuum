@@ -686,8 +686,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 }
                 String karma = getString(R.string.karma_info_user_detail, userData.getTotalKarma(), userData.getLinkKarma(), userData.getCommentKarma());
                 binding.karmaTextViewViewUserDetailActivity.setText(karma);
-                binding.cakedayTextViewViewUserDetailActivity.setText(getString(R.string.cakeday_info, new SimpleDateFormat("MMM d, yyyy",
-                        locale).format(userData.getCakeday())));
+                binding.cakedayTextViewViewUserDetailActivity.setText(getString(R.string.cakeday_info, Utils.getFormattedTime(locale, userData.getCakeday(), "MMM d, yyyy")));
 
                 if (userData.getDescription() == null || userData.getDescription().equals("")) {
                     binding.descriptionTextViewViewUserDetailActivity.setVisibility(View.GONE);
