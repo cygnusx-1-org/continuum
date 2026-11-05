@@ -2,7 +2,7 @@
 
 ---
 
-8.3.3.9.1.23 / 2026-11-5
+8.3.3.9.1.23-beta.2 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: the shared base of every post row (voting, saving, sharing, tapping names) now lives in its own file
 
