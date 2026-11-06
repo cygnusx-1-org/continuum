@@ -646,10 +646,8 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_credits_national_flags">"Nationale Vlaggen"</string>
     <string name="settings_credits_national_flags_summary">"Icoon gemaakt door Freepik van www.flaticon.com"</string>
     <string name="settings_group_global">"Wereldwijd"</string>
-    <string name="settings_group_account">"Account"</string>
     <string name="settings_account_settings_management_title">"Beheer van accountinstellingen"</string>
     <string name="settings_account_settings_management_summary">"Kopieer de instellingen van een ander account naar deze, zet deze terug naar de standaardwaarden of verwijder wat deze heeft verzameld"</string>
-    <string name="settings_group_themes">"Thema\'s"</string>
     <string name="settings_group_other">"Overige"</string>
     <string name="settings_copy_settings_from_account_title">"Kopieer instellingen van een ander account"</string>
     <string name="settings_copy_settings_from_account_summary">"Geef dit account de instellingen van een ander account"</string>
@@ -814,7 +812,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_proxy_hostname">"Hostnaam"</string>
     <string name="settings_proxy_port">"Poort"</string>
     <string name="settings_notification_master_summary">"Schakel pushmeldingen in en stel in hoe vaak deze worden gecontroleerd"</string>
-    <string name="settings_interface_summary">"Lettertypen, navigatielade, tabbladen, onderste app-balk en weergaveopties voor berichten en opmerkingen"</string>
     <string name="settings_theme_summary">"Lichte, donkere en AMOLED thema's, Material You en aangepaste themakleuren"</string>
     <string name="settings_video_summary">"Automatisch afspelen, dempen, afspeelsnelheid, standaardresolutie en gedrag op volledig scherm"</string>
     <string name="settings_gestures_and_buttons_summary">"Veeggebaren, volumetoetsnavigatie, lang indrukken en gebarengevoeligheid"</string>

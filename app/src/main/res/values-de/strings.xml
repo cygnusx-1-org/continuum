@@ -650,10 +650,8 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_credits_national_flags">"Nationalflaggen"</string>
     <string name="settings_credits_national_flags_summary">"Symbol erstellt von Freepik von www.flaticon.com"</string>
     <string name="settings_group_global">"Global"</string>
-    <string name="settings_group_account">"Konto"</string>
     <string name="settings_account_settings_management_title">"Verwaltung der Kontoeinstellungen"</string>
     <string name="settings_account_settings_management_summary">"Die Einstellungen eines anderen Kontos auf dieses übertragen, dieses auf die Standardwerte zurücksetzen oder die angesammelten Daten löschen"</string>
-    <string name="settings_group_themes">"Themen"</string>
     <string name="settings_group_other">"Sonstiges"</string>
     <string name="settings_copy_settings_from_account_title">"Einstellungen von einem anderen Konto kopieren"</string>
     <string name="settings_copy_settings_from_account_summary">"Diesem Konto die Einstellungen eines anderen Kontos geben"</string>
@@ -818,7 +816,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_proxy_hostname">"Hostname"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Push-Benachrichtigungen aktivieren und festlegen, wie oft sie geprüft werden"</string>
-    <string name="settings_interface_summary">"Schriftarten, Navigationsleiste, Reiter, untere App-Leiste sowie Anzeigeoptionen für Beiträge und Kommentare"</string>
     <string name="settings_theme_summary">"Helle, dunkle und AMOLED-Designs, Material You und benutzerdefinierte Designfarben"</string>
     <string name="settings_video_summary">"Autoplay, Stummschaltung, Wiedergabegeschwindigkeit, Standardauflösung und Vollbildverhalten"</string>
     <string name="settings_gestures_and_buttons_summary">"Wischgesten, Lautstärketastennavigation, Aktionen durch langes Drücken und Gestenempfindlichkeit"</string>

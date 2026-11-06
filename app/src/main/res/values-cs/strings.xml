@@ -650,10 +650,8 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_credits_national_flags">"Národní vlajky"</string>
     <string name="settings_credits_national_flags_summary">"Ikonu vytvořil Freepik z www.flaticon.com"</string>
     <string name="settings_group_global">"Globální"</string>
-    <string name="settings_group_account">"Účet"</string>
     <string name="settings_account_settings_management_title">"Správa nastavení účtu"</string>
     <string name="settings_account_settings_management_summary">"Zkopíruj nastavení jiného účtu na tento, vrať tento zpět na výchozí nebo odstraň to, co nashromáždil"</string>
-    <string name="settings_group_themes">"Motivy"</string>
     <string name="settings_group_other">"Ostatní"</string>
     <string name="settings_copy_settings_from_account_title">"Zkopíruj nastavení z jiného účtu"</string>
     <string name="settings_copy_settings_from_account_summary">"Dej tomuto účtu nastavení, která má jiný"</string>
@@ -818,7 +816,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_proxy_hostname">"Název hostitele"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Povol oznámení push a nastav, jak často jsou kontrolována"</string>
-    <string name="settings_interface_summary">"Písma, navigační vysouvací panel, karty, spodní lišta aplikací a možnosti zobrazení příspěvků a komentářů"</string>
     <string name="settings_theme_summary">"Světlé, tmavé a AMOLED motivy, Material You a vlastní barvy motivu"</string>
     <string name="settings_video_summary">"Automatické přehrávání, ztlumení, rychlost přehrávání, výchozí rozlišení a chování na celou obrazovku"</string>
     <string name="settings_gestures_and_buttons_summary">"Gesta přejetí, navigace pomocí tlačítek hlasitosti, dlouhé stisknutí a citlivost gest"</string>

@@ -650,10 +650,8 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_credits_national_flags">"Bandeiras Nacionais"</string>
     <string name="settings_credits_national_flags_summary">"Ícone criado por Freepik da www.flaticon.com"</string>
     <string name="settings_group_global">"Global"</string>
-    <string name="settings_group_account">"Conta"</string>
     <string name="settings_account_settings_management_title">"Gestão de definições de conta"</string>
     <string name="settings_account_settings_management_summary">"Copie as definições de outra conta para esta, volte a colocá-la nos padrões ou apague o que acumulou"</string>
-    <string name="settings_group_themes">"Temas"</string>
     <string name="settings_group_other">"Outros"</string>
     <string name="settings_copy_settings_from_account_title">"Copiar definições de outra conta"</string>
     <string name="settings_copy_settings_from_account_summary">"Dê a esta conta as definições que outra conta possui"</string>
@@ -818,7 +816,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_proxy_hostname">"Nome do host"</string>
     <string name="settings_proxy_port">"Porta"</string>
     <string name="settings_notification_master_summary">"Active as notificações push e defina com que frequência são verificadas"</string>
-    <string name="settings_interface_summary">"Fontes, gaveta de navegação, separadores, barra inferior de aplicações e opções de visualização de publicações e comentários"</string>
     <string name="settings_theme_summary">"Temas claros, escuros e AMOLED, Material You e cores de tema personalizadas"</string>
     <string name="settings_video_summary">"Reprodução automática, silenciamento, velocidade de reprodução, resolução padrão e comportamento de ecrã inteiro"</string>
     <string name="settings_gestures_and_buttons_summary">"Gestos de deslizar, navegação por teclas de volume, ações de toque longo e sensibilidade a gestos"</string>

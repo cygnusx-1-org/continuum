@@ -640,10 +640,8 @@
     <string name="settings_credits_national_flags">"தேசிய கொடிகள்"</string>
     <string name="settings_credits_national_flags_summary">"www.flaticon.com இலிருந்து Freepik ஆல் உருவாக்கப்பட்ட ஐகான்"</string>
     <string name="settings_group_global">"குளோபல்"</string>
-    <string name="settings_group_account">"கணக்கு"</string>
     <string name="settings_account_settings_management_title">"கணக்கு அமைப்புகள் மேலாண்மை"</string>
     <string name="settings_account_settings_management_summary">"மற்றொரு கணக்கின் அமைப்புகளை இதில் நகலெடுக்கவும், இதை மீண்டும் இயல்புநிலைக்கு வைக்கவும் அல்லது அது திரட்டப்பட்டதை நீக்கவும்"</string>
-    <string name="settings_group_themes">"தீம்கள்"</string>
     <string name="settings_group_other">"மற்றவை"</string>
     <string name="settings_copy_settings_from_account_title">"மற்றொரு கணக்கிலிருந்து அமைப்புகளை நகலெடுக்கவும்"</string>
     <string name="settings_copy_settings_from_account_summary">"இந்தக் கணக்கில் மற்றொருவர் வைத்திருக்கும் அமைப்புகளைக் கொடுங்கள்"</string>
@@ -808,7 +806,6 @@
     <string name="settings_proxy_hostname">"ஹோஸ்ட்பெயர்"</string>
     <string name="settings_proxy_port">"துறை"</string>
     <string name="settings_notification_master_summary">"புஷ் அறிவிப்புகளை இயக்கி, அவை எவ்வளவு அடிக்கடி சரிபார்க்கப்படுகின்றன என்பதை அமைக்கவும்"</string>
-    <string name="settings_interface_summary">"எழுத்துருக்கள், வழிசெலுத்தல் டிராயர், தாவல்கள், கீழே உள்ள பயன்பாட்டுப் பட்டி மற்றும் இடுகை மற்றும் கருத்து காட்சி விருப்பங்கள்"</string>
     <string name="settings_theme_summary">"ஒளி, இருண்ட மற்றும் AMOLED தீம்கள், Material You மற்றும் தனிப்பயன் தீம் வண்ணங்கள்"</string>
     <string name="settings_video_summary">"தானியங்கு, முடக்குதல், பின்னணி வேகம், இயல்புநிலை தெளிவுத்திறன் மற்றும் முழுத்திரை நடத்தை"</string>
     <string name="settings_gestures_and_buttons_summary">"ஸ்வைப் சைகைகள், வால்யூம் கீ நேவிகேஷன், நீண்ட அழுத்த செயல்கள் மற்றும் சைகை உணர்திறன்"</string>

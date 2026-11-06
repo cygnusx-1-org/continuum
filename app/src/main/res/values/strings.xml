@@ -709,10 +709,12 @@
     <string name="settings_credits_national_flags">National Flags</string>
     <string name="settings_credits_national_flags_summary">Icon made by Freepik from www.flaticon.com</string>
     <string name="settings_group_global">Global</string>
-    <string name="settings_group_account">Account</string>
+    <string name="settings_group_account_appearance">Account · Appearance</string>
+    <string name="settings_group_account_posts">Account · Posts and comments</string>
+    <string name="settings_group_account_navigation">Account · Navigation</string>
+    <string name="settings_group_account_more">Account · More</string>
     <string name="settings_account_settings_management_title">Account Settings Management</string>
     <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, put this one back to defaults, or delete what it has accumulated</string>
-    <string name="settings_group_themes">Themes</string>
     <string name="settings_group_other">Other</string>
     <string name="settings_copy_settings_from_account_title">Copy Settings from Another Account</string>
     <string name="settings_copy_settings_from_account_summary">Give this account the settings another one has</string>
@@ -918,7 +920,7 @@
 
     <!-- Settings section summaries -->
     <string name="settings_notification_master_summary">Enable push notifications and set how often they are checked</string>
-    <string name="settings_interface_summary">Fonts, navigation drawer, tabs, bottom app bar, and post and comment display options</string>
+    <string name="settings_interface_summary">Display options, search, time format, immersive mode, refresh rate and other toggles that fit nowhere else</string>
     <string name="settings_theme_summary">Light, dark, and AMOLED themes, Material You, and custom theme colors</string>
     <string name="settings_video_summary">Autoplay, muting, playback speed, default resolution, and fullscreen behavior</string>
     <string name="settings_gestures_and_buttons_summary">Swipe gestures, volume key navigation, long-press actions, and gesture sensitivity</string>

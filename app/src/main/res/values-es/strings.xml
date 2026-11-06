@@ -650,10 +650,8 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_credits_national_flags">"Banderas nacionales"</string>
     <string name="settings_credits_national_flags_summary">"Ícono hecho por Freepik desde www.flaticon.com"</string>
     <string name="settings_group_global">"Mundial"</string>
-    <string name="settings_group_account">"Cuenta"</string>
     <string name="settings_account_settings_management_title">"Gestión de configuración de cuenta"</string>
     <string name="settings_account_settings_management_summary">"Copie la configuración de otra cuenta en esta, restablezca esta a los valores predeterminados o elimine lo que ha acumulado"</string>
-    <string name="settings_group_themes">"Temas"</string>
     <string name="settings_group_other">"Otro"</string>
     <string name="settings_copy_settings_from_account_title">"Copiar configuración de otra cuenta"</string>
     <string name="settings_copy_settings_from_account_summary">"Dale a esta cuenta la configuración que tiene otra"</string>
@@ -818,7 +816,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_proxy_hostname">"Nombre de host"</string>
     <string name="settings_proxy_port">"Puerto"</string>
     <string name="settings_notification_master_summary">"Habilite las notificaciones automáticas y establezca la frecuencia con la que se revisan"</string>
-    <string name="settings_interface_summary">"Fuentes, cajón de navegación, pestañas, barra de aplicaciones inferior y opciones de visualización de publicaciones y comentarios"</string>
     <string name="settings_theme_summary">"Temas claros, oscuros y AMOLED, Material You y colores de temas personalizados"</string>
     <string name="settings_video_summary">"Reproducción automática, silencio, velocidad de reproducción, resolución predeterminada y comportamiento de pantalla completa"</string>
     <string name="settings_gestures_and_buttons_summary">"Gestos de deslizamiento, navegación con teclas de volumen, acciones de pulsación larga y sensibilidad de gestos"</string>

@@ -651,10 +651,8 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_credits_national_flags">"Bandiere nazionali"</string>
     <string name="settings_credits_national_flags_summary">"Icone create da Freepik su www.flaticon.com"</string>
     <string name="settings_group_global">"Globale"</string>
-    <string name="settings_group_account">"Conto"</string>
     <string name="settings_account_settings_management_title">"Gestione impostazioni account"</string>
     <string name="settings_account_settings_management_summary">"Copia le impostazioni di un altro account su questo, riporta questo ai valori predefiniti o elimina ciò che ha accumulato"</string>
-    <string name="settings_group_themes">"Temi"</string>
     <string name="settings_group_other">"Altro"</string>
     <string name="settings_copy_settings_from_account_title">"Copia le impostazioni da un altro account"</string>
     <string name="settings_copy_settings_from_account_summary">"Assegna a questo account le impostazioni di un altro"</string>
@@ -819,7 +817,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_proxy_hostname">"Nome host"</string>
     <string name="settings_proxy_port">"Porta"</string>
     <string name="settings_notification_master_summary">"Abilita le notifiche push e imposta la frequenza con cui vengono controllate"</string>
-    <string name="settings_interface_summary">"Caratteri, riquadro di navigazione, schede, barra inferiore dell'app e opzioni di visualizzazione di post e commenti"</string>
     <string name="settings_theme_summary">"Temi chiari, scuri e AMOLED, Material You e colori dei temi personalizzati"</string>
     <string name="settings_video_summary">"Riproduzione automatica, disattivazione audio, velocità di riproduzione, risoluzione predefinita e comportamento a schermo intero"</string>
     <string name="settings_gestures_and_buttons_summary">"Gesti di scorrimento, navigazione tramite tasto volume, azioni di pressione prolungata e sensibilità ai gesti"</string>

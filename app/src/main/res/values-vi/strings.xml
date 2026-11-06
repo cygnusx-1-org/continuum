@@ -643,10 +643,8 @@ Tự động phát video bị tắt."</string>
     <string name="settings_credits_national_flags">"Cờ quốc gia"</string>
     <string name="settings_credits_national_flags_summary">"Biểu tượng được tạo bởi Freepik từ www.flaticon.com"</string>
     <string name="settings_group_global">"Toàn cầu"</string>
-    <string name="settings_group_account">"Tài khoản"</string>
     <string name="settings_account_settings_management_title">"Quản lý cài đặt tài khoản"</string>
     <string name="settings_account_settings_management_summary">"Sao chép cài đặt của tài khoản khác vào tài khoản này, đặt tài khoản này về mặc định hoặc xóa những gì tài khoản đã tích lũy"</string>
-    <string name="settings_group_themes">"Chủ đề"</string>
     <string name="settings_group_other">"Khác"</string>
     <string name="settings_copy_settings_from_account_title">"Sao chép cài đặt từ tài khoản khác"</string>
     <string name="settings_copy_settings_from_account_summary">"Cung cấp cho tài khoản này các cài đặt mà tài khoản khác có"</string>
@@ -811,7 +809,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_proxy_hostname">"Tên máy chủ"</string>
     <string name="settings_proxy_port">"Cổng"</string>
     <string name="settings_notification_master_summary">"Bật thông báo đẩy và đặt tần suất kiểm tra chúng"</string>
-    <string name="settings_interface_summary">"Phông chữ, ngăn điều hướng, tab, thanh ứng dụng dưới cùng cũng như các tùy chọn hiển thị bài đăng và bình luận"</string>
     <string name="settings_theme_summary">"Các chủ đề sáng, tối và AMOLED, Material You và màu chủ đề tùy chỉnh"</string>
     <string name="settings_video_summary">"Tự động phát, tắt tiếng, tốc độ phát lại, độ phân giải mặc định và hành vi toàn màn hình"</string>
     <string name="settings_gestures_and_buttons_summary">"Cử chỉ vuốt, điều hướng bằng phím âm lượng, thao tác nhấn và giữ độ nhạy của cử chỉ"</string>
