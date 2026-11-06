@@ -42,13 +42,14 @@ public class SharedPreferencesUtils {
     public static final String AMOLED_DARK_KEY = "amoled_dark";
     public static final String IMMERSIVE_INTERFACE_KEY = "immersive_interface";
     public static final String DISABLE_IMMERSIVE_INTERFACE_IN_LANDSCAPE_MODE = "disable_immersive_interface_in_landscape_mode";
-    public static final String BOTTOM_APP_BAR_KEY = "bottom_app_bar";
     public static final String VOTE_BUTTONS_ON_THE_RIGHT_KEY = "vote_buttons_on_the_right";
     public static final String SHOW_AVATAR_ON_THE_RIGHT = "show_avatar_on_the_right";
     public static final String DEFAULT_SEARCH_RESULT_TAB = "default_search_result_tab";
     public static final String CUSTOM_FONT_FAMILY_KEY = "custom_font_family";
     public static final String CUSTOM_TITLE_FONT_FAMILY_KEY = "custom_title_font_family";
     public static final String CUSTOM_CONTENT_FONT_FAMILY_KEY = "custom_content_font_family";
+    public static final String MAIN_ACTIVITY_FAB_ACTION = "main_activity_fab_action";
+    public static final String OTHER_ACTIVITIES_FAB_ACTION = "other_activities_fab_action";
     public static final String HIDE_FAB_IN_POST_FEED = "hide_fab_in_post_feed";
     public static final String FORCE_MAX_REFRESH_RATE_KEY = "force_max_refresh_rate";
 
@@ -157,7 +158,6 @@ public class SharedPreferencesUtils {
     public static final int MAIN_PAGE_BACK_BUTTON_ACTION_CONFIRM_EXIT = 1;
     public static final int MAIN_PAGE_BACK_BUTTON_ACTION_OPEN_NAVIGATION_DRAWER = 2;
     public static final String LOCK_TOOLBAR = "lock_toolbar";
-    public static final String LOCK_BOTTOM_APP_BAR = "lock_bottom_app_bar";
     public static final String COMMENT_TOOLBAR_HIDDEN = "comment_toolbar_hidden";
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
@@ -529,38 +529,9 @@ public class SharedPreferencesUtils {
     public static final int MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS = 6;
 
     public static final String BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.bottom_app_bar";
-    public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT = "main_activity_bottom_app_bar_option_count";
-    public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1 = "main_activity_bottom_app_bar_option_1";
-    public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2 = "main_activity_bottom_app_bar_option_2";
-    public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3 = "main_activity_bottom_app_bar_option_3";
-    public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4 = "main_activity_bottom_app_bar_option_4";
     public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB = "main_activity_bottom_app_bar_fab";
-    public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT = "other_activities_bottom_app_bar_option_count";
-    public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1 = "other_activities_bottom_app_bar_option_1";
-    public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2 = "other_activities_bottom_app_bar_option_2";
-    public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3 = "other_activities_bottom_app_bar_option_3";
-    public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4 = "other_activities_bottom_app_bar_option_4";
     public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB = "other_activities_bottom_app_bar_fab";
 
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS = 0;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS = 1;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX = 2;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE = 3;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS = 4;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH = 5;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE = 6;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT = 7;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SEARCH = 8;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT = 9;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_USER = 10;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS = 11;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS = 12;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_UPVOTED = 13;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_DOWNVOTED = 14;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDDEN = 15;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SAVED = 16;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_TOP = 17;
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT = 18;
 
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS = 0;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH = 1;
@@ -573,26 +544,6 @@ public class SharedPreferencesUtils {
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_FILTER_POSTS = 8;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_TOP = 9;
 
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HOME = 0;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS = 1;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX = 2;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_PROFILE = 3;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_MULTIREDDITS = 4;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS = 5;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_REFRESH = 6;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE = 7;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT = 8;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SEARCH = 9;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT = 10;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_USER = 11;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS = 12;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_FILTER_POSTS = 13;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_UPVOTED = 14;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_DOWNVOTED = 15;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDDEN = 16;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED = 17;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP = 18;
-    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT = 19;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS = 0;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_REFRESH = 1;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_CHANGE_SORT_TYPE = 2;
@@ -640,6 +591,12 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_REDDIT_SECTION = "collapse_reddit_section";
     public static final String COLLAPSE_POST_SECTION = "collapse_post_section";
     public static final String COLLAPSE_PREFERENCES_SECTION = "collapse_preferences_section";
+    // A section of the navigation drawer that can be shown, collapsed or hidden: one choice per
+    // section. The COLLAPSE_* and HIDE_* switches below are what older versions stored instead;
+    // DrawerSection reads them once and moves them here.
+    public static final String RECENT_SUBREDDITS_SECTION = "recent_subreddits_section";
+    public static final String FAVORITE_SUBREDDITS_SECTION = "favorite_subreddits_section";
+    public static final String SUBSCRIBED_SUBREDDITS_SECTION = "subscribed_subreddits_section";
     public static final String COLLAPSE_RECENT_SUBREDDITS_SECTION = "collapse_recent_subreddits_section";
     public static final String HIDE_RECENT_SUBREDDITS_SECTION = "hide_recent_subreddits_section";
     public static final String COLLAPSE_FAVORITE_SUBREDDITS_SECTION = "collapse_favorite_subreddits_section";

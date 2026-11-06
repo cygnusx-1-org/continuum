@@ -136,13 +136,13 @@ public class ViewImageOrGifActivity extends AppCompatActivity
         getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
                 .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+        getTheme().applyStyle(FontFamily.of(Objects.requireNonNull(mSharedPreferences
                 .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+        getTheme().applyStyle(TitleFontFamily.of(Objects.requireNonNull(mSharedPreferences
                 .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+        getTheme().applyStyle(ContentFontFamily.of(Objects.requireNonNull(mSharedPreferences
                 .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext(),

@@ -451,7 +451,6 @@ Nhấn để thử lại."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Tắt giao diện đắm mình trong chế độ xoay ngang"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Tùy chỉnh các Tab trong trang chính"</string>
     <string name="only_for_logged_in_user">"Chỉ cho người dùng đã đăng nhập"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Bật điều hướng ở dưới cùng"</string>
     <string name="settings_category_post_and_comment_title">"Bài đăng và bình luận"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Nút Vote ở bên phải"</string>
     <string name="settings_mute_video_title">"Tắt tiếng Video"</string>
@@ -483,7 +482,6 @@ Nhấn để thử lại."</string>
     <string name="settings_post_compact_thumbnail_size">"Kích thước hình thu nhỏ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Hiện ảnh thu nhỏ ở bên trái"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Hiển thị hình thu nhỏ ở bên phải"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Chuyển đổi bên hình thu nhỏ"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Số lượng cột trong nguồn dữ liệu bài đăng"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Dọc"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Ngang"</string>
@@ -495,13 +493,11 @@ Nhấn để thử lại."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Vuốt dọc để quay lại từ phương tiện"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Khoá nút Nhảy đến bình luận cấp trên cùng tiếp theo"</string>
     <string name="settings_lock_toolbar_title">"Khóa thanh công cụ"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Khoá thanh điều hướng ở dưới cùng"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Vuốt lên để ẩn nút Nhảy đến bình luận cấp trên cùng tiếp theo"</string>
     <string name="settings_lazy_mode_interval_title">"Khoảng thời gian Chế độ lười biếng"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ẩn bài viết văn bản và bài viết không có bản xem trước"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Chế độ hộp bóng bỏ qua mọi bài đăng văn bản và bất kỳ bài đăng nào khác không có hình ảnh xem trước."</string>
     <string name="settings_font_title">"Phông chữ"</string>
-    <string name="settings_preview_font_title">"Xem trước phông chữ"</string>
     <string name="settings_font_summary">"Phông chữ"</string>
     <string name="settings_title_font_summary">"Tiêu đề"</string>
     <string name="settings_content_font_summary">"Nội dung"</string>
@@ -621,15 +617,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Yêu cầu xác thực để hiển thị tài khoản"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Nhấn giữ để ẩn thanh công cụ"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ẩn thanh công cụ theo mặc định"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Tuỳ biến thanh điều hướng ở dưới cùng"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Trang chính"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Các trang khác"</string>
-    <string name="settings_bottom_app_bar_option_count">"Số tuỳ chọn"</string>
-    <string name="settings_bottom_app_bar_option_1">"Tuỳ chọn 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Tuỳ chọn 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Tuỳ chọn 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Tuỳ chọn 4"</string>
-    <string name="settings_bottom_app_bar_fab">"Nút hành động nổi"</string>
     <string name="settings_data_saving_mode">"Chế độ tiết kiệm dữ liệu"</string>
     <string name="settings_data_saving_mode_info_summary">"Trong chế độ tiết kiệm dữ liệu:
 Các hình ảnh xem trước có độ phân giải thấp hơn.
@@ -729,10 +716,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_collapse_reddit_section_title">"Thu gọn khu vực Reddit"</string>
     <string name="settings_collapse_post_section_title">"Thu gọn khu vực bài đăng"</string>
     <string name="settings_collapse_preferences_section_title">"Thu gọn khu vực cài đặt"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Thu gọn khu vực subreddit yêu thích"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Thu gọn khu vực subreddit đã đăng ký"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Ẩn khu vực subreddit yêu thích"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Ẩn khu vực subreddit đã đăng ký"</string>
     <string name="settings_quick_toggles_title">"Chuyển đổi nhanh"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Hiển thị chủ đề Chuyển đổi"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Hiển thị NSFW Chuyển đổi"</string>
@@ -803,19 +786,15 @@ Tự động phát video bị tắt."</string>
     <string name="settings_proxy_type">"Loại proxy"</string>
     <string name="settings_proxy_hostname">"Tên máy chủ"</string>
     <string name="settings_proxy_port">"Cổng"</string>
-    <string name="settings_notification_master_summary">"Bật thông báo đẩy và đặt tần suất kiểm tra chúng"</string>
     <string name="settings_theme_summary">"Các chủ đề sáng, tối và AMOLED, Material You và màu chủ đề tùy chỉnh"</string>
     <string name="settings_video_summary">"Tự động phát, tắt tiếng, tốc độ phát lại, độ phân giải mặc định và hành vi toàn màn hình"</string>
     <string name="settings_gestures_and_buttons_summary">"Cử chỉ vuốt, điều hướng bằng phím âm lượng, thao tác nhấn và giữ độ nhạy của cử chỉ"</string>
     <string name="settings_security_summary">"Khóa ứng dụng, sinh trắc học hoặc mã PIN, chế độ bảo mật và xác thực để hiển thị tài khoản"</string>
-    <string name="settings_data_saving_mode_summary">"Tắt tính năng xem trước hình ảnh và giảm độ phân giải video để sử dụng ít dữ liệu hơn"</string>
-    <string name="settings_proxy_summary">"Định tuyến lưu lượng truy cập Reddit qua proxy HTTP hoặc SOCKS"</string>
     <string name="settings_post_history_summary">"Đánh dấu bài viết là đã đọc, giới hạn lịch sử đọc bài viết và ẩn bài viết đã đọc"</string>
     <string name="settings_over_18_and_spoiler_summary">"Hiển thị hoặc làm mờ nội dung NSFW và làm mờ nội dung tiết lộ nội dung"</string>
     <string name="settings_post_filter_summary">"Tạo và quản lý bộ lọc ẩn bài viết"</string>
     <string name="settings_comment_filter_summary">"Tạo và quản lý bộ lọc ẩn bình luận"</string>
     <string name="settings_sort_type_summary">"Loại sắp xếp mặc định và phạm vi thời gian cho các tài khoản con, người dùng và bình luận"</string>
-    <string name="settings_download_location_summary">"Chọn thư mục cho hình ảnh, GIF, video và NSFW phương tiện đã tải xuống"</string>
     <string name="settings_miscellaneous_summary">"Xử lý liên kết, trình duyệt, lịch sử tìm kiếm và ngôn ngữ"</string>
     <string name="settings_api_keys_title">"Khóa API"</string>
     <string name="settings_api_keys_summary">"Nhập khóa API của riêng bạn, bao gồm ID khách hàng của bạn"</string>
@@ -1033,12 +1012,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Áp dụng cho: Nền của tin nhắn riêng tư được nhận"</string>
     <string name="theme_item_sent_message_background_color">"Màu nền tin nhắn đã gửi"</string>
     <string name="theme_item_sent_message_background_color_detail">"Áp dụng cho: Nền của tin nhắn riêng tư đã gửi"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Màu thanh điều hướng ở dưới cùng"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Áp dụng cho: Thanh điều hướng ở dưới cùng"</string>
     <string name="theme_item_primary_icon_color">"Màu chính của biểu tượng"</string>
     <string name="theme_item_primary_icon_color_detail">"Áp dụng cho: Biểu tượng trong ngăn điều hướng."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Màu biểu tượng của ngăn điều hướng ở dưới cùng"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Áp dụng cho: Biểu tượng trong ngăn điều hướng ở dưới cùng"</string>
     <string name="theme_item_post_icon_and_info_color">"Màu biểu tượng và thông tin bài đăng"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Áp dụng cho: Biểu tượng, số điểm và số lượng bình luận trong bài đăng"</string>
     <string name="theme_item_comment_icon_and_info_color">"Màu biểu tượng và thông tin bình luận"</string>
@@ -1703,7 +1678,6 @@ Nhấn để thử lại."</string>
     <string name="content_description_video_indicator">"Chỉ báo video"</string>
     <string name="content_description_no_subscriptions_indicator">"Không có chỉ báo đăng ký"</string>
     <string name="content_description_create_multireddit">"Tạo MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Nút thanh điều hướng phía dưới"</string>
     <string name="content_description_fab">"Nút hành động nổi"</string>
     <string name="content_description_download">"Tải xuống"</string>
     <string name="content_description_share">"Chia sẻ"</string>

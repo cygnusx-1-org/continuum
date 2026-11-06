@@ -104,7 +104,6 @@ import ml.docilealligator.infinityforreddit.settings.AccountSettingsManagementPr
 import ml.docilealligator.infinityforreddit.settings.BackupAndRestorePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CommentPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CrashReportsFragment;
-import ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment;
 import ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragment;
 import ml.docilealligator.infinityforreddit.settings.DownloadLocationPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
@@ -115,7 +114,6 @@ import ml.docilealligator.infinityforreddit.settings.NotificationPreferenceFragm
 import ml.docilealligator.infinityforreddit.settings.NsfwAndSpoilerFragment;
 import ml.docilealligator.infinityforreddit.settings.PostDetailsPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostHistoryFragment;
-import ml.docilealligator.infinityforreddit.settings.ProxyPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.SecurityPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.ThemePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.TranslationFragment;
@@ -285,8 +283,6 @@ public interface AppComponent {
 
     void inject(NsfwAndSpoilerFragment nsfwAndSpoilerFragment);
 
-    void inject(CustomizeBottomAppBarFragment customizeBottomAppBarFragment);
-
     void inject(TranslationFragment translationFragment);
 
     void inject(FetchRandomSubredditActivity fetchRandomSubredditActivity);
@@ -355,8 +351,6 @@ public interface AppComponent {
     void inject(PostOptionsBottomSheetFragment postOptionsBottomSheetFragment);
 
     void inject(ShareBottomSheetFragment shareBottomSheetFragment);
-
-    void inject(ProxyPreferenceFragment proxyPreferenceFragment);
 
     void inject(CopyMultiRedditActivity copyMultiRedditActivity);
 

@@ -39,7 +39,7 @@ class SettingsScreenArgsTest {
         val owned = Bundle()
         owned.putString("existing", "value")
 
-        val args = SettingsScreenArgs.withScrollTarget(owned, "lock_bottom_app_bar")
+        val args = SettingsScreenArgs.withScrollTarget(owned, "lock_toolbar")
 
         assertEquals("value", args.getString("existing"))
         assertFalse("the source bundle was modified", owned.keySet().contains("ASTK"))

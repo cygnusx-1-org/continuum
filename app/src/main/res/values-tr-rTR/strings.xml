@@ -459,7 +459,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Manzara Modunda Sürükleyici Arayüzü Devre Dışı Bırak"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Ana Sayfadaki Sekmeleri Özelleştir"</string>
     <string name="only_for_logged_in_user">"Sadece Oturum Açmış Kullanıcılar için"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Alt Navigasyonu Etkinleştir"</string>
     <string name="settings_category_post_and_comment_title">"Gönderi ve Yorum"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Oy Düğmeleri Sağda"</string>
     <string name="settings_mute_video_title">"Videoları Sessize Al"</string>
@@ -491,7 +490,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_post_compact_thumbnail_size">"Küçük resim boyutu"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Küçük Resmi Solda Göster"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Sağdaki Küçük Resmi Göster"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Küçük Resim Tarafını Değiştir"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Gönderi Akışındaki Sütun Sayısı"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portre"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Manzara"</string>
@@ -503,13 +501,11 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Resim ve Gif'ten Geri Dönmek İçin Dikey Kaydır"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Bir Sonraki En İyi Yorumlar Düğmesine Geçmeyi Kilitle"</string>
     <string name="settings_lock_toolbar_title">"Araç Çubuğunu Kilitle"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Alt Navigasyon Çubuğunu Kilitle"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Gizlemek İçin Yukarı Kaydır ve Sonraki En İyi Yorumlar Düğmesine Git"</string>
     <string name="settings_lazy_mode_interval_title">"Uyuşuk Mod Aralığı"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Metin Gönderilerini ve Önizlemesiz Gönderileri Gizle"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox Modu, her metin gönderisini ve önizleme görüntüsü olmayan diğer tüm gönderileri atlar."</string>
     <string name="settings_font_title">"Yazı Tipi"</string>
-    <string name="settings_preview_font_title">"Yazı Tipi Önizlemesi"</string>
     <string name="settings_font_summary">"Yazı Tipi"</string>
     <string name="settings_title_font_summary">"Başlık"</string>
     <string name="settings_content_font_summary">"İçerik"</string>
@@ -625,15 +621,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_require_authentication_to_show_accounts">"Hesapları Göstermek için Kimlik Doğrulaması Gerektir"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Araç Çubuğunu Kompakt Düzende Gizlemek İçin Uzun Dokun"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Varsayılan Olarak Araç Çubuğunu Gizle"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Alt Navigasyon Çubuğunu Özelleştir"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Ana Sayfa"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Diğer Sayfalar"</string>
-    <string name="settings_bottom_app_bar_option_count">"Seçenek Sayısı"</string>
-    <string name="settings_bottom_app_bar_option_1">"Seçenek 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Seçenek 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Seçenek 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Seçenek 4"</string>
-    <string name="settings_bottom_app_bar_fab">"Kayan İşlem Düğmesi"</string>
     <string name="settings_data_saving_mode">"Veri Tasarrufu Modu"</string>
     <string name="settings_data_saving_mode_info_summary">"Veri tasarrufu modunda:
 Resim önizlemelerinin çözünürlüğü düşer.
@@ -733,10 +720,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_collapse_reddit_section_title">"Reddit Bölümünü Daralt"</string>
     <string name="settings_collapse_post_section_title">"Gönderi Bölümünü Daralt"</string>
     <string name="settings_collapse_preferences_section_title">"Tercihler Bölümünü Daralt"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Favori Subreddit'ler Bölümünü Daralt"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Abone Olunan Subreddit'ler Bölümünü Daralt"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Favori Subreddi'tler Bölümünü Gizle"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Abone Olunan Subreddit'ler Bölümünü Gizle"</string>
     <string name="settings_quick_toggles_title">"Hızlı Geçişler"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Temayı Göster Geçişi"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Göster NSFW Değiştir"</string>
@@ -807,19 +790,15 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_proxy_type">"Proxy Türü"</string>
     <string name="settings_proxy_hostname">"Ana Bilgisayar Adı"</string>
     <string name="settings_proxy_port">"Bağlantı noktası"</string>
-    <string name="settings_notification_master_summary">"Anında bildirimleri etkinleştirin ve bunların ne sıklıkta kontrol edileceğini ayarlayın"</string>
     <string name="settings_theme_summary">"Açık, koyu ve AMOLED temaları, Material You ve özel tema renkleri"</string>
     <string name="settings_video_summary">"Otomatik oynatma, sessize alma, oynatma hızı, varsayılan çözünürlük ve tam ekran davranışı"</string>
     <string name="settings_gestures_and_buttons_summary">"Kaydırma hareketleri, ses seviyesi tuşunda gezinme, uzun basma eylemleri ve hareket duyarlılığı"</string>
     <string name="settings_security_summary">"Uygulama kilidi, biyometrik veya PIN, güvenli mod ve hesapları göstermek için kimlik doğrulama"</string>
-    <string name="settings_data_saving_mode_summary">"Daha az veri kullanmak için görüntü önizlemelerini devre dışı bırakın ve video çözünürlüğünü düşürün"</string>
-    <string name="settings_proxy_summary">"HTTP veya SOCKS proxy üzerinden Reddit trafiği yönlendirin"</string>
     <string name="settings_post_history_summary">"Gönderileri okundu olarak işaretleyin, okunmuş gönderi geçmişini sınırlayın ve okunmuş gönderileri gizleyin"</string>
     <string name="settings_over_18_and_spoiler_summary">"NSFW içeriği göster veya bulanıklaştır ve spoiler'ı bulanıklaştır"</string>
     <string name="settings_post_filter_summary">"Gönderileri gizleyen filtreler oluşturun ve yönetin"</string>
     <string name="settings_comment_filter_summary">"Yorumları gizleyen filtreler oluşturun ve yönetin"</string>
     <string name="settings_sort_type_summary">"Alt dizinler, kullanıcılar ve yorumlar için varsayılan sıralama türü ve zaman aralığı"</string>
-    <string name="settings_download_location_summary">"İndirilen görseller, GIF'ler, videolar ve NSFW medya için klasörler seçin"</string>
     <string name="settings_miscellaneous_summary">"Bağlantı yönetimi, tarayıcı, arama geçmişi ve dil"</string>
     <string name="settings_api_keys_title">"API anahtarları"</string>
     <string name="settings_api_keys_summary">"Client ID’n de dahil olmak üzere kendi API anahtarlarını gir"</string>
@@ -1037,12 +1016,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Uygulandığı yer: Alınan özel mesajların arka planı"</string>
     <string name="theme_item_sent_message_background_color">"Gönderilen Mesaj Arka Plan Rengi"</string>
     <string name="theme_item_sent_message_background_color_detail">"Uygulandığı yer: Gönderilen özel mesajların arka planı"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Alt Navigasyon Çubuğu Rengi"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Uygulandığı yer: Alt Navigasyon çubuğu"</string>
     <string name="theme_item_primary_icon_color">"Birincil Simge Rengi"</string>
     <string name="theme_item_primary_icon_color_detail">"Uygulandığı yer: Gezinme çekmecesindeki simgeler."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Alt Navigasyon Çubuğu Simge Rengi"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Uygulandığı yer: Alt Navigasyon çubuğundaki simgeler"</string>
     <string name="theme_item_post_icon_and_info_color">"Gönderi Simgesi ve Bilgi Rengi"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Uygulandığı yer: Simgeler, puanlar ve gönderilerdeki yorum sayısı"</string>
     <string name="theme_item_comment_icon_and_info_color">"Yorum Simgesi ve Bilgi Rengi"</string>
@@ -1709,7 +1684,6 @@ Tekrar denemek için dokun."</string>
     <string name="content_description_video_indicator">"Video göstergesi"</string>
     <string name="content_description_no_subscriptions_indicator">"Abonelik yok göstergesi"</string>
     <string name="content_description_create_multireddit">"MultiReddit Oluştur"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Alt gezinme çubuğu düğmesi"</string>
     <string name="content_description_fab">"Kayan İşlem Düğmesi"</string>
     <string name="content_description_download">"İndir"</string>
     <string name="content_description_share">"Paylaş"</string>

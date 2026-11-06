@@ -50,11 +50,6 @@
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <include
-        layout="@layout/bottom_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
 
     <!--<LinearLayout
         android:layout_width="match_parent"
@@ -120,6 +115,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:visibility="gone"
         android:contentDescription="@null"
-        app:layout_anchor="@id/bottom_app_bar_bottom_app_bar" />
+        android:layout_gravity="end|bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -96,13 +96,11 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.SortTimeBottomS
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.SortTypeBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
-import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import ml.docilealligator.infinityforreddit.databinding.ActivityMainBinding;
-import ml.docilealligator.infinityforreddit.events.ChangeBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideFabInPostFeedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideKarmaEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNavigationDrawerSectionsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeRequireAuthToAccountSectionEvent;
@@ -145,6 +143,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
+import ml.docilealligator.infinityforreddit.utils.FloatingButtonAction;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
@@ -172,13 +171,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
     private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
-    private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
     // Resume where I left off: the tab the user was on, as a MainPageTabsUtils user key rather than
     // an index. The tab list is rebuilt from the subscription and multireddit data on every launch
     // and its order is not stable, so an index can name a different subreddit next time.
     private static final String STATE_RESUME_TAB_KEY = "RTK";
     /** Whether the bottom app bar was scrolled away. See {@link #saveResumeState}. */
-    private static final String STATE_RESUME_BOTTOM_BAR_HIDDEN = "RBBH";
 
     @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
@@ -241,7 +238,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private TabLayoutMediator tabLayoutMediator;
     @SuppressWarnings("NullAway.Init")
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
-    private NavigationWrapper navigationWrapper;
+    private FloatingActionButton fab;
     // Tracks the AppBar collapsed/expanded state so it can be persisted across rotation;
     // without this the AppBar resets to expanded on recreate, pushing the post feed down.
     private boolean mAppBarCollapsed = false;
@@ -249,11 +246,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     // While set, all "show" paths (ViewPager onPageSelected, content-scroll-up callbacks
     // triggered by the programmatic scroll restore) are blocked so the bar/FAB stay hidden
     // to match the pre-rotation state. Cleared shortly after the restore settles.
-    private boolean mKeepBottomBarHiddenOnRestore = false;
     // Sticky record of whether the bottom app bar is hidden. Landscape uses a navigation
     // rail (no bottom app bar), so we can't read translationY there; this field carries the
     // portrait hidden-state across the landscape intermediate so a P→L→P round trip keeps it.
-    private boolean mBottomBarHidden = false;
     @SuppressWarnings("NullAway.Init")
     private Runnable autoCompleteRunnable;
     @Nullable
@@ -278,9 +273,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private String lastCapturedTabKey;
     private boolean resumeTabApplied;
     private boolean hideFab;
-    private boolean showBottomAppBar;
     private int mBackButtonAction;
-    private boolean mLockBottomAppBar;
     private boolean mDisableSwipingBetweenTabs;
     private boolean mShowFavoriteMultiReddits;
     private boolean mShowMultiReddits;
@@ -350,13 +343,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         claimResumeState();
 
         hideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED, false);
-        showBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, false);
 
-        navigationWrapper = new NavigationWrapper(findViewById(R.id.bottom_app_bar_bottom_app_bar), findViewById(R.id.linear_layout_bottom_app_bar),
-                findViewById(R.id.option_1_bottom_app_bar), findViewById(R.id.option_2_bottom_app_bar),
-                findViewById(R.id.option_3_bottom_app_bar), findViewById(R.id.option_4_bottom_app_bar),
-                findViewById(R.id.fab_main_activity),
-                findViewById(R.id.navigation_rail), customThemeWrapper, showBottomAppBar);
+        fab = findViewById(R.id.fab_main_activity);
 
         // Track AppBar collapsed/expanded state so we can restore it across rotation.
         binding.includedAppBar.appbarLayoutMainActivity.addOnOffsetChangedListener(
@@ -400,52 +388,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
                         binding.navigationViewMainActivity.setPadding(allInsets.left, 0, 0, 0);
 
-                        if (navigationWrapper.navigationRailView == null) {
-                            if (navigationWrapper.bottomAppBar.getVisibility() != View.VISIBLE) {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.right,
-                                        (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.bottom);
-                            } else {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        allInsets.bottom);
-                            }
-                        } else {
-                            if (navigationWrapper.navigationRailView.getVisibility() != View.VISIBLE) {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.right,
+                        setMargins(fab,
+                                BaseActivity.IGNORE_MARGIN,
+                                BaseActivity.IGNORE_MARGIN,
+                                (int) Utils.convertDpToPixel(16,
+                                MainActivity.this) + allInsets.right,
                                         (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.bottom);
 
-                                binding.includedAppBar.viewPagerMainActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-                            } else {
-                                navigationWrapper.navigationRailView.setFitsSystemWindows(false);
-                                navigationWrapper.navigationRailView.setPadding(0, 0, 0, allInsets.bottom);
-
-                                setMargins(navigationWrapper.navigationRailView,
-                                        allInsets.left,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN
-                                );
-
-                                binding.includedAppBar.viewPagerMainActivity.setPadding(0, 0, allInsets.right, 0);
-                            }
-                        }
-
-                        if (navigationWrapper.bottomAppBar != null) {
-                            navigationWrapper.linearLayoutBottomAppBar.setPadding(
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingLeft(),
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingTop(),
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingRight(),
-                                    allInsets.bottom
-                            );
-                        }
+                        binding.includedAppBar.viewPagerMainActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
 
                         setMargins(binding.includedAppBar.toolbar,
                                 allInsets.left,
@@ -464,21 +414,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 });
 
-                /*adjustToolbar(binding.includedAppBar.toolbar);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    if (navigationWrapper.navigationRailView == null) {
-                        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) navigationWrapper.floatingActionButton.getLayoutParams();
-                        params.bottomMargin += navBarHeight;
-                        navigationWrapper.floatingActionButton.setLayoutParams(params);
-                    }
-                    if (navigationWrapper.bottomAppBar != null) {
-                        navigationWrapper.linearLayoutBottomAppBar.setPadding(navigationWrapper.linearLayoutBottomAppBar.getPaddingLeft(),
-                                navigationWrapper.linearLayoutBottomAppBar.getPaddingTop(), navigationWrapper.linearLayoutBottomAppBar.getPaddingRight(), navBarHeight);
-                    }
-                    binding.navDrawerRecyclerViewMainActivity.setPadding(0, 0, 0, navBarHeight);
-                }*/
             } else {
                 /*ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
                 ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
@@ -522,7 +457,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // track the preference rather than being read once.
         SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION, "0")
                 .observe(this, action -> mBackButtonAction = Integer.parseInt(action));
-        mLockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         mDisableSwipingBetweenTabs = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
         fragmentManager = getSupportFragmentManager();
@@ -535,19 +469,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
             mAppBarCollapsed = savedInstanceState.getBoolean(APP_BAR_COLLAPSED_STATE, false);
-            mBottomBarHidden = savedInstanceState.getBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, false);
             if (mAppBarCollapsed) {
                 // Restore the collapsed AppBar without animation so the post feed isn't pushed
                 // down by the re-expanded toolbar on rotation.
                 binding.includedAppBar.appbarLayoutMainActivity.setExpanded(false, false);
-            }
-            if (mBottomBarHidden) {
-                // The bottom app bar and its FAB auto-hide on scroll but reset to shown on
-                // recreate. Open a suppression window so the ViewPager's onPageSelected and
-                // the scroll-restore's contentScrollUp don't re-show them, and re-hide once
-                // the views are laid out. In landscape (navigation rail) bottomAppBar is null
-                // and there's nothing to hide, but the flag/state still carry to portrait.
-                reHideBottomBarAfterLayout();
             }
         } else {
             mMessageFullname = getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME);
@@ -609,11 +534,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     protected void applyCustomTheme() {
         int backgroundColor = mCustomThemeWrapper.getBackgroundColor();
         binding.drawerLayout.setBackgroundColor(backgroundColor);
-        navigationWrapper.applyCustomTheme(mCustomThemeWrapper.getBottomAppBarIconColor(), mCustomThemeWrapper.getBottomAppBarBackgroundColor());
         binding.navigationViewMainActivity.setBackgroundColor(backgroundColor);
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.includedAppBar.appbarLayoutMainActivity, binding.includedAppBar.collapsingToolbarLayoutMainActivity, binding.includedAppBar.toolbar);
         applyTabLayoutTheme(binding.includedAppBar.tabLayoutMainActivity);
-        applyFABTheme(navigationWrapper.floatingActionButton);
+        applyFABTheme(fab);
     }
 
     @ExperimentalBadgeUtils
@@ -686,327 +610,79 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
     }
 
-    private void bottomAppBarOptionAction(int option) {
-        switch (option) {
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS: {
-                Intent intent = new Intent(this, SubscribedThingListingActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS: {
-                Intent intent = new Intent(this, SubscribedThingListingActivity.class);
-                intent.putExtra(SubscribedThingListingActivity.EXTRA_SHOW_MULTIREDDITS, true);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX: {
-                Intent intent = new Intent(this, InboxActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE: {
-                Intent intent = new Intent(this, ViewUserDetailActivity.class);
-                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, accountName);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS: {
-                PostTypeBottomSheetFragment postTypeBottomSheetFragment = new PostTypeBottomSheetFragment();
-                postTypeBottomSheetFragment.show(getSupportFragmentManager(), postTypeBottomSheetFragment.getTag());
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH: {
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.refresh();
-                }
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE: {
-                changeSortType();
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT: {
-                PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-                postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SEARCH: {
-                Intent intent = new Intent(this, SearchActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT:
-                goToSubreddit();
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_USER:
-                goToUser();
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS:
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.hideReadPosts();
-                }
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS:
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.filterPosts();
-                }
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_UPVOTED: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_UPVOTED);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_DOWNVOTED: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_DOWNVOTED);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDDEN: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_HIDDEN);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SAVED: {
-                Intent intent = new Intent(MainActivity.this, AccountSavedThingActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT: {
-                boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
-                mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
-                EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
-                break;
-            }
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
-            default: {
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.goBackToTop();
-                }
-                break;
-            }
-        }
-    }
-
-    private int getBottomAppBarOptionDrawableResource(int option) {
-        switch (option) {
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS:
-                return R.drawable.ic_subscriptions_bottom_app_bar_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS:
-                return R.drawable.ic_multi_reddit_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX:
-                return R.drawable.ic_inbox_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE:
-                return R.drawable.ic_account_circle_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS:
-                return R.drawable.ic_add_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH:
-                return R.drawable.ic_refresh_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE:
-                return R.drawable.ic_sort_toolbar_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT:
-                return R.drawable.ic_post_layout_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SEARCH:
-                return R.drawable.ic_search_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT:
-                return R.drawable.ic_subreddit_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_USER:
-                return R.drawable.ic_user_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS:
-                return R.drawable.ic_hide_read_posts_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS:
-                return R.drawable.ic_filter_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_UPVOTED:
-                return R.drawable.ic_arrow_upward_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_DOWNVOTED:
-                return R.drawable.ic_arrow_downward_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDDEN:
-                return R.drawable.ic_lock_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SAVED:
-                return R.drawable.ic_bookmarks_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT:
-                return R.drawable.ic_thumbnail_left_day_night_24dp;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
-            default:
-                return R.drawable.ic_keyboard_double_arrow_up_day_night_24dp;
-        }
-    }
-
     @ExperimentalBadgeUtils
     private void bindView() {
         if (isFinishing() || isDestroyed()) {
             return;
         }
 
-        bindBottomAppBar();
+        bindFab();
         bindNavigationDrawerAndTabs();
     }
 
-    // Builds the bottom app bar options and FAB. Split out of bindView() so it can be re-run
-    // live (e.g. from the Customize Bottom App Bar settings) without rebuilding the whole screen.
+    // Sets up the floating action button: its icon, what it does, and where it sits.
     @ExperimentalBadgeUtils
-    private void bindBottomAppBar() {
+    private void bindFab() {
         if (isFinishing() || isDestroyed()) {
             return;
         }
 
-        if (showBottomAppBar) {
-            int optionCount = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
-            int option1 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS);
-            int option2 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS);
-
-            if (optionCount == 2) {
-                navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1), getBottomAppBarOptionDrawableResource(option2));
-                navigationWrapper.bindOptions(option1, option2);
-
-                if (navigationWrapper.navigationRailView == null) {
-                    navigationWrapper.option2BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option1);
-                    });
-
-                    navigationWrapper.option4BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option2);
-                    });
-
-                    setProfileLongClickListener(navigationWrapper.option2BottomAppBar, option1);
-                    setProfileLongClickListener(navigationWrapper.option4BottomAppBar, option2);
-
-                    setBottomAppBarContentDescription(navigationWrapper.option2BottomAppBar, option1);
-                    setBottomAppBarContentDescription(navigationWrapper.option4BottomAppBar, option2);
-                } else {
-                    navigationWrapper.navigationRailView.setOnItemSelectedListener(item -> {
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.navigation_rail_option_1) {
-                            bottomAppBarOptionAction(option1);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_2) {
-                            bottomAppBarOptionAction(option2);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            } else {
-                int option3 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX);
-                int option4 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE);
-
-                navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1),
-                        getBottomAppBarOptionDrawableResource(option2), getBottomAppBarOptionDrawableResource(option3),
-                        getBottomAppBarOptionDrawableResource(option4));
-                navigationWrapper.bindOptions(option1, option2, option3, option4);
-
-                if (navigationWrapper.navigationRailView == null) {
-                    navigationWrapper.option1BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option1);
-                    });
-
-                    navigationWrapper.option2BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option2);
-                    });
-
-                    navigationWrapper.option3BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option3);
-                    });
-
-                    navigationWrapper.option4BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option4);
-                    });
-
-                    setProfileLongClickListener(navigationWrapper.option1BottomAppBar, option1);
-                    setProfileLongClickListener(navigationWrapper.option2BottomAppBar, option2);
-                    setProfileLongClickListener(navigationWrapper.option3BottomAppBar, option3);
-                    setProfileLongClickListener(navigationWrapper.option4BottomAppBar, option4);
-
-                    setBottomAppBarContentDescription(navigationWrapper.option1BottomAppBar, option1);
-                    setBottomAppBarContentDescription(navigationWrapper.option2BottomAppBar, option2);
-                    setBottomAppBarContentDescription(navigationWrapper.option3BottomAppBar, option3);
-                    setBottomAppBarContentDescription(navigationWrapper.option4BottomAppBar, option4);
-                } else {
-                    navigationWrapper.navigationRailView.setOnItemSelectedListener(item -> {
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.navigation_rail_option_1) {
-                            bottomAppBarOptionAction(option1);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_2) {
-                            bottomAppBarOptionAction(option2);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_3) {
-                            bottomAppBarOptionAction(option3);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_4) {
-                            bottomAppBarOptionAction(option4);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            }
-        } else {
-            CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) navigationWrapper.floatingActionButton.getLayoutParams();
-            lp.setAnchorId(View.NO_ID);
-            lp.gravity = Gravity.END | Gravity.BOTTOM;
-            navigationWrapper.floatingActionButton.setLayoutParams(lp);
-        }
-
-        fabOption = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB,
-                SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
+        fabOption = FloatingButtonAction.mainActivity(mSharedPreferences, mBottomAppBarSharedPreference);
         switch (fabOption) {
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_refresh_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_refresh));
+                fab.setImageResource(R.drawable.ic_refresh_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_refresh));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_CHANGE_SORT_TYPE:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_sort_toolbar_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_change_sort_type));
+                fab.setImageResource(R.drawable.ic_sort_toolbar_24dp);
+                fab.setContentDescription(getString(R.string.content_description_change_sort_type));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_CHANGE_POST_LAYOUT:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_post_layout_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_change_post_layout));
+                fab.setImageResource(R.drawable.ic_post_layout_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_change_post_layout));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SEARCH:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_search_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_search));
+                fab.setImageResource(R.drawable.ic_search_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_search));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_SUBREDDIT:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_subreddit_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_go_to_subreddit));
+                fab.setImageResource(R.drawable.ic_subreddit_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_go_to_subreddit));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_USER:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_user_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_go_to_user));
+                fab.setImageResource(R.drawable.ic_user_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_go_to_user));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_HIDE_READ_POSTS:
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
                     fabOption = SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_FILTER_POSTS;
-                    navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_filter_posts));
+                    fab.setContentDescription(getString(R.string.content_description_filter_posts));
                 } else {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_hide_read_posts_day_night_24dp);
-                    navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_hide_read_posts));
+                    fab.setImageResource(R.drawable.ic_hide_read_posts_day_night_24dp);
+                    fab.setContentDescription(getString(R.string.content_description_hide_read_posts));
                 }
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_FILTER_POSTS:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_filter_posts));
+                fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_filter_posts));
                 break;
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_TOP:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_keyboard_double_arrow_up_day_night_24dp);
-                navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_go_to_top));
+                fab.setImageResource(R.drawable.ic_keyboard_double_arrow_up_day_night_24dp);
+                fab.setContentDescription(getString(R.string.content_description_go_to_top));
                 break;
             default:
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
                     fabOption = SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_FILTER_POSTS;
-                    navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_filter_posts));
+                    fab.setContentDescription(getString(R.string.content_description_filter_posts));
                 } else {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_add_day_night_24dp);
-                    navigationWrapper.floatingActionButton.setContentDescription(getString(R.string.content_description_submit_post));
+                    fab.setImageResource(R.drawable.ic_add_day_night_24dp);
+                    fab.setContentDescription(getString(R.string.content_description_submit_post));
                 }
                 break;
         }
-        navigationWrapper.floatingActionButton.setOnClickListener(view -> {
+        fab.setOnClickListener(view -> {
             switch (fabOption) {
                 case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH: {
                     if (sectionsPagerAdapter != null) {
@@ -1055,7 +731,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     break;
             }
         });
-        navigationWrapper.floatingActionButton.setOnLongClickListener(view -> {
+        fab.setOnLongClickListener(view -> {
             FABMoreOptionsBottomSheetFragment fabMoreOptionsBottomSheetFragment= new FABMoreOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putBoolean(FABMoreOptionsBottomSheetFragment.EXTRA_ANONYMOUS_MODE, accountName.equals(Account.ANONYMOUS_ACCOUNT));
@@ -1063,10 +739,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             fabMoreOptionsBottomSheetFragment.show(getSupportFragmentManager(), fabMoreOptionsBottomSheetFragment.getTag());
             return true;
         });
-        navigationWrapper.floatingActionButton.setVisibility(hideFab ? View.GONE : View.VISIBLE);
+        fab.setVisibility(hideFab ? View.GONE : View.VISIBLE);
 
-        // Rebinding the options moves which icon the inbox badge belongs to, so re-apply it.
-        navigationWrapper.setInboxCount(this, InboxCount.get(mCurrentAccountSharedPreferences));
     }
 
     // The Settings row, pinned below the scrolling drawer list.
@@ -1381,14 +1055,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.includedAppBar.viewPagerMainActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                // While restoring a rotation where the bar was hidden, don't re-show it.
-                if (!mKeepBottomBarHiddenOnRestore) {
-                    if (showBottomAppBar) {
-                        navigationWrapper.showNavigation();
-                    }
-                    if (!hideFab) {
-                        navigationWrapper.showFab();
-                    }
+                if (!hideFab) {
+                    fab.show();
                 }
                 sectionsPagerAdapter.displaySortTypeInToolbar();
                 // The tab is half of what this screen records, and changing it moves no activity,
@@ -1483,89 +1151,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 });
             }
-        }
-    }
-
-    public void setBottomAppBarContentDescription(View view, int option) {
-        switch (option) {
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS:
-                view.setContentDescription(getString(R.string.content_description_subscriptions));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX:
-                view.setContentDescription(getString(R.string.content_description_inbox));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE:
-                view.setContentDescription(getString(R.string.content_description_profile));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS:
-                view.setContentDescription(getString(R.string.content_description_multireddits));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS:
-                view.setContentDescription(getString(R.string.content_description_submit_post));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH:
-                view.setContentDescription(getString(R.string.content_description_refresh));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE:
-                view.setContentDescription(getString(R.string.content_description_change_sort_type));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT:
-                view.setContentDescription(getString(R.string.content_description_change_post_layout));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SEARCH:
-                view.setContentDescription(getString(R.string.content_description_search));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT :
-                view.setContentDescription(getString(R.string.content_description_go_to_subreddit));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_USER :
-                view.setContentDescription(getString(R.string.content_description_go_to_user));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS :
-                view.setContentDescription(getString(R.string.content_description_hide_read_posts));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS :
-                view.setContentDescription(getString(R.string.content_description_filter_posts));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_UPVOTED :
-                view.setContentDescription(getString(R.string.content_description_upvoted));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_DOWNVOTED :
-                view.setContentDescription(getString(R.string.content_description_downvoted));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDDEN :
-                view.setContentDescription(getString(R.string.content_description_hidden));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SAVED :
-                view.setContentDescription(getString(R.string.content_description_saved));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT :
-                view.setContentDescription(getString(R.string.bottom_app_bar_option_toggle_thumbnail_side));
-                break;
-            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_TOP :
-            default:
-                view.setContentDescription(getString(R.string.content_description_go_to_top));
-                break;
-        }
-    }
-
-    private void setProfileLongClickListener(View view, int option) {
-        if (option == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE) {
-            view.setOnLongClickListener(v -> {
-                openAccountManagementInDrawer();
-                return true;
-            });
-        } else {
-            view.setOnLongClickListener(null);
-            view.setLongClickable(false);
-        }
-    }
-
-    private void openAccountManagementInDrawer() {
-        binding.drawerLayout.open();
-        if (adapter != null && !mSecuritySharedPreferences.getBoolean(
-                SharedPreferencesUtils.REQUIRE_AUTHENTICATION_TO_GO_TO_ACCOUNT_SECTION_IN_NAVIGATION_DRAWER, false)) {
-            adapter.openAccountManagementPage();
         }
     }
 
@@ -1672,7 +1257,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         if (adapter != null) {
             adapter.setInboxCount(inboxCount);
         }
-        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     @Override
@@ -1806,13 +1390,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
         outState.putBoolean(APP_BAR_COLLAPSED_STATE, mAppBarCollapsed);
-        // When the bottom app bar exists (portrait), read its real state. When it's null
-        // (landscape navigation-rail mode) keep the sticky value so the portrait hidden-state
-        // survives the landscape intermediate of a P→L→P round trip.
-        if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
-            mBottomBarHidden = navigationWrapper.bottomAppBar.getTranslationY() > 0;
-        }
-        outState.putBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, mBottomBarHidden);
     }
 
     @Override
@@ -1872,34 +1449,15 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     @Override
     public void contentScrollUp() {
-        // Suppress the show while restoring a rotation where the bar was hidden — the
-        // programmatic scroll restore can fire this and would otherwise re-show the bar/FAB.
-        if (mKeepBottomBarHiddenOnRestore) {
-            return;
-        }
-        if (showBottomAppBar && !mLockBottomAppBar) {
-            navigationWrapper.showNavigation();
-            // Only track state when the bottom app bar actually exists (portrait); leave it
-            // sticky in landscape rail mode.
-            if (navigationWrapper.bottomAppBar != null) {
-                mBottomBarHidden = false;
-            }
-        }
-        if (!(showBottomAppBar && mLockBottomAppBar) && !hideFab) {
-            navigationWrapper.showFab();
+        if (!hideFab) {
+            fab.show();
         }
     }
 
     @Override
     public void contentScrollDown() {
-        if (!(showBottomAppBar && mLockBottomAppBar) && !hideFab) {
-            navigationWrapper.hideFab();
-        }
-        if (showBottomAppBar && !mLockBottomAppBar) {
-            navigationWrapper.hideNavigation();
-            if (navigationWrapper.bottomAppBar != null) {
-                mBottomBarHidden = true;
-            }
+        if (!hideFab) {
+            fab.hide();
         }
     }
 
@@ -1928,11 +1486,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRecreateActivityEvent(RecreateActivityEvent recreateActivityEvent) {
         ActivityCompat.recreate(this);
-    }
-
-    @Subscribe
-    public void onChangeLockBottomAppBar(ChangeLockBottomAppBarEvent changeLockBottomAppBarEvent) {
-        mLockBottomAppBar = changeLockBottomAppBarEvent.lockBottomAppBar;
     }
 
     @Subscribe
@@ -1985,17 +1538,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
     }
 
-    @ExperimentalBadgeUtils
-    @Subscribe
-    public void onChangeBottomAppBarEvent(ChangeBottomAppBarEvent event) {
-        // Re-read and re-apply the bottom app bar options/FAB without rebuilding the whole screen.
-        bindBottomAppBar();
-    }
-
     @Subscribe
     public void onChangeHideFabInPostFeed(ChangeHideFabInPostFeedEvent event) {
         hideFab = event.hideFabInPostFeed;
-        navigationWrapper.floatingActionButton.setVisibility(hideFab ? View.GONE : View.VISIBLE);
+        fab.setVisibility(hideFab ? View.GONE : View.VISIBLE);
     }
 
     @Subscribe
@@ -2055,30 +1601,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     }
 
     /**
-     * Put the bottom app bar and its FAB back out of sight, once the views exist.
-     *
-     * <p>Shared by the rotation restore and the resume: both rebuild a screen whose bar the user
-     * had already scrolled away, and both find it reset to shown. The suppression window is the
-     * reason this is not a plain {@code performHide} -- the ViewPager's {@code onPageSelected} and
-     * the scroll restore both call {@code contentScrollUp}, which would show it straight back.
-     *
-     * <p>In landscape the bar is a navigation rail and there is nothing to hide, but the flag still
-     * carries across to portrait.
-     */
-    private void reHideBottomBarAfterLayout() {
-        mKeepBottomBarHiddenOnRestore = true;
-        binding.getRoot().post(() -> {
-            if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
-                navigationWrapper.bottomAppBar.performHide(false);
-            }
-            if (navigationWrapper != null) {
-                navigationWrapper.hideFab();
-            }
-        });
-        binding.getRoot().postDelayed(() -> mKeepBottomBarHiddenOnRestore = false, 800);
-    }
-
-    /**
      * Record which tab the user was on, where in it they were, and whether the bottom bar was
      * scrolled away.
      *
@@ -2108,7 +1630,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return;
         }
         out.putString(STATE_RESUME_TAB_KEY, tabKey);
-        out.putBoolean(STATE_RESUME_BOTTOM_BAR_HIDDEN, mBottomBarHidden);
         if (captured) {
             lastCapturedTabKey = tabKey;
             saveResumeAppBarOffset(out);
@@ -2129,12 +1650,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // session -- a pause before the restored feed has settled -- would do exactly that. A
         // record that carried no position leaves this null: there is nothing to protect.
         lastCapturedTabKey = resumeFeed.isPending() ? resumeTabKey : null;
-        if (state.getBoolean(STATE_RESUME_BOTTOM_BAR_HIDDEN, false)) {
-            // Left scrolled away, so it comes back scrolled away. Same window as the rotation path:
-            // the restore itself calls contentScrollUp, which would show it again.
-            mBottomBarHidden = true;
-            reHideBottomBarAfterLayout();
-        }
         // Without this the feed comes back at the right adapter position but pushed down by the
         // part of the toolbar that was scrolled off when the user left -- every row off by the same
         // constant, which is the same failure the rotation path guards against above.

@@ -95,11 +95,6 @@
         app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:icon="@drawable/ic_subscriptions_bottom_app_bar_day_night_24dp"
-        app:title="@string/settings_customize_bottom_app_bar_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_gesture_day_night_24dp"
         app:title="@string/settings_gestures_and_buttons_title"
         app:summary="@string/settings_gestures_and_buttons_summary"
@@ -135,8 +130,8 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_notifications_day_night_24dp"
-        app:title="@string/settings_notification_master_title"
-        app:summary="@string/settings_notification_master_summary"
+        app:title="@string/settings_notifications_and_proxy_title"
+        app:summary="@string/settings_notifications_and_proxy_summary"
         app:fragment="ml.docilealligator.infinityforreddit.settings.NotificationPreferenceFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
@@ -147,21 +142,8 @@
         app:fragment="ml.docilealligator.infinityforreddit.settings.SecurityPreferenceFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        android:key="data_saving_mode_preference"
-        app:title="@string/settings_data_saving_mode"
-        app:summary="@string/settings_data_saving_mode_summary"
-        app:icon="@drawable/ic_data_saving_mode_day_night_24dp"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.DataSavingModePreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:icon="@drawable/ic_call_split_24"
-        app:title="@string/settings_proxy_title"
-        app:summary="@string/settings_proxy_summary"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.ProxyPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:title="@string/settings_download_location_title"
-        app:summary="@string/settings_download_location_summary"
+        app:title="@string/settings_data_saving_and_downloads_title"
+        app:summary="@string/settings_data_saving_and_downloads_summary"
         android:icon="@drawable/ic_download_day_night_24dp"
         app:fragment="ml.docilealligator.infinityforreddit.settings.DownloadLocationPreferenceFragment" />
 

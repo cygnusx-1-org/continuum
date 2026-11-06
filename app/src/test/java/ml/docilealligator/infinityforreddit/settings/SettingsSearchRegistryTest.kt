@@ -53,13 +53,13 @@ class SettingsSearchRegistryTest {
     }
 
     @Test
-    fun indexesLockBottomNavigationBar() {
-        val item = itemTitled(R.string.settings_lock_bottom_app_bar_title)
+    fun indexesLockToolbar() {
+        val item = itemTitled(R.string.settings_lock_toolbar_title)
 
         assertEquals(context.getString(R.string.settings_gestures_and_buttons_title), item.breadcrumb)
         assertEquals(GesturesAndButtonsPreferenceFragment::class.java, item.fragmentClass)
         assertEquals(context.getString(R.string.settings_gestures_and_buttons_title), item.fragmentTitle)
-        assertEquals("lock_bottom_app_bar", item.key)
+        assertEquals("lock_toolbar", item.key)
     }
 
     @Test
@@ -194,16 +194,16 @@ class SettingsSearchRegistryTest {
         assertEquals(SecurityPreferenceFragment::class.java, security.fragmentClass)
         assertNull(security.key)
 
-        // app:key="data_saving_mode_preference" on the root; the title is reused by a switch on
-        // the screen it opens, so pick the root's row by its breadcrumb.
+        // The combined data saving and downloads row on the root: no key, and the same title is
+        // not reused on the screen it opens, but the breadcrumb says which one is meant.
         val rootAllAccounts = context.getString(R.string.settings_activity_label) +
             " › " + context.getString(R.string.settings_group_global)
-        val dataSaving = items.single {
-            it.title == context.getString(R.string.settings_data_saving_mode) &&
+        val downloads = items.single {
+            it.title == context.getString(R.string.settings_data_saving_and_downloads_title) &&
                 it.breadcrumb == rootAllAccounts
         }
-        assertEquals(DataSavingModePreferenceFragment::class.java, dataSaving.fragmentClass)
-        assertNull(dataSaving.key)
+        assertEquals(DownloadLocationPreferenceFragment::class.java, downloads.fragmentClass)
+        assertNull(downloads.key)
     }
 
     /** Rows that do live on the screen they point at keep their key, so search can scroll to them. */
@@ -262,8 +262,8 @@ class SettingsSearchRegistryTest {
     fun rebuildsWhenTheLocaleChanges() {
         val registry = SettingsSearchRegistry.getInstance()
         val german = germanContext()
-        val germanTitle = german.getString(R.string.settings_lock_bottom_app_bar_title)
-        assertNotEquals(context.getString(R.string.settings_lock_bottom_app_bar_title), germanTitle)
+        val germanTitle = german.getString(R.string.settings_lock_toolbar_title)
+        assertNotEquals(context.getString(R.string.settings_lock_toolbar_title), germanTitle)
 
         registry.buildRegistry(german)
 

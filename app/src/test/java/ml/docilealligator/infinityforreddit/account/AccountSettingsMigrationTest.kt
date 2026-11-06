@@ -150,46 +150,46 @@ class AccountSettingsMigrationTest {
         // The old convention: one bar under the bare key for whoever was signed in, and a second
         // under "-" for anonymous.
         bottomAppBar.edit()
-            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 5)
-            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
+            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 5)
+            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 9)
             .commit()
 
         migrateBottomAppBar("alice", "bob")
 
         assertEquals(5, bottomAppBar.getInt(
-            AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
+            AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
         assertEquals(5, bottomAppBar.getInt(
-            AccountScope.key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
+            AccountScope.key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
         assertEquals(9, bottomAppBar.getInt(
-            AccountScope.key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
+            AccountScope.key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
     }
 
     @Test
     fun `the old spellings go, so a second run has nothing to do`() {
         bottomAppBar.edit()
-            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 5)
-            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
+            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 5)
+            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 9)
             .commit()
 
         migrateBottomAppBar("alice")
 
-        assertFalse(bottomAppBar.contains(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
+        assertFalse(bottomAppBar.contains(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB))
         assertFalse(bottomAppBar.contains(
-            LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
+            LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB))
     }
 
     @Test
     fun `a bar an account already owns is not overwritten`() {
         bottomAppBar.edit()
-            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 5)
-            .putInt(AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), 3)
+            .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 5)
+            .putInt(AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), 3)
             .commit()
 
         migrateBottomAppBar("alice")
 
         assertEquals("the canonical key wins over any old one it disagrees with",
             3, bottomAppBar.getInt(
-                AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
+                AccountScope.key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
     }
 
     // --- rescope: the five old conventions, retired ------------------------------------------
@@ -346,30 +346,6 @@ class AccountSettingsMigrationTest {
         assertEquals("and one the first round already settled is left alone",
             "Small", defaultPreferences.getString(
                 AccountScope.key("alice", SharedPreferencesUtils.FONT_SIZE_KEY), null))
-    }
-
-    @Test
-    fun `a device seeded a round ago picks up the bottom app bar toggle`() {
-        // The seeding round the toggle was added in. A device that stopped at the round before it
-        // has the global value and no scoped one, and reads the switch as off however it was left.
-        defaultPreferences.edit()
-            .putBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, true)
-            .commit()
-        internal.edit()
-            .putBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, true)
-            .putInt(SharedPreferencesUtils.ACCOUNT_SCOPE_SEED_VERSION, 2)
-            .putBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_SCOPE_MIGRATED, true)
-            .commit()
-
-        AccountSettingsMigration.migrate(
-            context, internal, Executor { it.run() }, database("alice"))
-
-        assertTrue("the bar the account had, kept",
-            defaultPreferences.getBoolean(
-                AccountScope.key("alice", SharedPreferencesUtils.BOTTOM_APP_BAR_KEY), false))
-        assertTrue("anonymous keeps it too",
-            defaultPreferences.getBoolean(
-                AccountScope.key(null, SharedPreferencesUtils.BOTTOM_APP_BAR_KEY), false))
     }
 
     @Test

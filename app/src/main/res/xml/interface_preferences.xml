@@ -18,10 +18,21 @@
         app:key="hide_fab_in_post_feed"
         app:title="@string/settings_hide_fab_in_post_feed" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="bottom_app_bar"
-        app:title="@string/settings_enable_bottom_app_bar_title" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="0"
+        app:entries="@array/settings_fab_action"
+        app:entryValues="@array/settings_fab_action_values"
+        app:key="main_activity_fab_action"
+        app:title="@string/settings_main_activity_fab_action_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="0"
+        app:entries="@array/settings_fab_action"
+        app:entryValues="@array/settings_fab_action_values"
+        app:key="other_activities_fab_action"
+        app:title="@string/settings_other_activities_fab_action_title"
+        app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"

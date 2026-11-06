@@ -458,7 +458,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Zakázat pohlcující rozhraní v režimu na šířku"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Přizpůsobit karty na hlavní stránce"</string>
     <string name="only_for_logged_in_user">"Pouze pro přihlášeného uživatele"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Povolit spodní navigaci"</string>
     <string name="settings_category_post_and_comment_title">"Příspěvek a komentář"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Hlasovací tlačítka napravo"</string>
     <string name="settings_mute_video_title">"Ztlumit videa"</string>
@@ -490,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"Velikost miniatury"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Zobrazit náhled nalevo"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Zobrazit miniaturu vpravo"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Přepínací strana miniatur"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Počet sloupců v příspěvcích"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Na výšku"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Na šířku"</string>
@@ -502,13 +500,11 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Posunout vertikálně pro návrat zpět z obrázku a GIFu"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Uzamknout tlačítko ke skoku na další komentář nejvyšší úrovně"</string>
     <string name="settings_lock_toolbar_title">"Uzamknout panel nástrojů"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Uzamknout spodní navigační lištu"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Posunutí nahoru pro skrytí skoku na další komentář nejvyšší úrovně"</string>
     <string name="settings_lazy_mode_interval_title">"Interval líného režimu"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Skrýt textové příspěvky a příspěvky bez náhledu"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Režim stínového pole přeskočí každý textový příspěvek a jakýkoli jiný příspěvek, který nemá žádný náhledový obrázek."</string>
     <string name="settings_font_title">"Písmo"</string>
-    <string name="settings_preview_font_title">"Náhled písma"</string>
     <string name="settings_font_summary">"Písmo"</string>
     <string name="settings_title_font_summary">"Nadpid"</string>
     <string name="settings_content_font_summary">"Obsah"</string>
@@ -628,15 +624,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Vyžadovat ověření pro zobrazení účtů"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Dlouhé podržení pro skrytí nástrojové lišty"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Skrývat nástrojovou lištu"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Přizpůsobit spodní navigační lištu"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Hlavní stránka"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Ostatní stránky"</string>
-    <string name="settings_bottom_app_bar_option_count">"Počet možností"</string>
-    <string name="settings_bottom_app_bar_option_1">"Možnost 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Možnost 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Možnost 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Možnost 4"</string>
-    <string name="settings_bottom_app_bar_fab">"Létající akční tlačítko"</string>
     <string name="settings_data_saving_mode">"Režim úspory dat"</string>
     <string name="settings_data_saving_mode_info_summary">"V režimu úspory dat:
 Náhledové obrázky mají nižší rozlišení.
@@ -736,10 +723,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_collapse_reddit_section_title">"Sbalit sekci Redditu"</string>
     <string name="settings_collapse_post_section_title">"Sbalit sekci příspěvků"</string>
     <string name="settings_collapse_preferences_section_title">"Sbalit sekci možností"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Sbalit sekci oblíbených subredditů"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Sbalit sekci odebíraných subredditů"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Skrýt sekci oblíbených subredditů"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Skrýt sekci odebíraných subredditů"</string>
     <string name="settings_quick_toggles_title">"Rychlé přepínání"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Zobrazit přepínání motivu"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Zobrazit NSFW Přepnout"</string>
@@ -810,19 +793,15 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_proxy_type">"Typ proxy"</string>
     <string name="settings_proxy_hostname">"Název hostitele"</string>
     <string name="settings_proxy_port">"Port"</string>
-    <string name="settings_notification_master_summary">"Povol oznámení push a nastav, jak často jsou kontrolována"</string>
     <string name="settings_theme_summary">"Světlé, tmavé a AMOLED motivy, Material You a vlastní barvy motivu"</string>
     <string name="settings_video_summary">"Automatické přehrávání, ztlumení, rychlost přehrávání, výchozí rozlišení a chování na celou obrazovku"</string>
     <string name="settings_gestures_and_buttons_summary">"Gesta přejetí, navigace pomocí tlačítek hlasitosti, dlouhé stisknutí a citlivost gest"</string>
     <string name="settings_security_summary">"Zámek aplikace, biometrický údaj nebo PIN, zabezpečený režim a ověřování pro zobrazení účtů"</string>
-    <string name="settings_data_saving_mode_summary">"Vypni náhledy obrázků a nižší rozlišení videa, abys spotřeboval méně dat"</string>
-    <string name="settings_proxy_summary">"Směruj provoz Reddit přes proxy HTTP nebo SOCKS"</string>
     <string name="settings_post_history_summary">"Označit příspěvky jako přečtené, omezit historii přečtených příspěvků a skrýt přečtené příspěvky"</string>
     <string name="settings_over_18_and_spoiler_summary">"Zobrazit nebo rozmazat NSFW obsah a rozmazat spoilery"</string>
     <string name="settings_post_filter_summary">"Vytvářej a spravuj filtry, které skrývají příspěvky"</string>
     <string name="settings_comment_filter_summary">"Vytvářej a spravuj filtry, které skrývají komentáře"</string>
     <string name="settings_sort_type_summary">"Výchozí typ řazení a časový rozsah pro subreddity, uživatele a komentáře"</string>
-    <string name="settings_download_location_summary">"Vyber složky pro stažené obrázky, GIFy, videa a NSFW média"</string>
     <string name="settings_miscellaneous_summary">"Zpracování odkazů, prohlížeč, historie vyhledávání a jazyk"</string>
     <string name="settings_api_keys_title">"Klíče API"</string>
     <string name="settings_api_keys_summary">"Zadej své vlastní klíče API, včetně tvého ID klienta"</string>
@@ -1039,12 +1018,8 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="theme_item_received_message_background_color_detail">"Použito na: pozadí obdržených soukromých zpráv"</string>
     <string name="theme_item_sent_message_background_color">"Barva pozadí odeslané zprávy"</string>
     <string name="theme_item_sent_message_background_color_detail">"Použito na: pozadí odeslaných soukromých zpráv"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Barva spodní navigační lišty"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Použito na: spodní navigační lištu"</string>
     <string name="theme_item_primary_icon_color">"Primární barva ikony"</string>
     <string name="theme_item_primary_icon_color_detail">"Použito na: ikony v navigačním panelu."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Barva ikon spodní navigační lišty"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Použito na: ikony ve spodní navigační liště"</string>
     <string name="theme_item_post_icon_and_info_color">"Barva ikony příspěvku a informace"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Použito na: ikony, skóre a počet komentářů v příspěvcích"</string>
     <string name="theme_item_comment_icon_and_info_color">"Barva ikony komentáře a informace"</string>
@@ -1716,7 +1691,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="content_description_video_indicator">"Video indikátor"</string>
     <string name="content_description_no_subscriptions_indicator">"Žádný indikátor předplatného"</string>
     <string name="content_description_create_multireddit">"Vytvořit multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Tlačítko spodní navigační lišty"</string>
     <string name="content_description_fab">"Létající akční tlačítko"</string>
     <string name="content_description_download">"Stáhnout"</string>
     <string name="content_description_share">"Sdílet"</string>

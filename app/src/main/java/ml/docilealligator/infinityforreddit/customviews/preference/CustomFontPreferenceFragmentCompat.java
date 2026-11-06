@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceDataStore;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
@@ -37,12 +38,26 @@ public abstract class CustomFontPreferenceFragmentCompat extends PreferenceFragm
      */
     @Override
     public void setPreferencesFromResource(int preferencesResId, @Nullable String key) {
-        SharedPreferences scoped =
-                mActivity.accountScopedPreferencesFor(getPreferenceManager().getSharedPreferencesName());
-        if (scoped != null) {
-            getPreferenceManager().setPreferenceDataStore(new AccountScopedPreferenceDataStore(scoped));
+        PreferenceDataStore custom = createPreferenceDataStore();
+        if (custom != null) {
+            getPreferenceManager().setPreferenceDataStore(custom);
+        } else {
+            SharedPreferences scoped =
+                    mActivity.accountScopedPreferencesFor(getPreferenceManager().getSharedPreferencesName());
+            if (scoped != null) {
+                getPreferenceManager().setPreferenceDataStore(new AccountScopedPreferenceDataStore(scoped));
+            }
         }
         super.setPreferencesFromResource(preferencesResId, key);
+    }
+
+    /**
+     * A store of the screen's own, for one whose rows live in more than one preferences file. Null,
+     * the usual answer, leaves the choice to the file the screen is on.
+     */
+    @Nullable
+    protected PreferenceDataStore createPreferenceDataStore() {
+        return null;
     }
 
     @Override

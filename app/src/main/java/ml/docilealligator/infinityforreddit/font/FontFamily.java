@@ -1,24 +1,10 @@
 package ml.docilealligator.infinityforreddit.font;
 
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.R;
 
 public enum FontFamily {
     Default(R.style.FontFamily, "Default"),
-    BalsamiqSans(R.style.FontFamily_BalsamiqSans, "BalsamiqSans"),
-    BalsamiqSansBold(R.style.FontFamily_BalsamiqSansBold, "BalsamiqSansBold"),
-    NotoSans(R.style.FontFamily_NotoSans, "NotoSans"),
-    NotoSansBold(R.style.FontFamily_NotoSansBold, "NotoSansBold"),
-    RobotoCondensed(R.style.FontFamily_RobotoCondensed, "RobotoCondensed"),
-    RobotoCondensedBold(R.style.FontFamily_RobotoCondensedBold, "RobotoCondensedBold"),
-    HarmoniaSans(R.style.FontFamily_HarmoniaSans, "HarmoniaSans"),
-    HarmoniaSansBold(R.style.FontFamily_HarmoniaSansBold, "HarmoniaSansBold"),
-    Inter(R.style.FontFamily_Inter, "Inter"),
-    InterBold(R.style.FontFamily_InterBold, "InterBold"),
-    Manrope(R.style.FontFamily_Manrope, "Manrope"),
-    ManropeBold(R.style.FontFamily_ManropeBold, "ManropeBold"),
-    Sriracha(R.style.FontFamily_Sriracha, "Sriracha"),
-    AtkinsonHyperlegible(R.style.FontFamily_AtkinsonHyperlegible, "AtkinsonHyperlegible"),
-    AtkinsonHyperlegibleBold(R.style.FontFamily_AtkinsonHyperlegibleBold, "AtkinsonHyperlegibleBold"),
     Custom(R.style.FontFamily, "Custom");
 
     private final int resId;
@@ -27,6 +13,19 @@ public enum FontFamily {
     FontFamily(int resId, String title) {
         this.resId = resId;
         this.title = title;
+    }
+
+    /**
+     * The family a stored name stands for. A name of a font that has since been removed, or none at
+     * all, is the default font rather than a crash.
+     */
+    public static FontFamily of(@Nullable String name) {
+        for (FontFamily family : values()) {
+            if (family.name().equals(name)) {
+                return family;
+            }
+        }
+        return Default;
     }
 
     public int getResId() {

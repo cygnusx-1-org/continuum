@@ -120,13 +120,6 @@ class AccountScopedScreenKeysTest {
     }
 
     @Test
-    fun `the bottom app bar toggle travels with the bar it switches on`() {
-        // The bar's contents are a whole per-account file; the toggle is one key in another.
-        assertEquals(true, AccountScopedKeys.isScoped(
-            AccountScopedKeys.DEFAULT_PREFERENCES, SharedPreferencesUtils.BOTTOM_APP_BAR_KEY))
-    }
-
-    @Test
     fun `every setting on a per-account screen with its own file is scoped`() {
         val unscoped = mutableListOf<String>()
         for ((screen, fileName) in ownFileScreens) {

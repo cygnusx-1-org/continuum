@@ -458,7 +458,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Вимкнути заглиблений інтерфейс в альбомному режимі"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Пристосувати вкладки на основній сторінці"</string>
     <string name="only_for_logged_in_user">"Лише для авторизованих користувачів"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Увімкнути нижнє пересування"</string>
     <string name="settings_category_post_and_comment_title">"Дописи і коментарі"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Кнопки голосування праворуч"</string>
     <string name="settings_mute_video_title">"Глушити відео"</string>
@@ -490,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"Розмір мініатюри"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Показувати мініатюру ліворуч"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Показати мініатюру праворуч"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Перемкнути бік ескізу"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Кількість стовпців у стрічці дописів"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Портретна"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Альбомна"</string>
@@ -502,13 +500,11 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Ковзни вертикально, щоб вернутися назад від зображення або Gif"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Блокувати стрибок до наступної кнопки коментаря верхнього рівня"</string>
     <string name="settings_lock_toolbar_title">"Закріпити панель інструментів"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Замкнути нижню панель пересування"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Ковзни уверх, щоб приховати стрибок до наступної кнопки коментаря верхнього рівня"</string>
     <string name="settings_lazy_mode_interval_title">"Крок лінивого режиму"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Приховати текстові дописи та дописи без попереднього перегляду"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Режим Shadowbox пропускає кожну текстову публікацію та будь-яку іншу публікацію, яка не має попереднього зображення."</string>
     <string name="settings_font_title">"Шрифт"</string>
-    <string name="settings_preview_font_title">"Перегляд шрифтів"</string>
     <string name="settings_font_summary">"Шрифт"</string>
     <string name="settings_title_font_summary">"Заголовок"</string>
     <string name="settings_content_font_summary">"Вміст"</string>
@@ -628,15 +624,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Щоб показати обліківки потрібна автентифікація"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Довге натискання ховає панель засобів"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ховати панель засобів типово"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Пристосувати низ панелі пересування"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Основна сторінка"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Інші сторінки"</string>
-    <string name="settings_bottom_app_bar_option_count">"Кількість параметрів"</string>
-    <string name="settings_bottom_app_bar_option_1">"Параметр 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Параметр 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Параметр 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Параметр 4"</string>
-    <string name="settings_bottom_app_bar_fab">"Плаваюча кнопка дії"</string>
     <string name="settings_data_saving_mode">"Режим збереження даних"</string>
     <string name="settings_data_saving_mode_info_summary">"У режимі зберігання даних:
 Попередній перегляд зображень має низьку роздільність.
@@ -736,10 +723,6 @@
     <string name="settings_collapse_reddit_section_title">"Згорнути розділ Reddit"</string>
     <string name="settings_collapse_post_section_title">"Згорнути розділ Допис"</string>
     <string name="settings_collapse_preferences_section_title">"Згорнути розділ Властивості"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Згорнути розділ відібраних сабредитів"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Згорнути розділ підписаних сабредитів"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Сховати розділ відібраних сабредитів"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Сховати розділ підписаних сабредитів"</string>
     <string name="settings_quick_toggles_title">"Швидкі перемикачі"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Показати перемикач теми"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Показати NSFW Перемикач"</string>
@@ -810,19 +793,15 @@
     <string name="settings_proxy_type">"Тип проксі"</string>
     <string name="settings_proxy_hostname">"Ім'я хоста"</string>
     <string name="settings_proxy_port">"Порт"</string>
-    <string name="settings_notification_master_summary">"Увімкни push-сповіщення та встанови частоту їх перевірки"</string>
     <string name="settings_theme_summary">"Світла, темна та AMOLED теми, Material You та власні кольори теми"</string>
     <string name="settings_video_summary">"Автовідтворення, вимкнення звуку, швидкість відтворення, роздільна здатність за замовчуванням і повноекранний режим"</string>
     <string name="settings_gestures_and_buttons_summary">"Жести гортання, навігація клавішами гучності, дії з тривалим натисканням і чутливість жестів"</string>
     <string name="settings_security_summary">"Блокування програми, біометричний або PIN-код, безпечний режим і автентифікація для показу облікових записів"</string>
-    <string name="settings_data_saving_mode_summary">"Вимкни попередній перегляд зображень і зменште роздільну здатність відео, щоб використовувати менше даних"</string>
-    <string name="settings_proxy_summary">"Маршрутизація трафіку Reddit через проксі-сервер HTTP або SOCKS"</string>
     <string name="settings_post_history_summary">"Позначати дописи як прочитані, обмежити історію прочитаних дописів і приховати прочитані дописи"</string>
     <string name="settings_over_18_and_spoiler_summary">"Показати або розмити вміст NSFW і розмити спойлери"</string>
     <string name="settings_post_filter_summary">"Створюй фільтри, які приховують публікації, і керуй ними"</string>
     <string name="settings_comment_filter_summary">"Створюй фільтри, які приховують коментарі, і керуй ними"</string>
     <string name="settings_sort_type_summary">"Тип сортування за замовчуванням і діапазон часу для субредітів, користувачів і коментарів"</string>
-    <string name="settings_download_location_summary">"Вибери папки для завантажених зображень, GIF-файлів, відео та NSFW медіа"</string>
     <string name="settings_miscellaneous_summary">"Обробка посилань, браузер, історія пошуку та мова"</string>
     <string name="settings_api_keys_title">"Ключі API"</string>
     <string name="settings_api_keys_summary">"Введи власні ключі API, включаючи ідентифікатор клієнта"</string>
@@ -1040,12 +1019,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Задіяно для: Тло отриманих приватних повідомлень"</string>
     <string name="theme_item_sent_message_background_color">"Колір тла надісланого посилання"</string>
     <string name="theme_item_sent_message_background_color_detail">"Задіяно для: Тло надісланих приватних повідомлень"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Колір нижньої панелі пересування"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Задіяно для: Кнопка панелі пересування"</string>
     <string name="theme_item_primary_icon_color">"Основний колір значків"</string>
     <string name="theme_item_primary_icon_color_detail">"Задіяно для: Значки в шторці переходів."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Колір значка нижньої панелі пересування"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Задіяно для: Значки внизу панелі пересування"</string>
     <string name="theme_item_post_icon_and_info_color">"Колір інформації і значка допису"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Задіяно для: Значки, оцінка і кількість коментарів у дописах"</string>
     <string name="theme_item_comment_icon_and_info_color">"Колір інформації і значка коментаря"</string>
@@ -1716,7 +1691,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_video_indicator">"Відеоіндикатор"</string>
     <string name="content_description_no_subscriptions_indicator">"Індикатор відсутності підписок"</string>
     <string name="content_description_create_multireddit">"Створити MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Кнопка нижньої панелі навігації"</string>
     <string name="content_description_fab">"Плаваюча кнопка дії"</string>
     <string name="content_description_download">"Завантажити"</string>
     <string name="content_description_share">"Поширити"</string>
