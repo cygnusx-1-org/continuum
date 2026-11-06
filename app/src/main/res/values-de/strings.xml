@@ -566,7 +566,6 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_enable_material_you_summary">"Reddit Jr. Theme ihrem Hintergrund anpassen"</string>
     <string name="settings_apply_material_you_title">"Material You anwenden"</string>
     <string name="settings_apply_material_you_summary">"Sollte Reddit Jr. den Theme nicht gewechselt haben"</string>
-    <string name="settings_global_settings_management_title">"Globale Einstellungsverwaltung"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Alle Subreddits aus der Datenbank löschen"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Alle Benutzer aus der Datenbank löschen"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Alle Sortierungsarten aus der Datenbank löschen"</string>
@@ -728,8 +727,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_hide_the_number_of_votes">"Anzahl der Abstimmungen verstecken"</string>
     <string name="settings_hide_the_number_of_comments">"Anzahl der Kommentare verstecken"</string>
     <string name="settings_show_avatar_on_the_right">"Avatar links anzeigen"</string>
-    <string name="settings_category_backup_and_restore_title">"Sicherung und Wiederherstellung"</string>
-    <string name="settings_backup_and_restore_summary">"Die Einstellungen aller Konten in einem verschlüsselten Archiv speichern oder eines wieder einlesen"</string>
     <string name="settings_backup_settings_title">"Einstellungen sichern"</string>
     <string name="settings_restore_settings_title">"Einstellungen wiederherstellen"</string>
     <string name="settings_credits_love_animation_title">"Liebes-Animation"</string>
@@ -827,7 +824,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_sort_type_summary">"Standardsortiertyp und Zeitbereich für Subreddits, Benutzer und Kommentare"</string>
     <string name="settings_download_location_summary">"Ordner für heruntergeladene Bilder, GIFs, Videos und NSFW-Medien wählen"</string>
     <string name="settings_miscellaneous_summary">"Linkverwaltung, Browser, Suchverlauf und Sprache"</string>
-    <string name="settings_global_settings_management_summary">"Die Einstellungen aller Konten zurücksetzen und die Daten löschen, die zu keinem Konto gehören"</string>
     <string name="settings_api_keys_title">"API-Schlüssel"</string>
     <string name="settings_api_keys_summary">"Eigene API-Schlüssel eingeben, einschließlich deiner Client-ID"</string>
     <string name="settings_enable_api_key_overrides_title">"Überschreibungen aktivieren"</string>

@@ -566,7 +566,6 @@
     <string name="settings_enable_material_you_summary">"Персоналізувати Reddit Jr. на основі твоїх шпалер"</string>
     <string name="settings_apply_material_you_title">"Застосувати Material You"</string>
     <string name="settings_apply_material_you_summary">"На випадок, якщо Reddit Jr. не змінює тему"</string>
-    <string name="settings_global_settings_management_title">"Керування глобальними параметрами"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Видалити всі сабредити з бази даних"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Видалити всіх користувачів із бази даних"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Видалити всі типи сортування з бази даних"</string>
@@ -728,8 +727,6 @@
     <string name="settings_hide_the_number_of_votes">"Ховати кількість голосів"</string>
     <string name="settings_hide_the_number_of_comments">"Ховати кількість коментарів"</string>
     <string name="settings_show_avatar_on_the_right">"Показувати аватарку праворуч"</string>
-    <string name="settings_category_backup_and_restore_title">"Резервне копіювання та відновлення"</string>
-    <string name="settings_backup_and_restore_summary">"Збережи налаштування кожного облікового запису в зашифрованому архіві або прочитай їх назад"</string>
     <string name="settings_backup_settings_title">"Резервне копіювання налаштувань"</string>
     <string name="settings_restore_settings_title">"Відновити налаштування"</string>
     <string name="settings_credits_love_animation_title">"Анімація любові"</string>
@@ -827,7 +824,6 @@
     <string name="settings_sort_type_summary">"Тип сортування за замовчуванням і діапазон часу для субредітів, користувачів і коментарів"</string>
     <string name="settings_download_location_summary">"Вибери папки для завантажених зображень, GIF-файлів, відео та NSFW медіа"</string>
     <string name="settings_miscellaneous_summary">"Обробка посилань, браузер, історія пошуку та мова"</string>
-    <string name="settings_global_settings_management_summary">"Скинути налаштування всіх облікових записів і видалити дані, які не належать жодному обліковому запису"</string>
     <string name="settings_api_keys_title">"Ключі API"</string>
     <string name="settings_api_keys_summary">"Введи власні ключі API, включаючи ідентифікатор клієнта"</string>
     <string name="settings_enable_api_key_overrides_title">"Увімкнути перевизначення"</string>

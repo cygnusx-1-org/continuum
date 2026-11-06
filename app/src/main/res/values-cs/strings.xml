@@ -566,7 +566,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_enable_material_you_summary">"Personalizovat Reddit Jr. podle pozadí"</string>
     <string name="settings_apply_material_you_title">"Použít Material You"</string>
     <string name="settings_apply_material_you_summary">"Pokud Reddit Jr. nezměnil motiv"</string>
-    <string name="settings_global_settings_management_title">"Správa globálních nastavení"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Odstranit všechny subreddity v databázi"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Odstranit všechny uživatele v databázi"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Odstranit všechny typy řazení v databázi"</string>
@@ -728,8 +727,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_hide_the_number_of_votes">"Skrýt počet hlasů"</string>
     <string name="settings_hide_the_number_of_comments">"Skrýt počet komentářů"</string>
     <string name="settings_show_avatar_on_the_right">"Zobrazit avatar napravo"</string>
-    <string name="settings_category_backup_and_restore_title">"Zálohování a obnovení"</string>
-    <string name="settings_backup_and_restore_summary">"Ulož nastavení každého účtu do šifrovaného archivu nebo si jej přečti zpět"</string>
     <string name="settings_backup_settings_title">"Nastavení zálohování"</string>
     <string name="settings_restore_settings_title">"Obnovit nastavení"</string>
     <string name="settings_credits_love_animation_title">"Animace lásky"</string>
@@ -827,7 +824,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_sort_type_summary">"Výchozí typ řazení a časový rozsah pro subreddity, uživatele a komentáře"</string>
     <string name="settings_download_location_summary">"Vyber složky pro stažené obrázky, GIFy, videa a NSFW média"</string>
     <string name="settings_miscellaneous_summary">"Zpracování odkazů, prohlížeč, historie vyhledávání a jazyk"</string>
-    <string name="settings_global_settings_management_summary">"Resetuj nastavení každého účtu a vymaž data, která nepatří žádnému účtu"</string>
     <string name="settings_api_keys_title">"Klíče API"</string>
     <string name="settings_api_keys_summary">"Zadej své vlastní klíče API, včetně tvého ID klienta"</string>
     <string name="settings_enable_api_key_overrides_title">"Povolit přepisy"</string>

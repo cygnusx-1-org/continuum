@@ -557,7 +557,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_enable_material_you_summary">"Personnalise Reddit Jr. en fonction de ton fond d\'écran"</string>
     <string name="settings_apply_material_you_title">"Appliquer Material You"</string>
     <string name="settings_apply_material_you_summary">"Au cas où Reddit Jr. n'aurait pas changé le thème"</string>
-    <string name="settings_global_settings_management_title">"Gestion des paramètres globaux"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Supprimer Tous les Subreddits de la Base de Donnée"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Supprimer Tous les Utilisateurs de la Base de Donnée"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Supprimer Tous les Types de Tri de la Base de Donnée"</string>
@@ -716,8 +715,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_hide_the_number_of_votes">"Cacher le Nombre de Votes"</string>
     <string name="settings_hide_the_number_of_comments">"Cacher le Nombre de Commentaires"</string>
     <string name="settings_show_avatar_on_the_right">"Voir l'avatar à droite"</string>
-    <string name="settings_category_backup_and_restore_title">"Sauvegarde et restauration"</string>
-    <string name="settings_backup_and_restore_summary">"Enregistrez les paramètres de chaque compte dans une archive cryptée ou relisez-en une"</string>
     <string name="settings_backup_settings_title">"Paramètres de Sauvegarde"</string>
     <string name="settings_restore_settings_title">"Restaurer les Paramètres"</string>
     <string name="settings_credits_love_animation_title">"Animation d'amour"</string>
@@ -815,7 +812,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_sort_type_summary">"Type de tri et plage horaire par défaut pour les sous-reddits, les utilisateurs et les commentaires"</string>
     <string name="settings_download_location_summary">"Choisissez des dossiers pour les images, GIF, vidéos et NSFW médias téléchargés"</string>
     <string name="settings_miscellaneous_summary">"Gestion des liens, navigateur, historique de recherche et langue"</string>
-    <string name="settings_global_settings_management_summary">"Réinitialisez les paramètres de chaque compte et effacez les données qui n'appartiennent à aucun compte"</string>
     <string name="settings_api_keys_title">"Clés API"</string>
     <string name="settings_api_keys_summary">"Entre tes propres clés API, y compris ton identifiant client"</string>
     <string name="settings_enable_api_key_overrides_title">"Activer les remplacements"</string>

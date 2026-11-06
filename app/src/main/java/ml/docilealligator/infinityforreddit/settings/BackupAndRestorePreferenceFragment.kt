@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.preference.Preference
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
@@ -16,12 +17,16 @@ import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings
+import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllThemes
 import ml.docilealligator.infinityforreddit.asynctasks.RestoreSettings
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat
+import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
+import org.greenrobot.eventbus.EventBus
 
 /**
- * Writing every setting out to an encrypted archive, and reading one back.
+ * Writing every setting out to an archive and reading one back, plus the two ways of wiping the
+ * app-wide data: deleting every custom theme, and resetting every setting.
  *
  * Whole-app rather than per-account: an archive holds every account's settings, which is what makes
  * it a way back from a mistake with one of them. The account-scoped preference files are absent from
@@ -37,6 +42,10 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
 
     @Inject
     lateinit var mRedditDataRoomDatabase: RedditDataRoomDatabase
+
+    @Inject
+    @Named("default")
+    lateinit var mSharedPreferences: SharedPreferences
 
     @Inject
     @Named("current_account")
@@ -96,6 +105,42 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
                 SELECT_BACKUP_SETTINGS_DIRECTORY_REQUEST_CODE)
             true
         }
+
+        findPreference<Preference>(SharedPreferencesUtils.DELETE_ALL_THEMES_IN_DATABASE)
+            ?.setOnPreferenceClickListener {
+                MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
+                    .setTitle(R.string.are_you_sure)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        DeleteAllThemes.deleteAllThemes(executor, handler, mRedditDataRoomDatabase,
+                            lightThemeSharedPreferences, darkThemeSharedPreferences,
+                            amoledThemeSharedPreferences) {
+                            Toast.makeText(mActivity, R.string.delete_all_themes_success,
+                                Toast.LENGTH_SHORT).show()
+                            EventBus.getDefault().post(RecreateActivityEvent())
+                        }
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .show()
+                true
+            }
+
+        findPreference<Preference>(SharedPreferencesUtils.RESET_ALL_SETTINGS)
+            ?.setOnPreferenceClickListener {
+                MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
+                    .setTitle(R.string.are_you_sure)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        mSharedPreferences.edit().clear().apply()
+                        mainActivityTabsSharedPreferences.edit().clear().apply()
+                        nsfwAndBlurringSharedPreferences.edit().clear().apply()
+
+                        Toast.makeText(mActivity, R.string.reset_all_settings_success,
+                            Toast.LENGTH_SHORT).show()
+                        EventBus.getDefault().post(RecreateActivityEvent())
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .show()
+                true
+            }
 
         restoreSettingsPreference?.setOnPreferenceClickListener {
             var chooseFile = Intent(Intent.ACTION_GET_CONTENT)

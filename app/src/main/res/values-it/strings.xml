@@ -567,7 +567,6 @@ Se hai dei temi con questi nomi devi cambiarli prima di attivare la Personalizza
     <string name="settings_enable_material_you_summary">"Personalizza Reddit Jr. in base al tuo sfondo"</string>
     <string name="settings_apply_material_you_title">"Applica Material You"</string>
     <string name="settings_apply_material_you_summary">"Nel caso Reddit Jr. non abbia cambiato il tema"</string>
-    <string name="settings_global_settings_management_title">"Gestione delle impostazioni globali"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Elimina Tutti i Subreddit nel Database"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Elimina Tutti gli Utenti nel Database"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Elimina Tutti i Tipi di Ordinamento nel Database"</string>
@@ -729,8 +728,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_hide_the_number_of_votes">"Nascondi numero di voti"</string>
     <string name="settings_hide_the_number_of_comments">"Nascondi numero di commenti"</string>
     <string name="settings_show_avatar_on_the_right">"Mostra l'avatar a sinistra"</string>
-    <string name="settings_category_backup_and_restore_title">"Backup e ripristino"</string>
-    <string name="settings_backup_and_restore_summary">"Salva le impostazioni di ogni account in un archivio crittografato o rileggine uno"</string>
     <string name="settings_backup_settings_title">"Impostazioni Backup"</string>
     <string name="settings_restore_settings_title">"Reimposta le impostazioni"</string>
     <string name="settings_credits_love_animation_title">"Animazione amore"</string>
@@ -828,7 +825,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_sort_type_summary">"Tipo di ordinamento e intervallo di tempo predefiniti per subreddit, utenti e commenti"</string>
     <string name="settings_download_location_summary">"Scegli le cartelle per immagini, GIF, video e contenuti multimediali NSFW scaricati"</string>
     <string name="settings_miscellaneous_summary">"Gestione dei collegamenti, browser, cronologia delle ricerche e lingua"</string>
-    <string name="settings_global_settings_management_summary">"Ripristina le impostazioni di ogni account e cancella i dati che non appartengono a nessun account"</string>
     <string name="settings_api_keys_title">"Chiavi API"</string>
     <string name="settings_api_keys_summary">"Inserisci le tue chiavi API, incluso il tuo ID cliente"</string>
     <string name="settings_enable_api_key_overrides_title">"Abilita sostituzioni"</string>

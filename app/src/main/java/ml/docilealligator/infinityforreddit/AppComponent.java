@@ -109,7 +109,6 @@ import ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragme
 import ml.docilealligator.infinityforreddit.settings.DownloadLocationPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenceFragment;
-import ml.docilealligator.infinityforreddit.settings.GlobalSettingsManagementPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MiscellaneousPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.NotificationPreferenceFragment;
@@ -238,8 +237,6 @@ public interface AppComponent {
     void inject(CustomThemeListingActivity customThemeListingActivity);
 
     void inject(SidebarFragment sidebarFragment);
-
-    void inject(GlobalSettingsManagementPreferenceFragment globalSettingsManagementPreferenceFragment);
 
     void inject(BackupAndRestorePreferenceFragment backupAndRestorePreferenceFragment);
 

@@ -554,7 +554,6 @@
     <string name="settings_enable_material_you_summary">"Szabd testre a Reddit Jr.ot a háttérképed alapján"</string>
     <string name="settings_apply_material_you_title">"Material You alkalmazása"</string>
     <string name="settings_apply_material_you_summary">"Abban az esetben, ha a Reddit Jr. nem változtatta meg a témát"</string>
-    <string name="settings_global_settings_management_title">"Globális beállítások kezelése"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Adatbázisban szereplő összes subreddit törlése"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Adatbázisban szereplő összes felhasználó törlése"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Adatbázisban szereplő összes rendezési típus törlése"</string>
@@ -716,8 +715,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_hide_the_number_of_votes">"Szavazások számának elrejtése"</string>
     <string name="settings_hide_the_number_of_comments">"Kommentek számának elrejtése"</string>
     <string name="settings_show_avatar_on_the_right">"Avatár megjelenítése a jobb oldalon"</string>
-    <string name="settings_category_backup_and_restore_title">"Biztonsági mentés és visszaállítás"</string>
-    <string name="settings_backup_and_restore_summary">"Mentsd el minden fiók beállításait egy titkosított archívumba, vagy olvassa vissza"</string>
     <string name="settings_backup_settings_title">"Beállítások biztonsági mentése"</string>
     <string name="settings_restore_settings_title">"Beállítások visszaállítása"</string>
     <string name="settings_credits_love_animation_title">"Love animáció"</string>
@@ -815,7 +812,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_sort_type_summary">"Alapértelmezett rendezési típus és időtartomány az alredditek, a felhasználók és a megjegyzések számára"</string>
     <string name="settings_download_location_summary">"Válassz mappákat a letöltött képek, GIF-ek, videók és NSFW média számára"</string>
     <string name="settings_miscellaneous_summary">"Linkkezelés, böngésző, keresési előzmények és nyelv"</string>
-    <string name="settings_global_settings_management_summary">"Állítsd vissza az összes fiók beállítását, és töröld a nem fiókhoz tartozó adatokat"</string>
     <string name="settings_api_keys_title">"API kulcsok"</string>
     <string name="settings_api_keys_summary">"Add meg saját API kulcsait, beleértve az ügyfél-azonosítóját"</string>
     <string name="settings_enable_api_key_overrides_title">"Felülbírálások engedélyezése"</string>

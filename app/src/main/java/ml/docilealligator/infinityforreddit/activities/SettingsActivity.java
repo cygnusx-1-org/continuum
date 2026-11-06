@@ -42,7 +42,6 @@ import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AboutPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenceFragment;
-import ml.docilealligator.infinityforreddit.settings.GlobalSettingsManagementPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.InterfacePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostPreferenceFragment;
@@ -255,8 +254,6 @@ public class SettingsActivity extends BaseActivity implements
                     setTitle(R.string.settings_gestures_and_buttons_title);
                 } else if (fragment instanceof PostPreferenceFragment) {
                     setTitle(R.string.settings_category_post_title);
-                } else if (fragment instanceof GlobalSettingsManagementPreferenceFragment) {
-                    setTitle(R.string.settings_global_settings_management_title);
                 } else if (fragment instanceof APIKeysPreferenceFragment) {
                     setTitle(R.string.settings_api_keys_title);
                 } else if (fragment instanceof MainPreferenceFragment) {

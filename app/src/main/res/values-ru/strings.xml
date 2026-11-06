@@ -565,7 +565,6 @@
     <string name="settings_enable_material_you_summary">"Персонализация Reddit Jr. на основе фонового изображения рабочего экрана"</string>
     <string name="settings_apply_material_you_title">"Применить «Material You»"</string>
     <string name="settings_apply_material_you_summary">"В случае, если приложение Reddit Jr. не изменило тему"</string>
-    <string name="settings_global_settings_management_title">"Управление глобальными настройками"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Удалить все сабреддиты из базы данных"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Удалить всех пользователей из базы данных"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Удалить все типы сортировки из базы данных"</string>
@@ -727,8 +726,6 @@
     <string name="settings_hide_the_number_of_votes">"Скрыть количество голосов"</string>
     <string name="settings_hide_the_number_of_comments">"Скрыть количество комментариев"</string>
     <string name="settings_show_avatar_on_the_right">"Показывать аватар справа"</string>
-    <string name="settings_category_backup_and_restore_title">"Резервное копирование и восстановление"</string>
-    <string name="settings_backup_and_restore_summary">"Сохрани настройки каждой учетной записи в зашифрованном архиве или прочитай их обратно."</string>
     <string name="settings_backup_settings_title">"Резервное копирование настроек"</string>
     <string name="settings_restore_settings_title">"Восстановить настройки"</string>
     <string name="settings_credits_love_animation_title">"Анимация любви"</string>
@@ -826,7 +823,6 @@
     <string name="settings_sort_type_summary">"Тип сортировки и временной диапазон по умолчанию для субреддитов, пользователей и комментариев"</string>
     <string name="settings_download_location_summary">"Выбери папки для загруженных изображений, GIF-файлов, видео и медиафайлов NSFW."</string>
     <string name="settings_miscellaneous_summary">"Обработка ссылок, браузер, история поиска и язык"</string>
-    <string name="settings_global_settings_management_summary">"Сбрось настройки каждой учетной записи и очисти данные, которые не принадлежат ни одной учетной записи."</string>
     <string name="settings_api_keys_title">"Ключи API"</string>
     <string name="settings_api_keys_summary">"Введи свои собственные ключи API, включая идентификатор клиента."</string>
     <string name="settings_enable_api_key_overrides_title">"Включить переопределения"</string>
