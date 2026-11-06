@@ -191,7 +191,6 @@ public class ViewPostDetailActivity extends BaseActivity
     private boolean mAppBarCollapsed;
     private boolean mSwipedToAnotherPost;
     private int mPagerScrollState = ViewPager2.SCROLL_STATE_IDLE;
-    private boolean mVolumeKeysNavigateComments;
     private boolean mIsNsfwSubreddit;
     private boolean mHideFab;
     private ActivityViewPostDetailBinding binding;
@@ -317,7 +316,6 @@ public class ViewPostDetailActivity extends BaseActivity
         setToolbarGoToTop(binding.toolbarViewPostDetailActivity);
         setNavigationIconLongClickToHome();
 
-        mVolumeKeysNavigateComments = mSharedPreferences.getBoolean(SharedPreferencesUtils.VOLUME_KEYS_NAVIGATE_COMMENTS, false);
 
         binding.fabViewPostDetailActivity.setOnClickListener(view -> {
             scrollToNextParentComment();
@@ -984,21 +982,6 @@ public class ViewPostDetailActivity extends BaseActivity
         super.onDestroy();
         Bridge.clear(this);
         BigImageViewer.imageLoader().cancelAll();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mVolumeKeysNavigateComments) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                    scrollToPreviousParentComment();
-                    return true;
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    scrollToNextParentComment();
-                    return true;
-            }
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override

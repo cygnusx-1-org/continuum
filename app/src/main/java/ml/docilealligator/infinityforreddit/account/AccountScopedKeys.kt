@@ -105,7 +105,7 @@ object AccountScopedKeys {
 
         // Gestures and buttons
         "swipe_to_go_back_from_post_detail", "lock_toolbar", "lock_bottom_app_bar",
-        "volume_keys_navigate_comments", "volume_keys_navigate_posts", "pull_to_refresh",
+        "pull_to_refresh",
         "swipe_between_posts", "tab_switching_sensitivity", "swipe_right_to_go_back_sensitivity",
         "swipe_action_sensitivity_in_comments", "navigation_drawer_swipe_area",
         "swipe_vertically_to_go_back_from_media", "lock_jump_to_next_top_level_comment_button",

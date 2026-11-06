@@ -460,8 +460,6 @@
     <string name="settings_enable_bottom_app_bar_title">"下部ナビゲーションを有効化"</string>
     <string name="settings_category_post_and_comment_title">"投稿とコメント"</string>
     <string name="settings_vote_buttons_on_the_right_title">"評価ボタンを右側に表示"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"音量ボタンで投稿画面のコメントをナビゲート"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"音量ボタンで投稿をナビゲート"</string>
     <string name="settings_mute_video_title">"動画をミュート再生"</string>
     <string name="settings_mute_nsfw_video_title">"NSFW ビデオをミュート"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"動画プレーヤーでナビゲーションバーを無視"</string>

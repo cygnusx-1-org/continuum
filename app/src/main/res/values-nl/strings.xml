@@ -457,8 +457,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_enable_bottom_app_bar_title">"Onderste navigatiebalk inschakelen"</string>
     <string name="settings_category_post_and_comment_title">"Plaatsen en reageren"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Stemknoppen aan rechterkant tonen"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"Volumetoetsen gebruiken om door reacties te bladeren"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"Volumetoetsen gebruiken om door berichten te bladeren"</string>
     <string name="settings_mute_video_title">"Video's dempen"</string>
     <string name="settings_mute_nsfw_video_title">"Dempen NSFW Video's"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"Navigatiebalk verbergen in videospeler"</string>

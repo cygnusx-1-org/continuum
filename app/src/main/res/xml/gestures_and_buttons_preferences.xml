@@ -92,22 +92,12 @@
         app:isPreferenceVisible="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="volume_keys_navigate_comments"
-        app:title="@string/settings_volume_keys_navigate_comments_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="swap_tap_and_long_in_comments"
         app:title="@string/settings_swap_tap_and_long_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
         app:title="@string/settings_category_post_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="volume_keys_navigate_posts"
-        app:title="@string/settings_volume_keys_navigate_posts_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="1"

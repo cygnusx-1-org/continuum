@@ -461,8 +461,6 @@
     <string name="settings_enable_bottom_app_bar_title">"Povolit spodní navigaci"</string>
     <string name="settings_category_post_and_comment_title">"Příspěvek a komentář"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Hlasovací tlačítka napravo"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"Použít tlačítka hlasitosti pro navigaci v komentářích"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"Použít tlačítka hlasitosti pro navigaci v příspěvcích"</string>
     <string name="settings_mute_video_title">"Ztlumit videa"</string>
     <string name="settings_mute_nsfw_video_title">"Ztlumit NSFW videa"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"Ignorovat navigační lištu v přehrávači videí"</string>

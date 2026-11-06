@@ -161,15 +161,6 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (sectionsPagerAdapter != null) {
-            return sectionsPagerAdapter.handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return mSharedPreferences;
     }
@@ -376,16 +367,6 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
                 return null;
             }
             return fragmentManager.findFragmentByTag("f" + binding.viewPagerHistoryActivity.getCurrentItem());
-        }
-
-        public boolean handleKeyDown(int keyCode) {
-            if (binding.viewPagerHistoryActivity.getCurrentItem() == 0) {
-                Fragment fragment = getCurrentFragment();
-                if (fragment instanceof PostFragment) {
-                    return ((PostFragment) fragment).handleKeyDown(keyCode);
-                }
-            }
-            return false;
         }
 
         public void refresh() {

@@ -451,8 +451,6 @@
     <string name="settings_enable_bottom_app_bar_title">"Daar u marada hoose"</string>
     <string name="settings_category_post_and_comment_title">"Boostada iyo faallooyinka"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Badhamada Codka ee Midigta"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"Isticmaal furayaasha mugga si aad ugu dhex marato faallooyinka boostada"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"Isticmaal furayaasha mugga si aad u dhex marato boostada"</string>
     <string name="settings_mute_video_title">"Muqaalka aamus"</string>
     <string name="settings_mute_nsfw_video_title">"aamusi NSFW Fiidyowyo"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"iska daa marin hagaha ee ku dhex jira Fiidiyowga"</string>

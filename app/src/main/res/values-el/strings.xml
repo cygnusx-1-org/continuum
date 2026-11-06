@@ -454,8 +454,6 @@
     <string name="settings_enable_bottom_app_bar_title">"Ενεργοποίηση Κάτω Πλοήγησης"</string>
     <string name="settings_category_post_and_comment_title">"Ανάρτηση και Σχόλια"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Κουμπιά Ψήφου στα Δεξιά"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"Περιήγηση στα σχόλια με τα κουμπιά έντασης"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"Περιήγηση στις αναρτήσεις με τα κουμπιά έντασης"</string>
     <string name="settings_mute_video_title">"Σίγαση βίντεο"</string>
     <string name="settings_mute_nsfw_video_title">"Σίγαση NSFW βίντεο"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"Αγνόηση Μπάρας Πλοήγησης κατά την Αναπαραγωγή Βίντεο"</string>
