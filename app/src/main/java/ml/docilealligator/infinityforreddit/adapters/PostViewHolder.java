@@ -98,25 +98,24 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    void setBaseView(AspectRatioGifImageView iconGifImageView,
-                    TextView subredditTextView,
-                    TextView userTextView,
-                    ImageView stickiedPostImageView,
-                    TextView postTimeTextView,
-                    TextView titleTextView,
-                    @Nullable CustomTextView typeTextView,
-                    @Nullable ImageView archivedImageView,
-                    @Nullable ImageView lockedImageView,
-                    @Nullable ImageView crosspostImageView,
-                    @Nullable CustomTextView nsfwTextView,
-                    @Nullable CustomTextView spoilerTextView,
-                    @Nullable CustomTextView flairTextView,
-                    MaterialButton upvoteButton,
-                    TextView scoreTextView,
-                    MaterialButton downvoteButton,
-                    @Nullable MaterialButton commentsCountButton,
-                    @Nullable MaterialButton saveButton,
-                    @Nullable MaterialButton shareButton) {
+    /** Remembers the views both setBaseView overloads are handed. */
+    private void keepViews(AspectRatioGifImageView iconGifImageView,
+                           ImageView stickiedPostImageView,
+                           TextView postTimeTextView,
+                           TextView titleTextView,
+                           @Nullable CustomTextView typeTextView,
+                           @Nullable ImageView archivedImageView,
+                           @Nullable ImageView lockedImageView,
+                           @Nullable ImageView crosspostImageView,
+                           @Nullable CustomTextView nsfwTextView,
+                           @Nullable CustomTextView spoilerTextView,
+                           @Nullable CustomTextView flairTextView,
+                           MaterialButton upvoteButton,
+                           TextView scoreTextView,
+                           MaterialButton downvoteButton,
+                           @Nullable MaterialButton commentsCountButton,
+                           @Nullable MaterialButton saveButton,
+                           @Nullable MaterialButton shareButton) {
         this.iconGifImageView = iconGifImageView;
         this.stickiedPostImageView = stickiedPostImageView;
         this.postTimeTextView = postTimeTextView;
@@ -136,40 +135,49 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         this.commentsCountButton = commentsCountButton;
         this.saveButton = saveButton;
         this.shareButton = shareButton;
+    }
 
-        if (host.displaySubredditName()) {
-            subredditTextView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position < 0) {
-                    return;
-                }
-                Post post = host.getItem(position);
-                if (post != null) {
-                    if (host.canStartActivity()) {
-                        host.setCanStartActivity(false);
-                        startSubredditOrUserActivity(post.getSubredditName());
-                    }
-                }
-            });
+    void setBaseView(AspectRatioGifImageView iconGifImageView,
+                    TextView subredditTextView,
+                    TextView userTextView,
+                    ImageView stickiedPostImageView,
+                    TextView postTimeTextView,
+                    TextView titleTextView,
+                    @Nullable CustomTextView typeTextView,
+                    @Nullable ImageView archivedImageView,
+                    @Nullable ImageView lockedImageView,
+                    @Nullable ImageView crosspostImageView,
+                    @Nullable CustomTextView nsfwTextView,
+                    @Nullable CustomTextView spoilerTextView,
+                    @Nullable CustomTextView flairTextView,
+                    MaterialButton upvoteButton,
+                    TextView scoreTextView,
+                    MaterialButton downvoteButton,
+                    @Nullable MaterialButton commentsCountButton,
+                    @Nullable MaterialButton saveButton,
+                    @Nullable MaterialButton shareButton) {
+        keepViews(iconGifImageView, stickiedPostImageView, postTimeTextView, titleTextView,
+                typeTextView, archivedImageView, lockedImageView, crosspostImageView, nsfwTextView,
+                spoilerTextView, flairTextView, upvoteButton, scoreTextView, downvoteButton,
+                commentsCountButton, saveButton, shareButton);
 
-            iconGifImageView.setOnClickListener(view -> subredditTextView.performClick());
-        } else {
-            subredditTextView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position < 0) {
-                    return;
+        subredditTextView.setOnClickListener(view -> {
+            int position = getBindingAdapterPosition();
+            if (position < 0) {
+                return;
+            }
+            Post post = host.getItem(position);
+            if (post != null) {
+                if (host.canStartActivity()) {
+                    host.setCanStartActivity(false);
+                    startSubredditOrUserActivity(post.getSubredditName());
                 }
-                Post post = host.getItem(position);
-                if (post != null) {
-                    if (host.canStartActivity()) {
-                        host.setCanStartActivity(false);
-                        startSubredditOrUserActivity(post.getSubredditName());
-                    }
-                }
-            });
+            }
+        });
 
-            iconGifImageView.setOnClickListener(view -> userTextView.performClick());
-        }
+        // The icon opens whichever name the row shows.
+        iconGifImageView.setOnClickListener(view ->
+                (host.displaySubredditName() ? subredditTextView : userTextView).performClick());
 
         userTextView.setOnClickListener(view -> {
             if (!host.canStartActivity()) {
@@ -218,25 +226,10 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
                     @Nullable MaterialButton commentsCountButton,
                     @Nullable MaterialButton saveButton,
                     @Nullable MaterialButton shareButton) {
-        this.iconGifImageView = iconGifImageView;
-        this.stickiedPostImageView = stickiedPostImageView;
-        this.postTimeTextView = postTimeTextView;
-        this.titleTextView = titleTextView;
-
-        this.typeTextView = typeTextView;
-        this.archivedImageView = archivedImageView;
-        this.lockedImageView = lockedImageView;
-        this.crosspostImageView = crosspostImageView;
-        this.nsfwTextView = nsfwTextView;
-        this.spoilerTextView = spoilerTextView;
-        this.flairTextView = flairTextView;
-
-        this.upvoteButton = upvoteButton;
-        this.scoreTextView = scoreTextView;
-        this.downvoteButton = downvoteButton;
-        this.commentsCountButton = commentsCountButton;
-        this.saveButton = saveButton;
-        this.shareButton = shareButton;
+        keepViews(iconGifImageView, stickiedPostImageView, postTimeTextView, titleTextView,
+                typeTextView, archivedImageView, lockedImageView, crosspostImageView, nsfwTextView,
+                spoilerTextView, flairTextView, upvoteButton, scoreTextView, downvoteButton,
+                commentsCountButton, saveButton, shareButton);
 
         nameTextView.setOnClickListener(view -> {
             int position = getBindingAdapterPosition();

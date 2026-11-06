@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.13 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: the two ways of setting up a post row share the code that remembers its views, and the subreddit-name tap handler is written once
+
 8.3.3.9.1.26-beta.12 / 2026-11-6
 ============
 * Internal clean-up with no change in what you see: the upvote and downvote buttons in the post list share one routine instead of two near-identical 100-line copies
