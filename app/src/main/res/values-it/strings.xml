@@ -459,7 +459,6 @@ Tocca per riprovare."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Disabilita l'interfaccia immersiva quando il dispositivo è orizzontale"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Personalizza le schede nella pagina principale"</string>
     <string name="only_for_logged_in_user">"Solo per utenti connessi"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Abilita navigazione dal basso"</string>
     <string name="settings_category_post_and_comment_title">"Post e Commenti"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Bottoni di voto sulla destra"</string>
     <string name="settings_mute_video_title">"Muta i video"</string>
@@ -503,7 +502,6 @@ Tocca per riprovare."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Scorri verticalmente per tornare indietro dai media"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Blocca il Tasto per Saltare al Prossimo Commento di Primo Livello"</string>
     <string name="settings_lock_toolbar_title">"Blocca barra degli strumenti"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Blocca la barra di navigazione inferiore"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Scorri Verso l'Alto per Nascondere il Tasto per Saltare al Prossimo Commento di Primo Livello"</string>
     <string name="settings_lazy_mode_interval_title">"Intervallo Modalità Pigra"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Nascondi post di testo e post senza anteprima"</string>
@@ -629,7 +627,6 @@ Se hai dei temi con questi nomi devi cambiarli prima di attivare la Personalizza
     <string name="settings_require_authentication_to_show_accounts">"Richiedi l'autenticazione per mostrare gli account"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Premere a lungo per nascondere la barra degli strumenti"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Nascondi la barra degli strumenti per impostazione predefinita"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Personalizza la barra di navigazione inferiore"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Pagina principale"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Altre pagine"</string>
     <string name="settings_bottom_app_bar_option_count">"Conteggio delle opzioni"</string>

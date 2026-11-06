@@ -453,7 +453,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"लैंडस्केप मोड में इमर्सिव इंटरफ़ेस अक्षम करें"</string>
     <string name="settings_customize_tabs_in_main_page_title">"मुख्य पृष्ट पर टैब्स अनुकूलित करें "</string>
     <string name="only_for_logged_in_user">"केवल लाॅग्ड-इन उपयोगकर्ता के लिए "</string>
-    <string name="settings_enable_bottom_app_bar_title">"निचला नेवीगेशन शुरू करें "</string>
     <string name="settings_category_post_and_comment_title">"पोस्ट एवं टिप्पणी "</string>
     <string name="settings_vote_buttons_on_the_right_title">"वोट बटन दाईं तरफ "</string>
     <string name="settings_mute_video_title">"मौन वीडियोज "</string>
@@ -497,7 +496,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"छवि और GIF से वापस जाने के लिए लंबवत स्वाइप करें"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"नया उच्चा मात्रा के मतमात मे जाने से रोके"</string>
     <string name="settings_lock_toolbar_title">"टूलबार लॉक करें"</string>
-    <string name="settings_lock_bottom_app_bar_title">"निचे के कण्ट्रोल बार को छुपाने से रोके"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"अगली शीर्ष स्तर की टिप्पणी पर जाने वाले बटन को छुपाने के  लिए ऊपर की ओर स्वाइप"</string>
     <string name="settings_lazy_mode_interval_title">"आलस्य प्रणाली अंतराल "</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"बिना किसी पूर्वावलोकन के टेक्स्ट पोस्ट और पोस्ट छुपाएं"</string>
@@ -619,7 +617,6 @@
     <string name="settings_require_authentication_to_show_accounts">"खाते दिखाने के लिए प्रमाणीकरण की आवश्यकता है"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"संक्षिप्त विन्यास में टूलबार को छुपाने के लिए लॉंग प्रैस "</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"संक्षिप्त विन्यास में टूलबार पूर्वनिर्धारित रूप से अदृश्य "</string>
-    <string name="settings_customize_bottom_app_bar_title">"निचले नेवीगेशन बार को अनुकूलित करें "</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"मुख्य पृष्ट "</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"अन्य पृष्ट "</string>
     <string name="settings_bottom_app_bar_option_count">"विकल्प संख्या "</string>

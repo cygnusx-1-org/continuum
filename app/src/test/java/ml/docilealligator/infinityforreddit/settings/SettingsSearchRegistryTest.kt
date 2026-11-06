@@ -53,13 +53,13 @@ class SettingsSearchRegistryTest {
     }
 
     @Test
-    fun indexesLockBottomNavigationBar() {
-        val item = itemTitled(R.string.settings_lock_bottom_app_bar_title)
+    fun indexesLockToolbar() {
+        val item = itemTitled(R.string.settings_lock_toolbar_title)
 
         assertEquals(context.getString(R.string.settings_gestures_and_buttons_title), item.breadcrumb)
         assertEquals(GesturesAndButtonsPreferenceFragment::class.java, item.fragmentClass)
         assertEquals(context.getString(R.string.settings_gestures_and_buttons_title), item.fragmentTitle)
-        assertEquals("lock_bottom_app_bar", item.key)
+        assertEquals("lock_toolbar", item.key)
     }
 
     @Test
@@ -262,8 +262,8 @@ class SettingsSearchRegistryTest {
     fun rebuildsWhenTheLocaleChanges() {
         val registry = SettingsSearchRegistry.getInstance()
         val german = germanContext()
-        val germanTitle = german.getString(R.string.settings_lock_bottom_app_bar_title)
-        assertNotEquals(context.getString(R.string.settings_lock_bottom_app_bar_title), germanTitle)
+        val germanTitle = german.getString(R.string.settings_lock_toolbar_title)
+        assertNotEquals(context.getString(R.string.settings_lock_toolbar_title), germanTitle)
 
         registry.buildRegistry(german)
 

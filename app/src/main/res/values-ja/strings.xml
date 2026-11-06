@@ -457,7 +457,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"横画面では没入型インターフェースを無効にする"</string>
     <string name="settings_customize_tabs_in_main_page_title">"メインページのタブをカスタマイズ"</string>
     <string name="only_for_logged_in_user">"ログイン済みユーザー用"</string>
-    <string name="settings_enable_bottom_app_bar_title">"下部ナビゲーションを有効化"</string>
     <string name="settings_category_post_and_comment_title">"投稿とコメント"</string>
     <string name="settings_vote_buttons_on_the_right_title">"評価ボタンを右側に表示"</string>
     <string name="settings_mute_video_title">"動画をミュート再生"</string>
@@ -501,7 +500,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"縦方向にスワイプして画像やGIF動画の画面から戻る"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"次の最上位コメントへ移動ボタンを常に表示"</string>
     <string name="settings_lock_toolbar_title">"ツールバーを固定"</string>
-    <string name="settings_lock_bottom_app_bar_title">"下部ナビゲーションバーを常に表示"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"次の最上位コメントへ移動ボタンを上スクロールで非表示(OFF=下スクロールで非表示)"</string>
     <string name="settings_lazy_mode_interval_title">"自動スクロール間隔"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"テキスト投稿とプレビューなしの投稿を非表示にする"</string>
@@ -627,7 +625,6 @@
     <string name="settings_require_authentication_to_show_accounts">"アカウントを表示するためには認証が必要です"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"コンパクトレイアウトのツールバーを長押しで非表示"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"コンパクトレイアウトのツールバーを標準で非表示"</string>
-    <string name="settings_customize_bottom_app_bar_title">"下部ナビゲーションバーをカスタマイズ"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"メインページ"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"他のページ"</string>
     <string name="settings_bottom_app_bar_option_count">"ボタン数"</string>

@@ -454,7 +454,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Schakel meeslepende interface uit in landschapmodus"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Tabbladen op startpagina aanpassen"</string>
     <string name="only_for_logged_in_user">"Alleen voor ingelogde gebruikers"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Onderste navigatiebalk inschakelen"</string>
     <string name="settings_category_post_and_comment_title">"Plaatsen en reageren"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Stemknoppen aan rechterkant tonen"</string>
     <string name="settings_mute_video_title">"Video's dempen"</string>
@@ -498,7 +497,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Omhoog swipen om terug te gaan van foto's en gif's"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Verspringen beperken tot volgende reactie op het hoogste niveau"</string>
     <string name="settings_lock_toolbar_title">"Werkbalk vergrendelen"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Onderste navigatiebalk vergrendelen"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Omhoog vegen beperken tot volgende reactie op het hoogste niveau"</string>
     <string name="settings_lazy_mode_interval_title">"Luie modus: tussenpoos"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Tekstberichten en berichten zonder voorbeeld verbergen"</string>
@@ -624,7 +622,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_require_authentication_to_show_accounts">"Authenticatie vereisen om accounts te tonen"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Druk lang in om werkbalk in compacte layout te verbergen"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Werkbalk in compacte layout standaard verborgen"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Pas de onderste navigatiebalk aan"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Hoofdpagina"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Pagina's"</string>
     <string name="settings_bottom_app_bar_option_count">"Aantal Opties"</string>

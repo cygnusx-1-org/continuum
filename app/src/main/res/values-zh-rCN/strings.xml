@@ -458,7 +458,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"在横屏模式下禁用沉浸式界面"</string>
     <string name="settings_customize_tabs_in_main_page_title">"自定义主界面标签页"</string>
     <string name="only_for_logged_in_user">"仅登录用户可用"</string>
-    <string name="settings_enable_bottom_app_bar_title">"开启底部导航栏"</string>
     <string name="settings_category_post_and_comment_title">"帖子和评论"</string>
     <string name="settings_vote_buttons_on_the_right_title">"顶踩按钮放置在右侧"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
@@ -502,7 +501,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"垂直滑动退出图片和动图界面"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"锁定跳转到下一个顶层评论按钮"</string>
     <string name="settings_lock_toolbar_title">"锁定工具栏"</string>
-    <string name="settings_lock_bottom_app_bar_title">"锁定底部导航栏"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"向上滑动以隐藏跳转到下一个顶层评论按钮"</string>
     <string name="settings_lazy_mode_interval_title">"懒人模式间隔时间"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"隐藏文本帖子和无预览的帖子"</string>
@@ -628,7 +626,6 @@
     <string name="settings_require_authentication_to_show_accounts">"需要身份验证才能显示帐户"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"在紧凑布局下长按隐藏工具栏"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"默认隐藏紧凑布局中的工具栏"</string>
-    <string name="settings_customize_bottom_app_bar_title">"自定义底部导航栏"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"主页"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"其他页面"</string>
     <string name="settings_bottom_app_bar_option_count">"选项数量"</string>

@@ -14,7 +14,6 @@ import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPre
 import ml.docilealligator.infinityforreddit.events.ChangeEnableCommentSwipeActionSwitchEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeEnableSwipeActionSwitchEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePullToRefreshEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences;
@@ -39,21 +38,15 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
 
         SwitchPreference lockJumpToNextTopLevelCommentButtonSwitch =
                 findPreference(SharedPreferencesUtils.LOCK_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON);
-        SwitchPreference lockBottomAppBarSwitch = findPreference(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR);
         SwitchPreference swipeUpToHideJumpToNextTopLevelCommentButtonSwitch =
                 findPreference(SharedPreferencesUtils.SWIPE_UP_TO_HIDE_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON);
         SwitchPreference pullToRefreshSwitch = findPreference(SharedPreferencesUtils.PULL_TO_REFRESH);
         SwitchPreference disableSwipingBetweenTabsSwitch = findPreference(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS);
 
-        if (lockJumpToNextTopLevelCommentButtonSwitch != null && lockBottomAppBarSwitch != null &&
+        if (lockJumpToNextTopLevelCommentButtonSwitch != null &&
                 swipeUpToHideJumpToNextTopLevelCommentButtonSwitch != null) {
             lockJumpToNextTopLevelCommentButtonSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
                 swipeUpToHideJumpToNextTopLevelCommentButtonSwitch.setVisible(!((Boolean) newValue));
-                return true;
-            });
-
-            lockBottomAppBarSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
-                EventBus.getDefault().post(new ChangeLockBottomAppBarEvent((Boolean) newValue));
                 return true;
             });
 

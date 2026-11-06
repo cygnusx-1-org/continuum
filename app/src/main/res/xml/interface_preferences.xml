@@ -20,11 +20,6 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
-        app:key="bottom_app_bar"
-        app:title="@string/settings_enable_bottom_app_bar_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="hide_subreddit_banner"
         app:title="@string/settings_hide_subreddit_banner_title"
         app:summary="@string/settings_hide_subreddit_banner_summary" />

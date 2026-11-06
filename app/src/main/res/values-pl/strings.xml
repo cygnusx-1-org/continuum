@@ -451,7 +451,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Wyłącz Immersywny Interfejs Horyzontalnie"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Dostosuj zakładki na stronie głównej"</string>
     <string name="only_for_logged_in_user">"Tylko dla zalogowanych użytkowników"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Włącz dolny pasek nawigacyjny"</string>
     <string name="settings_category_post_and_comment_title">"Post i komentarz"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Przyciski do głosowania po prawej"</string>
     <string name="settings_mute_video_title">"Wycisz filmy"</string>
@@ -495,7 +494,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Przesuń w pionie, aby wrócić z obrazu i GIF-u"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Zablokuj Skok do następnego przycisku komentarza na poziomie Top"</string>
     <string name="settings_lock_toolbar_title">"Zablokuj pasek narzędzi"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Zablokuj dolny pasek nawigacji"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Przesuń w górę, aby ukryć przycisk przejścia do następnego komentarza poziomu Top"</string>
     <string name="settings_lazy_mode_interval_title">"Częstotliwość trybu lenia"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ukryj posty tekstowe i posty bez podglądu"</string>
@@ -621,7 +619,6 @@ W przeciwnym razie, zmień ich nazwę przed włączeniem Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Wymagaj autoryzacji, aby pokazać konta"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Długie naciśnięcie powoduje ukrycie paska narzędzi w układzie kompaktowym"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ukrywaj domyślnie pasek narzędzi"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Dostosuj dolny pasek nawigacji"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Strona główna"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Inne strony"</string>
     <string name="settings_bottom_app_bar_option_count">"Liczba opcji"</string>

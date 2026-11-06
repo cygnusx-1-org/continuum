@@ -455,7 +455,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"லேண்ட்ஸ்கேப் பயன்முறையில் மூழ்கும் இடைமுகத்தை முடக்கு"</string>
     <string name="settings_customize_tabs_in_main_page_title">"முதன்மைப் பக்கத்தில் தாவல்களைத் தனிப்பயனாக்கு"</string>
     <string name="only_for_logged_in_user">"உள்துழைந்த பயனர்களுக்கு மட்டும்"</string>
-    <string name="settings_enable_bottom_app_bar_title">"அடிப்புற வழிசெழுத்தலை இயக்கு"</string>
     <string name="settings_category_post_and_comment_title">"இடுகையிட்டு கருத்தளி"</string>
     <string name="settings_vote_buttons_on_the_right_title">"வலதில் வாக்குப் பொத்தான்கள்"</string>
     <string name="settings_mute_video_title">"காணொளிகளை ஒளியடக்கு"</string>
@@ -499,7 +498,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"படம் மற்றும் Gif இலிருந்து திரும்பிச் செல்ல செங்குத்தாக ஸ்வைப் செய்யவும்"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"பூட்டு அடுத்த மேல் நிலை கருத்து பட்டனுக்கு செல்லவும்"</string>
     <string name="settings_lock_toolbar_title">"கருவிப்பட்டியைப் பூட்டு"</string>
-    <string name="settings_lock_bottom_app_bar_title">"அடிப்புற வழிசெழுத்தல் பட்டையை பூட்டு"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"மறைக்க மேலே ஸ்வைப் செய்யவும் அடுத்த மேல் நிலை கருத்து பட்டன் செல்லவும்"</string>
     <string name="settings_lazy_mode_interval_title">"சோம்பேறி பயன்முறை இடைவெளி"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"உரை இடுகைகள் மற்றும் இடுகைகளை முன்னோட்டம் இல்லாமல் மறை"</string>
@@ -621,7 +619,6 @@
     <string name="settings_require_authentication_to_show_accounts">"கணக்குகளைக் காட்ட அங்கீகாரம் தேவை"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"கருவிப்பட்டையை மறைக்க நீண்டழுத்து"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"கருவிப்பட்டையை இயல்பாகவே மறை"</string>
-    <string name="settings_customize_bottom_app_bar_title">"கீழ் வழிசெலுத்தல் பட்டியைத் தனிப்பயனாக்கு"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"முதன்மை பக்கம்"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"பிற பக்கங்கள்"</string>
     <string name="settings_bottom_app_bar_option_count">"விருப்ப எண்ணிக்கை"</string>

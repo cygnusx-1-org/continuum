@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.16 / 2026-11-6
+============
+* Removed the bottom app bar settings: Enable Bottom App Bar, Customize Bottom App Bar and Lock Bottom App Bar. The bar stays off whatever an older version stored
+
 8.3.3.9.1.26-beta.15 / 2026-11-6
 ============
 * Changing the post layout from the three-dot menu now waits for the menu to close before rebuilding the feed, so the menu no longer freezes on screen

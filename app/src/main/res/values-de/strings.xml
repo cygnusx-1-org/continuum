@@ -458,7 +458,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Immersive Oberfläche im horizontalen Modus deaktivieren"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Reiter auf der Hauptseite anpassen"</string>
     <string name="only_for_logged_in_user">"Nur für angemeldete Benutzer"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Untere Navigation aktivieren"</string>
     <string name="settings_category_post_and_comment_title">"Posten und Kommentieren"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Abstimmungsknöpfe auf der rechten Seite"</string>
     <string name="settings_mute_video_title">"Videos stummschalten"</string>
@@ -502,7 +501,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Vertikal wischen, um zurück zu den Medien zu gelangen"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"\"Zum nächsten Top-Level-Kommentar springen\"-Knopf sperren"</string>
     <string name="settings_lock_toolbar_title">"Symbolleiste sperren"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Untere Navigationsleiste sperren"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Nach oben wischen, um den \"Zum nächsten Top-Level-Kommentar springen\"-Knopf zu verstecken"</string>
     <string name="settings_lazy_mode_interval_title">"Intervall für Faulen Modus"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Textbeiträge und Beiträge ohne Vorschau ausblenden"</string>
@@ -628,7 +626,6 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_require_authentication_to_show_accounts">"Authentifizierung benötigt um Profile anzuzeigen"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Langes Drücken, um die Werkzeugleiste in der Kompaktansicht zu verstecken"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Werkzeugleiste in der Kompaktansicht standardmäßig verstecken"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Untere Werkzeugleiste anpassen"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Hauptseite"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Seiten"</string>
     <string name="settings_bottom_app_bar_option_count">"Anzahl an Optionen"</string>

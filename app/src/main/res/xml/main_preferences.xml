@@ -95,11 +95,6 @@
         app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:icon="@drawable/ic_subscriptions_bottom_app_bar_day_night_24dp"
-        app:title="@string/settings_customize_bottom_app_bar_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_gesture_day_night_24dp"
         app:title="@string/settings_gestures_and_buttons_title"
         app:summary="@string/settings_gestures_and_buttons_summary"

@@ -459,7 +459,6 @@ Toque para tentar de novo."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Desativar interface imersiva no modo retrato"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Customizar abas da página inicial"</string>
     <string name="only_for_logged_in_user">"Só para usuários autenticados"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Ativar barra de navegação inferior"</string>
     <string name="settings_category_post_and_comment_title">"Postagem e comentário"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Botões de Voto na Direita"</string>
     <string name="settings_mute_video_title">"Silenciar Vídeos"</string>
@@ -503,7 +502,6 @@ Toque para tentar de novo."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Deslize verticalmente para voltar da imagem e GIF"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Bloquear Botão de Avanço para Próximo Comentário Mais Votado"</string>
     <string name="settings_lock_toolbar_title">"Bloquear a barra de ferramentas"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Bloquear barra de navegação inferior"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Deslizar para Cima para Ocultar o Botão de Avanço para Próximo Comentário Mais Votado"</string>
     <string name="settings_lazy_mode_interval_title">"Intervalo do Modo Preguiçoso"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar postagens de texto e postagens sem visualização"</string>
@@ -629,7 +627,6 @@ Renomeie-os antes de ativar o Material You se você tiver."</string>
     <string name="settings_require_authentication_to_show_accounts">"Exigir autenticação para exibir contas"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Toque longo para ocultar a barra de ferramentas"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ocultar a barra de ferramentas por padrão"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Customizar barra de navegação inferior"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Página inicial"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Outras páginas"</string>
     <string name="settings_bottom_app_bar_option_count">"Opção de contador"</string>

@@ -350,7 +350,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         claimResumeState();
 
         hideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED, false);
-        showBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, false);
+        // The bottom app bar is gone as a setting; this keeps its code paths switched off.
+        showBottomAppBar = false;
 
         navigationWrapper = new NavigationWrapper(findViewById(R.id.bottom_app_bar_bottom_app_bar), findViewById(R.id.linear_layout_bottom_app_bar),
                 findViewById(R.id.option_1_bottom_app_bar), findViewById(R.id.option_2_bottom_app_bar),

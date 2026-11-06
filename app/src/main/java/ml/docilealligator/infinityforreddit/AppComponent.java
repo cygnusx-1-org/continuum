@@ -104,7 +104,6 @@ import ml.docilealligator.infinityforreddit.settings.AccountSettingsManagementPr
 import ml.docilealligator.infinityforreddit.settings.BackupAndRestorePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CommentPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CrashReportsFragment;
-import ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment;
 import ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragment;
 import ml.docilealligator.infinityforreddit.settings.DownloadLocationPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
@@ -284,8 +283,6 @@ public interface AppComponent {
     void inject(SecurityPreferenceFragment securityPreferenceFragment);
 
     void inject(NsfwAndSpoilerFragment nsfwAndSpoilerFragment);
-
-    void inject(CustomizeBottomAppBarFragment customizeBottomAppBarFragment);
 
     void inject(TranslationFragment translationFragment);
 

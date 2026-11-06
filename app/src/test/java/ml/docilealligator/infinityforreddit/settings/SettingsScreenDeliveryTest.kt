@@ -74,7 +74,7 @@ class SettingsScreenDeliveryTest {
     @Test
     fun deliversAndConsumesTheScrollTargetOnTheDestination() {
         val fragment = GesturesAndButtonsPreferenceFragment()
-        fragment.arguments = SettingsScreenArgs.withScrollTarget(null, "lock_bottom_app_bar")
+        fragment.arguments = SettingsScreenArgs.withScrollTarget(null, "lock_toolbar")
 
         activity.navigateToSettingsFragment(fragment, "Gestures & Buttons")
         idle()

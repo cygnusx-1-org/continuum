@@ -451,7 +451,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Απενεργοποίηση Καθολικής Διεπαφής"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Παραμετροποίηση Καρτελών στην Κύρια Σελίδα"</string>
     <string name="only_for_logged_in_user">"Μόνο για Συνδεδεμένο Χρήστη"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Ενεργοποίηση Κάτω Πλοήγησης"</string>
     <string name="settings_category_post_and_comment_title">"Ανάρτηση και Σχόλια"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Κουμπιά Ψήφου στα Δεξιά"</string>
     <string name="settings_mute_video_title">"Σίγαση βίντεο"</string>
@@ -495,7 +494,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Σύρε Κάθετα για να Επιστρέψεις από μια Εικόνα ή gif"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Κουμπί Κλειδώματος Άλματος στο Επόμενο Σχόλιο Άνω Επιπέδου"</string>
     <string name="settings_lock_toolbar_title">"Διατήρησε τη γραμμή εργαλείων σταθερή"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Κλείδωμα Κάτω Μπάρας Πλοήγησης"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Σύρε προς τα Πάνω για Απόκρυψη Κουμπιού Άλμα προς το Σχόλιο Άνω Επιπέδου"</string>
     <string name="settings_lazy_mode_interval_title">"Διάστημα Λειτουργίας Τεμπέλη"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Απόκρυψη αναρτήσεων κειμένου και αναρτήσεων χωρίς προεπισκόπηση"</string>
@@ -621,7 +619,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Απαίτηση Αυθεντικοποίησης για Εμφάνιση Λογαριασμών"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Παρατεταμένο Άγγιγμα για Απόκρυψη Γραμμής Εργαλείων"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Απόκρυψη Γραμμής Εργαλείων από Προεπιλογή"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Παραμετροποίηση Κάτω Μπάρας Πλοήγησης"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Κεντρική Σελίδα"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Άλλες Σελίδες"</string>
     <string name="settings_bottom_app_bar_option_count">"Καταμέτρηση Επιλογής"</string>

@@ -26,7 +26,6 @@ public class InterfacePreferenceFragment extends CustomFontPreferenceFragmentCom
         SwitchPreference showElapsedTimeSwitch = findPreference(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY);
         ListPreference timeFormatList = findPreference(SharedPreferencesUtils.TIME_FORMAT_KEY);
         SwitchPreference hideFabInPostFeedSwitchPreference = findPreference(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED);
-        SwitchPreference bottomAppBarSwitch = findPreference(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY);
         SwitchPreference voteButtonsOnTheRightSwitch = findPreference(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY);
         Preference displayCategory = findPreference("display_category");
         SwitchPreference forceMaxRefreshRateSwitch = findPreference(SharedPreferencesUtils.FORCE_MAX_REFRESH_RATE_KEY);
@@ -88,13 +87,6 @@ public class InterfacePreferenceFragment extends CustomFontPreferenceFragmentCom
         if (hideFabInPostFeedSwitchPreference != null) {
             hideFabInPostFeedSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeHideFabInPostFeedEvent((Boolean) newValue));
-                return true;
-            });
-        }
-
-        if (bottomAppBarSwitch != null) {
-            bottomAppBarSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
-                EventBus.getDefault().post(new RecreateActivityEvent());
                 return true;
             });
         }

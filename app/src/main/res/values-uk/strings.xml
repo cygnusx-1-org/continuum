@@ -458,7 +458,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Вимкнути заглиблений інтерфейс в альбомному режимі"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Пристосувати вкладки на основній сторінці"</string>
     <string name="only_for_logged_in_user">"Лише для авторизованих користувачів"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Увімкнути нижнє пересування"</string>
     <string name="settings_category_post_and_comment_title">"Дописи і коментарі"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Кнопки голосування праворуч"</string>
     <string name="settings_mute_video_title">"Глушити відео"</string>
@@ -502,7 +501,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Ковзни вертикально, щоб вернутися назад від зображення або Gif"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Блокувати стрибок до наступної кнопки коментаря верхнього рівня"</string>
     <string name="settings_lock_toolbar_title">"Закріпити панель інструментів"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Замкнути нижню панель пересування"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Ковзни уверх, щоб приховати стрибок до наступної кнопки коментаря верхнього рівня"</string>
     <string name="settings_lazy_mode_interval_title">"Крок лінивого режиму"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Приховати текстові дописи та дописи без попереднього перегляду"</string>
@@ -628,7 +626,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Щоб показати обліківки потрібна автентифікація"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Довге натискання ховає панель засобів"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ховати панель засобів типово"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Пристосувати низ панелі пересування"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Основна сторінка"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Інші сторінки"</string>
     <string name="settings_bottom_app_bar_option_count">"Кількість параметрів"</string>

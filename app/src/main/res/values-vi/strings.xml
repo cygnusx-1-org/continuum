@@ -451,7 +451,6 @@ Nhấn để thử lại."</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Tắt giao diện đắm mình trong chế độ xoay ngang"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Tùy chỉnh các Tab trong trang chính"</string>
     <string name="only_for_logged_in_user">"Chỉ cho người dùng đã đăng nhập"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Bật điều hướng ở dưới cùng"</string>
     <string name="settings_category_post_and_comment_title">"Bài đăng và bình luận"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Nút Vote ở bên phải"</string>
     <string name="settings_mute_video_title">"Tắt tiếng Video"</string>
@@ -495,7 +494,6 @@ Nhấn để thử lại."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Vuốt dọc để quay lại từ phương tiện"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Khoá nút Nhảy đến bình luận cấp trên cùng tiếp theo"</string>
     <string name="settings_lock_toolbar_title">"Khóa thanh công cụ"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Khoá thanh điều hướng ở dưới cùng"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Vuốt lên để ẩn nút Nhảy đến bình luận cấp trên cùng tiếp theo"</string>
     <string name="settings_lazy_mode_interval_title">"Khoảng thời gian Chế độ lười biếng"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ẩn bài viết văn bản và bài viết không có bản xem trước"</string>
@@ -621,7 +619,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Yêu cầu xác thực để hiển thị tài khoản"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Nhấn giữ để ẩn thanh công cụ"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ẩn thanh công cụ theo mặc định"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Tuỳ biến thanh điều hướng ở dưới cùng"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Trang chính"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Các trang khác"</string>
     <string name="settings_bottom_app_bar_option_count">"Số tuỳ chọn"</string>

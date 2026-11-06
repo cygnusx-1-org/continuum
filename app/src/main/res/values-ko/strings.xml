@@ -458,7 +458,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"가로 모드에서 몰입형 인터페이스 비활성화"</string>
     <string name="settings_customize_tabs_in_main_page_title">"메인 페이지에 커스터마이징 탭"</string>
     <string name="only_for_logged_in_user">"로그인한 사용자 전용"</string>
-    <string name="settings_enable_bottom_app_bar_title">"하단 내비게이션 활성화"</string>
     <string name="settings_category_post_and_comment_title">"게시글과 댓글"</string>
     <string name="settings_vote_buttons_on_the_right_title">"투표버튼 우측으로 이동"</string>
     <string name="settings_mute_video_title">"둥영상 음소거"</string>
@@ -502,7 +501,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"이미지 및 Gif에서 돌아가려면 수직으로 스와이프하세요."</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"잠금 다음 최상위 댓글 버튼으로 이동"</string>
     <string name="settings_lock_toolbar_title">"도구 모음 잠금"</string>
-    <string name="settings_lock_bottom_app_bar_title">"내비게이션 바 잠근"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"위로 스와이프하여 숨기기 다음 최상위 댓글 버튼으로 이동"</string>
     <string name="settings_lazy_mode_interval_title">"게으른 모드 간격"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"미리보기 없이 텍스트 게시물 및 게시물 숨기기"</string>
@@ -624,7 +622,6 @@
     <string name="settings_require_authentication_to_show_accounts">"계정을 표시하려면 인증이 필요합니다."</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"길게 눌러 도구 모음 숨기기"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"기본적으로 도구 모음 숨기기"</string>
-    <string name="settings_customize_bottom_app_bar_title">"하단 탐색 표시줄 사용자 정의"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"메인 페이지"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"기타 페이지"</string>
     <string name="settings_bottom_app_bar_option_count">"옵션 수"</string>

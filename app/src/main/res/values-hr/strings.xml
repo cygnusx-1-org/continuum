@@ -449,7 +449,6 @@
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Onemogući imerzivno sučelje u pejzažnom načinu"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Uredi kartice na Glavnoj stranici"</string>
     <string name="only_for_logged_in_user">"Samo za prijavljene korisnike"</string>
-    <string name="settings_enable_bottom_app_bar_title">"Omogući donju navigacijsku traku"</string>
     <string name="settings_category_post_and_comment_title">"Objavi i komentiraj"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Tipke za glasanje na desnoj strani"</string>
     <string name="settings_mute_video_title">"Isključi ton na videozapisima"</string>
@@ -493,7 +492,6 @@
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Prijeđi okomito za povratak sa slike i gifa"</string>
     <string name="settings_lock_jump_to_next_top_level_comment_button_title">"Zaključaj ''Skoći na sljedeći Top komentar'' gumb"</string>
     <string name="settings_lock_toolbar_title">"Zaključaj alatnu traku"</string>
-    <string name="settings_lock_bottom_app_bar_title">"Zaključaj donju navigacijsku traku"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Prelazak prstom prema gore za skrivanje ''Skoći na sljedeći Top komentar'' gumba"</string>
     <string name="settings_lazy_mode_interval_title">"Interval Moda za lijenčine"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Sakrij tekstualne postove i postove bez pregleda"</string>
@@ -615,7 +613,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Zahtijeva autentifikaciju za prikaz računa"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Dugo pritisni za skrivanje alatne trake u Kompaktnom rasporedu"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Alatna traka u Kompaktnom rasporedu je zadano skrivena"</string>
-    <string name="settings_customize_bottom_app_bar_title">"Uredi donju navigacijsku traku"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Glavna stranica"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Druge stranice"</string>
     <string name="settings_bottom_app_bar_option_count">"Broj opcija"</string>
