@@ -489,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"Velikost miniatury"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Zobrazit náhled nalevo"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Zobrazit miniaturu vpravo"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Přepínací strana miniatur"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Počet sloupců v příspěvcích"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Na výšku"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Na šířku"</string>
@@ -626,10 +625,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Vyžadovat ověření pro zobrazení účtů"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Dlouhé podržení pro skrytí nástrojové lišty"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Skrývat nástrojovou lištu"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Hlavní stránka"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Ostatní stránky"</string>
-    <string name="settings_bottom_app_bar_option_count">"Počet možností"</string>
-    <string name="settings_bottom_app_bar_fab">"Létající akční tlačítko"</string>
     <string name="settings_data_saving_mode">"Režim úspory dat"</string>
     <string name="settings_data_saving_mode_info_summary">"V režimu úspory dat:
 Náhledové obrázky mají nižší rozlišení.
@@ -1705,7 +1700,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="content_description_video_indicator">"Video indikátor"</string>
     <string name="content_description_no_subscriptions_indicator">"Žádný indikátor předplatného"</string>
     <string name="content_description_create_multireddit">"Vytvořit multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Tlačítko spodní navigační lišty"</string>
     <string name="content_description_fab">"Létající akční tlačítko"</string>
     <string name="content_description_download">"Stáhnout"</string>
     <string name="content_description_share">"Sdílet"</string>

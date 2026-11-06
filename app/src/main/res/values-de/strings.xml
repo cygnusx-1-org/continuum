@@ -489,7 +489,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_post_compact_thumbnail_size">"Miniaturbildgröße"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Thumbnail auf der Linken Seite des kompakten Layouts anzeigen"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniaturansicht rechts anzeigen"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Miniaturbildseite umschalten"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Anzahl an Spalten im Beitragsfeed"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Hochformat"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Querformat"</string>
@@ -626,10 +625,6 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_require_authentication_to_show_accounts">"Authentifizierung benötigt um Profile anzuzeigen"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Langes Drücken, um die Werkzeugleiste in der Kompaktansicht zu verstecken"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Werkzeugleiste in der Kompaktansicht standardmäßig verstecken"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Hauptseite"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Seiten"</string>
-    <string name="settings_bottom_app_bar_option_count">"Anzahl an Optionen"</string>
-    <string name="settings_bottom_app_bar_fab">"Schwebender Aktionsknopf"</string>
     <string name="settings_data_saving_mode">"Datensparmodus"</string>
     <string name="settings_data_saving_mode_info_summary">"Im Datensparmodus:
 Vorschaubilder haben eine geringere Auflösung.
@@ -1702,7 +1697,6 @@ Keine Sorge, du kannst Reddit Jr. trotzdem genießen."</string>
     <string name="content_description_video_indicator">"Videoanzeige"</string>
     <string name="content_description_no_subscriptions_indicator">"Keine Abonnementsanzeige"</string>
     <string name="content_description_create_multireddit">"MultiReddit erstellen"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Schaltfläche in der unteren Navigationsleiste"</string>
     <string name="content_description_fab">"Schwebende Aktionsschaltfläche"</string>
     <string name="content_description_download">"Herunterladen"</string>
     <string name="content_description_share">"Teilen"</string>

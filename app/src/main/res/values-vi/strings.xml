@@ -482,7 +482,6 @@ Nhấn để thử lại."</string>
     <string name="settings_post_compact_thumbnail_size">"Kích thước hình thu nhỏ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Hiện ảnh thu nhỏ ở bên trái"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Hiển thị hình thu nhỏ ở bên phải"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Chuyển đổi bên hình thu nhỏ"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Số lượng cột trong nguồn dữ liệu bài đăng"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Dọc"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Ngang"</string>
@@ -619,10 +618,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Yêu cầu xác thực để hiển thị tài khoản"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Nhấn giữ để ẩn thanh công cụ"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ẩn thanh công cụ theo mặc định"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Trang chính"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Các trang khác"</string>
-    <string name="settings_bottom_app_bar_option_count">"Số tuỳ chọn"</string>
-    <string name="settings_bottom_app_bar_fab">"Nút hành động nổi"</string>
     <string name="settings_data_saving_mode">"Chế độ tiết kiệm dữ liệu"</string>
     <string name="settings_data_saving_mode_info_summary">"Trong chế độ tiết kiệm dữ liệu:
 Các hình ảnh xem trước có độ phân giải thấp hơn.
@@ -1692,7 +1687,6 @@ Nhấn để thử lại."</string>
     <string name="content_description_video_indicator">"Chỉ báo video"</string>
     <string name="content_description_no_subscriptions_indicator">"Không có chỉ báo đăng ký"</string>
     <string name="content_description_create_multireddit">"Tạo MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Nút thanh điều hướng phía dưới"</string>
     <string name="content_description_fab">"Nút hành động nổi"</string>
     <string name="content_description_download">"Tải xuống"</string>
     <string name="content_description_share">"Chia sẻ"</string>

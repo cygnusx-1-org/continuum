@@ -482,7 +482,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_post_compact_thumbnail_size">"Rozmiar miniatury"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Pokaż miniaturę po lewej stronie w układzie kompaktowym"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Pokaż miniaturę po prawej stronie"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Przełącz stronę miniatury"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Liczba kolumn w kanale postów"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Pion"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Poziom"</string>
@@ -619,10 +618,6 @@ W przeciwnym razie, zmień ich nazwę przed włączeniem Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Wymagaj autoryzacji, aby pokazać konta"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Długie naciśnięcie powoduje ukrycie paska narzędzi w układzie kompaktowym"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ukrywaj domyślnie pasek narzędzi"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Strona główna"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Inne strony"</string>
-    <string name="settings_bottom_app_bar_option_count">"Liczba opcji"</string>
-    <string name="settings_bottom_app_bar_fab">"Pływający przycisk akcji"</string>
     <string name="settings_data_saving_mode">"Tryb oszczędzania danych"</string>
     <string name="settings_data_saving_mode_info_summary">"W trybie oszczędzania danych:
 Podglądy obrazów mają niższą rozdzielczość.
@@ -1696,7 +1691,6 @@ Kliknij by spróbować ponownie."</string>
     <string name="content_description_video_indicator">"Wskaźnik wideo"</string>
     <string name="content_description_no_subscriptions_indicator">"Brak wskaźnika subskrypcji"</string>
     <string name="content_description_create_multireddit">"Utwórz multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Przycisk dolnego paska nawigacyjnego"</string>
     <string name="content_description_fab">"Pływający przycisk akcji"</string>
     <string name="content_description_download">"Pobierz"</string>
     <string name="content_description_share">"Udostępnij"</string>

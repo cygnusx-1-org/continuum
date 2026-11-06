@@ -485,7 +485,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_post_compact_thumbnail_size">"Miniatuurgrootte"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Miniatuur tonen aan linkerkant in compacte indeling"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatuur aan de rechterkant weergeven"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Miniatuurzijde schakelen"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Het Aantal Kolommen in de Postfeed"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Landschap"</string>
@@ -622,10 +621,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_require_authentication_to_show_accounts">"Authenticatie vereisen om accounts te tonen"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Druk lang in om werkbalk in compacte layout te verbergen"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Werkbalk in compacte layout standaard verborgen"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Hoofdpagina"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Pagina's"</string>
-    <string name="settings_bottom_app_bar_option_count">"Aantal Opties"</string>
-    <string name="settings_bottom_app_bar_fab">"Zwevende actieknop"</string>
     <string name="settings_data_saving_mode">"Databesparingsmodus"</string>
     <string name="settings_data_saving_mode_info_summary">"In gegevensbesparingsmodus:
 Voorbeeldafbeeldingen hebben een lagere resolutie.
@@ -1694,7 +1689,6 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="content_description_video_indicator">"Video-indicator"</string>
     <string name="content_description_no_subscriptions_indicator">"Geen abonnementsindicator"</string>
     <string name="content_description_create_multireddit">"MultiReddit aanmaken"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Knop op de navigatiebalk onderaan"</string>
     <string name="content_description_fab">"Zwevende actieknop"</string>
     <string name="content_description_download">"Downloaden"</string>
     <string name="content_description_share">"Delen"</string>

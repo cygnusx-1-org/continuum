@@ -552,33 +552,27 @@ class RestoreSettingsTest {
     }
 
     @Test
-    fun `an Infinity bottom app bar comes back in this app's numbering`() {
+    fun `an Infinity floating button choice comes back in this app's numbering`() {
         bottomAppBar.edit()
-            .putInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2), 5)
+            .putInt(key(null, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB), 3)
             .commit()
 
         restore(
             SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
                 SharedPreferencesUtils.THEME_KEY to "2"
             ),
-            // Infinity's numbering: 11 is Random, 13 Filter Posts; its FAB's 10 is Go To Top.
+            // Infinity's numbering: its main FAB's 10 is Go To Top, where Random sat at 7.
             SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE to mapOf(
-                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1 to 13,
-                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2 to 11,
-                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3 to 5,
                 "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB to 10,
+                "-" + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB to 7,
             ),
         )
 
-        assertEquals(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS,
-            bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
-        assertFalse("Random is gone, so the slot goes back to its default",
-            bottomAppBar.contains(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2)))
-        assertEquals("an option before Random keeps its number",
-            5, bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3), -1))
         assertEquals(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_TOP,
             bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
-        assertFalse(bottomAppBar.contains("-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
+        assertFalse("Random is gone, so the choice goes back to its default",
+            bottomAppBar.contains(key(null, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB)))
+        assertFalse(bottomAppBar.contains("-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB))
     }
 
     @Test

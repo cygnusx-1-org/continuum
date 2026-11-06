@@ -489,7 +489,6 @@ Toca para reintentar."</string>
     <string name="settings_post_compact_thumbnail_size">"Tamaño de miniatura"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Mostrar miniatura a la izquierda"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Mostrar miniatura a la derecha"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Alternar lado de miniatura"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"El número de columnas en el feed de publicaciones"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Vertical"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Horizontal"</string>
@@ -626,10 +625,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="settings_require_authentication_to_show_accounts">"Requerir autenticación para mostrar cuentas"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Mantener pulsado para ocultar la barra de herramientas"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ocultar barra superior por defecto"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Página principal"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Otras páginas"</string>
-    <string name="settings_bottom_app_bar_option_count">"Número de opciones"</string>
-    <string name="settings_bottom_app_bar_fab">"Botón de acción flotante"</string>
     <string name="settings_data_saving_mode">"Modo de ahorro de datos"</string>
     <string name="settings_data_saving_mode_info_summary">"En modo de ahorro de datos:
 La vista previa de imágenes tienen una resolución más baja.
@@ -1702,7 +1697,6 @@ Toque para volver a intentarlo."</string>
     <string name="content_description_video_indicator">"Indicador de vídeo"</string>
     <string name="content_description_no_subscriptions_indicator">"Sin indicador de suscripciones"</string>
     <string name="content_description_create_multireddit">"Crear multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Botón de la barra de navegación inferior"</string>
     <string name="content_description_fab">"Botón de acción flotante"</string>
     <string name="content_description_download">"Descargar"</string>
     <string name="content_description_share">"Compartir"</string>

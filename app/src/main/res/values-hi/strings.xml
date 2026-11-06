@@ -484,7 +484,6 @@
     <string name="settings_post_compact_thumbnail_size">"थंबनेल आकार"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"संक्षिप्त विन्यास में थम्बनेल बाईं तरफ दिखाएं "</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"दाईं ओर थंबनेल दिखाएँ"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"थंबनेल साइड टॉगल करें"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"पोस्ट फीड में स्तम्भों की संख्या "</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"ऊर्ध्वाधर"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">" क्षैतिज "</string>
@@ -617,10 +616,6 @@
     <string name="settings_require_authentication_to_show_accounts">"खाते दिखाने के लिए प्रमाणीकरण की आवश्यकता है"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"संक्षिप्त विन्यास में टूलबार को छुपाने के लिए लॉंग प्रैस "</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"संक्षिप्त विन्यास में टूलबार पूर्वनिर्धारित रूप से अदृश्य "</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"मुख्य पृष्ट "</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"अन्य पृष्ट "</string>
-    <string name="settings_bottom_app_bar_option_count">"विकल्प संख्या "</string>
-    <string name="settings_bottom_app_bar_fab">"तैरता क्रिया बटन "</string>
     <string name="settings_data_saving_mode">"डेटा संरक्षण प्रणाली"</string>
     <string name="settings_data_saving_mode_info_summary">"डेटा संरक्षण प्रणाली:
 पूर्वावलोकित चित्र की कमतर स्पष्टता।
@@ -1688,7 +1683,6 @@
     <string name="content_description_video_indicator">"वीडियो संकेतक"</string>
     <string name="content_description_no_subscriptions_indicator">"कोई सदस्यता संकेतक नहीं"</string>
     <string name="content_description_create_multireddit">"मल्टीरैडिट बनाएँ"</string>
-    <string name="content_description_bottom_navigation_bar_button">"निचला नेविगेशन बार बटन"</string>
     <string name="content_description_fab">"तैरता क्रिया बटन"</string>
     <string name="content_description_download">"डाउनलोड"</string>
     <string name="content_description_share">"दूसरो को भेजे"</string>

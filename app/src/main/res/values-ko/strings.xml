@@ -489,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"썸네일 크기"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"썸네일 좌측으로 표시"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"오른쪽에 썸네일 표시"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"썸네일 측면 전환"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"포스트 피드의 열 수"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"초상화"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"풍경"</string>
@@ -622,10 +621,6 @@
     <string name="settings_require_authentication_to_show_accounts">"계정을 표시하려면 인증이 필요합니다."</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"길게 눌러 도구 모음 숨기기"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"기본적으로 도구 모음 숨기기"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"메인 페이지"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"기타 페이지"</string>
-    <string name="settings_bottom_app_bar_option_count">"옵션 수"</string>
-    <string name="settings_bottom_app_bar_fab">"플로팅 작업 버튼"</string>
     <string name="settings_data_saving_mode">"데이터 절약 모드"</string>
     <string name="settings_data_saving_mode_info_summary">"데이터 절약 모드:\n미리보기 이미지의 해상도가 낮습니다.\nReddit 및 Redgifs 동영상의 해상도가 낮습니다.\n동영상 자동 재생이 비활성화됩니다."</string>
     <string name="settings_translation_title">"번역"</string>
@@ -1684,7 +1679,6 @@
     <string name="content_description_video_indicator">"비디오 표시기"</string>
     <string name="content_description_no_subscriptions_indicator">"구독 표시 없음"</string>
     <string name="content_description_create_multireddit">"MultiReddit 생성"</string>
-    <string name="content_description_bottom_navigation_bar_button">"하단 탐색 모음 버튼"</string>
     <string name="content_description_fab">"플로팅 작업 버튼"</string>
     <string name="content_description_download">"다운로드"</string>
     <string name="content_description_share">"공유"</string>

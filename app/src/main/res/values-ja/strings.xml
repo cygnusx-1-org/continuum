@@ -488,7 +488,6 @@
     <string name="settings_post_compact_thumbnail_size">"サムネイルのサイズ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"コンパクトレイアウトでサムネイルを左側に表示"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"右側にサムネイルを表示"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"サムネイルの横を切り替え"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"投稿フィードの表示列数"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"縦画面時"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"横画面時"</string>
@@ -625,10 +624,6 @@
     <string name="settings_require_authentication_to_show_accounts">"アカウントを表示するためには認証が必要です"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"コンパクトレイアウトのツールバーを長押しで非表示"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"コンパクトレイアウトのツールバーを標準で非表示"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"メインページ"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"他のページ"</string>
-    <string name="settings_bottom_app_bar_option_count">"ボタン数"</string>
-    <string name="settings_bottom_app_bar_fab">"アクションボタン"</string>
     <string name="settings_data_saving_mode">"データ節約モード"</string>
     <string name="settings_data_saving_mode_info_summary">"データ節約モード:\nプレビュー画像は低解像度です。\nReddit および Redgifs ビデオは低解像度です。\nビデオの自動再生は無効です。"</string>
     <string name="settings_translation_title">"翻訳"</string>
@@ -1691,7 +1686,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_video_indicator">"ビデオインジケーター"</string>
     <string name="content_description_no_subscriptions_indicator">"サブスクリプションインジケーターがありません"</string>
     <string name="content_description_create_multireddit">"MultiReddit を作成"</string>
-    <string name="content_description_bottom_navigation_bar_button">"下部ナビゲーション バー ボタン"</string>
     <string name="content_description_fab">"アクションボタン"</string>
     <string name="content_description_download">"ダウンロード"</string>
     <string name="content_description_share">"共有"</string>

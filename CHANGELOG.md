@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.20 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: the bottom app bar's leftover option lists, constants and migration code are removed. The file that remembers what the floating button does is kept, and old backups still restore it
+
 8.3.3.9.1.26-beta.19 / 2026-11-6
 ============
 * Custom themes no longer have the "Bottom Navigation Bar Color" and "Bottom Navigation Bar Icon Color" rows, and the theme preview no longer draws a bottom bar. Existing themes are unaffected; the two stored values are simply no longer used

@@ -489,7 +489,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_post_compact_thumbnail_size">"Dimensiunea miniaturii"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Se afișează miniatura pe partea stângă"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Afișează miniatura din dreapta"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Comută latura miniaturii"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Numărul de Coloane în Fluxul de Postări"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Peisaj"</string>
@@ -626,10 +625,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_require_authentication_to_show_accounts">"Necesită Autentificare pentru a Afișa Conturile"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Apasă Lung pentru a Ascunde Bara de Instrumente"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ascunde Bara de Instrumente în Mod Implicit"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Pagina Principală"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Alte Pagini"</string>
-    <string name="settings_bottom_app_bar_option_count">"Număr de Opțiuni"</string>
-    <string name="settings_bottom_app_bar_fab">"Buton de Acțiune Plutitor"</string>
     <string name="settings_data_saving_mode">"Regim de Economisire a Datelor"</string>
     <string name="settings_data_saving_mode_info_summary">"În regimul de economisire a datelor:
 Imaginile de previzualizare au o rezoluție mai mică.
@@ -1703,7 +1698,6 @@ Apasă pentru a reîncerca."</string>
     <string name="content_description_video_indicator">"Indicator video"</string>
     <string name="content_description_no_subscriptions_indicator">"Indicator fără abonamente"</string>
     <string name="content_description_create_multireddit">"Creează multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Buton din bara de navigare de jos"</string>
     <string name="content_description_fab">"Buton de Acțiune Plutitor"</string>
     <string name="content_description_download">"Descarcăre"</string>
     <string name="content_description_share">"Distribuire"</string>

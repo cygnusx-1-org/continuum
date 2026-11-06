@@ -489,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"Розмір мініатюри"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Показувати мініатюру ліворуч"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Показати мініатюру праворуч"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Перемкнути бік ескізу"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Кількість стовпців у стрічці дописів"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Портретна"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Альбомна"</string>
@@ -626,10 +625,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Щоб показати обліківки потрібна автентифікація"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Довге натискання ховає панель засобів"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Ховати панель засобів типово"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Основна сторінка"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Інші сторінки"</string>
-    <string name="settings_bottom_app_bar_option_count">"Кількість параметрів"</string>
-    <string name="settings_bottom_app_bar_fab">"Плаваюча кнопка дії"</string>
     <string name="settings_data_saving_mode">"Режим збереження даних"</string>
     <string name="settings_data_saving_mode_info_summary">"У режимі зберігання даних:
 Попередній перегляд зображень має низьку роздільність.
@@ -1705,7 +1700,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_video_indicator">"Відеоіндикатор"</string>
     <string name="content_description_no_subscriptions_indicator">"Індикатор відсутності підписок"</string>
     <string name="content_description_create_multireddit">"Створити MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Кнопка нижньої панелі навігації"</string>
     <string name="content_description_fab">"Плаваюча кнопка дії"</string>
     <string name="content_description_download">"Завантажити"</string>
     <string name="content_description_share">"Поширити"</string>

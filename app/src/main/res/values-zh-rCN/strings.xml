@@ -489,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"缩略图尺寸"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"紧凑布局中在左侧显示缩略图"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"在右侧显示缩略图"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"切换缩略图侧"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"帖子列表页面的列数"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"竖屏"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"横屏"</string>
@@ -626,10 +625,6 @@
     <string name="settings_require_authentication_to_show_accounts">"需要身份验证才能显示帐户"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"在紧凑布局下长按隐藏工具栏"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"默认隐藏紧凑布局中的工具栏"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"主页"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"其他页面"</string>
-    <string name="settings_bottom_app_bar_option_count">"选项数量"</string>
-    <string name="settings_bottom_app_bar_fab">"悬浮动作按钮"</string>
     <string name="settings_data_saving_mode">"省流模式"</string>
     <string name="settings_data_saving_mode_info_summary">"在省流模式下：
 预览图片分辨率较低。
@@ -1697,7 +1692,6 @@ Reddit 视频分辨率较低。
     <string name="content_description_video_indicator">"视频指示灯"</string>
     <string name="content_description_no_subscriptions_indicator">"无订阅指示符"</string>
     <string name="content_description_create_multireddit">"创建 MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"底部导航栏按钮"</string>
     <string name="content_description_fab">"悬浮动作按钮"</string>
     <string name="content_description_download">"下载"</string>
     <string name="content_description_share">"分享"</string>

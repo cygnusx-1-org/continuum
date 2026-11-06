@@ -480,7 +480,6 @@
     <string name="settings_post_compact_thumbnail_size">"Veličina sličice"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Prikaži sličicu na lijevoj strani u Kompaktnom rasporedu"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Prikaži sličicu s desne strane"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Prebaci stranu sličice"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Broj stupaca u feed-u objava"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Pejzaž"</string>
@@ -613,10 +612,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Zahtijeva autentifikaciju za prikaz računa"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Dugo pritisni za skrivanje alatne trake u Kompaktnom rasporedu"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Alatna traka u Kompaktnom rasporedu je zadano skrivena"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Glavna stranica"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Druge stranice"</string>
-    <string name="settings_bottom_app_bar_option_count">"Broj opcija"</string>
-    <string name="settings_bottom_app_bar_fab">"Plutajući akcijski gumb"</string>
     <string name="settings_data_saving_mode">"Način uštede podataka"</string>
     <string name="settings_data_saving_mode_info_summary">"U načinu rada za uštedu podataka:\nPregled slika je u nižoj rezoluciji.\nReddit i Redgifs video zapisi su u nižoj rezoluciji.\nAutomatska reprodukcija videa je onemogućena."</string>
     <string name="settings_translation_title">"Prijevod"</string>
@@ -1682,7 +1677,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="content_description_video_indicator">"Video indikator"</string>
     <string name="content_description_no_subscriptions_indicator">"Nema indikatora pretplata"</string>
     <string name="content_description_create_multireddit">"Stvori multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Donji gumb navigacijske trake"</string>
     <string name="content_description_fab">"Plutajući akcijski gumb"</string>
     <string name="content_description_download">"Preuzmi"</string>
     <string name="content_description_share">"Podijeli"</string>

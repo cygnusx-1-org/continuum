@@ -486,7 +486,6 @@
     <string name="settings_post_compact_thumbnail_size">"சிறுபட அளவு"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"சிறுபடத்தை இடதில் காட்டு"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"வலதுபுறத்தில் சிறுபடத்தைக் காட்டு"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"சிறுபடம் பக்கத்தை மாற்றவும்"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"போஸ்ட் ஃபீடில் உள்ள நெடுவரிசைகளின் எண்ணிக்கை"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"உருவப்படம்"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"நிலப்பரப்பு"</string>
@@ -619,10 +618,6 @@
     <string name="settings_require_authentication_to_show_accounts">"கணக்குகளைக் காட்ட அங்கீகாரம் தேவை"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"கருவிப்பட்டையை மறைக்க நீண்டழுத்து"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"கருவிப்பட்டையை இயல்பாகவே மறை"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"முதன்மை பக்கம்"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"பிற பக்கங்கள்"</string>
-    <string name="settings_bottom_app_bar_option_count">"விருப்ப எண்ணிக்கை"</string>
-    <string name="settings_bottom_app_bar_fab">"மிதக்கும் செயல் பட்டன்"</string>
     <string name="settings_data_saving_mode">"தரவு சேமிப்பு பயன்முறை"</string>
     <string name="settings_data_saving_mode_info_summary">"தரவு சேமிப்பு முறையில்:\nமுன்னோட்ட படங்கள் குறைந்த தெளிவுத்திறனில் உள்ளன.\nReddit மற்றும் Redgifs வீடியோக்கள் குறைந்த தெளிவுத்திறனில் உள்ளன.\nவீடியோ ஆட்டோபிளே முடக்கப்பட்டுள்ளது."</string>
     <string name="settings_translation_title">"மொழிபெயர்ப்பு"</string>
@@ -1683,7 +1678,6 @@
     <string name="content_description_video_indicator">"வீடியோ காட்டி"</string>
     <string name="content_description_no_subscriptions_indicator">"சந்தாக்கள் இல்லை"</string>
     <string name="content_description_create_multireddit">"MultiReddit உருவாக்கு"</string>
-    <string name="content_description_bottom_navigation_bar_button">"கீழ் வழிசெலுத்தல் பட்டி பொத்தான்"</string>
     <string name="content_description_fab">"மிதக்கும் செயல் பொத்தான்"</string>
     <string name="content_description_download">"பதிவிறக்கு"</string>
     <string name="content_description_share">"பகிர்"</string>

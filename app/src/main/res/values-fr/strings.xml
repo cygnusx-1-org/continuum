@@ -484,7 +484,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_post_compact_thumbnail_size">"Taille de la vignette"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Afficher la miniature à gauche"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Afficher la vignette à droite"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Basculer le côté des vignettes"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Nombre de colonnes dans le flux"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portrait"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Paysage"</string>
@@ -617,10 +616,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_require_authentication_to_show_accounts">"Nécessite de s'authentifier pour afficher les comptes"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Appuyer longuement pour cacher la barre d'outils dans la disposition \"compacte\""</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Cacher la barre d'outil par défaut dans la disposition \"compacte\" "</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Page Principale"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Autres pages"</string>
-    <string name="settings_bottom_app_bar_option_count">"Nombre d'options"</string>
-    <string name="settings_bottom_app_bar_fab">"Action du bouton flottant"</string>
     <string name="settings_data_saving_mode">"Mode économie de données"</string>
     <string name="settings_data_saving_mode_info_summary">"En mode d'économie de données :\nLes images d'aperçu sont en résolution inférieure.\nReddit et Redgifs les vidéos sont en résolution inférieure.\nLa lecture automatique des vidéos est désactivée."</string>
     <string name="settings_translation_title">"Traduction"</string>
@@ -1690,7 +1685,6 @@ Cliquez pour réessayer."</string>
     <string name="content_description_video_indicator">"Indicateur vidéo"</string>
     <string name="content_description_no_subscriptions_indicator">"Indicateur d'absence d'abonnement"</string>
     <string name="content_description_create_multireddit">"Créer un multireddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Bouton de la barre de navigation inférieure"</string>
     <string name="content_description_fab">"Action du bouton flottant"</string>
     <string name="content_description_download">"Télécharger"</string>
     <string name="content_description_share">"Partager"</string>

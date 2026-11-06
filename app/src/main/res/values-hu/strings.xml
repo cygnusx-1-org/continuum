@@ -481,7 +481,6 @@
     <string name="settings_post_compact_thumbnail_size">"Indexkép mérete"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Bélyegkép megjelenítése baloldalt"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatűr megjelenítése a jobb oldalon"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Bélyegkép oldala"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Az oszlopok száma a poszt feedben"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portré"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Tájlép"</string>
@@ -614,10 +613,6 @@
     <string name="settings_require_authentication_to_show_accounts">"A fiókok megjelenítéséhez hitelesítés szükséges"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Nyomd hosszan, hogy elrejtsd az eszköztárat kompakt elrendezésben"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Az eszköztár alapértelmezve rejtett kompakt elrendezésben"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Főoldal"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Más oldalak"</string>
-    <string name="settings_bottom_app_bar_option_count">"Opció szám"</string>
-    <string name="settings_bottom_app_bar_fab">"Lebegő művelet gomb"</string>
     <string name="settings_data_saving_mode">"Adatcsökkentő mód"</string>
     <string name="settings_data_saving_mode_info_summary">"Adatcsökkentő módban:
 Előnézeti képek alacsonyabb felbontásban lesznek.
@@ -1686,7 +1681,6 @@ Az alap az indigó amoled téma"</string>
     <string name="content_description_video_indicator">"Videójelző"</string>
     <string name="content_description_no_subscriptions_indicator">"Nincs előfizetés jelző"</string>
     <string name="content_description_create_multireddit">"MultiReddit létrehozása"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Alsó navigációs sáv gomb"</string>
     <string name="content_description_fab">"Lebegő művelet gomb"</string>
     <string name="content_description_download">"Letöltés"</string>
     <string name="content_description_share">"Megosztás"</string>

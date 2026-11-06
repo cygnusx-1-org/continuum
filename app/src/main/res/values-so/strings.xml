@@ -479,7 +479,6 @@
     <string name="settings_post_compact_thumbnail_size">"cabbirka sawirka thumbnail"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Muuji thumbnail dhinaca bidix"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Muuji thumbnail dhinaca midig"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Beddel Dhinaca Tumbnailka"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Tirada Tiirarka ku jira Quudinta Boostada"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Sawirka"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Muuqaalka muuqaalka"</string>
@@ -612,10 +611,6 @@
     <string name="settings_require_authentication_to_show_accounts">"waxay u baahan tahay xaqiijin si loo muujiyo xisaabaadka"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Riix dheer si aad u qariso Toolbar"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Qari Toolbar sida ugu talagalka ah"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Bogga ugu muhiimsan"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Bogagga kale"</string>
-    <string name="settings_bottom_app_bar_option_count">"Tirada Doorashada"</string>
-    <string name="settings_bottom_app_bar_fab">"Badhanka Ficil Sabaynta"</string>
     <string name="settings_data_saving_mode">"Habka Keydinta Xogta"</string>
     <string name="settings_data_saving_mode_info_summary">"Habka kaydinta xogta:\nSawirada horudhaca ayaa xalin hoose ku jira.\nReddit iyo Redgifs fiidyowyo ayaa xalin hoose ku jira.\nFiidiyow-ku-ciyaarid toos ah waa naafo"</string>
     <string name="settings_translation_title">"Turjumaada"</string>
@@ -1676,7 +1671,6 @@
     <string name="content_description_video_indicator">"Tusiyaha Fiidiyowga"</string>
     <string name="content_description_no_subscriptions_indicator">"Ma jiro tilmaame is-diiwaangelin"</string>
     <string name="content_description_create_multireddit">"Samee Reddit-badane"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Bottom bar navigation button"</string>
     <string name="content_description_fab">"badhanka ficil sabaynta"</string>
     <string name="content_description_download">"Daji"</string>
     <string name="content_description_share">"La wadaag"</string>

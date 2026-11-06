@@ -490,7 +490,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_post_compact_thumbnail_size">"Küçük resim boyutu"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Küçük Resmi Solda Göster"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Sağdaki Küçük Resmi Göster"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Küçük Resim Tarafını Değiştir"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Gönderi Akışındaki Sütun Sayısı"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portre"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Manzara"</string>
@@ -623,10 +622,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_require_authentication_to_show_accounts">"Hesapları Göstermek için Kimlik Doğrulaması Gerektir"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Araç Çubuğunu Kompakt Düzende Gizlemek İçin Uzun Dokun"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Varsayılan Olarak Araç Çubuğunu Gizle"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Ana Sayfa"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Diğer Sayfalar"</string>
-    <string name="settings_bottom_app_bar_option_count">"Seçenek Sayısı"</string>
-    <string name="settings_bottom_app_bar_fab">"Kayan İşlem Düğmesi"</string>
     <string name="settings_data_saving_mode">"Veri Tasarrufu Modu"</string>
     <string name="settings_data_saving_mode_info_summary">"Veri tasarrufu modunda:
 Resim önizlemelerinin çözünürlüğü düşer.
@@ -1698,7 +1693,6 @@ Tekrar denemek için dokun."</string>
     <string name="content_description_video_indicator">"Video göstergesi"</string>
     <string name="content_description_no_subscriptions_indicator">"Abonelik yok göstergesi"</string>
     <string name="content_description_create_multireddit">"MultiReddit Oluştur"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Alt gezinme çubuğu düğmesi"</string>
     <string name="content_description_fab">"Kayan İşlem Düğmesi"</string>
     <string name="content_description_download">"İndir"</string>
     <string name="content_description_share">"Paylaş"</string>

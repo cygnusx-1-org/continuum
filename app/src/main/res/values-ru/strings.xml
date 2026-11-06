@@ -488,7 +488,6 @@
     <string name="settings_post_compact_thumbnail_size">"Размер миниатюры"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Показывать миниатюры слева"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Показать миниатюру справа"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Переключить сторону миниатюр"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Количество столбцов в ленте постов"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Портрет"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Альбом"</string>
@@ -625,10 +624,6 @@
     <string name="settings_require_authentication_to_show_accounts">"Для отображения аккаунтов необходима аутентификация"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Удерживать – скрытие панели инструментов в компакте"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Панель инструментов в компактом макете скрыта по умолчанию"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Главная страница"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Другие страницы"</string>
-    <string name="settings_bottom_app_bar_option_count">"Количество вариантов"</string>
-    <string name="settings_bottom_app_bar_fab">"Плавающая кнопка действий"</string>
     <string name="settings_data_saving_mode">"Режим экономии трафика"</string>
     <string name="settings_data_saving_mode_info_summary">"В режиме экономии трафика:
 Просмотр изображений – уменьшенное разрешение.
@@ -1705,7 +1700,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_video_indicator">"Индикатор видео"</string>
     <string name="content_description_no_subscriptions_indicator">"Индикатор отсутствия подписок"</string>
     <string name="content_description_create_multireddit">"Создать MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Кнопка нижней панели навигации"</string>
     <string name="content_description_fab">"Плавающая кнопка действий"</string>
     <string name="content_description_download">"Загрузить"</string>
     <string name="content_description_share">"Поделиться"</string>
