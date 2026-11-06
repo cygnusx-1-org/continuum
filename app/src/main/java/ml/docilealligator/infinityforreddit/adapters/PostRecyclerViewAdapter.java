@@ -1303,11 +1303,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 .listener(toroPlayer.previewRequestListener)
                                 .into(toroPlayer.previewImageView);
                     }
+                    asVideo.toroPlayer.setForceMuted(post.isNSFW() && mMuteNSFWVideo);
                     if (!asVideo.toroPlayer.isManuallyPaused) {
                         if (mFragment.getMasterMutingOption() == null) {
                             asVideo.toroPlayer.setVolume(mMuteAutoplayingVideos || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
                         } else {
-                            asVideo.toroPlayer.setVolume(mFragment.getMasterMutingOption() ? 0f : 1f);
+                            asVideo.toroPlayer.setVolume(mFragment.getMasterMutingOption() || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
                         }
                     }
 
@@ -3133,6 +3134,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setAutoplayNsfwVideos(boolean autoplayNsfwVideos) {
         mAutoplayNsfwVideos = autoplayNsfwVideos;
+    }
+
+    /** Carries a muting choice made on one video to every video bound in the list. */
+    public void applyMuteToVideos(RecyclerView recyclerView, boolean mute) {
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+            if (holder instanceof PostBaseVideoAutoplayViewHolder asVideo) {
+                asVideo.toroPlayer.applyMute(mute);
+            }
+        }
     }
 
     public void setMuteAutoplayingVideos(boolean muteAutoplayingVideos) {

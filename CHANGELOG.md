@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.27-beta.2 / 2026-11-6
+============
+**Fixed**
+* With "Remember muting option" on, muting or unmuting one video in the feed now carries to every other video already set up (several playing at once, or ready below), instead of only to the ones that start afterwards
+* "Mute NSFW videos" is no longer overridden by the remembered muting option: NSFW videos stay silent until you unmute that video yourself
+
+---
+
 8.3.3.9.1.27-beta.1 / 2026-11-5
 ============
 **Fixed**
