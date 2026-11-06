@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.9 / 2026-11-6
+============
+* The picture numbers in the vertical gallery list are a little larger
+
 8.3.3.9.1.26-beta.8 / 2026-11-6
 ============
 * Settings: Time Format and Immersive Interface no longer have screens of their own; their switches are on the Interface screen
