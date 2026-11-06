@@ -11,6 +11,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import org.greenrobot.eventbus.EventBus;
+import ml.docilealligator.infinityforreddit.events.ChangeOnlyDisablePreviewInVideoAndGifPostsEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDisableImagePreviewEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDataSavingModeEvent;
+import androidx.preference.SwitchPreference;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.recyclerview.widget.RecyclerView;
 import java.net.URLDecoder;
@@ -43,10 +49,104 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
     // Flag to track if a long press occurred
     private boolean isLongPressing = false;
 
+    /** The data saving options, which share this screen with the download locations. */
+    private void setUpDataSaving() {
+        ListPreference dataSavingModeListPreference = findPreference(SharedPreferencesUtils.DATA_SAVING_MODE);
+        SwitchPreference disableImagePreviewPreference = findPreference(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW);
+        SwitchPreference onlyDisablePreviewInVideoAndGifPostsPreference = findPreference(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS);
+        ListPreference redditVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION);
+        ListPreference redgifsVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDGIFS_VIDEO_DEFAULT_RESOLUTION);
+        ListPreference mlbVideoDefaultBitrateListPreference = findPreference(SharedPreferencesUtils.MLB_VIDEO_DEFAULT_BITRATE);
+
+        if (dataSavingModeListPreference != null) {
+            if (dataSavingModeListPreference.getValue().equals("0")) {
+                if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
+                    onlyDisablePreviewInVideoAndGifPostsPreference.setVisible(false);
+                }
+                if (disableImagePreviewPreference != null) {
+                    disableImagePreviewPreference.setVisible(false);
+                }
+                if (redditVideoDefaultResolutionListPreference != null) {
+                    redditVideoDefaultResolutionListPreference.setVisible(false);
+                }
+                if (redgifsVideoDefaultResolutionListPreference != null) {
+                    redgifsVideoDefaultResolutionListPreference.setVisible(false);
+                }
+                if (mlbVideoDefaultBitrateListPreference != null) {
+                    mlbVideoDefaultBitrateListPreference.setVisible(false);
+                }
+            }
+            dataSavingModeListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeDataSavingModeEvent((String) newValue));
+                if (newValue.equals("0")) {
+                    if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
+                        onlyDisablePreviewInVideoAndGifPostsPreference.setVisible(false);
+                    }
+                    if (disableImagePreviewPreference != null) {
+                        disableImagePreviewPreference.setVisible(false);
+                    }
+                    if (redditVideoDefaultResolutionListPreference != null) {
+                        redditVideoDefaultResolutionListPreference.setVisible(false);
+                    }
+                    if (redgifsVideoDefaultResolutionListPreference != null) {
+                        redgifsVideoDefaultResolutionListPreference.setVisible(false);
+                    }
+                    if (mlbVideoDefaultBitrateListPreference != null) {
+                        mlbVideoDefaultBitrateListPreference.setVisible(false);
+                    }
+                } else {
+                    if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
+                        onlyDisablePreviewInVideoAndGifPostsPreference.setVisible(true);
+                    }
+                    if (disableImagePreviewPreference != null) {
+                        disableImagePreviewPreference.setVisible(true);
+                    }
+                    if (redditVideoDefaultResolutionListPreference != null) {
+                        redditVideoDefaultResolutionListPreference.setVisible(true);
+                    }
+                    if (redgifsVideoDefaultResolutionListPreference != null) {
+                        redgifsVideoDefaultResolutionListPreference.setVisible(true);
+                    }
+                    if (mlbVideoDefaultBitrateListPreference != null) {
+                        mlbVideoDefaultBitrateListPreference.setVisible(true);
+                    }
+                }
+                return true;
+            });
+        }
+
+        if (disableImagePreviewPreference != null) {
+            disableImagePreviewPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeDisableImagePreviewEvent((Boolean) newValue));
+                if ((Boolean) newValue) {
+                    EventBus.getDefault().post(new ChangeOnlyDisablePreviewInVideoAndGifPostsEvent(false));
+                    if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
+                        onlyDisablePreviewInVideoAndGifPostsPreference.setChecked(false);
+                    }
+                }
+                return true;
+            });
+        }
+
+        if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
+            onlyDisablePreviewInVideoAndGifPostsPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeOnlyDisablePreviewInVideoAndGifPostsEvent((Boolean) newValue));
+                if ((Boolean) newValue) {
+                    EventBus.getDefault().post(new ChangeDisableImagePreviewEvent(false));
+                    if (disableImagePreviewPreference != null) {
+                        disableImagePreviewPreference.setChecked(false);
+                    }
+                }
+                return true;
+            });
+        }
+    }
+
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
         setPreferencesFromResource(R.xml.download_location_preferences, rootKey);
+        setUpDataSaving();
 
         imageDownloadLocationPreference = findPreference(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION);
         gifDownloadLocationPreference = findPreference(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION);

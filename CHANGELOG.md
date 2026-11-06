@@ -2,6 +2,11 @@
 
 ---
 
+8.3.3.9.1.26-beta.21 / 2026-11-6
+============
+* Settings: Data Saving Mode and Download Location are one screen, "Data saving and downloads", and Notifications and Proxy are one screen, "Notifications and proxy". Security stays on its own because it asks you to unlock first
+* Settings: you can choose again what the floating button does, on the Interface screen: one choice for the main page and one for the other pages. A choice made before the bottom bar went away is kept until you pick one here
+
 8.3.3.9.1.26-beta.20 / 2026-11-6
 ============
 * Internal clean-up with no change in what you see: the bottom app bar's leftover option lists, constants and migration code are removed. The file that remembers what the floating button does is kept, and old backups still restore it

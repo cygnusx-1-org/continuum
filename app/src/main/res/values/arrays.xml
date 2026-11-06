@@ -41,6 +41,32 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="settings_fab_action">
+        <item>@string/submit_post</item>
+        <item>@string/refresh</item>
+        <item>@string/change_sort_type</item>
+        <item>@string/change_post_layout</item>
+        <item>@string/search</item>
+        <item>@string/go_to_subreddit</item>
+        <item>@string/go_to_user</item>
+        <item>@string/hide_read_posts</item>
+        <item>@string/filter_posts</item>
+        <item>@string/go_to_top</item>
+    </string-array>
+
+    <string-array name="settings_fab_action_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </string-array>
+
     <string-array name="settings_default_post_layout">
         <item>@string/post_layout_card</item>
         <item>@string/post_layout_card_3</item>

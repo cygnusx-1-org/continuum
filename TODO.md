@@ -23,8 +23,8 @@ The settings home is grouped by scope, on purpose: "Account · ..." headings are
 
 - Done: Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar were promoted out of Interface (`beta.7`). Time Format and Immersive Interface were folded into Interface (`beta.8`). The repeated volume-key rows are gone and Disable Swiping Between Tabs sits with Tab Switching Sensitivity (`beta.10`). Global Settings Management was merged into Backup and Restore, now "Backup, restore and reset" (`beta.14`).
 - Not done, and why:
-  - Media settings are still in Video, Data Saving Mode, Download Location and Device.
-  - Notifications, Proxy and Security are small separate Global screens. Merge them only among Global screens.
+  - Done in `beta.21`: Data Saving Mode and Download Location are one screen ("Data saving and downloads"); Notifications and Proxy are one screen ("Notifications and proxy"; the proxy rows live in their own file, reached through `KeyRoutedPreferenceDataStore`). Security stays separate on purpose: it asks for the device lock before it shows, and joining it to another screen would either lock that screen too or show the app-lock settings without the lock.
+  - Media settings are still in Video (per account) and Device (the preview max resolution; fold support is global and cannot move to a per-account screen).
   - Account Settings Management is per-account and cannot join the global screens.
 - The Post Details screen is not a duplicate of Posts: they are the same options for the feed and for the detail view, stored in separate files.
 - How: one screen group per release. Moving XML rows is safe; the screen's listeners have to move with them, and `SCREEN_RESOURCES` in `SettingsSearchRegistry` loses the screen. Deleting or renaming a key needs a migration. Every string removed from `values/strings.xml` must go from the 23 `values-*` files too, and `AccountScopedKeysTest` and `SettingsSearchRegistryTest` list keys, titles and breadcrumbs. New strings are English only; other languages fall back to it.

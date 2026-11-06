@@ -67,6 +67,7 @@ object AccountScopedKeys {
         "number_of_columns_in_post_feed_landscape_gallery_layout",
 
         // Interface.
+        "main_activity_fab_action", "other_activities_fab_action",
         "hide_fab_in_post_feed", "hide_subreddit_banner", "hide_subreddit_icon", "hide_subreddit_description",
         "default_search_result_tab",
         "lazy_mode_interval", "shadowbox_hide_text_and_previewless_posts",
