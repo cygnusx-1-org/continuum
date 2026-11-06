@@ -616,6 +616,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             binding.recyclerViewHistoryPostFragment.addItemDecoration(itemDecoration);
             mLinearLayoutManager = null;
         }
+        syncSwipeActions(binding.recyclerViewHistoryPostFragment, nColumns);
 
         if (previousPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(previousPosition);

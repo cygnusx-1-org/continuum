@@ -2067,6 +2067,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             binding.recyclerViewPostFragment.addItemDecoration(itemDecoration);
             mLinearLayoutManager = null;
         }
+        syncSwipeActions(binding.recyclerViewPostFragment, nColumns);
 
         if (previousPosition > 0) {
             binding.recyclerViewPostFragment.scrollToPosition(previousPosition);

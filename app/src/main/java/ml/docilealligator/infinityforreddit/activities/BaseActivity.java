@@ -967,7 +967,10 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             return false;
         }
         if (this instanceof PostLayoutBottomSheetFragment.PostLayoutSelectionCallback callback) {
-            callback.postLayoutSelected(postLayout);
+            // A frame later, once the menu has finished closing: rebuilding the feed takes long
+            // enough to freeze the menu on screen and swallow the touches meant for it.
+            final int chosen = postLayout;
+            getWindow().getDecorView().post(() -> callback.postLayoutSelected(chosen));
         }
         return true;
     }

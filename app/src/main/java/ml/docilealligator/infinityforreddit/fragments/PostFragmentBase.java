@@ -600,6 +600,20 @@ public abstract class PostFragmentBase extends Fragment {
         }
     }
 
+    /**
+     * Swipe actions only work in a one-column feed, and the layout decides the columns, so a layout
+     * change can turn them on or off: from the two-column Gallery layout to a card layout they were
+     * never attached, and into it they stayed attached to a feed they cannot work in.
+     */
+    protected final void syncSwipeActions(RecyclerView recyclerView, int nColumns) {
+        if (touchHelper == null) {
+            return;
+        }
+        boolean enabled = nColumns == 1 && mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false);
+        swipeActionEnabled = enabled;
+        touchHelper.attachToRecyclerView(enabled ? recyclerView : null, 1);
+    }
+
     public final void changePostLayout(int postLayout) {
         changePostLayout(postLayout, false);
     }
