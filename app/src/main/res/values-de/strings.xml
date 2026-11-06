@@ -629,10 +629,6 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Hauptseite"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Seiten"</string>
     <string name="settings_bottom_app_bar_option_count">"Anzahl an Optionen"</string>
-    <string name="settings_bottom_app_bar_option_1">"Option 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Option 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Option 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Option 4"</string>
     <string name="settings_bottom_app_bar_fab">"Schwebender Aktionsknopf"</string>
     <string name="settings_data_saving_mode">"Datensparmodus"</string>
     <string name="settings_data_saving_mode_info_summary">"Im Datensparmodus:

@@ -37,22 +37,6 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!--
-          Tablet/landscape only: the bottom app bar takes its place in the other
-          configurations, so this id is deliberately absent from them.
-          NavigationWrapper.navigationRailView is null there and every use of it is
-          null-checked, which is why InconsistentLayoutVariantIds is suppressed here.
-        -->
-        <com.google.android.material.navigationrail.NavigationRailView
-            android:id="@+id/navigation_rail"
-            tools:ignore="InconsistentLayoutVariantIds"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            app:headerLayout="@layout/floating_action_button"
-            app:menu="@menu/navigation_rail_menu"
-            app:labelVisibilityMode="unlabeled"
-            app:itemActiveIndicatorStyle="@style/App.Custom.Indicator" />
-
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/frame_layout_view_multi_reddit_detail_activity"
             android:layout_width="match_parent"
@@ -60,16 +44,12 @@
 
     </LinearLayout>
 
-    <include
-        layout="@layout/bottom_app_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_view_multi_reddit_detail_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
         android:visibility="gone"
         android:contentDescription="@null" />

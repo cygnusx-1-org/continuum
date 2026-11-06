@@ -629,10 +629,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Hlavní stránka"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Ostatní stránky"</string>
     <string name="settings_bottom_app_bar_option_count">"Počet možností"</string>
-    <string name="settings_bottom_app_bar_option_1">"Možnost 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Možnost 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Možnost 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Možnost 4"</string>
     <string name="settings_bottom_app_bar_fab">"Létající akční tlačítko"</string>
     <string name="settings_data_saving_mode">"Režim úspory dat"</string>
     <string name="settings_data_saving_mode_info_summary">"V režimu úspory dat:

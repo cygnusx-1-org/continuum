@@ -616,10 +616,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Glavna stranica"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Druge stranice"</string>
     <string name="settings_bottom_app_bar_option_count">"Broj opcija"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opcija 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opcija 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opcija 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opcija 4"</string>
     <string name="settings_bottom_app_bar_fab">"Plutajući akcijski gumb"</string>
     <string name="settings_data_saving_mode">"Način uštede podataka"</string>
     <string name="settings_data_saving_mode_info_summary">"U načinu rada za uštedu podataka:\nPregled slika je u nižoj rezoluciji.\nReddit i Redgifs video zapisi su u nižoj rezoluciji.\nAutomatska reprodukcija videa je onemogućena."</string>

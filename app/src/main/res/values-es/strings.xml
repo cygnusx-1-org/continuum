@@ -629,10 +629,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Página principal"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Otras páginas"</string>
     <string name="settings_bottom_app_bar_option_count">"Número de opciones"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opción 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opción 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opción 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opción 4"</string>
     <string name="settings_bottom_app_bar_fab">"Botón de acción flotante"</string>
     <string name="settings_data_saving_mode">"Modo de ahorro de datos"</string>
     <string name="settings_data_saving_mode_info_summary">"En modo de ahorro de datos:

@@ -629,10 +629,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"主页"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"其他页面"</string>
     <string name="settings_bottom_app_bar_option_count">"选项数量"</string>
-    <string name="settings_bottom_app_bar_option_1">"选项 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"选项 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"选项 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"选项 4"</string>
     <string name="settings_bottom_app_bar_fab">"悬浮动作按钮"</string>
     <string name="settings_data_saving_mode">"省流模式"</string>
     <string name="settings_data_saving_mode_info_summary">"在省流模式下：
