@@ -445,19 +445,6 @@ public abstract class PostFragmentBase extends Fragment {
         this.mActivity = (BaseActivity) context;
     }
 
-    public final boolean handleKeyDown(int keyCode) {
-        boolean volumeKeysNavigatePosts = mSharedPreferences.getBoolean(SharedPreferencesUtils.VOLUME_KEYS_NAVIGATE_POSTS, false);
-        if (volumeKeysNavigatePosts) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                    return scrollPostsByCount(-1);
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    return scrollPostsByCount(1);
-            }
-        }
-        return false;
-    }
-
     public final long getPostFragmentId() {
         return postFragmentId;
     }
@@ -685,8 +672,6 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     public abstract void loadUserIcon(List<Post> posts, UserProfileImagesBatchLoader.LoadIconListener loadIconListener);
-
-    protected abstract boolean scrollPostsByCount(int count);
 
     /**
      * The "buffer space" above the first post: empty room so a one-column feed starts within reach

@@ -2,6 +2,15 @@
 
 ---
 
+8.3.3.9.1.26-beta.11 / 2026-11-6
+============
+* Removed the volume-key navigation: the "Use Volume Keys to Navigate Posts" and "...Comments in Posts" settings, and the code behind them in the feeds, post details and Shadowbox. The volume keys now only change the volume
+
+8.3.3.9.1.26-beta.10 / 2026-11-6
+============
+* Settings: Gestures and Buttons listed the two volume-key switches twice; they are now shown once, under Comment and Post
+* Settings: Disable Swiping Between Tabs moved from Swipe Actions to Gestures and Buttons, next to Tab Switching Sensitivity
+
 8.3.3.9.1.26-beta.9 / 2026-11-6
 ============
 * The picture numbers in the vertical gallery list are a little larger

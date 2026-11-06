@@ -124,7 +124,6 @@ class ShadowboxActivity : BaseActivity() {
     private var swipedAway = false
     private var chromeVisible = true
     private var markPostsAsRead = false
-    private var volumeKeysNavigatePosts = false
     private var hideTextAndPreviewlessPosts = false
 
     /** Consecutive fetched pages that this mode's filter emptied, so one run cannot go on forever. */
@@ -166,7 +165,6 @@ class ShadowboxActivity : BaseActivity() {
         markPostsAsRead = postHistorySharedPreferences.getBoolean(
             AccountScope.key(accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false
         )
-        volumeKeysNavigatePosts = sharedPreferences.getBoolean(SharedPreferencesUtils.VOLUME_KEYS_NAVIGATE_POSTS, false)
         hideTextAndPreviewlessPosts = sharedPreferences.getBoolean(
             SharedPreferencesUtils.SHADOWBOX_HIDE_TEXT_AND_PREVIEWLESS_POSTS, false
         )
@@ -506,28 +504,6 @@ class ShadowboxActivity : BaseActivity() {
         if (javaClass.name != event.excludeActivityClassName) {
             finish()
         }
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (volumeKeysNavigatePosts && adapter != null) {
-            val pager = binding.viewPager2ShadowboxActivity
-            when (keyCode) {
-                KeyEvent.KEYCODE_VOLUME_UP -> {
-                    if (pager.currentItem > 0) {
-                        pager.setCurrentItem(pager.currentItem - 1, true)
-                    }
-                    return true
-                }
-                KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    val adapter = this.adapter
-                    if (adapter != null && pager.currentItem < adapter.pageCount) {
-                        pager.setCurrentItem(pager.currentItem + 1, true)
-                    }
-                    return true
-                }
-            }
-        }
-        return super.onKeyDown(keyCode, event)
     }
 
     override fun onResume() {

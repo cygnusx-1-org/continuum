@@ -461,8 +461,6 @@
     <string name="settings_enable_bottom_app_bar_title">"开启底部导航栏"</string>
     <string name="settings_category_post_and_comment_title">"帖子和评论"</string>
     <string name="settings_vote_buttons_on_the_right_title">"顶踩按钮放置在右侧"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"在帖子内使用音量键浏览评论"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"使用音量键浏览帖子"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
     <string name="settings_mute_nsfw_video_title">"静音 NSFW 视频"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"视频播放器中忽略导航栏"</string>

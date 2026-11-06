@@ -714,15 +714,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (sectionsPagerAdapter != null) {
-            return sectionsPagerAdapter.handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return mSharedPreferences;
     }
@@ -1953,16 +1944,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 return fragment;
             }
             return null;
-        }
-
-        public boolean handleKeyDown(int keyCode) {
-            if (binding.viewPagerViewSubredditDetailActivity.getCurrentItem() == 0) {
-                Fragment fragment = getCurrentFragment();
-                if (fragment instanceof PostFragment) {
-                    return ((PostFragment) fragment).handleKeyDown(keyCode);
-                }
-            }
-            return false;
         }
 
         public void refresh(boolean refreshSubredditData) {

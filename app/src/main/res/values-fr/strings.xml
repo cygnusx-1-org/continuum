@@ -456,8 +456,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_enable_bottom_app_bar_title">"Activer la navigation en bas"</string>
     <string name="settings_category_post_and_comment_title">"Publications et commentaires"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Boutons de vote sur la droite"</string>
-    <string name="settings_volume_keys_navigate_comments_title">"Utiliser les boutons de volume pour naviguer dans les commentaires des publications"</string>
-    <string name="settings_volume_keys_navigate_posts_title">"Utiliser les boutons de volume pour naviguer dans les publications"</string>
     <string name="settings_mute_video_title">"Couper le son des vidéos"</string>
     <string name="settings_mute_nsfw_video_title">"Muet NSFW Vidéos"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"Ignorer la barre de navigation dans le lecteur vidéo"</string>

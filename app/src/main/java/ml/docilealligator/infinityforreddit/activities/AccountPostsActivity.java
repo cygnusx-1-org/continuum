@@ -144,15 +144,6 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mFragment != null) {
-            return ((PostFragmentBase) mFragment).handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return mSharedPreferences;
     }

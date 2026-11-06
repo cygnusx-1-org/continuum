@@ -12,6 +12,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeEnableCommentSwipeActionSwitchEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeEnableSwipeActionSwitchEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePullToRefreshEvent;
@@ -42,6 +43,7 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
         SwitchPreference swipeUpToHideJumpToNextTopLevelCommentButtonSwitch =
                 findPreference(SharedPreferencesUtils.SWIPE_UP_TO_HIDE_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON);
         SwitchPreference pullToRefreshSwitch = findPreference(SharedPreferencesUtils.PULL_TO_REFRESH);
+        SwitchPreference disableSwipingBetweenTabsSwitch = findPreference(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS);
 
         if (lockJumpToNextTopLevelCommentButtonSwitch != null && lockBottomAppBarSwitch != null &&
                 swipeUpToHideJumpToNextTopLevelCommentButtonSwitch != null) {
@@ -58,6 +60,13 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
             if (!sharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON, false)) {
                 swipeUpToHideJumpToNextTopLevelCommentButtonSwitch.setVisible(true);
             }
+        }
+
+        if (disableSwipingBetweenTabsSwitch != null) {
+            disableSwipingBetweenTabsSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeDisableSwipingBetweenTabsEvent((Boolean) newValue));
+                return true;
+            });
         }
 
         if (pullToRefreshSwitch != null) {
