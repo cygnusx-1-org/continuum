@@ -183,13 +183,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(sharedPreferences
                 .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+        getTheme().applyStyle(FontFamily.of(Objects.requireNonNull(sharedPreferences
                 .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+        getTheme().applyStyle(TitleFontFamily.of(Objects.requireNonNull(sharedPreferences
                 .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+        getTheme().applyStyle(ContentFontFamily.of(Objects.requireNonNull(sharedPreferences
                 .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         binding = ActivityViewRedditGalleryBinding.inflate(getLayoutInflater());

@@ -505,7 +505,6 @@ Toca para reintentar."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar publicaciones de texto y publicaciones sin vista previa"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"El modo Shadowbox omite todas las publicaciones de texto y cualquier otra publicación que no tenga una imagen de vista previa."</string>
     <string name="settings_font_title">"Fuente"</string>
-    <string name="settings_preview_font_title">"Previsualización de la fuente"</string>
     <string name="settings_font_summary">"Fuente"</string>
     <string name="settings_title_font_summary">"Título"</string>
     <string name="settings_content_font_summary">"Contenido"</string>
@@ -724,10 +723,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_collapse_reddit_section_title">"Contraer sección de Reddit"</string>
     <string name="settings_collapse_post_section_title">"Contraer sección de publicación"</string>
     <string name="settings_collapse_preferences_section_title">"Contraer sección de ajustes"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Contraer sección de subreddits favoritos"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Contraer sección de subreddits suscritos"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Ocultar sección de subreddits favoritos"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Ocultar la sección de subreddits suscritos"</string>
     <string name="settings_quick_toggles_title">"Cambios rápidos"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Mostrar alternar tema"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Mostrar NSFW Alternar"</string>

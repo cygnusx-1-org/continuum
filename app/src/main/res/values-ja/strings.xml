@@ -504,7 +504,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"テキスト投稿とプレビューなしの投稿を非表示にする"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"シャドウボックス モードでは、すべてのテキスト投稿と、プレビュー画像のないその他の投稿がスキップされます。"</string>
     <string name="settings_font_title">"フォント"</string>
-    <string name="settings_preview_font_title">"フォントのプレビュー"</string>
     <string name="settings_font_summary">"フォント"</string>
     <string name="settings_title_font_summary">"タイトル"</string>
     <string name="settings_content_font_summary">"内容"</string>
@@ -720,10 +719,6 @@
     <string name="settings_collapse_reddit_section_title">"「Reddit」セクションを折り畳む"</string>
     <string name="settings_collapse_post_section_title">"「投稿」セクションを折り畳む"</string>
     <string name="settings_collapse_preferences_section_title">"「環境設定」セクションを折り畳む"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"「お気に入りのSubreddit」セクションを折り畳む"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"「登録済みSubreddit」セクションを折り畳む"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"お気に入りの Subreddits セクションを非表示にする"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"購読済みの Subreddits セクションを非表示にする"</string>
     <string name="settings_quick_toggles_title">"クイックトグル"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"テーマの切り替えを表示"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"表示 NSFW トグル"</string>

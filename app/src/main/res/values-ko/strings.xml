@@ -505,7 +505,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"미리보기 없이 텍스트 게시물 및 게시물 숨기기"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"섀도우박스 모드는 모든 텍스트 게시물과 미리보기 이미지가 없는 기타 게시물을 건너뜁니다."</string>
     <string name="settings_font_title">"폰트"</string>
-    <string name="settings_preview_font_title">"폰트 미리보기"</string>
     <string name="settings_font_summary">"폰트"</string>
     <string name="settings_title_font_summary">"제목"</string>
     <string name="settings_content_font_summary">"콘텐츠"</string>
@@ -717,10 +716,6 @@
     <string name="settings_collapse_reddit_section_title">"축소 Reddit 섹션"</string>
     <string name="settings_collapse_post_section_title">"포스트 섹션 축소"</string>
     <string name="settings_collapse_preferences_section_title">"기본 설정 섹션 축소"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"즐겨찾는 하위 레딧 섹션 축소"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"구독한 하위 레딧 섹션 접기"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"즐겨찾는 하위 레딧 섹션 숨기기"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"구독한 하위 레딧 섹션 숨기기"</string>
     <string name="settings_quick_toggles_title">"퀵 토글"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"표시 테마 토글"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"쇼 NSFW 토글"</string>

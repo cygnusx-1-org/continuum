@@ -591,6 +591,12 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_REDDIT_SECTION = "collapse_reddit_section";
     public static final String COLLAPSE_POST_SECTION = "collapse_post_section";
     public static final String COLLAPSE_PREFERENCES_SECTION = "collapse_preferences_section";
+    // A section of the navigation drawer that can be shown, collapsed or hidden: one choice per
+    // section. The COLLAPSE_* and HIDE_* switches below are what older versions stored instead;
+    // DrawerSection reads them once and moves them here.
+    public static final String RECENT_SUBREDDITS_SECTION = "recent_subreddits_section";
+    public static final String FAVORITE_SUBREDDITS_SECTION = "favorite_subreddits_section";
+    public static final String SUBSCRIBED_SUBREDDITS_SECTION = "subscribed_subreddits_section";
     public static final String COLLAPSE_RECENT_SUBREDDITS_SECTION = "collapse_recent_subreddits_section";
     public static final String HIDE_RECENT_SUBREDDITS_SECTION = "hide_recent_subreddits_section";
     public static final String COLLAPSE_FAVORITE_SUBREDDITS_SECTION = "collapse_favorite_subreddits_section";

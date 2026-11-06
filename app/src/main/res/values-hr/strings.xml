@@ -496,7 +496,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Sakrij tekstualne postove i postove bez pregleda"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox Mode preskače svaki tekstualni post i svaki drugi post koji nema sliku za pregled."</string>
     <string name="settings_font_title">"Font"</string>
-    <string name="settings_preview_font_title">"Pregled fonta"</string>
     <string name="settings_font_summary">"Font"</string>
     <string name="settings_title_font_summary">"Naslov"</string>
     <string name="settings_content_font_summary">"Sadržaj"</string>
@@ -708,10 +707,6 @@
     <string name="settings_collapse_reddit_section_title">"Sažmi Reddit odjeljak"</string>
     <string name="settings_collapse_post_section_title">"Sažmi odjeljak objave"</string>
     <string name="settings_collapse_preferences_section_title">"Sažmi odjeljak postavki"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Sažmi odjeljak omiljenih subreddita"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Sažmi odjeljak za pretplaćene podredite"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Sakrij odjeljak omiljenih subreddita"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Sakrij odjeljak Subreddits na koje ste pretplaćeni"</string>
     <string name="settings_quick_toggles_title">"Brzi prekidači"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Prikaži prebacivanje teme"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Prikaži NSFW Prebaci"</string>

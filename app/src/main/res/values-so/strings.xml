@@ -495,7 +495,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Qari Qoraallada iyo Qoraallada aan Horudhac lahayn"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Qaabka Shadowbox wuxuu ka boodaa qoraal kasta iyo qoraal kasta oo kale oo aan lahayn muuqaal horudhac ah."</string>
     <string name="settings_font_title">"Farta"</string>
-    <string name="settings_preview_font_title">"Font Horudhac"</string>
     <string name="settings_font_summary">"Farta"</string>
     <string name="settings_title_font_summary">"Ciwaanka"</string>
     <string name="settings_content_font_summary">"Nuxurka"</string>
@@ -707,10 +706,6 @@
     <string name="settings_collapse_reddit_section_title">"Burbur Reddit Qaybta"</string>
     <string name="settings_collapse_post_section_title">"Burburka Qaybta Boostada"</string>
     <string name="settings_collapse_preferences_section_title">"Burburka Dookhyada Qaybta"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Burburka Qaybta hoosaadyada la jecel yahay"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Burburka Qaybta Subreddits-ka ee la rukumo"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Qari Qaybta Hoosaadka ee Jecel"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Qari Qaybta Subreddits-ka ee la rukumo"</string>
     <string name="settings_quick_toggles_title">"Toggles degdeg ah"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Tus Mawduuca beddelka"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Show NSFW Beddel"</string>

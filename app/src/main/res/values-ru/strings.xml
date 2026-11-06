@@ -504,7 +504,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Скрыть текстовые сообщения и сообщения без предварительного просмотра"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Режим Shadowbox пропускает каждое текстовое сообщение и любое другое сообщение, не имеющее изображения предварительного просмотра."</string>
     <string name="settings_font_title">"Шрифт"</string>
-    <string name="settings_preview_font_title">"Предпросмотр шрифтов"</string>
     <string name="settings_font_summary">"Шрифт"</string>
     <string name="settings_title_font_summary">"Заглавие"</string>
     <string name="settings_content_font_summary">"Содержимое"</string>
@@ -723,10 +722,6 @@
     <string name="settings_collapse_reddit_section_title">"Свернуть раздел Reddit"</string>
     <string name="settings_collapse_post_section_title">"Свернуть раздел поста"</string>
     <string name="settings_collapse_preferences_section_title">"Свернуть раздел настроек"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Свернуть раздел избранных сабреддитов"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Свернуть раздел сабреддитов в подписках"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Скрыть раздел избранных сабреддитов"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Скрыть раздел сабреддитов с подпиской"</string>
     <string name="settings_quick_toggles_title">"Быстрые переключатели"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Показать переключатель тем"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Показать NSFW Переключить"</string>

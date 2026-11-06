@@ -505,7 +505,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Skrýt textové příspěvky a příspěvky bez náhledu"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Režim stínového pole přeskočí každý textový příspěvek a jakýkoli jiný příspěvek, který nemá žádný náhledový obrázek."</string>
     <string name="settings_font_title">"Písmo"</string>
-    <string name="settings_preview_font_title">"Náhled písma"</string>
     <string name="settings_font_summary">"Písmo"</string>
     <string name="settings_title_font_summary">"Nadpid"</string>
     <string name="settings_content_font_summary">"Obsah"</string>
@@ -724,10 +723,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_collapse_reddit_section_title">"Sbalit sekci Redditu"</string>
     <string name="settings_collapse_post_section_title">"Sbalit sekci příspěvků"</string>
     <string name="settings_collapse_preferences_section_title">"Sbalit sekci možností"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Sbalit sekci oblíbených subredditů"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Sbalit sekci odebíraných subredditů"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Skrýt sekci oblíbených subredditů"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Skrýt sekci odebíraných subredditů"</string>
     <string name="settings_quick_toggles_title">"Rychlé přepínání"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Zobrazit přepínání motivu"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Zobrazit NSFW Přepnout"</string>

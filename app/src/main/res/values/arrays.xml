@@ -199,41 +199,11 @@
 
     <string-array name="settings_font_family">
         <item>@string/default_in_array</item>
-        <item>Balsamiq Sans</item>
-        <item>Balsamiq Sans Bold</item>
-        <item>Noto Sans</item>
-        <item>Noto Sans Bold</item>
-        <item>Harmonia Sans</item>
-        <item>Harmonia Sans Bold (No Italic)</item>
-        <item>Roboto Condensed</item>
-        <item>Roboto Condensed Bold</item>
-        <item>Inter (No Italic)</item>
-        <item>Inter Bold (No Italic)</item>
-        <item>Manrope (No Italic)</item>
-        <item>Manrope Bold (No Italic)</item>
-        <item>Sriracha</item>
-        <item>Atkinson Hyperlegible</item>
-        <item>Atkinson Hyperlegible Bold</item>
         <item>@string/settings_custom_font_family_title</item>
     </string-array>
 
     <string-array name="settings_font_family_values">
         <item>Default</item>
-        <item>BalsamiqSans</item>
-        <item>BalsamiqSansBold</item>
-        <item>NotoSans</item>
-        <item>NotoSansBold</item>
-        <item>HarmoniaSans</item>
-        <item>HarmoniaSansBold</item>
-        <item>RobotoCondensed</item>
-        <item>RobotoCondensedBold</item>
-        <item>Inter</item>
-        <item>InterBold</item>
-        <item>Manrope</item>
-        <item>ManropeBold</item>
-        <item>Sriracha</item>
-        <item>AtkinsonHyperlegible</item>
-        <item>AtkinsonHyperlegibleBold</item>
         <item>Custom</item>
     </string-array>
 
@@ -908,6 +878,18 @@
         <item>72</item>
         <item>96</item>
         <item>112</item>
+    </string-array>
+
+    <string-array name="settings_drawer_section_state">
+        <item>@string/settings_drawer_section_shown</item>
+        <item>@string/settings_drawer_section_collapsed</item>
+        <item>@string/settings_drawer_section_hidden</item>
+    </string-array>
+
+    <string-array name="settings_drawer_section_state_values">
+        <item>shown</item>
+        <item>collapsed</item>
+        <item>hidden</item>
     </string-array>
 
     <string-array name="recent_subreddits_limit">

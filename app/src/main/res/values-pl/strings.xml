@@ -498,7 +498,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ukryj posty tekstowe i posty bez podglądu"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Tryb Shadowbox pomija każdy post tekstowy i każdy inny post, który nie ma obrazu podglądu."</string>
     <string name="settings_font_title">"Czcionka"</string>
-    <string name="settings_preview_font_title">"Podgląd czcionki"</string>
     <string name="settings_font_summary">"Czcionka"</string>
     <string name="settings_title_font_summary">"Tytuł"</string>
     <string name="settings_content_font_summary">"Zawartość"</string>
@@ -717,10 +716,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_collapse_reddit_section_title">"Zwiń sekcję Reddit"</string>
     <string name="settings_collapse_post_section_title">"Schowaj sekcję Post"</string>
     <string name="settings_collapse_preferences_section_title">"Schowaj sekcję Preferencje"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Schowaj Ulubione Subreddity"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Zwiń sekcję subskrybowanych subredditów"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Schowaj sekcję ulubionych subredditów"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Schowaj sekcję subskrybowanych subredditów"</string>
     <string name="settings_quick_toggles_title">"Szybkie przełączanie"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Pokaż przełącznik motywu"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Pokaż NSFW Przełącz"</string>
