@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Poprzedni komentarz najwyższego poziomu"</string>
     <string name="action_back_content_description">"Tył"</string>
     <string name="action_more_post_options">"Więcej opcji wysyłania"</string>
-    <string name="action_open_clipboard_reddit_link">"Otwórz łącze Reddit w schowku"</string>
     <string name="parse_json_response_error">"Wystąpił błąd podczas analizy odpowiedzi JSON"</string>
     <string name="retrieve_token_error">"Wystąpił błąd podczas pobierania tokenu"</string>
     <string name="oauth_error_invalid_credentials">"Nieprawidłowy identyfikator klienta lub dane uwierzytelniające API — sprawdź klucz API w ustawieniach (HTTP %1$d)"</string>
@@ -829,7 +828,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Pokaż elementy paska narzędzi w oparciu o dostępną przestrzeń"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Automatycznie pokazuj lub ukrywaj elementy paska narzędzi w przypadku zmiany dostępnego miejsca."</string>
     <string name="no_link_available">"Nie można uzyskać linku"</string>
-    <string name="clipboard_no_reddit_link">"Brak łącza Reddit w schowku"</string>
     <string name="exit_when_submit">"Wyjść?"</string>
     <string name="exit_when_submit_post_detail">"Post zostanie przesłany, nawet jeśli stąd wyjdziesz."</string>
     <string name="exit_when_edit_post_detail">"Post może zostać przesłany, nawet jeśli stąd wyjdziesz."</string>

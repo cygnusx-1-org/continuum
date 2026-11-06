@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"이전 최상위 댓글"</string>
     <string name="action_back_content_description">"돌아가기"</string>
     <string name="action_more_post_options">"추가 게시물 옵션"</string>
-    <string name="action_open_clipboard_reddit_link">"클립보드에 Reddit 링크 열기"</string>
     <string name="parse_json_response_error">"JSON 답변을 파싱하는데 오류가 발생했습니다"</string>
     <string name="retrieve_token_error">"토큰을 가져오는데 실패했습니다"</string>
     <string name="oauth_error_invalid_credentials">"잘못된 API 클라이언트 ID 또는 자격 증명 — 설정에서 API 키를 확인하세요(HTTP %1$d)"</string>
@@ -829,7 +828,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"사용 가능한 공간을 기준으로 도구 모음 항목 표시"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"사용 가능한 공간이 변경되면 도구 모음 항목을 자동으로 표시하거나 숨깁니다."</string>
     <string name="no_link_available">"링크를 가져올 수 없습니다"</string>
-    <string name="clipboard_no_reddit_link">"클립보드에 Reddit 링크가 없습니다."</string>
     <string name="exit_when_submit">"떠나시겠습니까?"</string>
     <string name="exit_when_submit_post_detail">"여기를 나가셔도 게시물은 계속 제출됩니다."</string>
     <string name="exit_when_edit_post_detail">"여기를 떠나셔도 게시물이 계속 제출될 수 있습니다."</string>

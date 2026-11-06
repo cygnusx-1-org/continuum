@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Bình luận cấp cao nhất trước đó"</string>
     <string name="action_back_content_description">"Quay lại"</string>
     <string name="action_more_post_options">"Tùy chọn đăng bài khác"</string>
-    <string name="action_open_clipboard_reddit_link">"Mở Reddit Liên kết trong Clipboard"</string>
     <string name="parse_json_response_error">"Lỗi khi phân tích phản hồi JSON"</string>
     <string name="retrieve_token_error">"Lỗi khi truy xuất mã thông báo"</string>
     <string name="oauth_error_invalid_credentials">"Không hợp lệ API ID khách hàng hoặc thông tin đăng nhập - kiểm tra khóa API của bạn trong Cài đặt (HTTP %1$d)"</string>
@@ -829,7 +828,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Hiển thị các mục trên thanh công cụ dựa trên dung lượng có sẵn"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Tự động hiển thị hoặc ẩn các mục trên thanh công cụ khi không gian có sẵn thay đổi."</string>
     <string name="no_link_available">"Không thể lấy liên kết"</string>
-    <string name="clipboard_no_reddit_link">"Không có liên kết Reddit trong bảng nhớ tạm"</string>
     <string name="exit_when_submit">"Rời khỏi?"</string>
     <string name="exit_when_submit_post_detail">"Bài đăng vẫn sẽ được gửi đi kể cả nếu bạn rời khỏi đây."</string>
     <string name="exit_when_edit_post_detail">"Bài đăng vẫn có thể được gửi đi kể cả nếu bạn rời khỏi đây."</string>

@@ -7,14 +7,11 @@ import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROL
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
 import android.Manifest;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -141,7 +138,6 @@ import ml.docilealligator.infinityforreddit.user.FetchUserData;
 import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
-import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.FloatingButtonAction;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -1319,43 +1315,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         return result;
     }
 
-    /**
-     * Opens the Reddit link on the clipboard, or says there is not one. The clipboard is read only
-     * when the menu item is tapped, never on the way in.
-     */
-    private void openClipboardRedditLink() {
-        ClipboardManager clipboard = ContextCompat.getSystemService(this, ClipboardManager.class);
-
-        String clip = null;
-        if (clipboard != null && clipboard.hasPrimaryClip()) {
-            ClipData data = clipboard.getPrimaryClip();
-            if (data != null && data.getItemCount() > 0) {
-                // Read the clip directly rather than through coerceToText: for a content:// clip
-                // (an image copied out of a file manager) that opens the other app's provider and
-                // reads a stream on the main thread. Text and URI are the only forms a copied
-                // link arrives in, and neither needs the resolver.
-                ClipData.Item item = data.getItemAt(0);
-                CharSequence text = item.getText();
-                if (text == null && item.getUri() != null) {
-                    text = item.getUri().toString();
-                }
-                if (text != null) {
-                    clip = text.toString();
-                }
-            }
-        }
-
-        String url = RedditLinkUtils.redditLinkOrNull(clip);
-        if (url == null) {
-            Toast.makeText(this, R.string.clipboard_no_reddit_link, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Intent intent = new Intent(this, LinkResolverActivity.class);
-        intent.setData(Uri.parse(url));
-        startActivity(intent);
-    }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -1372,9 +1331,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             loadUserData();
             return true;
         } else if (handlePostLayoutMenuItem(itemId)) {
-            return true;
-        } else if (itemId == R.id.action_open_clipboard_reddit_link_main_activity) {
-            openClipboardRedditLink();
             return true;
         }
         return false;

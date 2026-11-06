@@ -304,7 +304,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             for (int next = position + 1; next <= position + 2 && next < gallery.size(); next++) {
                 Post.Gallery item = gallery.get(next);
                 String url = urlFor(item);
-                if (url != null && !(item.mediaType == Post.Gallery.TYPE_GIF && autoplayGifs)) {
+                if (url != null) {
                     sizedRequest(url).preload();
                 }
             }
@@ -317,12 +317,24 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
         @Override
         public void onViewRecycled(@NonNull GalleryListViewHolder holder) {
+            holder.animated = false;
             Glide.with(ViewRedditGalleryActivity.this).clear(holder.binding.imageViewItemShadowboxGallery);
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(@NonNull GalleryListViewHolder holder) {
+            // Off the screen, a row gives its animation back: the decoded frames of a long GIF are
+            // what the list ran out of memory and time on when every row it had passed kept its own.
+            holder.stopAnimation();
         }
     }
 
     private class GalleryListViewHolder extends RecyclerView.ViewHolder {
         final ItemShadowboxGalleryBinding binding;
+        @Nullable
+        Post.Gallery item;
+        /** The animated source is what the row shows, rather than its still. */
+        boolean animated;
 
         GalleryListViewHolder(ItemShadowboxGalleryBinding binding) {
             super(binding.getRoot());
@@ -339,7 +351,21 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             });
         }
 
+        void stopAnimation() {
+            Post.Gallery current = item;
+            if (!animated || current == null) {
+                return;
+            }
+            animated = false;
+            String still = current.feedPreviewUrl;
+            if (still != null) {
+                sizedRequest(still).into(binding.imageViewItemShadowboxGallery);
+            }
+        }
+
         void bind(Post.Gallery item) {
+            this.item = item;
+            animated = false;
             // The source's own size reserves the row's height before the picture arrives, so the
             // list does not jump as items load; without it the row sizes to the picture.
             binding.imageViewItemShadowboxGallery.setRatio(
@@ -365,6 +391,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 request.into(binding.imageViewItemShadowboxGallery);
             }
 
+            itemView.post(() -> {
+                if (ViewRedditGalleryActivity.this.binding.recyclerViewViewRedditGalleryActivity.getScrollState()
+                        == RecyclerView.SCROLL_STATE_IDLE) {
+                    animateGifIfResting(this);
+                }
+            });
+
             if (TextUtils.isEmpty(item.caption)) {
                 binding.captionTextViewItemShadowboxGallery.setVisibility(View.GONE);
             } else {
@@ -375,19 +408,47 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     }
 
     /**
+     * Swaps a GIF row's still for the animation, once the row is on screen and the list is not
+     * moving. Rows flung past never start the download, and the ones the list is resting on are
+     * the only ones decoding frames.
+     */
+    private void animateGifIfResting(GalleryListViewHolder holder) {
+        Post.Gallery item = holder.item;
+        if (item == null || holder.animated || !autoplayGifs || item.mediaType != Post.Gallery.TYPE_GIF
+                || !holder.itemView.isAttachedToWindow() || item.url == null) {
+            return;
+        }
+        String still = item.feedPreviewUrl;
+        if (still == null || still.equals(item.url)) {
+            // Nothing cheaper was shown, so the animation is already what the row has.
+            return;
+        }
+        holder.animated = true;
+        sizedRequest(item.url).thumbnail(sizedRequest(still)).into(holder.binding.imageViewItemShadowboxGallery);
+    }
+
+    private void animateRestingGifs() {
+        RecyclerView list = binding.recyclerViewViewRedditGalleryActivity;
+        for (int i = 0; i < list.getChildCount(); i++) {
+            RecyclerView.ViewHolder holder = list.getChildViewHolder(list.getChildAt(i));
+            if (holder instanceof GalleryListViewHolder) {
+                animateGifIfResting((GalleryListViewHolder) holder);
+            }
+        }
+    }
+
+    /**
      * What the list loads for an item. The resolution-bounded still Reddit publishes, for every
      * type: the source is several thousand pixels wide and decoding a screenful of those is what
      * made the list stutter. A video's url is the mp4, which an ImageView cannot show, so its still
-     * stands in; a GIF plays only where the Video Autoplay settings allow, and is a still otherwise.
+     * stands in; a GIF is a still too, and is swapped for the animation only while its row rests on screen
+     * (see {@link #animateGifIfResting}) where the Video Autoplay settings allow it.
      */
     @Nullable
     private String urlFor(Post.Gallery item) {
         String still = item.feedPreviewUrl;
         if (item.mediaType == Post.Gallery.TYPE_VIDEO) {
             return still;
-        }
-        if (item.mediaType == Post.Gallery.TYPE_GIF && autoplayGifs) {
-            return item.url;
         }
         return still != null ? still : item.url;
     }
@@ -419,6 +480,14 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
             binding.recyclerViewViewRedditGalleryActivity.setItemViewCacheSize(6);
             binding.recyclerViewViewRedditGalleryActivity.setAdapter(new GalleryListAdapter());
+            binding.recyclerViewViewRedditGalleryActivity.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        animateRestingGifs();
+                    }
+                }
+            });
         }
         if (scrollTo > 0 && scrollTo < gallery.size()) {
             binding.recyclerViewViewRedditGalleryActivity.scrollToPosition(scrollTo);

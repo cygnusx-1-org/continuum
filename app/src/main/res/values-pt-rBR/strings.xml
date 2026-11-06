@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Comentário anterior de nível superior"</string>
     <string name="action_back_content_description">"Voltar"</string>
     <string name="action_more_post_options">"Mais opções de postagem"</string>
-    <string name="action_open_clipboard_reddit_link">"Abrir Reddit Link na área de transferência"</string>
     <string name="parse_json_response_error">"Erro ao analisar a resposta do JSON"</string>
     <string name="retrieve_token_error">"Erro ao recuperar o código"</string>
     <string name="oauth_error_invalid_credentials">"API ID do cliente ou credenciais inválidas — verifique sua chave API nas configurações (HTTP %1$d)"</string>
@@ -837,7 +836,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Mostrar itens da barra de ferramentas com base no espaço disponível"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Mostrar ou ocultar automaticamente itens da barra de ferramentas conforme o espaço disponível muda."</string>
     <string name="no_link_available">"Não pode obter o link"</string>
-    <string name="clipboard_no_reddit_link">"Nenhum link Reddit na área de transferência"</string>
     <string name="exit_when_submit">"Sair?"</string>
     <string name="exit_when_submit_post_detail">"A postagem será postada mesmo se você sair daqui."</string>
     <string name="exit_when_edit_post_detail">"A postagem poderá ainda ser pistada se você sair daqui."</string>

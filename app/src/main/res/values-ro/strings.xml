@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Comentariu de nivel superior anterior"</string>
     <string name="action_back_content_description">"Înapoi"</string>
     <string name="action_more_post_options">"Mai multe opțiuni de postare"</string>
-    <string name="action_open_clipboard_reddit_link">"Deschide Reddit Link în Clipboard"</string>
     <string name="parse_json_response_error">"Eroare la afișarea răspunsului JSON"</string>
     <string name="retrieve_token_error">"Eroare la obținerea token-ului"</string>
     <string name="oauth_error_invalid_credentials">"Invalid API ID-ul clientului sau acreditările — verifică cheia API în Setări (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Afișează elementele din bara de instrumente pe baza spațiului disponibil"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Afișează sau ascunde automat elementele din bara de instrumente ca modificări ale spațiului disponibil."</string>
     <string name="no_link_available">"Nu s-a putut obține link-ul"</string>
-    <string name="clipboard_no_reddit_link">"Nu Reddit link în clipboard"</string>
     <string name="exit_when_submit">"Părăsește?"</string>
     <string name="exit_when_submit_post_detail">"Postarea va fi trimisă chiar dacă părăsești această pagină."</string>
     <string name="exit_when_edit_post_detail">"Postarea ar putea fi trimisă chiar dacă părăsești această pagină."</string>

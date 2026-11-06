@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Önceki Üst Düzey Yorum"</string>
     <string name="action_back_content_description">"Geri"</string>
     <string name="action_more_post_options">"Daha Fazla Gönderi Seçeneği"</string>
-    <string name="action_open_clipboard_reddit_link">"Reddit Bağlantısını Panoda Aç"</string>
     <string name="parse_json_response_error">"JSON yanıtı ayrıştırılırken hata oluştu"</string>
     <string name="retrieve_token_error">"Token alınırken hata oluştu"</string>
     <string name="oauth_error_invalid_credentials">"Geçersiz API İstemci Kimliği veya kimlik bilgileri — Ayarlar'da API Anahtarınızı kontrol edin (HTTP %1$d)"</string>
@@ -833,7 +832,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Kullanılabilir Alana Göre Araç Çubuğu Öğelerini Göster"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Kullanılabilir alan değiştikçe araç çubuğu öğelerini otomatik olarak gösterin veya gizleyin."</string>
     <string name="no_link_available">"Bağlantı alınamıyor"</string>
-    <string name="clipboard_no_reddit_link">"Panoda Reddit bağlantısı yok"</string>
     <string name="exit_when_submit">"Ayrılacak mısın?"</string>
     <string name="exit_when_submit_post_detail">"Buradan ayrılsanız bile gönderi gönderilecektir."</string>
     <string name="exit_when_edit_post_detail">"Buradan ayrılsanız bile gönderi gönderilebilir."</string>

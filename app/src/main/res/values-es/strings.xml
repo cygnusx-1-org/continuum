@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Comentario de nivel superior anterior"</string>
     <string name="action_back_content_description">"Volver"</string>
     <string name="action_more_post_options">"Más opciones de publicación"</string>
-    <string name="action_open_clipboard_reddit_link">"Abrir Reddit Enlace en el Portapapeles"</string>
     <string name="parse_json_response_error">"No fue posible procesar la respuesta JSON"</string>
     <string name="retrieve_token_error">"Error al recuperar el token"</string>
     <string name="oauth_error_invalid_credentials">"Credenciales o ID de cliente API no válidos: verifique su clave API en Configuración (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Mostrar elementos de la barra de herramientas según el espacio disponible"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Muestra u oculta automáticamente los elementos de la barra de herramientas a medida que cambia el espacio disponible."</string>
     <string name="no_link_available">"No fue posible obtener el enlace"</string>
-    <string name="clipboard_no_reddit_link">"No hay enlace Reddit en el portapapeles"</string>
     <string name="exit_when_submit">"¿Salir?"</string>
     <string name="exit_when_submit_post_detail">"La publicación se hará, incluso si sales ahora."</string>
     <string name="exit_when_edit_post_detail">"La publicación se hará, incluso si sales ahora."</string>
