@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"접두사만 일치"</string>
     <string name="action_start_lazy_mode">"게으른 모드 시작"</string>
     <string name="action_stop_lazy_mode">"게으른 모드 중지"</string>
-    <string name="action_shadowbox_mode">"섀도우박스 모드"</string>
     <string name="action_send">"전송"</string>
     <string name="action_sort">"정렬"</string>
     <string name="action_hide_post">"글 숨기기"</string>

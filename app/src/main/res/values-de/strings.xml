@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Nur den Präfix vergleichen"</string>
     <string name="action_start_lazy_mode">"Lazy Mode starten"</string>
     <string name="action_stop_lazy_mode">"Lazy Mode stoppen"</string>
-    <string name="action_shadowbox_mode">"Shadowbox-Modus"</string>
     <string name="action_send">"Senden"</string>
     <string name="action_sort">"Sortieren"</string>
     <string name="action_hide_post">"Beitrag verstecken"</string>

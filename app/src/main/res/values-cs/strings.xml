@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Porovnávat pouze předponu"</string>
     <string name="action_start_lazy_mode">"Spustit líný režim"</string>
     <string name="action_stop_lazy_mode">"Zastavit líný režim"</string>
-    <string name="action_shadowbox_mode">"Režim stínového boxu"</string>
     <string name="action_send">"Odeslat"</string>
     <string name="action_sort">"Řazení"</string>
     <string name="action_hide_post">"Skrýt příspěvek"</string>

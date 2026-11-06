@@ -2,6 +2,16 @@
 
 ---
 
+8.3.3.9.1.27-beta.5 / 2026-11-6
+============
+**New**
+* Shadowbox is a post layout: pick it from Change Post Layout (or as the Default Post Layout in Settings > Posts) and the feed opens in Shadowbox, remembered per feed like any other layout. Backing out of it leaves the feed on its card list, ready for another layout; choosing Shadowbox again opens it afresh
+
+**Changed**
+* The separate "Shadowbox Mode" entry in the three-dot menu is gone, replaced by the layout. History has no Shadowbox layout, as its posts are not a feed to page through
+
+---
+
 8.3.3.9.1.27-beta.4 / 2026-11-6
 ============
 **Fixed**

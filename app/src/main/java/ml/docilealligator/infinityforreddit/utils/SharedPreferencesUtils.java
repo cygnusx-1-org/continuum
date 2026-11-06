@@ -94,6 +94,20 @@ public class SharedPreferencesUtils {
     public static final int POST_LAYOUT_COMPACT_2 = 5;
     /** Card Bottom without the row of buttons under the content; swiping does the same things. */
     public static final int POST_LAYOUT_CARD_CLEAN = 6;
+    /**
+     * Shadowbox, one post to a screen. It is a viewer opened over the feed rather than a way of
+     * drawing rows, so under it the feed keeps the rows of {@link #rowLayout}.
+     */
+    public static final int POST_LAYOUT_SHADOWBOX = 7;
+
+    public static boolean isShadowbox(int postLayout) {
+        return postLayout == POST_LAYOUT_SHADOWBOX;
+    }
+
+    /** The layout whose rows a feed draws for {@code postLayout}: Shadowbox's list is Card Bottom's. */
+    public static int rowLayout(int postLayout) {
+        return isShadowbox(postLayout) ? POST_LAYOUT_CARD : postLayout;
+    }
 
     /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Card Clean. */
     public static boolean isCardBottom(int postLayout) {

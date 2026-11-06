@@ -135,6 +135,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
+    private static final String SHADOWBOX_LAUNCHED_STATE = "SBLS";
+    /** Shadowbox was opened for this feed in its Shadowbox layout; see {@link #openShadowboxIfDue}. */
+    private boolean shadowboxLaunched;
     private static final String SORT_TYPE_STATE = "STS";
     private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
@@ -277,6 +280,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             binding.recyclerViewPostFragment.onWindowVisibilityChanged(View.VISIBLE);
         }
         applyPendingSortType();
+        openShadowboxIfDue();
     }
 
     @Override
@@ -324,6 +328,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             userAnchorOffset = savedInstanceState.getInt(RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE, 0);
 
             isInLazyMode = savedInstanceState.getBoolean(IS_IN_LAZY_MODE_STATE);
+            // A feed rebuilt behind the Shadowbox it opened must not open it a second time.
+            shadowboxLaunched = savedInstanceState.getBoolean(SHADOWBOX_LAUNCHED_STATE);
             postFilter = savedInstanceState.getParcelable(POST_FILTER_STATE);
             concatenatedSubredditNames = savedInstanceState.getString(CONCATENATED_SUBREDDIT_NAMES_STATE);
             postFragmentId = savedInstanceState.getLong(POST_FRAGMENT_ID_STATE);
@@ -419,7 +425,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             }
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -491,7 +497,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // own -- the same reason the firehose feeds do.
             boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName)
                     || randomSubredditPseudoName != null;
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -566,8 +572,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                    defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -631,7 +637,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             settingsSortType = savedOrDefaultSortType();
             SortType overrideSortType = getOverrideSortType(savedInstanceState);
             sortType = overrideSortType != null ? overrideSortType : settingsSortType;
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -694,7 +700,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
 
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -761,7 +767,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 }
             }
 
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -822,7 +828,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // The duplicates endpoint has its own ordering and ignores the standard sort params; the
             // ViewModel still needs a non-null SortType, so use a neutral default.
             sortType = new SortType(SortType.Type.BEST);
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -863,7 +869,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             } else {
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
-            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
+            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -1142,7 +1148,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                                 : SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"), true);
                     } else {
                         // Its own layout stays, but the column count is re-read.
-                        changePostLayout(postLayout, true);
+                        changePostLayout(currentLayout(), true);
                     }
                 });
 
@@ -1369,6 +1375,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 } else {
                     binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
                     hasPost = true;
+                    openShadowboxIfDue();
                 }
             } else if (refreshLoadState instanceof LoadState.Error) {
                 binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(view -> refresh());
@@ -1423,10 +1430,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_shadowbox_mode_post_fragment) {
-            startShadowboxMode();
-            return true;
-        } else if (item.getItemId() == R.id.action_lazy_mode_post_fragment) {
+        if (item.getItemId() == R.id.action_lazy_mode_post_fragment) {
             if (isInLazyMode) {
                 stopLazyMode();
             } else {
@@ -1445,6 +1449,19 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return true;
         }
         return false;
+    }
+
+    /**
+     * Opens Shadowbox when the feed is in that layout and has not opened it yet: once the posts are
+     * in, and the feed is the screen being looked at. Being backed out of it leaves the feed on its
+     * rows, for the layout menu, so this does not open it again until the layout is chosen afresh.
+     */
+    private void openShadowboxIfDue() {
+        if (!shadowboxLayout || shadowboxLaunched || !hasPost || mAdapter == null || !isResumed()) {
+            return;
+        }
+        shadowboxLaunched = true;
+        startShadowboxMode();
     }
 
     /**
@@ -1626,6 +1643,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_IN_LAZY_MODE_STATE, isInLazyMode);
+        outState.putBoolean(SHADOWBOX_LAUNCHED_STATE, shadowboxLaunched);
 
         ScrollAnchor.Anchor anchor = ScrollAnchor.capture(
                 binding.recyclerViewPostFragment, userAnchorPos, userAnchorOffset);
@@ -2014,26 +2032,31 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
-    public void changePostLayout(int postLayout, boolean temporary) {
-        this.postLayout = postLayout;
+    public void changePostLayout(int chosenLayout, boolean temporary) {
+        boolean wasShadowbox = shadowboxLayout;
+        this.postLayout = adoptLayout(chosenLayout);
+        if (shadowboxLayout && (!temporary || !wasShadowbox)) {
+            // Chosen afresh, so it opens, even if the feed was in it before and was backed out of.
+            shadowboxLaunched = false;
+        }
         if (!temporary) {
             switch (postType) {
                 case PostType.FRONT_PAGE:
                 case PostType.ANONYMOUS_FRONT_PAGE:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, postLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, chosenLayout).apply();
                     break;
                 case PostType.SUBREDDIT:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, postLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, chosenLayout).apply();
                     break;
                 case PostType.USER:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, postLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, chosenLayout).apply();
                     break;
                 case PostType.SEARCH:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, postLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, chosenLayout).apply();
                     break;
                 case PostType.MULTIREDDIT:
                 case PostType.ANONYMOUS_MULTIREDDIT:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, postLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, chosenLayout).apply();
                     break;
             }
         }
@@ -2074,7 +2097,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         if (mAdapter != null) {
-            mAdapter.setPostLayout(postLayout);
+            mAdapter.setPostLayout(this.postLayout);
             // The columns may have changed with the layout, and the list's width has not, so its
             // layout listener will not be the one to say so.
             provideItemWidth(mAdapter);
@@ -2082,6 +2105,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         applyMediaOnlyPosts();
+        openShadowboxIfDue();
     }
 
     @Override
@@ -2173,7 +2197,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Subscribe
     public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
         // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
-        changePostLayout(postLayout, true);
+        changePostLayout(currentLayout(), true);
     }
 
     @Subscribe

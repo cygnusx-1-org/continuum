@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Chỉ khớp tiền tố"</string>
     <string name="action_start_lazy_mode">"Bật chế độ lười biếng"</string>
     <string name="action_stop_lazy_mode">"Tắt chế độ lười biếng"</string>
-    <string name="action_shadowbox_mode">"Chế độ hộp bóng"</string>
     <string name="action_send">"Gửi"</string>
     <string name="action_sort">"Sắp xếp"</string>
     <string name="action_hide_post">"Ẩn bài đăng"</string>

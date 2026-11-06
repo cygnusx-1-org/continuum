@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Αντιστοίχιση μόνο του προθέματος"</string>
     <string name="action_start_lazy_mode">"Εκκίνηση Lazy Mode"</string>
     <string name="action_stop_lazy_mode">"Σταμάτημα Lazy Mode"</string>
-    <string name="action_shadowbox_mode">"Λειτουργία Shadowbox"</string>
     <string name="action_send">"Αποστολή"</string>
     <string name="action_sort">"Ταξινόμηση"</string>
     <string name="action_hide_post">"Απόκρυψη ανάρτησης"</string>

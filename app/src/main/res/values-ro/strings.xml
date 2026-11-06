@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Potrivește numai prefixul"</string>
     <string name="action_start_lazy_mode">"Pornire Mod Leneș"</string>
     <string name="action_stop_lazy_mode">"Oprește Mod Leneș"</string>
-    <string name="action_shadowbox_mode">"Modul Shadowbox"</string>
     <string name="action_send">"Trimitere"</string>
     <string name="action_sort">"Sortare"</string>
     <string name="action_hide_post">"Ascunde postarea"</string>

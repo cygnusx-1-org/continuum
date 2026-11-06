@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Sólo coincide con el prefijo"</string>
     <string name="action_start_lazy_mode">"Iniciar modo automático"</string>
     <string name="action_stop_lazy_mode">"Detener modo automático"</string>
-    <string name="action_shadowbox_mode">"Modo caja de sombras"</string>
     <string name="action_send">"Enviar"</string>
     <string name="action_sort">"Ordenar"</string>
     <string name="action_hide_post">"Ocultar publicación"</string>
