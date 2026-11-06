@@ -596,7 +596,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * one more child laid over its top edge, which the card's rounded corners clip.
      */
     private void applyCardTopBorder(PostViewHolder holder) {
-        if ((mPostLayout != SharedPreferencesUtils.POST_LAYOUT_CARD
+        if ((!SharedPreferencesUtils.isCardBottom(mPostLayout)
                 && !SharedPreferencesUtils.isCardTop(mPostLayout))
                 || !(holder.itemView instanceof FrameLayout) || holder.post == null) {
             return;
@@ -703,7 +703,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * a post will be drawn as without going through a position, which would ask Paging to load it.
      */
     private int viewTypeFor(@Nullable Post post) {
-        if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD) {
+        if (SharedPreferencesUtils.isCardBottom(mPostLayout)) {
             if (post != null) {
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
@@ -740,7 +740,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                         switch (mDefaultLinkPostLayout) {
                             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                                 return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
@@ -766,9 +765,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
                     switch (mDefaultLinkPostLayout) {
                         case SharedPreferencesUtils.POST_LAYOUT_CARD:
+                        case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                             return VIEW_TYPE_POST_GALLERY;
@@ -823,6 +822,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                         switch (mDefaultLinkPostLayout) {
                             case SharedPreferencesUtils.POST_LAYOUT_CARD:
+                            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                                 return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
@@ -929,9 +929,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /**
-     * Card Clean is Card Top without the row of buttons under the content. The row is squeezed to
-     * a strip of bottom padding rather than removed, so the card keeps its space below the text;
-     * every other layout gets it back at its natural height, because rows are recycled.
+     * Card Clean is Card Bottom without the row of buttons under the content. The row is made
+     * invisible and squeezed to a strip of space, so nothing of it shows but the card keeps some
+     * room under the text; every other layout gets it back at its natural height, because rows are
+     * recycled.
      */
     private void applyCleanCard(PostBaseViewHolder holder) {
         ConstraintLayout bar = holder.bottomConstraintLayout;
@@ -939,13 +940,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             return;
         }
         boolean clean = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN;
-        int height = clean ? Math.round(16 * mScale) : ViewGroup.LayoutParams.WRAP_CONTENT;
+        int height = clean ? Math.round(8 * mScale) : ViewGroup.LayoutParams.WRAP_CONTENT;
         ViewGroup.LayoutParams params = bar.getLayoutParams();
         if (params.height != height) {
             params.height = height;
             bar.setLayoutParams(params);
         }
-        bar.setClipChildren(true);
+        bar.setVisibility(clean ? View.INVISIBLE : View.VISIBLE);
         bar.setImportantForAccessibility(clean
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);

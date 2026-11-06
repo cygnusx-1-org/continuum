@@ -638,7 +638,6 @@
     <string name="settings_delete_resume_state_title">Delete Resume Data</string>
     <string name="settings_delete_read_posts_in_database_title">Delete All Read Posts</string>
     <string name="settings_delete_user_tags_title">Delete All User Tags</string>
-    <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
     <string name="restart_app_see_changes">Restart the app to see the changes</string>
     <string name="app_will_restart">Going back after changing a value will cause the app to restart.</string>
@@ -959,9 +958,6 @@
     <string name="redirect_uri_pref_key" translatable="false">redirect_uri_pref_key</string>
     <string name="settings_redirect_uri_title">Redirect URI</string>
     <string name="tap_to_set_redirect_uri">Tap to set custom Redirect URI</string>
-    <string name="use_old_api_info_pref_key" translatable="false">use_old_api_info_pref_key</string>
-    <string name="settings_use_old_api_info_title">Use /api/info the Old Way</string>
-    <string name="settings_use_old_api_info_summary">Uses far fewer requests, but Load More Comments, History, Local Saved and random subreddits fail if Reddit blocks it for you</string>
     <string name="default_redirect_uri" translatable="false">redreader://rr_oauth_redir</string>
 
     <string name="settings_hide_fab_in_post_details">Hide Floating Action Button</string>
@@ -1387,7 +1383,6 @@
     <string name="delete_resume_state_success">Resume data deleted</string>
     <string name="delete_all_read_posts_success">Delete all read posts successfully</string>
     <string name="delete_all_user_tags_success">User tags deleted</string>
-    <string name="delete_all_legacy_settings_success">Delete all legacy settings successfully</string>
     <string name="reset_all_settings_success">Reset all settings successfully</string>
 
     <string name="username_preview">u/edgan</string>

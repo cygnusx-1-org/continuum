@@ -55,15 +55,7 @@ class HistoryPostPagingSourceTest {
 
     @After
     fun tearDown() {
-        useOldApiInfo(false)
         db.close()
-    }
-
-    /** The switch, and Enable Overrides, without which it counts for nothing. */
-    private fun useOldApiInfo(on: Boolean, overrides: Boolean = on) {
-        context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE).edit()
-            .putBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, overrides)
-            .putBoolean(SharedPreferencesUtils.USE_OLD_API_INFO_PREF_KEY, on).commit()
     }
 
     @Test
@@ -85,38 +77,6 @@ class HistoryPostPagingSourceTest {
         for (request in requests) {
             assertEquals(APIUtils.AUTHORIZATION_BASE + TOKEN, request.header(APIUtils.AUTHORIZATION_KEY))
         }
-    }
-
-    @Test
-    fun `the old way reads a logged-in account's posts from api info alone`() {
-        useOldApiInfo(true)
-        val source = historySource { 200 to """{"kind":"Listing","data":{"children":[],"after":null}}""" }
-
-        val result = source.transformData(listOf(ReadPost(ACCOUNT, "a", ReadPostType.READ_POSTS)))
-
-        assertTrue(result.toString(), result is PagingSource.LoadResult.Page)
-        assertEquals("t3_a", requests.single().url.queryParameter("id"))
-    }
-
-    @Test
-    fun `the old way counts for nothing while overrides are off, where it is greyed out`() {
-        useOldApiInfo(true, overrides = false)
-        val source = historySource { 200 to commentsListing(RedditPreviewFixtures.json(RedditPreviewFixtures.NAMES[0])) }
-
-        source.transformData(listOf(ReadPost(ACCOUNT, "a", ReadPostType.READ_POSTS)))
-
-        assertEquals("/comments/a.json", requests.single().url.encodedPath)
-    }
-
-    @Test
-    fun `the old way fails while api info is blocked, as it always did`() {
-        useOldApiInfo(true)
-        val source = historySource { 403 to "<body>blocked by network security</body>" }
-
-        val result = source.transformData(listOf(ReadPost(ACCOUNT, "a", ReadPostType.READ_POSTS)))
-
-        assertTrue(result.toString(), result is PagingSource.LoadResult.Error)
-        assertEquals("/api/info.json", requests.single().url.encodedPath)
     }
 
     private fun historySource(respond: (Request) -> Pair<Int, String>) = HistoryPostPagingSource(

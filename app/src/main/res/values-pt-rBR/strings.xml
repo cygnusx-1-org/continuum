@@ -578,7 +578,6 @@ Renomeie-os antes de ativar o Material You se você tiver."</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Excluir toda posição de rolagem da primeira página no banco de dados"</string>
     <string name="settings_delete_resume_state_title">"Excluir os dados de Continuar"</string>
     <string name="settings_delete_read_posts_in_database_title">"Excluir toda postagem lida no banco de dados"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Excluir todo ajuste antigo"</string>
     <string name="settings_reset_all_settings_title">"Redefinir todo ajuste"</string>
     <string name="restart_app_see_changes">"Reinicie o aplicativo para ver as mudanças"</string>
     <string name="app_will_restart">"Voltar após alterar um valor fará com que o aplicativo seja reiniciado."</string>
@@ -1241,7 +1240,6 @@ Baseado no tema Índigo AMOLED"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Êxito ao excluir toda posição de rolagem na primeira página"</string>
     <string name="delete_resume_state_success">"Dados de Continuar excluídos"</string>
     <string name="delete_all_read_posts_success">"Êxito ao excluir toda postagem já lida"</string>
-    <string name="delete_all_legacy_settings_success">"Êxito ao excluir ajustes antigos"</string>
     <string name="reset_all_settings_success">"Êxito ao redefinir ajustes"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

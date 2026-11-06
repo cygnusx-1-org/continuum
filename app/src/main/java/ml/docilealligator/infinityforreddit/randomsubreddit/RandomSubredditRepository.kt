@@ -264,7 +264,7 @@ class RandomSubredditRepository @Inject constructor(
         val infoUse = if (accountName == Account.ANONYMOUS_ACCOUNT) {
             InfoUse.First(ThingLookup.INFO_BLOCKED)
         } else {
-            InfoUse.forAccount(APIUtils.useOldApiInfo())
+            InfoUse.forAccount(false)
         }
         when (RandomSubredditNames.canonicalise(randomSubredditName)) {
             RandomSubredditNames.MYRANDOM -> pickSubscribed(accountName, retrofit, headers, handler, listener)

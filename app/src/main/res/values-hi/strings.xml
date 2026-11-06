@@ -568,7 +568,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"डेटाबेस से सभी मुख पृष्ट की स्क्रोल्ड स्थितियां मिटा दें "</string>
     <string name="settings_delete_resume_state_title">"फिर से शुरू करने का डेटा हटाएं"</string>
     <string name="settings_delete_read_posts_in_database_title">"डेटाबेस में सभी पढ़े गए पोस्ट हटाएं"</string>
-    <string name="settings_delete_all_legacy_settings_title">"सभी पुरानी सैटिंग्स को मिटाएं"</string>
     <string name="settings_reset_all_settings_title">"सभी सेटिंग्स रीसेट कर दें "</string>
     <string name="restart_app_see_changes">"परिवर्तन देखने के लिए एप्प को पुनः शुरू करें "</string>
     <string name="app_will_restart">"मान बदलने के बाद वापस जाने से ऐप पुनरारंभ हो जाएगा।"</string>
@@ -1230,7 +1229,6 @@
     <string name="delete_all_front_page_scrolled_positions_success">"मुख पृष्ट में सभी स्क्रोल्ड स्थितियां सफलतापूर्वक मिटा दी गई "</string>
     <string name="delete_resume_state_success">"फिर से शुरू करने का डेटा हटा दिया गया"</string>
     <string name="delete_all_read_posts_success">"पढ़े हुए सारे पोस्टों को पूर्णतः डिलीट करें"</string>
-    <string name="delete_all_legacy_settings_success">"सभी पुरानी सैटिंग्स को मिटाना सफल "</string>
     <string name="reset_all_settings_success">"सभी सेटिंग्स सफलतापूर्वक रीसेट कर दी गई "</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

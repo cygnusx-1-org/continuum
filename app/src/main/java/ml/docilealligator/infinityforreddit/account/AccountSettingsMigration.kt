@@ -7,7 +7,6 @@ import androidx.preference.PreferenceManager
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.DisableNsfwForeverMigration
-import ml.docilealligator.infinityforreddit.utils.OldApiInfoMigration
 import ml.docilealligator.infinityforreddit.utils.SharedLinkDomainMigration
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import ml.docilealligator.infinityforreddit.utils.SwipeActionSideMigration
@@ -187,11 +186,6 @@ object AccountSettingsMigration {
         // Also before the rest, for the same reason, and so a pre-account switch is already the
         // list value by the time the seeding below copies it to each account.
         SharedLinkDomainMigration.migrate(PreferenceManager.getDefaultSharedPreferences(context))
-        // Before the seeding below, which would otherwise find a switch that is no longer scoped.
-        OldApiInfoMigration.migrate(
-            PreferenceManager.getDefaultSharedPreferences(context),
-            file(context, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE)
-        )
 
         if (internalSharedPreferences.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false) &&
             seedVersionOf(internalSharedPreferences) >= SEED_VERSION &&

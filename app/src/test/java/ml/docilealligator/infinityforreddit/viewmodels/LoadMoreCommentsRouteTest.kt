@@ -223,28 +223,6 @@ class LoadMoreCommentsRouteTest {
             JSONArray(comments.map { JSONObject().put("kind", "t1").put("data", it) })))
     ).toString()
 
-    @Test
-    fun `the option is on the api keys settings screen, off by default and greyed out without overrides`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val parser = context.resources.getXml(R.xml.api_keys_preferences)
-        val android = "http://schemas.android.com/apk/res-auto"
-        val platform = "http://schemas.android.com/apk/res/android"
-        var found = false
-        while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.eventType == XmlPullParser.START_TAG
-                && parser.getAttributeValue(android, "key") == "@" + R.string.use_old_api_info_pref_key
-            ) {
-                found = true
-                assertEquals("false", parser.getAttributeValue(android, "defaultValue"))
-                assertEquals(
-                    "@" + R.string.enable_api_key_overrides_pref_key,
-                    parser.getAttributeValue(platform, "dependency")
-                )
-            }
-        }
-        assertTrue(found)
-    }
-
     private fun threadWithPlaceholder(): ArrayList<Comment> {
         val parent = ParseComment.parseSingleComment(commentData("parent", "t3_postid", 0), 0)
         val placeholder = Comment(parent.fullName, 1, Comment.PLACEHOLDER_LOAD_MORE_COMMENTS)

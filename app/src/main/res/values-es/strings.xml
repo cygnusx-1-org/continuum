@@ -577,7 +577,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Borrar todas las posiciones de la página principal de la base de datos"</string>
     <string name="settings_delete_resume_state_title">"Eliminar los datos de Continuar"</string>
     <string name="settings_delete_read_posts_in_database_title">"Borrar todas las publicaciones leídas en la base de datos"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Borrar todos los ajustes heredados"</string>
     <string name="settings_reset_all_settings_title">"Restablecer todas la configuraciones"</string>
     <string name="restart_app_see_changes">"Reinicie la app para ver cambios"</string>
     <string name="app_will_restart">"Volver atrás después de cambiar un valor hará que la aplicación se reinicie."</string>
@@ -1239,7 +1238,6 @@ Basado en Tema Índigo AMOLED"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Se han eliminado todas las posiciones de la página principal"</string>
     <string name="delete_resume_state_success">"Datos de Continuar eliminados"</string>
     <string name="delete_all_read_posts_success">"Todas las publicaciones leídas han sido eliminadas"</string>
-    <string name="delete_all_legacy_settings_success">"Se han borrado todos los ajustes heredados"</string>
     <string name="reset_all_settings_success">"Se ha restablecido la configuración"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

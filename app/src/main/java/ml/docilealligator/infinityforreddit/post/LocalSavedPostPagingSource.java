@@ -166,7 +166,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
             postIds.add(fullName.startsWith("t3_") ? fullName.substring(3) : fullName);
         }
         return PostLookup.forOauthApi(oauthRetrofit.create(RedditAPIKt.class),
-                APIUtils.getOAuthHeader(accessToken), APIUtils.useOldApiInfo()).loadBlocking(postIds);
+                APIUtils.getOAuthHeader(accessToken), false).loadBlocking(postIds);
     }
 
     private LoadResult<String, Post> transformData(List<LocalSavedThing> promotedPosts) {
