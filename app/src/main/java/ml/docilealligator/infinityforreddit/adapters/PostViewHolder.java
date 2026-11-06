@@ -374,7 +374,7 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         int otherOutline = up ? R.drawable.ic_downvote_24dp : R.drawable.ic_upvote_24dp;
         int votedColor = up ? host.upvotedColor() : host.downvotedColor();
         String direction = up ? APIUtils.DIR_UPVOTE : APIUtils.DIR_DOWNVOTE;
-        ReadPostType anonymousType = up ? ReadPostType.ANONYMOUS_UPVOTED_POSTS : ReadPostType.ANONYMOUS_DOWNVOTED_POSTS;
+        int anonymousType = up ? ReadPostType.ANONYMOUS_UPVOTED_POSTS : ReadPostType.ANONYMOUS_DOWNVOTED_POSTS;
 
         ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
         ColorStateList previousDownvoteButtonIconTint = downvoteButton.getIconTint();
