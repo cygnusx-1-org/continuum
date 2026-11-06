@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Alleen het voorvoegsel vergelijken"</string>
     <string name="action_start_lazy_mode">"Luie modus inschakelen"</string>
     <string name="action_stop_lazy_mode">"Luie modus uitschakelen"</string>
-    <string name="action_shadowbox_mode">"Shadowbox-modus"</string>
     <string name="action_send">"Versturen"</string>
     <string name="action_sort">"Sorteren"</string>
     <string name="action_hide_post">"Bericht verbergen"</string>

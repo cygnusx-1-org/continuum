@@ -254,7 +254,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                                 : null);
         Locale locale = getResources().getConfiguration().locale;
 
-        postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout);
+        postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout));
 
         mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                 mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -581,10 +581,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
-    public void changePostLayout(int postLayout, boolean temporary) {
-        this.postLayout = postLayout;
+    public void changePostLayout(int chosenLayout, boolean temporary) {
+        this.postLayout = adoptLayout(chosenLayout);
         if (!temporary) {
-            mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, postLayout).apply();
+            mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, chosenLayout).apply();
         }
 
         int previousPosition = -1;
@@ -623,7 +623,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         }
 
         if (mAdapter != null) {
-            mAdapter.setPostLayout(postLayout);
+            mAdapter.setPostLayout(this.postLayout);
             // The columns may have changed with the layout, and the list's width has not, so its
             // layout listener will not be the one to say so.
             provideItemWidth(mAdapter);
@@ -760,7 +760,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     @Subscribe
     public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
         // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
-        changePostLayout(postLayout, true);
+        changePostLayout(currentLayout(), true);
     }
 
     @Subscribe

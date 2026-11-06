@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"プレフィックスのみ一致"</string>
     <string name="action_start_lazy_mode">"自動スクロールを開始"</string>
     <string name="action_stop_lazy_mode">"自動スクロールを停止"</string>
-    <string name="action_shadowbox_mode">"シャドーボックス モード"</string>
     <string name="action_send">"送信"</string>
     <string name="action_sort">"並べ替え"</string>
     <string name="action_hide_post">"投稿を非表示"</string>

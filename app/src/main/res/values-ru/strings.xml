@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Сравнивать только префикс"</string>
     <string name="action_start_lazy_mode">"Включить ленивый режим"</string>
     <string name="action_stop_lazy_mode">"Остановить ленивый режим"</string>
-    <string name="action_shadowbox_mode">"Режим теневого ящика"</string>
     <string name="action_send">"Отправить"</string>
     <string name="action_sort">"Сортировка"</string>
     <string name="action_hide_post">"Скрыть пост"</string>

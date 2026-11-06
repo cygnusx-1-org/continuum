@@ -49,6 +49,9 @@
                 <item
                     android:id="@+id/action_post_layout_gallery"
                     android:title="@string/post_layout_gallery" />
+                <item
+                    android:id="@+id/action_post_layout_shadowbox"
+                    android:title="@string/post_layout_shadowbox" />
             </group>
         </menu>
     </item>

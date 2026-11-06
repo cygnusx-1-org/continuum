@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"முன்னொட்டை மட்டும் பொருத்து"</string>
     <string name="action_start_lazy_mode">"சோம்பல் பயன்முறையைத் துவக்கு"</string>
     <string name="action_stop_lazy_mode">"சோம்பல் பயன்முறையை நிறுத்து"</string>
-    <string name="action_shadowbox_mode">"ஷேடோபாக்ஸ் பயன்முறை"</string>
     <string name="action_send">"அனுப்பு"</string>
     <string name="action_sort">"வரிசைப்படுத்து"</string>
     <string name="action_hide_post">"இடக்கையை மறை"</string>

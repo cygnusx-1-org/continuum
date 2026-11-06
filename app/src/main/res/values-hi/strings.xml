@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"केवल उपसर्ग से मेल खाता है"</string>
     <string name="action_start_lazy_mode">"औटो मोड शुरू करे"</string>
     <string name="action_stop_lazy_mode">"औटो मोड बन्द करें "</string>
-    <string name="action_shadowbox_mode">"शैडोबॉक्स मोड"</string>
     <string name="action_send">"भेजें"</string>
     <string name="action_sort">"क्रमबन्धन "</string>
     <string name="action_hide_post">"पोस्ट छुपाएं"</string>

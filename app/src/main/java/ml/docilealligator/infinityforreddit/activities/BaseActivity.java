@@ -963,6 +963,8 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             postLayout = SharedPreferencesUtils.POST_LAYOUT_COMPACT_2;
         } else if (itemId == R.id.action_post_layout_gallery) {
             postLayout = SharedPreferencesUtils.POST_LAYOUT_GALLERY;
+        } else if (itemId == R.id.action_post_layout_shadowbox) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_SHADOWBOX;
         } else {
             return false;
         }

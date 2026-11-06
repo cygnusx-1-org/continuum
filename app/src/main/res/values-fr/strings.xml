@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Faire correspondre le préfixe uniquement"</string>
     <string name="action_start_lazy_mode">"Lancer le mode automatique"</string>
     <string name="action_stop_lazy_mode">"Arrêter le mode automatique"</string>
-    <string name="action_shadowbox_mode">"Mode boîte fantôme"</string>
     <string name="action_send">"Envoyer"</string>
     <string name="action_sort">"Trier"</string>
     <string name="action_hide_post">"Masquer la publication"</string>

@@ -64,7 +64,6 @@
     <string name="action_match_prefix_only">Match prefix only</string>
     <string name="action_start_lazy_mode">Start Lazy Mode</string>
     <string name="action_stop_lazy_mode">Stop Lazy Mode</string>
-    <string name="action_shadowbox_mode">Shadowbox Mode</string>
     <string name="action_send">Send</string>
     <string name="action_sort">Sort</string>
     <string name="action_hide_post">Hide Post</string>
@@ -1010,6 +1009,7 @@
     <string name="post_layout_compact_2">Compact Layout</string>
     <string name="post_layout_gallery">Gallery Layout</string>
     <string name="post_layout_card_3">Card Top</string>
+    <string name="post_layout_shadowbox">Shadowbox</string>
     <string name="post_layout_card_clean">Card Clean</string>
 
     <string name="elapsed_time_just_now">Just Now</string>

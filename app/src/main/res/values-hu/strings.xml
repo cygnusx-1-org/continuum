@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Csak az előtag egyezzen"</string>
     <string name="action_start_lazy_mode">"Lusta mód indítása"</string>
     <string name="action_stop_lazy_mode">"Lusta mód leállítása"</string>
-    <string name="action_shadowbox_mode">"Shadowbox mód"</string>
     <string name="action_send">"Küldés"</string>
     <string name="action_sort">"Rendezés"</string>
     <string name="action_hide_post">"Bejegyzés elrejtése"</string>

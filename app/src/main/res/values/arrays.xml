@@ -73,6 +73,7 @@
         <item>@string/post_layout_card_clean</item>
         <item>@string/post_layout_compact_2</item>
         <item>@string/post_layout_gallery</item>
+        <item>@string/post_layout_shadowbox</item>
     </string-array>
 
     <string-array name="settings_default_post_layout_values">
@@ -81,6 +82,7 @@
         <item>6</item>
         <item>5</item>
         <item>2</item>
+        <item>7</item>
     </string-array>
 
     <string-array name="settings_default_link_post_layout">

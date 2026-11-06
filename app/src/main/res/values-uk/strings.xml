@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Збігається лише з префіксом"</string>
     <string name="action_start_lazy_mode">"Розпочати лінивий режим"</string>
     <string name="action_stop_lazy_mode">"Зупинити лінивий режим"</string>
-    <string name="action_shadowbox_mode">"Режим Shadowbox"</string>
     <string name="action_send">"Надіслати"</string>
     <string name="action_sort">"Сортувати"</string>
     <string name="action_hide_post">"Сховати допис"</string>

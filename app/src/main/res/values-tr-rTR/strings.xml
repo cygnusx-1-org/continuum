@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Yalnızca öneki eşleştir"</string>
     <string name="action_start_lazy_mode">"Uyuşuk Modu Başlat"</string>
     <string name="action_stop_lazy_mode">"Uyuşuk Modu Durdur"</string>
-    <string name="action_shadowbox_mode">"Gölge Kutusu Modu"</string>
     <string name="action_send">"Gönder"</string>
     <string name="action_sort">"Sırala"</string>
     <string name="action_hide_post">"Gönderiyi Gizle"</string>

@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Corresponder apenas ao prefixo"</string>
     <string name="action_start_lazy_mode">"Iniciar modo automático"</string>
     <string name="action_stop_lazy_mode">"Parar modo automático"</string>
-    <string name="action_shadowbox_mode">"Modo Shadowbox"</string>
     <string name="action_send">"Enviar"</string>
     <string name="action_sort">"Ordenar"</string>
     <string name="action_hide_post">"Ocultar postagem"</string>

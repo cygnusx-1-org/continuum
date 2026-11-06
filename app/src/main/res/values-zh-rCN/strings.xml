@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"仅匹配前缀"</string>
     <string name="action_start_lazy_mode">"启用懒人模式"</string>
     <string name="action_stop_lazy_mode">"停用懒人模式"</string>
-    <string name="action_shadowbox_mode">"Shadowbox 模式"</string>
     <string name="action_send">"发送"</string>
     <string name="action_sort">"排序"</string>
     <string name="action_hide_post">"隐藏帖子"</string>

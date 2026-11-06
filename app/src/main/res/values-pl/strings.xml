@@ -61,7 +61,6 @@
     <string name="action_match_prefix_only">"Dopasowuje tylko prefiks"</string>
     <string name="action_start_lazy_mode">"Rozpocznij tryb lenia"</string>
     <string name="action_stop_lazy_mode">"Zatrzymaj tryb lenia"</string>
-    <string name="action_shadowbox_mode">"Tryb Shadowbox"</string>
     <string name="action_send">"Wyślij"</string>
     <string name="action_sort">"Sortuj"</string>
     <string name="action_hide_post">"Ukryj post"</string>
