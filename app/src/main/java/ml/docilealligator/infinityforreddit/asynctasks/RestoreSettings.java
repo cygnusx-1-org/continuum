@@ -32,7 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -149,23 +152,21 @@ public class RestoreSettings {
                         targets.put(CustomThemeSharedPreferencesUtils.LIGHT_THEME_SHARED_PREFERENCES_FILE, lightThemeSharedPreferences);
                         targets.put(CustomThemeSharedPreferencesUtils.DARK_THEME_SHARED_PREFERENCES_FILE, darkThemeSharedPreferences);
                         targets.put(CustomThemeSharedPreferencesUtils.AMOLED_THEME_SHARED_PREFERENCES_FILE, amoledThemeSharedPreferences);
-                        targets.put(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE));
-                        targets.put(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE));
-                        targets.put(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE));
-                        targets.put(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE));
+                        // The files nothing injects: opened raw, each under its own name.
+                        for (String rawName : new String[]{
+                                SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
+                                SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
+                                SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
+                                SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
+                                SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+                                SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE}) {
+                            targets.put(rawName, rawFile(context, rawName));
+                        }
                         targets.put(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE, postFeedScrolledPositionSharedPreferences);
                         targets.put(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE, mainActivityTabsSharedPreferences);
                         targets.put(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE, proxySharedPreferences);
                         targets.put(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE, nsfwAndSpoilerSharedPreferencs);
-                        targets.put(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE));
                         targets.put(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE, postHistorySharedPreferences);
-                        targets.put(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
-                                rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE));
 
                         // What each file held, by the name the backup gave it.
                         Map<String, Map<String, Object>> restoredFiles = new HashMap<>();
@@ -302,22 +303,22 @@ public class RestoreSettings {
                 "INSERT OR IGNORE INTO accounts (username, karma, is_current_user, is_mod)"
                         + " VALUES ('-', 0, 0, 0)");
 
-        File anonymousSubscribedSubredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_subscribed_subreddits.json");
-        File anonymousSubscribedUsersFile = new File(databaseDir.getAbsolutePath() + "/anonymous_subscribed_users.json");
-        File anonymousMultiredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_multireddits.json");
-        File anonymousMultiredditSubredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_multireddit_subreddits.json");
-        File customThemesFile = new File(databaseDir.getAbsolutePath() + "/custom_themes.json");
-        File postFiltersFile = new File(databaseDir.getAbsolutePath() + "/post_filters.json");
-        File postFilterUsageFile = new File(databaseDir.getAbsolutePath() + "/post_filter_usage.json");
-        File commentFiltersFile = new File(databaseDir.getAbsolutePath() + "/comment_filters.json");
-        File commentFilterUsageFile = new File(databaseDir.getAbsolutePath() + "/comment_filter_usage.json");
-        File accountsFile = new File(databaseDir.getAbsolutePath() + "/accounts.json");
-        File readPostsFile = new File(databaseDir.getAbsolutePath() + "/read_posts.json");
-        File localSavedFile = new File(databaseDir.getAbsolutePath() + "/local_saved.json");
-        File anonymousSavedCommentsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_saved_comments.json");
-        File commentDraftsFile = new File(databaseDir.getAbsolutePath() + "/comment_drafts.json");
-        File remindersFile = new File(databaseDir.getAbsolutePath() + "/reminders.json");
-        File recentSearchQueriesFile = new File(databaseDir.getAbsolutePath() + "/recent_search_queries.json");
+        File anonymousSubscribedSubredditsFile = new File(databaseDir, "anonymous_subscribed_subreddits.json");
+        File anonymousSubscribedUsersFile = new File(databaseDir, "anonymous_subscribed_users.json");
+        File anonymousMultiredditsFile = new File(databaseDir, "anonymous_multireddits.json");
+        File anonymousMultiredditSubredditsFile = new File(databaseDir, "anonymous_multireddit_subreddits.json");
+        File customThemesFile = new File(databaseDir, "custom_themes.json");
+        File postFiltersFile = new File(databaseDir, "post_filters.json");
+        File postFilterUsageFile = new File(databaseDir, "post_filter_usage.json");
+        File commentFiltersFile = new File(databaseDir, "comment_filters.json");
+        File commentFilterUsageFile = new File(databaseDir, "comment_filter_usage.json");
+        File accountsFile = new File(databaseDir, "accounts.json");
+        File readPostsFile = new File(databaseDir, "read_posts.json");
+        File localSavedFile = new File(databaseDir, "local_saved.json");
+        File anonymousSavedCommentsFile = new File(databaseDir, "anonymous_saved_comments.json");
+        File commentDraftsFile = new File(databaseDir, "comment_drafts.json");
+        File remindersFile = new File(databaseDir, "reminders.json");
+        File recentSearchQueriesFile = new File(databaseDir, "recent_search_queries.json");
 
         if (anonymousSubscribedSubredditsFile.exists()) {
             List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -401,115 +402,45 @@ public class RestoreSettings {
         List<String> filterOwners = currentAccount != null
                 ? accountNames(redditDataRoomDatabase)
                 : Collections.singletonList(Account.ANONYMOUS_ACCOUNT);
-        if (postFiltersFile.exists()) {
-            List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
-            List<PostFilterUsage> postFilterUsage = postFilterUsageFile.exists()
-                    ? getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType())
-                    : Collections.emptyList();
-            if (rowsHave(postFiltersFile, "username")) {
-                redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
-                redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
-            } else {
-                for (String username : filterOwners) {
-                    for (PostFilter postFilter : postFilters) {
-                        postFilter.username = username;
-                    }
-                    redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
-                    for (PostFilterUsage usage : postFilterUsage) {
-                        usage.username = username;
-                    }
-                    redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
-                }
-            }
-        }
-        if (commentFiltersFile.exists()) {
-            List<CommentFilter> commentFilters = getListFromFile(commentFiltersFile, new TypeToken<List<CommentFilter>>() {}.getType());
-            List<CommentFilterUsage> commentFilterUsage = commentFilterUsageFile.exists()
-                    ? getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType())
-                    : Collections.emptyList();
-            if (rowsHave(commentFiltersFile, "username")) {
-                redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
-                redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
-            } else {
-                for (String username : filterOwners) {
-                    for (CommentFilter commentFilter : commentFilters) {
-                        commentFilter.username = username;
-                    }
-                    redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
-                    for (CommentFilterUsage usage : commentFilterUsage) {
-                        usage.username = username;
-                    }
-                    redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
-                }
-            }
-        }
+        restoreFilters(postFiltersFile, postFilterUsageFile,
+                new TypeToken<List<PostFilter>>() {}, new TypeToken<List<PostFilterUsage>>() {},
+                filterOwners, (filter, owner) -> filter.username = owner, (usage, owner) -> usage.username = owner,
+                redditDataRoomDatabase.postFilterDao()::insertAll, redditDataRoomDatabase.postFilterUsageDao()::insertAll);
+        restoreFilters(commentFiltersFile, commentFilterUsageFile,
+                new TypeToken<List<CommentFilter>>() {}, new TypeToken<List<CommentFilterUsage>>() {},
+                filterOwners, (filter, owner) -> filter.username = owner, (usage, owner) -> usage.username = owner,
+                redditDataRoomDatabase.commentFilterDao()::insertAll, redditDataRoomDatabase.commentFilterUsageDao()::insertAll);
         // Everything below has a foreign key onto an account, and a backup can name accounts it
         // does not bring back: Infinity's holds read posts and reminders for every account it had
         // and no accounts at all. One such row failed its key, and took the whole database restore
         // back with it -- anonymous subscriptions, multireddits, themes and filters included.
         Set<String> accountsInDatabase = namesInAccountsTable(redditDataRoomDatabase);
 
-        // Restore read_posts after accounts so the FK on username is satisfied.
-        if (readPostsFile.exists()) {
-            List<ReadPost> readPosts = onAccountsInDatabase(
-                    getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType()),
-                    ReadPost::getUsername, accountsInDatabase, "read_posts");
-            if (!readPosts.isEmpty()) {
-                redditDataRoomDatabase.readPostDao().insertAll(readPosts);
-            }
-        }
-
-        // Restore local_saved after accounts so the FK on username is satisfied.
-        if (localSavedFile.exists()) {
-            List<LocalSavedThing> localSaved = onAccountsInDatabase(
-                    getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType()),
-                    LocalSavedThing::getUsername, accountsInDatabase, "local_saved");
-            if (!localSaved.isEmpty()) {
-                redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
-            }
-        }
-
-        // Restore anonymous_saved_comments after accounts so the FK on username is satisfied.
-        if (anonymousSavedCommentsFile.exists()) {
-            List<AnonymousSavedComment> anonymousSavedComments = onAccountsInDatabase(
-                    getListFromFile(anonymousSavedCommentsFile, new TypeToken<List<AnonymousSavedComment>>() {}.getType()),
-                    AnonymousSavedComment::getUsername, accountsInDatabase, "anonymous_saved_comments");
-            if (!anonymousSavedComments.isEmpty()) {
-                redditDataRoomDatabase.anonymousSavedCommentDao().insertAll(anonymousSavedComments);
-            }
-        }
-
-        // Restore comment_drafts after accounts so the FK on username is satisfied.
-        if (commentDraftsFile.exists()) {
-            List<CommentDraft> commentDrafts = getListFromFile(commentDraftsFile, new TypeToken<List<CommentDraft>>() {}.getType());
-            if (!commentDrafts.isEmpty()) {
-                redditDataRoomDatabase.commentDraftDao().insertAll(commentDrafts);
-            }
-        }
-
-        // Restore reminders after accounts so the FK on username is satisfied.
-        if (remindersFile.exists()) {
-            List<Reminder> reminders = withoutAbsentAccounts(
-                    getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType()),
-                    accountsInDatabase);
-            if (!reminders.isEmpty()) {
-                redditDataRoomDatabase.reminderDao().insertAll(reminders);
-            }
-        }
+        // Each of these has a foreign key on username, so they go in after the accounts.
+        restoreRows(readPostsFile, new TypeToken<List<ReadPost>>() {},
+                rows -> onAccountsInDatabase(rows, ReadPost::getUsername, accountsInDatabase, "read_posts"),
+                redditDataRoomDatabase.readPostDao()::insertAll);
+        restoreRows(localSavedFile, new TypeToken<List<LocalSavedThing>>() {},
+                rows -> onAccountsInDatabase(rows, LocalSavedThing::getUsername, accountsInDatabase, "local_saved"),
+                redditDataRoomDatabase.localSavedThingDao()::insertAll);
+        restoreRows(anonymousSavedCommentsFile, new TypeToken<List<AnonymousSavedComment>>() {},
+                rows -> onAccountsInDatabase(rows, AnonymousSavedComment::getUsername, accountsInDatabase, "anonymous_saved_comments"),
+                redditDataRoomDatabase.anonymousSavedCommentDao()::insertAll);
+        restoreRows(commentDraftsFile, new TypeToken<List<CommentDraft>>() {},
+                rows -> rows,
+                redditDataRoomDatabase.commentDraftDao()::insertAll);
+        restoreRows(remindersFile, new TypeToken<List<Reminder>>() {},
+                rows -> withoutAbsentAccounts(rows, accountsInDatabase),
+                redditDataRoomDatabase.reminderDao()::insertAll);
 
         // Recently visited and search history hang off accounts by an
         // ON DELETE CASCADE, so clearing the accounts above wiped whatever
         // was here. They have to come back from the backup -- nothing on
         // Reddit can re-sync them -- and, like the tables above, only after
         // the accounts they reference exist again.
-        if (recentSearchQueriesFile.exists()) {
-            List<RecentSearchQuery> recentSearchQueries = onAccountsInDatabase(
-                    getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType()),
-                    RecentSearchQuery::getUsername, accountsInDatabase, "recent_search_queries");
-            if (!recentSearchQueries.isEmpty()) {
-                redditDataRoomDatabase.recentSearchQueryDao().insertAll(recentSearchQueries);
-            }
-        }
+        restoreRows(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {},
+                rows -> onAccountsInDatabase(rows, RecentSearchQuery::getUsername, accountsInDatabase, "recent_search_queries"),
+                redditDataRoomDatabase.recentSearchQueryDao()::insertAll);
 
         // Everything is in. Move whatever landed on the placeholder above
         // onto the name the app actually reads, and drop the placeholder.
@@ -520,6 +451,55 @@ public class RestoreSettings {
                 redditDataRoomDatabase.getOpenHelper().getWritableDatabase());
 
         return currentAccount;
+    }
+
+    /**
+     * Restores one table from its file: nothing when the backup has no file for it, otherwise the
+     * rows {@code keep} lets through, and nothing at all when that leaves none.
+     */
+    private static <T> void restoreRows(File file, TypeToken<List<T>> type,
+                                        UnaryOperator<List<T>> keep, Consumer<List<T>> insert) {
+        if (!file.exists()) {
+            return;
+        }
+        List<T> rows = keep.apply(getListFromFile(file, type.getType()));
+        if (!rows.isEmpty()) {
+            insert.accept(rows);
+        }
+    }
+
+    /**
+     * Restores the filters of one kind, and their usage rows. A backup that says whose they are
+     * brings them in as written; one from before a filter had an owner gives a copy to each of
+     * {@code owners}.
+     */
+    private static <F, U> void restoreFilters(File filtersFile, File usageFile,
+                                              TypeToken<List<F>> filterType, TypeToken<List<U>> usageType,
+                                              List<String> owners,
+                                              BiConsumer<F, String> setFilterOwner, BiConsumer<U, String> setUsageOwner,
+                                              Consumer<List<F>> insertFilters, Consumer<List<U>> insertUsage) {
+        if (!filtersFile.exists()) {
+            return;
+        }
+        List<F> filters = getListFromFile(filtersFile, filterType.getType());
+        List<U> usage = usageFile.exists()
+                ? getListFromFile(usageFile, usageType.getType())
+                : Collections.emptyList();
+        if (rowsHave(filtersFile, "username")) {
+            insertFilters.accept(filters);
+            insertUsage.accept(usage);
+            return;
+        }
+        for (String owner : owners) {
+            for (F filter : filters) {
+                setFilterOwner.accept(filter, owner);
+            }
+            insertFilters.accept(filters);
+            for (U row : usage) {
+                setUsageOwner.accept(row, owner);
+            }
+            insertUsage.accept(usage);
+        }
     }
 
     /**
