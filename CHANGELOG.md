@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.12 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: the upvote and downvote buttons in the post list share one routine instead of two near-identical 100-line copies
+
 8.3.3.9.1.26-beta.11 / 2026-11-6
 ============
 * Removed the volume-key navigation: the "Use Volume Keys to Navigate Posts" and "...Comments in Posts" settings, and the code behind them in the feeds, post details and Shadowbox. The volume keys now only change the volume
