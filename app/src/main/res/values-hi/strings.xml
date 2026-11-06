@@ -456,8 +456,6 @@
     <string name="settings_enable_bottom_app_bar_title">"निचला नेवीगेशन शुरू करें "</string>
     <string name="settings_category_post_and_comment_title">"पोस्ट एवं टिप्पणी "</string>
     <string name="settings_vote_buttons_on_the_right_title">"वोट बटन दाईं तरफ "</string>
-    <string name="settings_volume_keys_navigate_comments_title">"पोस्ट्स में टिप्पणी नेवीगेशन के लिए वॉल्यूम कुंजियों का प्रयोग "</string>
-    <string name="settings_volume_keys_navigate_posts_title">"पोस्ट्स नेवीगेशन के लिए वॉल्यूम कुंजियों का प्रयोग "</string>
     <string name="settings_mute_video_title">"मौन वीडियोज "</string>
     <string name="settings_mute_nsfw_video_title">"म्यूट NSFW वीडियो"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"वीडियो प्लेयर में नेवीगेशन बार का छिपना"</string>

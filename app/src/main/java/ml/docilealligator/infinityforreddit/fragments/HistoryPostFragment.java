@@ -400,18 +400,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
-    protected boolean scrollPostsByCount(int count) {
-        if (mLinearLayoutManager != null) {
-            int pos = mLinearLayoutManager.findFirstVisibleItemPosition();
-            int targetPosition = pos + count;
-            mLinearLayoutManager.scrollToPositionWithOffset(targetPosition, 0);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public void onDestroyView() {
         if (mHistoryPostViewModel != null) {
             // The view model outlives this view, and must not hold on to its preloader.

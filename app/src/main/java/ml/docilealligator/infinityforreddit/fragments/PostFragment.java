@@ -280,18 +280,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
-    protected boolean scrollPostsByCount(int count) {
-        if (mLinearLayoutManager != null) {
-            int pos = mLinearLayoutManager.findFirstVisibleItemPosition();
-            int targetPosition = pos + count;
-            mLinearLayoutManager.scrollToPositionWithOffset(targetPosition, 0);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment

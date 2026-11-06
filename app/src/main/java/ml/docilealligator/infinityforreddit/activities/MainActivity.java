@@ -1797,15 +1797,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (sectionsPagerAdapter != null) {
-            return sectionsPagerAdapter.handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(FETCH_USER_INFO_STATE, mFetchUserInfoSuccess);
@@ -2954,14 +2945,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         @Nullable
         private Fragment getRawFragmentAtPosition(int position) {
             return rawFragmentAtPosition(position);
-        }
-
-        boolean handleKeyDown(int keyCode) {
-            PostFragment currentFragment = getCurrentFragment();
-            if (currentFragment != null) {
-                return currentFragment.handleKeyDown(keyCode);
-            }
-            return false;
         }
 
         @PostType

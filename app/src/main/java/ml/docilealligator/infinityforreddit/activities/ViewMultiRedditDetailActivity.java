@@ -159,13 +159,6 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     private NavigationWrapper navigationWrapper;
     private ActivityViewMultiRedditDetailBinding binding;
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mFragment instanceof PostFragment)
-            return ((PostFragment) mFragment).handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        return super.onKeyDown(keyCode, event);
-    }
-
     @ExperimentalBadgeUtils
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

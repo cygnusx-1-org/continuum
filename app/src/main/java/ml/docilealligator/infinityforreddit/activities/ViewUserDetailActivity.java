@@ -788,15 +788,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (sectionsPagerAdapter != null) {
-            return sectionsPagerAdapter.handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return mSharedPreferences;
     }
@@ -2062,16 +2053,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 return null;
             }
             return fragmentManager.findFragmentByTag("f" + binding.viewPagerViewUserDetailActivity.getCurrentItem());
-        }
-
-        public boolean handleKeyDown(int keyCode) {
-            if (binding.viewPagerViewUserDetailActivity.getCurrentItem() == 0) {
-                Fragment fragment = getCurrentFragment();
-                if (fragment instanceof PostFragment) {
-                    return ((PostFragment) fragment).handleKeyDown(keyCode);
-                }
-            }
-            return false;
         }
 
         public void refresh() {

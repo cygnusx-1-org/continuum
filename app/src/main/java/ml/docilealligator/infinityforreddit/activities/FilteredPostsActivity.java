@@ -305,15 +305,6 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mFragment != null) {
-            return mFragment.handleKeyDown(keyCode) || super.onKeyDown(keyCode, event);
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public SharedPreferences getDefaultSharedPreferences() {
         return mSharedPreferences;
     }
