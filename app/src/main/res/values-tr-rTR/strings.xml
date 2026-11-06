@@ -647,10 +647,8 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_credits_national_flags">"Ulusal Bayraklar"</string>
     <string name="settings_credits_national_flags_summary">"Freepik tarafından www.flaticon.com adresinden yapılan simge"</string>
     <string name="settings_group_global">"Küresel"</string>
-    <string name="settings_group_account">"Hesap"</string>
     <string name="settings_account_settings_management_title">"Hesap Ayarları Yönetimi"</string>
     <string name="settings_account_settings_management_summary">"Başka bir hesabın ayarlarını buna kopyalayın, bunu varsayılanlara geri getirin veya biriktirdiklerini silin"</string>
-    <string name="settings_group_themes">"Temalar"</string>
     <string name="settings_group_other">"Diğer"</string>
     <string name="settings_copy_settings_from_account_title">"Ayarları Başka Bir Hesaptan Kopyala"</string>
     <string name="settings_copy_settings_from_account_summary">"Bu hesaba başka bir hesabın ayarlarını verin"</string>
@@ -815,7 +813,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_proxy_hostname">"Ana Bilgisayar Adı"</string>
     <string name="settings_proxy_port">"Bağlantı noktası"</string>
     <string name="settings_notification_master_summary">"Anında bildirimleri etkinleştirin ve bunların ne sıklıkta kontrol edileceğini ayarlayın"</string>
-    <string name="settings_interface_summary">"Yazı tipleri, gezinme çekmecesi, sekmeler, alt uygulama çubuğu ve gönderi ve yorum görüntüleme seçenekleri"</string>
     <string name="settings_theme_summary">"Açık, koyu ve AMOLED temaları, Material You ve özel tema renkleri"</string>
     <string name="settings_video_summary">"Otomatik oynatma, sessize alma, oynatma hızı, varsayılan çözünürlük ve tam ekran davranışı"</string>
     <string name="settings_gestures_and_buttons_summary">"Kaydırma hareketleri, ses seviyesi tuşunda gezinme, uzun basma eylemleri ve hareket duyarlılığı"</string>

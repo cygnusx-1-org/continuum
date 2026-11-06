@@ -3,27 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_font_title"
-        app:icon="@drawable/ic_font_size_day_night_24dp"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:key="immersive_interface_entry"
         app:title="@string/settings_immersive_interface_title"
         app:fragment="ml.docilealligator.infinityforreddit.settings.ImmersiveInterfacePreferenceFragment"
         app:isPreferenceVisible="false" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_navigation_drawer_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.NavigationDrawerPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_customize_tabs_in_main_page_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_customize_bottom_app_bar_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
@@ -63,18 +46,6 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:title="@string/settings_time_format_title"
         app:fragment="ml.docilealligator.infinityforreddit.settings.TimeFormatPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_category_post_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.PostPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_post_details_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.PostDetailsPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_category_comment_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.CommentPreferenceFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="2.5"

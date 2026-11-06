@@ -633,10 +633,8 @@
     <string name="settings_credits_national_flags">"Calanka Qaranka"</string>
     <string name="settings_credits_national_flags_summary">"Icon ay samaysay Freepik ka www.flaticon.com"</string>
     <string name="settings_group_global">"Guud"</string>
-    <string name="settings_group_account">"Koontada"</string>
     <string name="settings_account_settings_management_title">"Maaraynta Dejinta Koontada"</string>
     <string name="settings_account_settings_management_summary">"Ku koobbi dejimaha akoon kale midkan, kan ku celi mid khaldan, ama tirtir waxa uu urursaday"</string>
-    <string name="settings_group_themes">"Mawduucyada"</string>
     <string name="settings_group_other">"Kale"</string>
     <string name="settings_copy_settings_from_account_title">"Naqli dejinta akoon kale"</string>
     <string name="settings_copy_settings_from_account_summary">"Sii akoonkan meelaha uu mid kale leeyahay"</string>
@@ -801,7 +799,6 @@
     <string name="settings_proxy_hostname">"Magaca martida loo yahay"</string>
     <string name="settings_proxy_port">"Dekedda"</string>
     <string name="settings_notification_master_summary">"Daree ogeysiisyada riixitaanka oo deji inta jeer ee la hubiyo"</string>
-    <string name="settings_interface_summary">"Fonts, khaanad hagaha, tabs, bar app hoose, iyo ikhtiyaarka soo bandhigida boostada iyo faallooyinka"</string>
     <string name="settings_theme_summary">"Mawduucyo iftiin, madow iyo AMOLED ah, Material You iyo midabbo mawduuc gaar ah"</string>
     <string name="settings_video_summary">"Autoplay, aamusin, xawaaraha dib-u-ciyaarista, xallinta caadiga ah, iyo dhaqanka shaashada buuxda"</string>
     <string name="settings_gestures_and_buttons_summary">"Dhaqdhaqaaqa dhaqdhaqaajinta, hagitaan mugga mugga, ficillada saxaafadda dheer, iyo dareenka tilmaanta"</string>

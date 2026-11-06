@@ -204,7 +204,12 @@ class AccountScopedScreenKeysTest {
      * that followed only "Account" would have stopped guarding those the moment they moved.
      */
     private fun fragmentsUnderThisAccount(): List<String> {
-        val perAccountGroups = setOf(R.string.settings_group_account, R.string.settings_group_themes)
+        val perAccountGroups = setOf(
+            R.string.settings_group_account_appearance,
+            R.string.settings_group_account_posts,
+            R.string.settings_group_account_navigation,
+            R.string.settings_group_account_more,
+        )
         val fragments = mutableListOf<String>()
         var underThisAccount = false
         forEachStartTag(R.xml.main_preferences) { tag, parser ->

@@ -649,10 +649,8 @@
     <string name="settings_credits_national_flags">"Национальные флаги"</string>
     <string name="settings_credits_national_flags_summary">"Значок создан Freepik из www.flaticon.com"</string>
     <string name="settings_group_global">"Глобальный"</string>
-    <string name="settings_group_account">"Аккаунт"</string>
     <string name="settings_account_settings_management_title">"Управление настройками учетной записи"</string>
     <string name="settings_account_settings_management_summary">"Скопируй настройки другой учетной записи в эту, верни эту к настройкам по умолчанию или удали накопленные данные."</string>
-    <string name="settings_group_themes">"Темы"</string>
     <string name="settings_group_other">"Другое"</string>
     <string name="settings_copy_settings_from_account_title">"Копирование настроек из другой учетной записи"</string>
     <string name="settings_copy_settings_from_account_summary">"Дай этой учетной записи настройки, которые есть у другой."</string>
@@ -817,7 +815,6 @@
     <string name="settings_proxy_hostname">"Имя хоста"</string>
     <string name="settings_proxy_port">"Порт"</string>
     <string name="settings_notification_master_summary">"Включи push-уведомления и установи частоту их проверки."</string>
-    <string name="settings_interface_summary">"Шрифты, панель навигации, вкладки, нижняя панель приложений, а также параметры отображения публикаций и комментариев."</string>
     <string name="settings_theme_summary">"Светлые, темные темы и темы AMOLED, Material You и пользовательские цвета темы."</string>
     <string name="settings_video_summary">"Автозапуск, отключение звука, скорость воспроизведения, разрешение по умолчанию и полноэкранный режим"</string>
     <string name="settings_gestures_and_buttons_summary">"Жесты смахивания, навигация с помощью клавиш громкости, действия при длительном нажатии и чувствительность к жестам"</string>

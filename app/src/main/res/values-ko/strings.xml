@@ -643,10 +643,8 @@
     <string name="settings_credits_national_flags">"국기"</string>
     <string name="settings_credits_national_flags_summary">"www.flaticon.com의 Freepik에서 만든 아이콘"</string>
     <string name="settings_group_global">"글로벌"</string>
-    <string name="settings_group_account">"계정"</string>
     <string name="settings_account_settings_management_title">"계정 설정 관리"</string>
     <string name="settings_account_settings_management_summary">"다른 계정의 설정을 이 계정에 복사하거나, 기본값으로 되돌리거나, 누적된 내용을 삭제하세요."</string>
-    <string name="settings_group_themes">"테마"</string>
     <string name="settings_group_other">"기타"</string>
     <string name="settings_copy_settings_from_account_title">"다른 계정에서 설정 복사"</string>
     <string name="settings_copy_settings_from_account_summary">"이 계정에 다른 계정의 설정을 부여하세요"</string>
@@ -811,7 +809,6 @@
     <string name="settings_proxy_hostname">"호스트 이름"</string>
     <string name="settings_proxy_port">"포트"</string>
     <string name="settings_notification_master_summary">"푸시 알림을 활성화하고 확인 빈도를 설정합니다."</string>
-    <string name="settings_interface_summary">"글꼴, 탐색 창, 탭, 하단 앱 바, 게시물 및 댓글 표시 옵션"</string>
     <string name="settings_theme_summary">"밝음, 어두움 및 AMOLED 테마, Material You 및 사용자 정의 테마 색상"</string>
     <string name="settings_video_summary">"자동 재생, 음소거, 재생 속도, 기본 해상도 및 전체 화면 동작"</string>
     <string name="settings_gestures_and_buttons_summary">"스와이프 동작, 볼륨 키 탐색, 길게 누르기 동작 및 동작 감도"</string>

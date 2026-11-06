@@ -650,10 +650,8 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_credits_national_flags">"Steaguri Naționale"</string>
     <string name="settings_credits_national_flags_summary">"Pictogramă realizată de Freepik din www.flaticon.com"</string>
     <string name="settings_group_global">"Global"</string>
-    <string name="settings_group_account">"Cont"</string>
     <string name="settings_account_settings_management_title">"Gestionarea setărilor contului"</string>
     <string name="settings_account_settings_management_summary">"Copiază setările altui cont pe acesta, pui-l înapoi la valorile implicite sau șterge ceea ce a acumulat"</string>
-    <string name="settings_group_themes">"Teme"</string>
     <string name="settings_group_other">"Altele"</string>
     <string name="settings_copy_settings_from_account_title">"Copiază setările dintr-un alt cont"</string>
     <string name="settings_copy_settings_from_account_summary">"Dă acestui cont setările pe care le are altul"</string>
@@ -818,7 +816,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_proxy_hostname">"Nume gazdă"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Activează notificările push și setează cât de des sunt verificate"</string>
-    <string name="settings_interface_summary">"Fonturi, sertar de navigare, file, bara de aplicație de jos și opțiuni de afișare a postării și a comentariilor"</string>
     <string name="settings_theme_summary">"Teme deschise, întunecate și AMOLED, Material You și culori tematice personalizate"</string>
     <string name="settings_video_summary">"Redare automată, dezactivare, viteza de redare, rezoluție implicită și comportament pe ecran complet"</string>
     <string name="settings_gestures_and_buttons_summary">"Gesturi de glisare, navigare cu tastele de volum, acțiuni de apăsare lungă și sensibilitate la gesturi"</string>

@@ -643,10 +643,8 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_credits_national_flags">"Flagi narodowe"</string>
     <string name="settings_credits_national_flags_summary">"Icon made by Freepik from www.flaticon.com"</string>
     <string name="settings_group_global">"Globalny"</string>
-    <string name="settings_group_account">"Konto"</string>
     <string name="settings_account_settings_management_title">"Zarządzanie ustawieniami konta"</string>
     <string name="settings_account_settings_management_summary">"Skopiuj ustawienia innego konta na to, przywróć ustawienia domyślne tego konta lub usuń to, co zgromadziło"</string>
-    <string name="settings_group_themes">"Motywy"</string>
     <string name="settings_group_other">"Inne"</string>
     <string name="settings_copy_settings_from_account_title">"Kopiuj ustawienia z innego konta"</string>
     <string name="settings_copy_settings_from_account_summary">"Nadaj temu kontu ustawienia, które ma inne"</string>
@@ -811,7 +809,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_proxy_hostname">"Nazwa hosta"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Włącz powiadomienia push i ustaw częstotliwość ich sprawdzania"</string>
-    <string name="settings_interface_summary">"Czcionki, szuflada nawigacji, karty, dolny pasek aplikacji oraz opcje wyświetlania postów i komentarzy"</string>
     <string name="settings_theme_summary">"Jasne, ciemne i AMOLED motywy, Material You i niestandardowe kolory motywu"</string>
     <string name="settings_video_summary">"Automatyczne odtwarzanie, wyciszanie, prędkość odtwarzania, domyślna rozdzielczość i zachowanie na pełnym ekranie"</string>
     <string name="settings_gestures_and_buttons_summary">"Gesty przesuwania, nawigacja przy użyciu klawiszy głośności, akcje przy długim naciśnięciu i czułość gestów"</string>

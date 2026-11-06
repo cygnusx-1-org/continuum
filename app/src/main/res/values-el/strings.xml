@@ -643,10 +643,8 @@
     <string name="settings_credits_national_flags">"Εθνικές Σημαίες"</string>
     <string name="settings_credits_national_flags_summary">"Εικονίδιο έγινε από τον Freepik από www.flaticon.com"</string>
     <string name="settings_group_global">"Παγκόσμια"</string>
-    <string name="settings_group_account">"Λογαριασμός"</string>
     <string name="settings_account_settings_management_title">"Διαχείριση ρυθμίσεων λογαριασμού"</string>
     <string name="settings_account_settings_management_summary">"Αντίγραψε τις ρυθμίσεις ενός άλλου λογαριασμού σε αυτόν, επανάφερε αυτόν στις προεπιλογές ή διάγραψε ό,τι έχει συσσωρευτεί"</string>
-    <string name="settings_group_themes">"Θέματα"</string>
     <string name="settings_group_other">"Άλλο"</string>
     <string name="settings_copy_settings_from_account_title">"Αντιγραφή ρυθμίσεων από άλλον λογαριασμό"</string>
     <string name="settings_copy_settings_from_account_summary">"Δώσε σε αυτόν τον λογαριασμό τις ρυθμίσεις που έχει ένας άλλος"</string>
@@ -811,7 +809,6 @@
     <string name="settings_proxy_hostname">"Όνομα κεντρικού υπολογιστή"</string>
     <string name="settings_proxy_port">"Θύρα"</string>
     <string name="settings_notification_master_summary">"Ενεργοποίησε τις ειδοποιήσεις push και όρισε πόσο συχνά θα ελέγχονται"</string>
-    <string name="settings_interface_summary">"Γραμματοσειρές , συρτάρι πλοήγησης, καρτέλες, κάτω γραμμή εφαρμογών και επιλογές εμφάνισης αναρτήσεων και σχολίων"</string>
     <string name="settings_theme_summary">"Ανοιχτά, σκούρα και AMOLED θέματα, Material You και προσαρμοσμένα χρώματα θεμάτων"</string>
     <string name="settings_video_summary">"Αυτόματη αναπαραγωγή, σίγαση, ταχύτητα αναπαραγωγής, προεπιλεγμένη ανάλυση και συμπεριφορά πλήρους οθόνης"</string>
     <string name="settings_gestures_and_buttons_summary">"Κινήσεις ολίσθησης, πλοήγηση με πλήκτρα έντασης, ενέργειες παρατεταμένου πατήματος και ευαισθησία χειρονομιών"</string>
