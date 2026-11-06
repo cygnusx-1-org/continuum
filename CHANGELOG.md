@@ -2,6 +2,11 @@
 
 ---
 
+8.3.3.9.1.26-beta.15 / 2026-11-6
+============
+* Changing the post layout from the three-dot menu now waits for the menu to close before rebuilding the feed, so the menu no longer freezes on screen
+* Changing the post layout now turns swipe actions on or off to match the new layout: going from the two-column Gallery layout to a card layout left them off, and going the other way left them on
+
 8.3.3.9.1.26-beta.14 / 2026-11-6
 ============
 * Settings: "Global Settings Management" is gone; its two actions, Delete All Themes and Reset All Settings, are on the Backup and Restore screen, now called "Backup, restore and reset"
