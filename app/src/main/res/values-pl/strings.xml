@@ -1025,12 +1025,8 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="theme_item_received_message_background_color_detail">"Zastosowano do: Tło odebranej wiadomości prywatnej"</string>
     <string name="theme_item_sent_message_background_color">"Kolor tła wysłanej wiadomości"</string>
     <string name="theme_item_sent_message_background_color_detail">"Zastosowano dla: Tło wysłanej wiadomości"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Kolor paska dolnej nawigacji"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Zastosowano do: Dolny pasek nawigacji"</string>
     <string name="theme_item_primary_icon_color">"Kolor ikony podstawowej"</string>
     <string name="theme_item_primary_icon_color_detail">"Zastosowano dla: Ikony w szufladzie nawigacji"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Kolor ikon dolnego paska nawigacji"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Zastosowano dla: Ikony dolnego paska nawigacji"</string>
     <string name="theme_item_post_icon_and_info_color">"Ikona posta i kolor informacji"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Zastosowano dla: Ikon, wyniku i liczny komentarzy"</string>
     <string name="theme_item_comment_icon_and_info_color">"Ikona komentarza i kolor informacji"</string>

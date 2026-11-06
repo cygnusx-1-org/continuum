@@ -1025,12 +1025,8 @@
     <string name="theme_item_received_message_background_color_detail">"적용 대상: 비공개 메시지 수신 배경"</string>
     <string name="theme_item_sent_message_background_color">"보낸 메시지 배경색"</string>
     <string name="theme_item_sent_message_background_color_detail">"적용 대상: 비공개 메시지 전송 배경"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"하단 탐색 표시줄 색상"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"적용 대상: 하단 네비게이션 바"</string>
     <string name="theme_item_primary_icon_color">"기본 아이콘 색상"</string>
     <string name="theme_item_primary_icon_color_detail">"적용 대상: 탐색 창의 아이콘."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"하단 탐색 표시줄 아이콘 색상"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"적용 대상: 하단 네비게이션 바 아이콘"</string>
     <string name="theme_item_post_icon_and_info_color">"게시물 아이콘 및 정보 색상"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"적용 대상: 게시물의 아이콘, 점수, 댓글 수"</string>
     <string name="theme_item_comment_icon_and_info_color">"댓글 아이콘 및 정보 색상"</string>

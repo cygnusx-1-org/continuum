@@ -1034,12 +1034,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fundo das mensagens privadas recebidas"</string>
     <string name="theme_item_sent_message_background_color">"Cor de fundo da mensagem enviada"</string>
     <string name="theme_item_sent_message_background_color_detail">"Aplicado a: Fundo das mensagens privadas enviadas"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Cor da barra de navegação inferior"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Aplicado a: Barra de navegação inferior"</string>
     <string name="theme_item_primary_icon_color">"Cor do Ícone Primário"</string>
     <string name="theme_item_primary_icon_color_detail">"Aplicado a: Ícones no menu de navegação."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Cor do ícone da barra de navegação inferior"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Aplicado a: Ícones na barra de navegação inferior"</string>
     <string name="theme_item_post_icon_and_info_color">"Cor do ícone da postagem e informações"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Aplicado a: Ícones, número de comentários e pontuação nas postagens"</string>
     <string name="theme_item_comment_icon_and_info_color">"Cor do Ícone de Comentário e Informações"</string>

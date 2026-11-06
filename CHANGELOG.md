@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.19 / 2026-11-6
+============
+* Custom themes no longer have the "Bottom Navigation Bar Color" and "Bottom Navigation Bar Icon Color" rows, and the theme preview no longer draws a bottom bar. Existing themes are unaffected; the two stored values are simply no longer used
+
 8.3.3.9.1.26-beta.18 / 2026-11-6
 ============
 * The bottom app bar and the landscape/tablet navigation rail are gone from the layouts of the main feed, subreddit, user and multireddit screens. The floating button now sits in the corner by itself, and in landscape and on tablets it hides on scroll like it does in portrait

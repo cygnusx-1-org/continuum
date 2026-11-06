@@ -1032,12 +1032,8 @@ Reddit 视频分辨率较低。
     <string name="theme_item_received_message_background_color_detail">"应用于：已接收私人消息的背景"</string>
     <string name="theme_item_sent_message_background_color">"已发送消息的背景色"</string>
     <string name="theme_item_sent_message_background_color_detail">"应用于：已发送私人消息的背景"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"底部导航栏颜色"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"应用于：底部导航栏"</string>
     <string name="theme_item_primary_icon_color">"主图标颜色"</string>
     <string name="theme_item_primary_icon_color_detail">"应用于：导航抽屉中的图标"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"底部导航栏图标颜色"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"应用于：底部导航栏中的图标"</string>
     <string name="theme_item_post_icon_and_info_color">"帖子图标和信息颜色"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"应用于：帖子图标、分数与评论数"</string>
     <string name="theme_item_comment_icon_and_info_color">"评论图标和信息颜色"</string>

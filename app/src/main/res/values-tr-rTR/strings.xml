@@ -1030,12 +1030,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Uygulandığı yer: Alınan özel mesajların arka planı"</string>
     <string name="theme_item_sent_message_background_color">"Gönderilen Mesaj Arka Plan Rengi"</string>
     <string name="theme_item_sent_message_background_color_detail">"Uygulandığı yer: Gönderilen özel mesajların arka planı"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Alt Navigasyon Çubuğu Rengi"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Uygulandığı yer: Alt Navigasyon çubuğu"</string>
     <string name="theme_item_primary_icon_color">"Birincil Simge Rengi"</string>
     <string name="theme_item_primary_icon_color_detail">"Uygulandığı yer: Gezinme çekmecesindeki simgeler."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Alt Navigasyon Çubuğu Simge Rengi"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Uygulandığı yer: Alt Navigasyon çubuğundaki simgeler"</string>
     <string name="theme_item_post_icon_and_info_color">"Gönderi Simgesi ve Bilgi Rengi"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Uygulandığı yer: Simgeler, puanlar ve gönderilerdeki yorum sayısı"</string>
     <string name="theme_item_comment_icon_and_info_color">"Yorum Simgesi ve Bilgi Rengi"</string>

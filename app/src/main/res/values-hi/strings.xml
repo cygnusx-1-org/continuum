@@ -1023,12 +1023,8 @@
     <string name="theme_item_received_message_background_color_detail">"पर लागू होगा: प्राप्त व्यक्तिगत संदेश की पृष्ठभूमि "</string>
     <string name="theme_item_sent_message_background_color">"भेजे गए संदेश की पृष्टभूमि का रंग "</string>
     <string name="theme_item_sent_message_background_color_detail">"पर लागू होगा: भेजे गए व्यक्तिगत संदेश की पृष्टभूमि"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"निचले नेवीगेशन बार का रंग "</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"पर लागू होगा: निचला नेवीगेशन बार "</string>
     <string name="theme_item_primary_icon_color">"प्राथमिक आइकन रंग "</string>
     <string name="theme_item_primary_icon_color_detail">"पर लागू होगा: नेवीगेशन दराज में आइकन्स"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"निचले नेवीगेशन बार के आइकन्स के रंग "</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"पर लागू होगा: निचले नेवीगेशन बार के आइकन्स"</string>
     <string name="theme_item_post_icon_and_info_color">"पोस्ट आइकन एवं सूचना रंग "</string>
     <string name="theme_item_post_icon_and_info_color_detail">"पर लागू होगा: आइकन्स, अंक एवं पोस्ट में टिप्पणियों की संख्या "</string>
     <string name="theme_item_comment_icon_and_info_color">"टिप्पणी आइकन एवं सूचना रंग "</string>

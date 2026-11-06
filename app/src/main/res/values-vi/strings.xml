@@ -1026,12 +1026,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Áp dụng cho: Nền của tin nhắn riêng tư được nhận"</string>
     <string name="theme_item_sent_message_background_color">"Màu nền tin nhắn đã gửi"</string>
     <string name="theme_item_sent_message_background_color_detail">"Áp dụng cho: Nền của tin nhắn riêng tư đã gửi"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Màu thanh điều hướng ở dưới cùng"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Áp dụng cho: Thanh điều hướng ở dưới cùng"</string>
     <string name="theme_item_primary_icon_color">"Màu chính của biểu tượng"</string>
     <string name="theme_item_primary_icon_color_detail">"Áp dụng cho: Biểu tượng trong ngăn điều hướng."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Màu biểu tượng của ngăn điều hướng ở dưới cùng"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Áp dụng cho: Biểu tượng trong ngăn điều hướng ở dưới cùng"</string>
     <string name="theme_item_post_icon_and_info_color">"Màu biểu tượng và thông tin bài đăng"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Áp dụng cho: Biểu tượng, số điểm và số lượng bình luận trong bài đăng"</string>
     <string name="theme_item_comment_icon_and_info_color">"Màu biểu tượng và thông tin bình luận"</string>

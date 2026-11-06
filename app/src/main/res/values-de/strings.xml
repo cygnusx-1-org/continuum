@@ -1032,12 +1032,8 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="theme_item_received_message_background_color_detail">"Angewandt auf: Hintergrund von empfangenen private Nachrichten"</string>
     <string name="theme_item_sent_message_background_color">"Hintergrundfarbe für gesendete Nachrichten"</string>
     <string name="theme_item_sent_message_background_color_detail">"Angewandt auf: Hintergrund von gesendeten privaten Nachrichten"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Farbe für untere Navigationsleiste"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Angewandt auf: Untere Navigationsleiste"</string>
     <string name="theme_item_primary_icon_color">"Primäre Symbolfarbe"</string>
     <string name="theme_item_primary_icon_color_detail">"Angewandt auf: Symbole in der Navigationsleiste."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Symbolfarbe für untere Navigationsleiste"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Angewandt auf: Symbole in der unteren Navigationsleiste"</string>
     <string name="theme_item_post_icon_and_info_color">"Farbe für Beitragssymbol und Information"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Angewandt auf: Symbole, Punktezahl und die Anzahl der Kommentare in Beiträgen"</string>
     <string name="theme_item_comment_icon_and_info_color">"Farbe für Kommentarsymbol und Information"</string>

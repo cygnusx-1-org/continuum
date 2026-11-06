@@ -1032,12 +1032,8 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="theme_item_received_message_background_color_detail">"Použito na: pozadí obdržených soukromých zpráv"</string>
     <string name="theme_item_sent_message_background_color">"Barva pozadí odeslané zprávy"</string>
     <string name="theme_item_sent_message_background_color_detail">"Použito na: pozadí odeslaných soukromých zpráv"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Barva spodní navigační lišty"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Použito na: spodní navigační lištu"</string>
     <string name="theme_item_primary_icon_color">"Primární barva ikony"</string>
     <string name="theme_item_primary_icon_color_detail">"Použito na: ikony v navigačním panelu."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Barva ikon spodní navigační lišty"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Použito na: ikony ve spodní navigační liště"</string>
     <string name="theme_item_post_icon_and_info_color">"Barva ikony příspěvku a informace"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Použito na: ikony, skóre a počet komentářů v příspěvcích"</string>
     <string name="theme_item_comment_icon_and_info_color">"Barva ikony komentáře a informace"</string>

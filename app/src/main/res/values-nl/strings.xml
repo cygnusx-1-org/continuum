@@ -1029,12 +1029,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Wordt toegepast op ontvangen privéberichten"</string>
     <string name="theme_item_sent_message_background_color">"Achtergrondkleur van verzonden privéberichten"</string>
     <string name="theme_item_sent_message_background_color_detail">"Wordt toegepast op verzonden privéberichten"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Kleur van onderste navigatiebalk"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Wordt toegepast op de onderste navigatiebalk"</string>
     <string name="theme_item_primary_icon_color">"Primaire pictogramkleur"</string>
     <string name="theme_item_primary_icon_color_detail">"Wordt toegepast op pictogrammen in het navigatiemenu"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Kleur van onderste navigatiebalkpictogrammen"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Wordt toegepast op pictogrammen op de onderste navigatiebalk"</string>
     <string name="theme_item_post_icon_and_info_color">"Berichtpictogram en -informatiekleur"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Wordt toegepast op pictogrammen, scores en het aantal reacties onder berichten"</string>
     <string name="theme_item_comment_icon_and_info_color">"Reactiepictogram en -informatiekleur"</string>

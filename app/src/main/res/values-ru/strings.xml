@@ -1032,12 +1032,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Применяется к: фон полученного личного сообщения"</string>
     <string name="theme_item_sent_message_background_color">"Цвет фона отправленного сообщения"</string>
     <string name="theme_item_sent_message_background_color_detail">"Применяется к: фон отправленного личного сообщения"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Цвет нижней панели навигации"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Применяется к: нижняя панель навигации"</string>
     <string name="theme_item_primary_icon_color">"Основной цвет значка"</string>
     <string name="theme_item_primary_icon_color_detail">"Применяется к: значки в панели навигации"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Цвет значка нижней панели"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Применяется к: значки на нижней панели навигации"</string>
     <string name="theme_item_post_icon_and_info_color">"Значок поста и цвет информации"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Применяется к: значки, оценка и количество комментариев в постах"</string>
     <string name="theme_item_comment_icon_and_info_color">"Значок комментария и цвет информации"</string>

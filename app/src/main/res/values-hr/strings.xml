@@ -1016,12 +1016,8 @@
     <string name="theme_item_received_message_background_color_detail">"Primijenjeno na: Pozadinu primljene privatne poruke"</string>
     <string name="theme_item_sent_message_background_color">"Boja pozadine poslane poruke"</string>
     <string name="theme_item_sent_message_background_color_detail">"Primijenjeno na: Pozadinu poslane privatne poruke"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Boja donje navigacijske trake"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Primijenjeno na: Donju navigacijsku traku"</string>
     <string name="theme_item_primary_icon_color">"Primarna boja ikone"</string>
     <string name="theme_item_primary_icon_color_detail">"Primijenjeno na: Ikone u navigacijskoj ladici"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Boja ikone donje navigacijske trake"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Primijenjeno na: Ikone u donjoj navigacijskoj traci"</string>
     <string name="theme_item_post_icon_and_info_color">"Boja ikone i info objave"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Primijenjeno na: Ikone, rezultat i broj komentara u objavi"</string>
     <string name="theme_item_comment_icon_and_info_color">"Boja ikone i info komentara"</string>

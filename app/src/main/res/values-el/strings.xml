@@ -1025,12 +1025,8 @@
     <string name="theme_item_received_message_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο ληφθέντων προσωπικών μηνυμάτων"</string>
     <string name="theme_item_sent_message_background_color">"Χρώμα Παρασκηνίου Απεσταλμένου Μηνύματος"</string>
     <string name="theme_item_sent_message_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο απεσταλμένων προσωπικών μηνυμάτων"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Χρώμα Κάτω Μπάρας Πλοήγησης"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Εφαρμόστηκε σε: Κάτω μπάρα πλοήγησης"</string>
     <string name="theme_item_primary_icon_color">"Χρώμα Κυρίου Εικονιδίου"</string>
     <string name="theme_item_primary_icon_color_detail">"Εφαρμόστηκε σε: Εικονίδια συρταριού πλοήγησης."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Χρώμα Εικονιδίου Κάτω Μπάρας Πλοήγησης"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Εφαρμόστηκε σε: Εικονίδια στην κάτω μπάρα πλοήγησης"</string>
     <string name="theme_item_post_icon_and_info_color">"Χρώμα πληροφοριών και Εικονιδίου Ανάρτησης"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Εφαρμόστηκε σε: Εικονίδια, σκορ και αριθμός σχολίων στις αναρτήσεις"</string>
     <string name="theme_item_comment_icon_and_info_color">"Χρώμα Πληροφοριών και Εικονιδίου Σχολίου"</string>

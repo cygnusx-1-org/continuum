@@ -1022,12 +1022,8 @@
     <string name="theme_item_received_message_background_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: பெறப்பட்ட தனிப்பட்ட செய்திகளின் பின்னணி"</string>
     <string name="theme_item_sent_message_background_color">"அனுப்பிய தகவல் பின்புல நிறம்"</string>
     <string name="theme_item_sent_message_background_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: அனுப்பப்பட்ட தனிப்பட்ட செய்திகளின் பின்னணி"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"அடிப்புற வழிசெழுத்தல் பட்டை நிறம்"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: கீழ் வழிசெலுத்தல் பட்டி"</string>
     <string name="theme_item_primary_icon_color">"முதன்மை படவுரு நிறம்"</string>
     <string name="theme_item_primary_icon_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: வழிசெலுத்தல் டிராயரில் உள்ள ஐகான்கள்."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"அடிப்புற வழிசெழுத்தலை பட்டை படவுரு நிறம்"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: கீழ் வழிசெலுத்தல் பட்டியில் உள்ள சின்னங்கள்"</string>
     <string name="theme_item_post_icon_and_info_color">"இடுகை படவுரு மற்றும் தகவல் நிறம்"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"இதற்குப் பயன்படுத்தப்பட்டது: சின்னங்கள், மதிப்பெண் மற்றும் இடுகைகளில் உள்ள கருத்துகளின் எண்ணிக்கை"</string>
     <string name="theme_item_comment_icon_and_info_color">"கருத்து படவுரு மற்றும் தகவல் நிறம்"</string>

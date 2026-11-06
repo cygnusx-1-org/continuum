@@ -1032,12 +1032,8 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fondo de mensajes privados recibidos"</string>
     <string name="theme_item_sent_message_background_color">"Color del fondo de mensaje enviado"</string>
     <string name="theme_item_sent_message_background_color_detail">"Aplicado a: Fondo de mensajes privados enviados"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Color de la barra de navegación inferior"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Aplicado a: Barra de navegación inferior"</string>
     <string name="theme_item_primary_icon_color">"Color de ícono primario"</string>
     <string name="theme_item_primary_icon_color_detail">"Aplicado a: Íconos en el cajón lateral."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Color de los íconos de la barra de navegación inferior"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Aplicado a: Íconos de la barra de navegación inferior"</string>
     <string name="theme_item_post_icon_and_info_color">"Color de los íconos de Información de publicación y comentario"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Aplicado a: Íconos, puntuación y número de comentarios en la publicación"</string>
     <string name="theme_item_comment_icon_and_info_color">"Color de los íconos de información de comentarios"</string>

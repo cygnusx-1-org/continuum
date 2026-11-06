@@ -1015,12 +1015,8 @@
     <string name="theme_item_received_message_background_color_detail">"Lagu dabaqay: Asalka fariimaha gaarka ah ee la helay"</string>
     <string name="theme_item_sent_message_background_color">"Fariinta La Diray Midabka Dhabarka"</string>
     <string name="theme_item_sent_message_background_color_detail">"Lagu dabaqay: asalka fariimaha gaarka ah ee la diray"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Bottom Navigation Bar Midabka"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Lagu dabaqay: gunta navigation bar"</string>
     <string name="theme_item_primary_icon_color">"Midabka Aasaasiga ah"</string>
     <string name="theme_item_primary_icon_color_detail">"Lagu dabaqay: Astaamaha khaanadaha hagidda"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Bottom Navigation Bar Icon Midabka"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Lagu dabaqay: Astaamaha ku yaal bar navigation hoose"</string>
     <string name="theme_item_post_icon_and_info_color">"Icon Boostada iyo Midabka macluumaadka"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Lagu dabaqay: Astaamaha, buundooyinka iyo tirada faallooyinka qoraallada"</string>
     <string name="theme_item_comment_icon_and_info_color">"Astaanta faallooyinka iyo midabka macluumaadka"</string>

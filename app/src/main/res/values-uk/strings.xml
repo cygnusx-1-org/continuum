@@ -1033,12 +1033,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Задіяно для: Тло отриманих приватних повідомлень"</string>
     <string name="theme_item_sent_message_background_color">"Колір тла надісланого посилання"</string>
     <string name="theme_item_sent_message_background_color_detail">"Задіяно для: Тло надісланих приватних повідомлень"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Колір нижньої панелі пересування"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Задіяно для: Кнопка панелі пересування"</string>
     <string name="theme_item_primary_icon_color">"Основний колір значків"</string>
     <string name="theme_item_primary_icon_color_detail">"Задіяно для: Значки в шторці переходів."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Колір значка нижньої панелі пересування"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Задіяно для: Значки внизу панелі пересування"</string>
     <string name="theme_item_post_icon_and_info_color">"Колір інформації і значка допису"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Задіяно для: Значки, оцінка і кількість коментарів у дописах"</string>
     <string name="theme_item_comment_icon_and_info_color">"Колір інформації і значка коментаря"</string>
