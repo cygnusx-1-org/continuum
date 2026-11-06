@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.26-beta.22 / 2026-11-6
+============
+* Navigation drawer settings: Recents, Favorite Subreddits and Subscribed Subreddits each have one choice, Shown, Collapsed or Hidden, instead of a collapse switch and a hide switch. What you had set is carried over (hidden wins over collapsed, as before). Tapping a section's title in the drawer now remembers the collapse for the favorites and subscriptions too, as it already did for recents
+* Fonts: the bundled fonts other than the default are removed, along with the Font Preview screen, which only showed them. Each of the three roles (app, titles, content) still has Default and Custom. If you had picked a removed font, the default is used
+* Internal: the favorites and subscriptions drawer lists were two copies of one adapter and are now one
+
 8.3.3.9.1.26-beta.21 / 2026-11-6
 ============
 * Settings: Data Saving Mode and Download Location are one screen, "Data saving and downloads", and Notifications and Proxy are one screen, "Notifications and proxy". Security stays on its own because it asks you to unlock first

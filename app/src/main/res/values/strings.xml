@@ -831,6 +831,12 @@
     <string name="settings_navigation_drawer_title">Navigation Drawer</string>
     <string name="settings_collapse_account_section_title">Collapse Account Section</string>
     <string name="settings_collapse_reddit_section_title">Collapse Reddit Section</string>
+    <string name="settings_drawer_recents_section_title">Recents Section</string>
+    <string name="settings_drawer_favorites_section_title">Favorite Subreddits Section</string>
+    <string name="settings_drawer_subscribed_section_title">Subscribed Subreddits Section</string>
+    <string name="settings_drawer_section_shown">Shown</string>
+    <string name="settings_drawer_section_collapsed">Collapsed</string>
+    <string name="settings_drawer_section_hidden">Hidden</string>
     <string name="settings_collapse_post_section_title">Collapse Post Section</string>
     <string name="settings_collapse_preferences_section_title">Collapse Preferences Section</string>
     <string name="settings_quick_toggles_title">Quick Toggles</string>
