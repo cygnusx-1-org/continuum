@@ -58,9 +58,7 @@ public class SettingsSearchRegistry {
         m.put(NotificationPreferenceFragment.class, R.xml.notification_preferences);
         m.put(InterfacePreferenceFragment.class, R.xml.interface_preferences);
         m.put(FontPreferenceFragment.class, R.xml.font_preferences);
-        m.put(ImmersiveInterfacePreferenceFragment.class, R.xml.immersive_interface_preferences);
         m.put(NavigationDrawerPreferenceFragment.class, R.xml.navigation_drawer_preferences);
-        m.put(TimeFormatPreferenceFragment.class, R.xml.time_format_preferences);
         m.put(PostPreferenceFragment.class, R.xml.post_preferences);
         m.put(NumberOfColumnsInPostFeedPreferenceFragment.class,
                 R.xml.number_of_columns_in_post_feed_preferences);

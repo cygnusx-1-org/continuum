@@ -88,7 +88,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
             RedditAPIKt api = retrofit.create(RedditAPIKt.class);
             PostLookup lookup = accountName.equals(Account.ANONYMOUS_ACCOUNT)
                     ? PostLookup.forApi(api)
-                    : PostLookup.forOauthApi(api, APIUtils.getOAuthHeader(accessToken), false);
+                    : PostLookup.forOauthApi(api, APIUtils.getOAuthHeader(accessToken));
             Response<String> response = lookup.loadBlocking(postIds);
             if (response.isSuccessful()) {
                 String responseString = response.body();

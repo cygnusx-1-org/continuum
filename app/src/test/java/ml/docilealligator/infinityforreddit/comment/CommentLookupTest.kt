@@ -121,17 +121,6 @@ class CommentLookupTest {
     }
 
     @Test
-    fun theOldWayFindsACommentWithoutItsPostThroughInfo() = runBlocking {
-        val infoBody = """{"kind":"Listing","data":{"children":[],"after":null}}"""
-
-        val response = lookup(info = { ok(infoBody) }, infoUse = InfoUse.Only).load(listOf(saved("old", postId = null)))
-
-        assertEquals(infoBody, response.body())
-        assertEquals(listOf("t1_old"), infoRequests)
-        assertTrue(commentRequests.isEmpty())
-    }
-
-    @Test
     fun aBlockOnEveryCommentIsReportedAsTheBlock() = runBlocking {
         val response = lookup(comment = { _, _ -> blocked() }).load(listOf(saved("a"), saved("b")))
 

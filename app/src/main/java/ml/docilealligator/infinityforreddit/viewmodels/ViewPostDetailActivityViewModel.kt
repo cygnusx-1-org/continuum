@@ -251,8 +251,7 @@ class ViewPostDetailActivityViewModel(
                         PostLookup.forApi(retrofit.create(RedditAPIKt::class.java))
                     } else {
                         PostLookup.forOauthApi(
-                            oauthRetrofit.create(RedditAPIKt::class.java), APIUtils.getOAuthHeader(accessToken),
-                            false
+                            oauthRetrofit.create(RedditAPIKt::class.java), APIUtils.getOAuthHeader(accessToken)
                         )
                     }
                     val response = lookup.load(readPosts.map { it.id })

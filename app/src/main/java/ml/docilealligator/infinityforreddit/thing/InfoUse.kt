@@ -14,18 +14,6 @@ internal sealed interface InfoUse {
      */
     class First(val blocked: AtomicBoolean) : InfoUse
 
-    /**
-     * Asked alone, as before the block, and whatever it answers is the answer: one request where
-     * the fallback makes one per thing, but a failure while Reddit refuses it. A logged-in account
-     * with "Use /api/info the Old Way" on.
-     */
-    object Only : InfoUse
-
-    /** Never asked. A logged-in account with "Use /api/info the Old Way" off, the default. */
+    /** Never asked. A logged-in account. */
     object Never : InfoUse
-
-    companion object {
-        /** For a logged-in account, from `APIUtils.useOldApiInfo`. */
-        fun forAccount(useOldApiInfo: Boolean): InfoUse = if (useOldApiInfo) Only else Never
-    }
 }

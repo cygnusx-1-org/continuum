@@ -75,22 +75,15 @@ class SettingsSearchRegistryTest {
     }
 
     /**
-     * A navigation row that starts hidden still gets indexed, along with everything on the screen
-     * it opens: search instantiates the fragment directly, so the row's visibility is irrelevant.
-     * The Immersive Interface entry is hidden below API 26 and would otherwise take a whole screen
-     * of settings out of the index.
+     * The Immersive Interface switch is hidden below API 26 by code, not by the XML, so search
+     * still finds it; it lives on the Interface screen now that it has no screen of its own.
      */
     @Test
-    fun indexesScreensBehindHiddenNavigationRows() {
-        // The title is used twice: the entry on Interface, and the switch on the screen it opens.
-        val entry = items.single {
-            it.title == context.getString(R.string.settings_immersive_interface_title) &&
-                it.breadcrumb == context.getString(R.string.settings_interface_title)
-        }
-        assertEquals(ImmersiveInterfacePreferenceFragment::class.java, entry.fragmentClass)
+    fun indexesImmersiveInterfaceOnTheInterfaceScreen() {
+        val item = itemTitled(R.string.settings_immersive_interface_title)
 
-        val screenItems = items.filter { it.fragmentClass == ImmersiveInterfacePreferenceFragment::class.java }
-        assertTrue("immersive interface screen contributed ${screenItems.size} items", screenItems.size > 1)
+        assertEquals(InterfacePreferenceFragment::class.java, item.fragmentClass)
+        assertEquals("immersive_interface", item.key)
     }
 
     /** Two rows on this screen are titled "Portrait"; only the heading tells them apart. */

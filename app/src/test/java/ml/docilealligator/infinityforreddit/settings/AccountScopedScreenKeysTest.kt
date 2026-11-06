@@ -71,8 +71,6 @@ class AccountScopedScreenKeysTest {
         R.xml.post_preferences,
         R.xml.comment_preferences,
         R.xml.font_preferences,
-        R.xml.immersive_interface_preferences,
-        R.xml.time_format_preferences,
         R.xml.number_of_columns_in_post_feed_preferences,
         R.xml.theme_preferences,
         R.xml.video_preferences,

@@ -422,7 +422,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
         }
 
         Response<String> response = CommentLookup.forOauthApi(retrofit.create(RedditAPIKt.class),
-                APIUtils.getOAuthHeader(accessToken), false).loadBlocking(refs);
+                APIUtils.getOAuthHeader(accessToken)).loadBlocking(refs);
         String body = response.body();
         if (!response.isSuccessful() || body == null) {
             throw new java.io.IOException("Response failed");

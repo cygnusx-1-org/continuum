@@ -59,14 +59,12 @@ class PostLookup internal constructor(
         /**
          * For a logged-in account. [api] must be the OAuth Retrofit's, so that both requests carry
          * the account's own vote, saved and hidden state on each post, as `/api/info` does.
-         *
-         * @param useOldApiInfo `APIUtils.useOldApiInfo()`: `/api/info` alone if set, else never
          */
         @JvmStatic
-        fun forOauthApi(api: RedditAPIKt, headers: Map<String, String>, useOldApiInfo: Boolean) = PostLookup(
+        fun forOauthApi(api: RedditAPIKt, headers: Map<String, String>) = PostLookup(
             { fullnames -> api.getInfoOauth(fullnames, headers) },
             { postId -> api.getPostWithMinimalCommentsOauth(postId, headers) },
-            InfoUse.forAccount(useOldApiInfo)
+            InfoUse.Never
         )
     }
 }
