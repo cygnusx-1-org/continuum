@@ -287,239 +287,13 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
-        upvoteButton.setOnClickListener(view -> {
-            int position = getBindingAdapterPosition();
-            if (position < 0) {
-                return;
-            }
-            Post post = host.getItem(position);
-            if (post != null) {
-                if (!Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
-                    if (post.isArchived()) {
-                        Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-
-                if (host.markPostsAsReadAfterVoting()) {
-                    markPostRead(post, true);
-                }
-
-                ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
-                ColorStateList previousDownvoteButtonIconTint = downvoteButton.getIconTint();
-                int previousScoreTextViewColor = scoreTextView.getCurrentTextColor();
-                Drawable previousUpvoteButtonDrawable = upvoteButton.getIcon();
-                Drawable previousDownvoteButtonDrawable = downvoteButton.getIcon();
-
-                int previousVoteType = post.getVoteType();
-                String newVoteType;
-
-                downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
-                downvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-
-                if (previousVoteType != 1) {
-                    //Not upvoted before
-                    post.setVoteType(1);
-                    newVoteType = APIUtils.DIR_UPVOTE;
-                    upvoteButton.setIconResource(R.drawable.ic_upvote_filled_24dp);
-                    upvoteButton.setIconTint(ColorStateList.valueOf(host.upvotedColor()));
-                    scoreTextView.setTextColor(host.upvotedColor());
-                } else {
-                    //Upvoted before
-                    post.setVoteType(0);
-                    newVoteType = APIUtils.DIR_UNVOTE;
-                    upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
-                    upvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                    scoreTextView.setTextColor(host.postIconAndInfoColor());
-                }
-
-                if (Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
-                    if (previousVoteType == 1) {
-                        ReadPostModification.deleteReadPost(host.database(), host.executor(), mActivity.accountName,
-                                post.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS);
-                    } else {
-                        ReadPostModification.insertReadPost(host.database(), host.executor(), mActivity.accountName,
-                                post.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS,
-                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, host.postHistorySharedPreferences()));
-                    }
-                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    return;
-                } else {
-                    if (!host.hideTheNumberOfVotes()) {
-                        scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
-                    }
-                }
-
-                VoteThing.voteThing(mActivity, host.oauthRetrofit(), host.accessToken(), new VoteThing.VoteThingListener() {
-                    @Override
-                    public void onVoteThingSuccess(int position1) {
-                        int currentPosition = getBindingAdapterPosition();
-                        if (newVoteType.equals(APIUtils.DIR_UPVOTE)) {
-                            post.setVoteType(1);
-                            if (currentPosition == position) {
-                                upvoteButton.setIconResource(R.drawable.ic_upvote_filled_24dp);
-                                upvoteButton.setIconTint(ColorStateList.valueOf(host.upvotedColor()));
-                                scoreTextView.setTextColor(host.upvotedColor());
-                            }
-                        } else {
-                            post.setVoteType(0);
-                            if (currentPosition == position) {
-                                upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
-                                upvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                                scoreTextView.setTextColor(host.postIconAndInfoColor());
-                            }
-                        }
-
-                        if (currentPosition == position) {
-                            downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
-                            downvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                            if (!host.hideTheNumberOfVotes()) {
-                                scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
-                            }
-                        }
-
-                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    }
-
-                    @Override
-                    public void onVoteThingFail(int position1) {
-                        Toast.makeText(mActivity, R.string.vote_failed, Toast.LENGTH_SHORT).show();
-                        post.setVoteType(previousVoteType);
-                        if (getBindingAdapterPosition() == position) {
-                            if (!host.hideTheNumberOfVotes()) {
-                                scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + previousVoteType));
-                            }
-                            upvoteButton.setIcon(previousUpvoteButtonDrawable);
-                            upvoteButton.setIconTint(previousUpvoteButtonIconTint);
-                            scoreTextView.setTextColor(previousScoreTextViewColor);
-                            downvoteButton.setIcon(previousDownvoteButtonDrawable);
-                            downvoteButton.setIconTint(previousDownvoteButtonIconTint);
-                        }
-
-                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    }
-                }, post.getFullName(), newVoteType, getBindingAdapterPosition());
-            }
-        });
+        upvoteButton.setOnClickListener(view -> vote(1, upvoteButton, scoreTextView, downvoteButton));
 
         scoreTextView.setOnClickListener(view -> {
             upvoteButton.performClick();
         });
 
-        downvoteButton.setOnClickListener(view -> {
-            int position = getBindingAdapterPosition();
-            if (position < 0) {
-                return;
-            }
-            Post post = host.getItem(position);
-            if (post != null) {
-                if (!Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
-                    if (post.isArchived()) {
-                        Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-
-                if (host.markPostsAsReadAfterVoting()) {
-                    markPostRead(post, true);
-                }
-
-                ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
-                ColorStateList previousDownvoteButtonIconTint = downvoteButton.getIconTint();
-                int previousScoreTextViewColor = scoreTextView.getCurrentTextColor();
-                Drawable previousUpvoteButtonDrawable = upvoteButton.getIcon();
-                Drawable previousDownvoteButtonDrawable = downvoteButton.getIcon();
-
-                int previousVoteType = post.getVoteType();
-                String newVoteType;
-
-                upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
-                upvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-
-                if (previousVoteType != -1) {
-                    //Not downvoted before
-                    post.setVoteType(-1);
-                    newVoteType = APIUtils.DIR_DOWNVOTE;
-                    downvoteButton.setIconResource(R.drawable.ic_downvote_filled_24dp);
-                    downvoteButton.setIconTint(ColorStateList.valueOf(host.downvotedColor()));
-                    scoreTextView.setTextColor(host.downvotedColor());
-                } else {
-                    //Downvoted before
-                    post.setVoteType(0);
-                    newVoteType = APIUtils.DIR_UNVOTE;
-                    downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
-                    downvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                    scoreTextView.setTextColor(host.postIconAndInfoColor());
-                }
-
-                if (Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
-                    if (previousVoteType == -1) {
-                        ReadPostModification.deleteReadPost(host.database(), host.executor(), mActivity.accountName,
-                                post.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS);
-                    } else {
-                        ReadPostModification.insertReadPost(host.database(), host.executor(), mActivity.accountName,
-                                post.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS,
-                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, host.postHistorySharedPreferences()));
-                    }
-                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    return;
-                } else {
-                    if (!host.hideTheNumberOfVotes()) {
-                        scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
-                    }
-                }
-
-                VoteThing.voteThing(mActivity, host.oauthRetrofit(), host.accessToken(), new VoteThing.VoteThingListener() {
-                    @Override
-                    public void onVoteThingSuccess(int position1) {
-                        int currentPosition = getBindingAdapterPosition();
-                        if (newVoteType.equals(APIUtils.DIR_DOWNVOTE)) {
-                            post.setVoteType(-1);
-                            if (currentPosition == position) {
-                                downvoteButton.setIconResource(R.drawable.ic_downvote_filled_24dp);
-                                downvoteButton.setIconTint(ColorStateList.valueOf(host.downvotedColor()));
-                                scoreTextView.setTextColor(host.downvotedColor());
-                            }
-                        } else {
-                            post.setVoteType(0);
-                            if (currentPosition == position) {
-                                downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
-                                downvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                                scoreTextView.setTextColor(host.postIconAndInfoColor());
-                            }
-                        }
-
-                        if (currentPosition == position) {
-                            upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
-                            upvoteButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
-                            if (!host.hideTheNumberOfVotes()) {
-                                scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
-                            }
-                        }
-
-                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    }
-
-                    @Override
-                    public void onVoteThingFail(int position1) {
-                        Toast.makeText(mActivity, R.string.vote_failed, Toast.LENGTH_SHORT).show();
-                        post.setVoteType(previousVoteType);
-                        if (getBindingAdapterPosition() == position) {
-                            if (!host.hideTheNumberOfVotes()) {
-                                scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + previousVoteType));
-                            }
-                            upvoteButton.setIcon(previousUpvoteButtonDrawable);
-                            upvoteButton.setIconTint(previousUpvoteButtonIconTint);
-                            scoreTextView.setTextColor(previousScoreTextViewColor);
-                            downvoteButton.setIcon(previousDownvoteButtonDrawable);
-                            downvoteButton.setIconTint(previousDownvoteButtonIconTint);
-                        }
-
-                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                    }
-                }, post.getFullName(), newVoteType, getBindingAdapterPosition());
-            }
-        });
+        downvoteButton.setOnClickListener(view -> vote(-1, upvoteButton, scoreTextView, downvoteButton));
 
         if (commentsCountButton != null) {
             commentsCountButton.setOnClickListener(view -> itemView.performClick());
@@ -563,6 +337,139 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
                 return false;
             });
         }
+    }
+
+    /**
+     * A tap on the upvote ({@code target} 1) or the downvote ({@code target} -1) button: tapping the
+     * vote the post already has takes it back. The two buttons are mirror images of each other, so
+     * everything that differs between them is picked from {@code target} here.
+     */
+    private void vote(int target, MaterialButton upvoteButton, TextView scoreTextView,
+                      MaterialButton downvoteButton) {
+        int position = getBindingAdapterPosition();
+        if (position < 0) {
+            return;
+        }
+        Post post = host.getItem(position);
+        if (post == null) {
+            return;
+        }
+        if (!Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
+            if (post.isArchived()) {
+                Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        if (host.markPostsAsReadAfterVoting()) {
+            markPostRead(post, true);
+        }
+
+        boolean up = target == 1;
+        // The button that was tapped, and the other one, which a vote always puts back to plain.
+        MaterialButton votedButton = up ? upvoteButton : downvoteButton;
+        MaterialButton otherButton = up ? downvoteButton : upvoteButton;
+        int votedOutline = up ? R.drawable.ic_upvote_24dp : R.drawable.ic_downvote_24dp;
+        int votedFilled = up ? R.drawable.ic_upvote_filled_24dp : R.drawable.ic_downvote_filled_24dp;
+        int otherOutline = up ? R.drawable.ic_downvote_24dp : R.drawable.ic_upvote_24dp;
+        int votedColor = up ? host.upvotedColor() : host.downvotedColor();
+        String direction = up ? APIUtils.DIR_UPVOTE : APIUtils.DIR_DOWNVOTE;
+        int anonymousType = up ? ReadPostType.ANONYMOUS_UPVOTED_POSTS : ReadPostType.ANONYMOUS_DOWNVOTED_POSTS;
+
+        ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
+        ColorStateList previousDownvoteButtonIconTint = downvoteButton.getIconTint();
+        int previousScoreTextViewColor = scoreTextView.getCurrentTextColor();
+        Drawable previousUpvoteButtonDrawable = upvoteButton.getIcon();
+        Drawable previousDownvoteButtonDrawable = downvoteButton.getIcon();
+
+        int previousVoteType = post.getVoteType();
+        String newVoteType;
+
+        otherButton.setIconResource(otherOutline);
+        otherButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
+
+        if (previousVoteType != target) {
+            //Not voted this way before
+            post.setVoteType(target);
+            newVoteType = direction;
+            votedButton.setIconResource(votedFilled);
+            votedButton.setIconTint(ColorStateList.valueOf(votedColor));
+            scoreTextView.setTextColor(votedColor);
+        } else {
+            //Voted this way before
+            post.setVoteType(0);
+            newVoteType = APIUtils.DIR_UNVOTE;
+            votedButton.setIconResource(votedOutline);
+            votedButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
+            scoreTextView.setTextColor(host.postIconAndInfoColor());
+        }
+
+        if (Account.ANONYMOUS_ACCOUNT.equals(host.accountName())) {
+            if (previousVoteType == target) {
+                ReadPostModification.deleteReadPost(host.database(), host.executor(), mActivity.accountName,
+                        post.getId(), anonymousType);
+            } else {
+                ReadPostModification.insertReadPost(host.database(), host.executor(), mActivity.accountName,
+                        post.getId(), anonymousType,
+                        ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, host.postHistorySharedPreferences()));
+            }
+            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+            return;
+        } else {
+            if (!host.hideTheNumberOfVotes()) {
+                scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
+            }
+        }
+
+        VoteThing.voteThing(mActivity, host.oauthRetrofit(), host.accessToken(), new VoteThing.VoteThingListener() {
+            @Override
+            public void onVoteThingSuccess(int position1) {
+                int currentPosition = getBindingAdapterPosition();
+                if (newVoteType.equals(direction)) {
+                    post.setVoteType(target);
+                    if (currentPosition == position) {
+                        votedButton.setIconResource(votedFilled);
+                        votedButton.setIconTint(ColorStateList.valueOf(votedColor));
+                        scoreTextView.setTextColor(votedColor);
+                    }
+                } else {
+                    post.setVoteType(0);
+                    if (currentPosition == position) {
+                        votedButton.setIconResource(votedOutline);
+                        votedButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
+                        scoreTextView.setTextColor(host.postIconAndInfoColor());
+                    }
+                }
+
+                if (currentPosition == position) {
+                    otherButton.setIconResource(otherOutline);
+                    otherButton.setIconTint(ColorStateList.valueOf(host.postIconAndInfoColor()));
+                    if (!host.hideTheNumberOfVotes()) {
+                        scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + post.getVoteType()));
+                    }
+                }
+
+                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+            }
+
+            @Override
+            public void onVoteThingFail(int position1) {
+                Toast.makeText(mActivity, R.string.vote_failed, Toast.LENGTH_SHORT).show();
+                post.setVoteType(previousVoteType);
+                if (getBindingAdapterPosition() == position) {
+                    if (!host.hideTheNumberOfVotes()) {
+                        scoreTextView.setText(Utils.getNVotes(host.showAbsoluteNumberOfVotes(), post.getScore() + previousVoteType));
+                    }
+                    upvoteButton.setIcon(previousUpvoteButtonDrawable);
+                    upvoteButton.setIconTint(previousUpvoteButtonIconTint);
+                    scoreTextView.setTextColor(previousScoreTextViewColor);
+                    downvoteButton.setIcon(previousDownvoteButtonDrawable);
+                    downvoteButton.setIconTint(previousDownvoteButtonIconTint);
+                }
+
+                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+            }
+        }, post.getFullName(), newVoteType, getBindingAdapterPosition());
     }
 
     void setOnClickListeners(@Nullable CustomTextView typeTextView,
