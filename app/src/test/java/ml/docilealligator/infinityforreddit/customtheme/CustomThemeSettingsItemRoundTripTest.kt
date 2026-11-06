@@ -29,8 +29,15 @@ import org.robolectric.annotation.Config
 @Config(application = TestInfinity::class)
 class CustomThemeSettingsItemRoundTripTest {
 
+    /**
+     * The two bottom app bar colours are still columns of the theme table but have no editor row:
+     * the bar is gone, and dropping the columns needs a table-rebuilding migration.
+     */
+    private val columnsWithoutARow = setOf("bottomAppBarBackgroundColor", "bottomAppBarIconColor")
+
     private fun colourFields(): List<Field> = CustomTheme::class.java.fields
         .filter { it.type == Int::class.javaPrimitiveType && !Modifier.isStatic(it.modifiers) }
+        .filter { it.name !in columnsWithoutARow }
         .sortedBy { it.name }
 
     private fun flagFields(): List<Field> = CustomTheme::class.java.fields
