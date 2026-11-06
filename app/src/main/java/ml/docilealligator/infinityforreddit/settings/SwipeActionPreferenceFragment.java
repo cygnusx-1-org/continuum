@@ -6,15 +6,13 @@ import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
-import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSwipeActionThresholdEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVibrateWhenActionTriggeredEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import org.greenrobot.eventbus.EventBus;
 
 /**
- * What posts and comments share: how far a swipe has to travel, whether it buzzes, and the tab
- * gesture it competes with. The actions themselves are on the two screens this links to, which
+ * What posts and comments share: how far a swipe has to travel and whether it buzzes. The actions themselves are on the two screens this links to, which
  * have a different list each.
  */
 public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentCompat {
@@ -24,19 +22,11 @@ public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentC
         setPreferencesFromResource(R.xml.swipe_action_preferences, rootKey);
 
         SwitchPreference vibrateWhenActionTriggeredSwitch = findPreference(SharedPreferencesUtils.VIBRATE_WHEN_ACTION_TRIGGERED);
-        SwitchPreference disableSwipingBetweenTabsSwitch = findPreference(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS);
         ListPreference swipeActionThresholdListPreference = findPreference(SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD);
 
         if (vibrateWhenActionTriggeredSwitch != null) {
             vibrateWhenActionTriggeredSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeVibrateWhenActionTriggeredEvent((Boolean) newValue));
-                return true;
-            });
-        }
-
-        if (disableSwipingBetweenTabsSwitch != null) {
-            disableSwipingBetweenTabsSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
-                EventBus.getDefault().post(new ChangeDisableSwipingBetweenTabsEvent((Boolean) newValue));
                 return true;
             });
         }

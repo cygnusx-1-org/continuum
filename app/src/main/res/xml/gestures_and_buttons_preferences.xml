@@ -19,16 +19,6 @@
         app:title="@string/settings_lock_bottom_app_bar_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="volume_keys_navigate_comments"
-        app:title="@string/settings_volume_keys_navigate_comments_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="volume_keys_navigate_posts"
-        app:title="@string/settings_volume_keys_navigate_posts_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="pull_to_refresh"
         app:title="@string/settings_pull_to_refresh_title" />
@@ -49,6 +39,11 @@
         app:key="tab_switching_sensitivity"
         app:title="@string/settings_tab_switching_sensitivity"
         app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="disable_swiping_between_tabs"
+        app:title="@string/settings_disable_swiping_between_tabs_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0.1"
