@@ -72,14 +72,8 @@ public class CustomTheme implements Parcelable {
     public int readPostFilledCardViewBackgroundColor;
     @ColumnInfo(name = "comment_background_color")
     public int commentBackgroundColor;
-    @ColumnInfo(name = "bottom_app_bar_background_color")
-    // Kept only so stored themes still match the table: the bottom app bar is gone and nothing reads this.
-    public int bottomAppBarBackgroundColor;
     @ColumnInfo(name = "primary_icon_color")
     public int primaryIconColor;
-    @ColumnInfo(name = "bottom_app_bar_icon_color")
-    // Kept only so stored themes still match the table: the bottom app bar is gone and nothing reads this.
-    public int bottomAppBarIconColor;
     @ColumnInfo(name = "post_icon_and_info_color")
     public int postIconAndInfoColor;
     @ColumnInfo(name = "comment_icon_and_info_color")
@@ -251,9 +245,7 @@ public class CustomTheme implements Parcelable {
         filledCardViewBackgroundColor = in.readInt();
         readPostFilledCardViewBackgroundColor = in.readInt();
         commentBackgroundColor = in.readInt();
-        bottomAppBarBackgroundColor = in.readInt();
         primaryIconColor = in.readInt();
-        bottomAppBarIconColor = in.readInt();
         postIconAndInfoColor = in.readInt();
         commentIconAndInfoColor = in.readInt();
         toolbarPrimaryTextAndIconColor = in.readInt();
@@ -483,9 +475,7 @@ public class CustomTheme implements Parcelable {
         dest.writeInt(filledCardViewBackgroundColor);
         dest.writeInt(readPostFilledCardViewBackgroundColor);
         dest.writeInt(commentBackgroundColor);
-        dest.writeInt(bottomAppBarBackgroundColor);
         dest.writeInt(primaryIconColor);
-        dest.writeInt(bottomAppBarIconColor);
         dest.writeInt(postIconAndInfoColor);
         dest.writeInt(commentIconAndInfoColor);
         dest.writeInt(toolbarPrimaryTextAndIconColor);
