@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.27-beta.1 / 2026-11-5
+============
+**Fixed**
+* Switching the post layout (Card Top, Card Bottom, Card Clean, and so on) no longer leaves the feed unresponsive to touch: the swipe-action helper lost its drawing hook when the layout change cleared the list's decorations, yet stayed attached and kept swallowing gestures. It is now detached and attached afresh on every layout change.
+
+---
+
 8.3.3.9.1.26 / 2026-11-6
 ============
 This stable release rolls up every beta since 8.3.3.9.1.22 (the entries below have the detail).
