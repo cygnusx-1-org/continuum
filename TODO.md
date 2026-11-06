@@ -9,6 +9,8 @@ Things deliberately left alone, and why. State as of 2026-11-06: `8.3.3.9.1.26-b
 - [ ] **Which settings to cut.** Decode NATO Binary, Swap Tap and Long Press in Comments, Disable Profile Avatar Animation, the dozen "Collapse X Section" navigation drawer toggles, and the three font families that each have a custom variant. Already removed: Delete All Legacy Settings, Use /api/info the Old Way, the volume-key navigation settings and code. Do not remove anything else without the owner's say.
 - [ ] **The feature enhancements** the owner mentioned at the start of the settings work. Not named yet.
 
+- [ ] **Delete the dead bottom app bar code (settings are gone as of `beta.16`).** Enable, Customize and Lock Bottom App Bar were removed from Settings and the four activities that read the flag (`MainActivity`, `ViewSubredditDetailActivity`, `ViewUserDetailActivity`, `ViewMultiRedditDetailActivity`) now set `showBottomAppBar = false`, so an older stored "on" does nothing. Still in the code and worth a careful pass: the bar's layouts and handling in those activities and in `NavigationWrapper`; `ChangeBottomAppBarEvent` and `ChangeLockBottomAppBarEvent` and their subscribers in `MainActivity`; the bottom-bar colours in `CustomTheme`, `CustomThemeWrapper`, `CustomThemeSettingsItem`, `MaterialYouUtils` and the theme database (`RedditDataRoomDatabase`; dropping those columns needs a Room migration); the `bottom_app_bar` preference file in `AppModule`, `AccountSettings`, `AccountSettingsMigration`, `BackupSettings` and `RestoreSettings` (old backups still carry that file, so restore has to keep ignoring it); the bar's constants in `SharedPreferencesUtils` and the tests that use them.
+
 ## Release housekeeping
 
 - [ ] `versionName` is still a beta (`8.3.3.9.1.26-beta.14` on master). The next stable release needs a plain version and tag.
@@ -21,7 +23,6 @@ The settings home is grouped by scope, on purpose: "Account · ..." headings are
 
 - Done: Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar were promoted out of Interface (`beta.7`). Time Format and Immersive Interface were folded into Interface (`beta.8`). The repeated volume-key rows are gone and Disable Swiping Between Tabs sits with Tab Switching Sensitivity (`beta.10`). Global Settings Management was merged into Backup and Restore, now "Backup, restore and reset" (`beta.14`).
 - Not done, and why:
-  - "Enable Bottom App Bar" is still on Interface. Customize Bottom App Bar is a custom screen with no preference XML to hold the switch; it would have to become a switch row on the home, which needs a switch variant that matches the home's row backgrounds.
   - Media settings are still in Video, Data Saving Mode, Download Location and Device.
   - Notifications, Proxy and Security are small separate Global screens. Merge them only among Global screens.
   - Account Settings Management is per-account and cannot join the global screens.
