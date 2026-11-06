@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Előző legfelső szintű megjegyzés"</string>
     <string name="action_back_content_description">"Hátul"</string>
     <string name="action_more_post_options">"További bejegyzési lehetőségek"</string>
-    <string name="action_open_clipboard_reddit_link">"Nyisd meg a Reddit hivatkozást a vágólapon"</string>
     <string name="parse_json_response_error">"Hiba történt a JSON válasz feldolgozása során"</string>
     <string name="retrieve_token_error">"Hiba a token lekérése során"</string>
     <string name="oauth_error_invalid_credentials">"Érvénytelen API ügyfél-azonosító vagy hitelesítő adatok – ellenőrizd az API kulcsot a Beállításokban (HTTP %1$d)"</string>
@@ -824,7 +823,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Az eszköztár elemeinek megjelenítése a szabad hely alapján"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Az eszköztár elemeinek automatikus megjelenítése vagy elrejtése a rendelkezésre álló terület változása esetén."</string>
     <string name="no_link_available">"Nem lehet megszerezni a linker"</string>
-    <string name="clipboard_no_reddit_link">"Nincs Reddit hivatkozás a vágólapon"</string>
     <string name="exit_when_submit">"Kilépsz?"</string>
     <string name="exit_when_submit_post_detail">"A poszt be lesz küldve még akkor is ha itthagyod."</string>
     <string name="exit_when_edit_post_detail">"A poszt lehet, hogy be lesz küldve még akkor is ha itthagyod."</string>

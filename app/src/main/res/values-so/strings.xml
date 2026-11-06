@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Faallo Heerka Sare ee hore"</string>
     <string name="action_back_content_description">"Dib u noqo"</string>
     <string name="action_more_post_options">"Ikhtiyaar badan oo Boostada ah"</string>
-    <string name="action_open_clipboard_reddit_link">"Furan Reddit Isku xirka boodhka"</string>
     <string name="parse_json_response_error">"Cilad ayaa dhacday markii la falanqeeyay jawaabta JSON"</string>
     <string name="retrieve_token_error">"Khalad Soo Celinta Calaamadaha"</string>
     <string name="oauth_error_invalid_credentials">"aan ansax ahayn API Aqoonsiga macmiilka ama aqoonsiga - hubi furahaaga API furaha goobaha (HTTP %1$d)"</string>
@@ -819,7 +818,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Tus Toolbar Walxaha ku salaysan booska la heli karo"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Si toos ah u tusi ama u qari alaabta bar sida boosku isu beddelo."</string>
     <string name="no_link_available">"ma heli karo isku xirka"</string>
-    <string name="clipboard_no_reddit_link">"Maya Reddit iskuxiraha ku jira kilibka"</string>
     <string name="exit_when_submit">"Fasax ?"</string>
     <string name="exit_when_submit_post_detail">"Boosta weli waa la soo gudbin doonaa xitaa haddii aad halkan ka tagto."</string>
     <string name="exit_when_edit_post_detail">"Boostada weli waa la soo gudbin karaa xitaa haddii aad halkan ka tagto."</string>

@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Попередній коментар верхнього рівня"</string>
     <string name="action_back_content_description">"Назад"</string>
     <string name="action_more_post_options">"Більше параметрів публікації"</string>
-    <string name="action_open_clipboard_reddit_link">"Відкрити посилання на Reddit із буфера обміну"</string>
     <string name="parse_json_response_error">"Помилка відбулася під час аналізу відповіді JSON"</string>
     <string name="retrieve_token_error">"Помилка отримання токена"</string>
     <string name="oauth_error_invalid_credentials">"Недійсний ідентифікатор клієнта API або облікові дані — перевір свій ключ API у налаштуваннях (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Показати елементи панелі інструментів на основі доступного простору"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Автоматично показувати або приховувати елементи панелі інструментів у міру зміни доступного простору."</string>
     <string name="no_link_available">"Не можливо отримати посилання"</string>
-    <string name="clipboard_no_reddit_link">"Немає посилання Reddit у буфері обміну"</string>
     <string name="exit_when_submit">"Покинути?"</string>
     <string name="exit_when_submit_post_detail">"Допис буде надіслано, навіть якщо ти вийдеш звідси."</string>
     <string name="exit_when_edit_post_detail">"Допис може бути надісланим, навіть якщо ти вийдеш звідси."</string>

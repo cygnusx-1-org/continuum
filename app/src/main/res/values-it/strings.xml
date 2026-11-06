@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Commento di livello superiore precedente"</string>
     <string name="action_back_content_description">"Indietro"</string>
     <string name="action_more_post_options">"Altre opzioni di pubblicazione"</string>
-    <string name="action_open_clipboard_reddit_link">"Apri il collegamento Reddit negli Appunti"</string>
     <string name="parse_json_response_error">"Si è verificato un errore durante l'analisi della risposta JSON"</string>
     <string name="retrieve_token_error">"Errore durante il recupero del token"</string>
     <string name="oauth_error_invalid_credentials">"API ID cliente o credenziali non validi: controlla la chiave API nelle Impostazioni (HTTP %1$d)"</string>
@@ -837,7 +836,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Mostra gli elementi della barra degli strumenti in base allo spazio disponibile"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Mostra o nasconde automaticamente gli elementi della barra degli strumenti man mano che lo spazio disponibile cambia."</string>
     <string name="no_link_available">"Impossibile ottenere il link"</string>
-    <string name="clipboard_no_reddit_link">"Nessun collegamento Reddit negli appunti"</string>
     <string name="exit_when_submit">"Uscire?"</string>
     <string name="exit_when_submit_post_detail">"Il post verrà inviato anche se esci da qui."</string>
     <string name="exit_when_edit_post_detail">"Il post può ancora essere inviato anche se esci da qui."</string>

@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Vorige commentaar op het hoogste niveau"</string>
     <string name="action_back_content_description">"Terug"</string>
     <string name="action_more_post_options">"Meer berichtopties"</string>
-    <string name="action_open_clipboard_reddit_link">"Open Reddit Link op het klembord"</string>
     <string name="parse_json_response_error">"Er is een fout opgetreden bij het verwerken van het json-antwoord"</string>
     <string name="retrieve_token_error">"De toegangssleutel kan niet worden opgehaald"</string>
     <string name="oauth_error_invalid_credentials">"Ongeldige API-client-ID of inloggegevens: controleer je API-sleutel in Instellingen (HTTP %1$d)"</string>
@@ -832,7 +831,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Werkbalkitems weergeven op basis van beschikbare ruimte"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Automatisch werkbalkitems weergeven of verbergen als de beschikbare ruimte verandert."</string>
     <string name="no_link_available">"De link kan niet worden opgehaald"</string>
-    <string name="clipboard_no_reddit_link">"Geen Reddit link op klembord"</string>
     <string name="exit_when_submit">"Verlaten?"</string>
     <string name="exit_when_submit_post_detail">"Het bericht wordt geplaatst, zelfs als je hier weggaat."</string>
     <string name="exit_when_edit_post_detail">"Het bericht kan worden geplaatst, zelfs als je hier weggaat."</string>

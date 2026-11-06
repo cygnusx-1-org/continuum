@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Προηγούμενο σχόλιο ανώτατου επιπέδου"</string>
     <string name="action_back_content_description">"Πίσω"</string>
     <string name="action_more_post_options">"Περισσότερες επιλογές ανάρτησης"</string>
-    <string name="action_open_clipboard_reddit_link">"Άνοιξε τη σύνδεση Reddit στο Πρόχειρο"</string>
     <string name="parse_json_response_error">"Σφάλμα κατά την ανάλυση της απόκρισης JSON"</string>
     <string name="retrieve_token_error">"Σφάλμα κατά την ανάκτηση token"</string>
     <string name="oauth_error_invalid_credentials">"Μη έγκυρο API αναγνωριστικό πελάτη ή διαπιστευτήρια — έλεγξε το κλειδί API στις Ρυθμίσεις (HTTP %1$d)"</string>
@@ -829,7 +828,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Εμφάνιση στοιχείων γραμμής εργαλείων με βάση το διαθέσιμο χώρο"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Αυτόματη εμφάνιση ή απόκρυψη στοιχείων της γραμμής εργαλείων καθώς αλλάζει ο διαθέσιμος χώρος."</string>
     <string name="no_link_available">"Δεν είναι δυνατή η απόκτηση του συνδέσμου"</string>
-    <string name="clipboard_no_reddit_link">"Όχι σύνδεσμος Reddit στο πρόχειρο"</string>
     <string name="exit_when_submit">"Αποχώρηση;"</string>
     <string name="exit_when_submit_post_detail">"Η ανάρτηση θα αναρτηθεί ακόμα και αν αποχωρήσεις από εδώ. "</string>
     <string name="exit_when_edit_post_detail">"Η ανάρτηση μπορεί και πάλι να αναρτηθεί ακόμα και αν αποχωρήσεις από εδώ."</string>

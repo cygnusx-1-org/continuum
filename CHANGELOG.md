@@ -2,6 +2,16 @@
 
 ---
 
+8.3.3.9.1.27-beta.3 / 2026-11-6
+============
+**Fixed**
+* Long vertical galleries with animated GIFs scroll smoothly: every GIF row shows its still, and the animation is fetched and played only for the rows the list is resting on, then handed back when the row scrolls away
+
+**Removed**
+* "Open Reddit Link in the Clipboard" from the main page's three-dot menu
+
+---
+
 8.3.3.9.1.27-beta.2 / 2026-11-6
 ============
 **Fixed**

@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Vorheriger Kommentar auf oberster Ebene"</string>
     <string name="action_back_content_description">"Zurück"</string>
     <string name="action_more_post_options">"Weitere Post-Optionen"</string>
-    <string name="action_open_clipboard_reddit_link">"Reddit-Link aus der Zwischenablage öffnen"</string>
     <string name="parse_json_response_error">"Ein Fehler trat beim Abruf der JSON-Antwort auf"</string>
     <string name="retrieve_token_error">"Fehler beim Abruf des Tokens"</string>
     <string name="oauth_error_invalid_credentials">"Ungültige API-Client-ID oder Anmeldeinformationen – prüfe deinen API-Schlüssel in den Einstellungen (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Symbolleistenelemente basierend auf dem verfügbaren Platz anzeigen"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Symbolleistenelemente automatisch anzeigen oder ausblenden, wenn sich der verfügbare Platz ändert."</string>
     <string name="no_link_available">"Konnte den Link nicht abrufen"</string>
-    <string name="clipboard_no_reddit_link">"Kein Reddit-Link in der Zwischenablage"</string>
     <string name="exit_when_submit">"Verlassen?"</string>
     <string name="exit_when_submit_post_detail">"Der Beitrag wird übermittelt, auch wenn du diese Seite verlässt."</string>
     <string name="exit_when_edit_post_detail">"Der Beitrag kann noch übermittelt werden, auch wenn du diese Seite verlässt."</string>

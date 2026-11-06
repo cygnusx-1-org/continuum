@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Prethodni komentar najviše razine"</string>
     <string name="action_back_content_description">"Natrag"</string>
     <string name="action_more_post_options">"Više opcija objave"</string>
-    <string name="action_open_clipboard_reddit_link">"Otvori vezu Reddit u međuspremniku"</string>
     <string name="parse_json_response_error">"Došlo je do pogreške prilikom raščlanjivanja JSON odgovora"</string>
     <string name="retrieve_token_error">"Pogreška pri dohvaćanju tokena"</string>
     <string name="oauth_error_invalid_credentials">"Nevažeći API ID klijenta ili vjerodajnice — provjeri svoj API ključ u postavkama (HTTP %1$d)"</string>
@@ -820,7 +819,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Prikaži stavke alatne trake na temelju dostupnog prostora"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Automatski prikaži ili sakrij stavke alatne trake kako se mijenja raspoloživi prostor."</string>
     <string name="no_link_available">"Poveznica nije dostupna"</string>
-    <string name="clipboard_no_reddit_link">"Nema veze Reddit u međuspremniku"</string>
     <string name="exit_when_submit">"Napustiti?"</string>
     <string name="exit_when_submit_post_detail">"Objava će biti objavljena i ako napustiš stranicu."</string>
     <string name="exit_when_edit_post_detail">"Objava može biti objavljena i ako napustiš stranicu."</string>

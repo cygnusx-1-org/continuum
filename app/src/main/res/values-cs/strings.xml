@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Předchozí komentář nejvyšší úrovně"</string>
     <string name="action_back_content_description">"Zpět"</string>
     <string name="action_more_post_options">"Další možnosti příspěvku"</string>
-    <string name="action_open_clipboard_reddit_link">"Otevřít odkaz na Reddit ze schránky"</string>
     <string name="parse_json_response_error">"Při parsování JSON odpovědi se vyskytla chyba"</string>
     <string name="retrieve_token_error">"Chyba při získávání tokenu"</string>
     <string name="oauth_error_invalid_credentials">"Neplatné ID klienta API nebo přihlašovací údaje – zkontroluj klíč API v nastavení (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Zobrazit položky panelu nástrojů podle dostupného místa"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Automaticky zobrazit nebo skrýt položky panelu nástrojů podle změny dostupného místa."</string>
     <string name="no_link_available">"Nelze získat odkaz"</string>
-    <string name="clipboard_no_reddit_link">"Žádný odkaz Reddit ve schránce"</string>
     <string name="exit_when_submit">"Opustit?"</string>
     <string name="exit_when_submit_post_detail">"Příspěvek bude odeslán, i když opustíš tuto obrazovku."</string>
     <string name="exit_when_edit_post_detail">"Příspěvek může být odeslán, i když opustíš tuto obrazovku."</string>

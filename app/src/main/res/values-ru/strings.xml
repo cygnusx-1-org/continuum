@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Предыдущий комментарий верхнего уровня"</string>
     <string name="action_back_content_description">"Назад"</string>
     <string name="action_more_post_options">"Дополнительные параметры публикации"</string>
-    <string name="action_open_clipboard_reddit_link">"Открыть ссылку Reddit в буфере обмена"</string>
     <string name="parse_json_response_error">"Произошла ошибка при анализе JSON-ответа"</string>
     <string name="retrieve_token_error">"Ошибка получения токена"</string>
     <string name="oauth_error_invalid_credentials">"Неверный API идентификатор клиента или учетные данные — проверь свой API ключ в настройках (HTTP %1$d)"</string>
@@ -835,7 +834,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Показывать элементы панели инструментов в зависимости от доступного места"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Автоматически отображать или скрывать элементы панели инструментов при изменении доступного пространства."</string>
     <string name="no_link_available">"Не могу получить ссылку"</string>
-    <string name="clipboard_no_reddit_link">"Нет ссылки Reddit в буфере обмена"</string>
     <string name="exit_when_submit">"Выйти?"</string>
     <string name="exit_when_submit_post_detail">"Пост всё равно будет отправлен, даже если ты уйдёте отсюда."</string>
     <string name="exit_when_edit_post_detail">"Пост может быть отправлен, даже если ты уйдёте отсюда."</string>

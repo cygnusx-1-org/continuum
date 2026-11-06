@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"之前的顶级评论"</string>
     <string name="action_back_content_description">"返回"</string>
     <string name="action_more_post_options">"更多帖子选项"</string>
-    <string name="action_open_clipboard_reddit_link">"在剪贴板中打开 Reddit 链接"</string>
     <string name="parse_json_response_error">"解析 JSON 响应错误"</string>
     <string name="retrieve_token_error">"获取 Token 错误"</string>
     <string name="oauth_error_invalid_credentials">"API 客户端 ID 或凭据无效 — 检查您的设置中的 API 密钥 (HTTP %1$d)"</string>
@@ -836,7 +835,6 @@ Reddit 视频分辨率较低。
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"根据可用空间显示工具栏项目"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"当可用空间发生变化时自动显示或隐藏工具栏项目。"</string>
     <string name="no_link_available">"无法获取链接"</string>
-    <string name="clipboard_no_reddit_link">"剪贴板中没有 Reddit 链接"</string>
     <string name="exit_when_submit">"要离开吗？"</string>
     <string name="exit_when_submit_post_detail">"即使您现在离开，此帖子仍会被提交。"</string>
     <string name="exit_when_edit_post_detail">"如果您现在离开，此帖子或许仍会被提交。"</string>

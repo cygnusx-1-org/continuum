@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"Commentaire de premier niveau précédent"</string>
     <string name="action_back_content_description">"Retour"</string>
     <string name="action_more_post_options">"Plus d'options de publication"</string>
-    <string name="action_open_clipboard_reddit_link">"Ouvrir le lien Reddit dans le Presse-papiers"</string>
     <string name="parse_json_response_error">"Une erreur s'est produite lors de l'analyse de la réponse JSON"</string>
     <string name="retrieve_token_error">"Erreur dans la récupération du jeton"</string>
     <string name="oauth_error_invalid_credentials">"ID client ou informations d\'identification API non valides — vérifie ta clé API dans les paramètres (HTTP %1$d)"</string>
@@ -824,7 +823,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"Afficher les éléments de la barre d'outils en fonction de l'espace disponible"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"Afficher ou masquer automatiquement les éléments de la barre d'outils à mesure que l'espace disponible change."</string>
     <string name="no_link_available">"Lien indisponible"</string>
-    <string name="clipboard_no_reddit_link">"Aucun lien Reddit dans le presse-papiers"</string>
     <string name="exit_when_submit">"Quitter ?"</string>
     <string name="exit_when_submit_post_detail">"Cette publication sera envoyée même si tu quittes cette page."</string>
     <string name="exit_when_edit_post_detail">"Cette publication pourra être envoyée même si tu quittes cette page."</string>

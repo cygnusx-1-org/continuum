@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"前のトップレベルのコメント"</string>
     <string name="action_back_content_description">"戻る"</string>
     <string name="action_more_post_options">"その他の投稿オプション"</string>
-    <string name="action_open_clipboard_reddit_link">"クリップボード内の Reddit リンクを開く"</string>
     <string name="parse_json_response_error">"JSONの解析中にエラーが発生しました"</string>
     <string name="retrieve_token_error">"トークンの取得中にエラーが発生しました"</string>
     <string name="oauth_error_invalid_credentials">"API クライアント ID または資格情報が無効です — 設定 (HTTP %1$d) の API キーを確認してください"</string>
@@ -832,7 +831,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"利用可能なスペースに基づいてツールバー項目を表示"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"利用可能なスペースの変化に応じて、ツールバー項目を自動的に表示または非表示にします。"</string>
     <string name="no_link_available">"リンクを取得できませんでした"</string>
-    <string name="clipboard_no_reddit_link">"クリップボードに Reddit リンクがありません"</string>
     <string name="exit_when_submit">"戻ってよろしいですか？"</string>
     <string name="exit_when_submit_post_detail">"ここを離れてもこの内容は投稿されます。"</string>
     <string name="exit_when_edit_post_detail">"ここを離れてもこの内容は投稿される可能性があります。"</string>

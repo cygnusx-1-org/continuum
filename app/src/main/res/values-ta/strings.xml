@@ -110,7 +110,6 @@
     <string name="action_previous_parent_comment">"முந்தைய உயர்மட்ட கருத்து"</string>
     <string name="action_back_content_description">"பின்"</string>
     <string name="action_more_post_options">"மேலும் இடுகை விருப்பங்கள்"</string>
-    <string name="action_open_clipboard_reddit_link">"கிளிப்போர்டில் Reddit இணைப்பைத் திறக்கவும்"</string>
     <string name="parse_json_response_error">"JSON பதிலைக் கூறாக்கும்போது பிழை ஏற்பட்டது"</string>
     <string name="retrieve_token_error">"கிள்ளாக்கைப் பெறுவதில் பிழை"</string>
     <string name="oauth_error_invalid_credentials">"தவறான API கிளையண்ட் ஐடி அல்லது நற்சான்றிதழ்கள் — அமைப்புகளில் உங்கள் API சாவியைச் சரிபார்க்கவும் (HTTP %1$d)"</string>
@@ -826,7 +825,6 @@
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_title">"உள்ள இடத்தின் அடிப்படையில் கருவிப்பட்டி உருப்படிகளைக் காட்டு"</string>
     <string name="settings_show_post_and_comment_toolbar_items_based_on_available_space_summary">"கருவிப்பட்டியில் உள்ள உருப்படிகளை தானாகவே காண்பிக்கும் அல்லது மறைக்கவும்."</string>
     <string name="no_link_available">"தொடுப்பைப் பெற முடியவில்லை"</string>
-    <string name="clipboard_no_reddit_link">"கிளிப்போர்டில் Reddit இணைப்பு இல்லை"</string>
     <string name="exit_when_submit">"விலகவா?"</string>
     <string name="exit_when_submit_post_detail">"நீங்கள் இங்கிருந்து வெளியேறினாலும் இடுகை சமர்ப்பிக்கப்படும்."</string>
     <string name="exit_when_edit_post_detail">"நீங்கள் இங்கிருந்து வெளியேறினாலும் இடுகை சமர்ப்பிக்கப்படலாம்."</string>
