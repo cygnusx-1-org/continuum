@@ -36,21 +36,6 @@ class LayoutVariantIdParityTest {
          * Allowlisting an id means "the code copes with it being null", not "the drift is fine".
          */
         private val ALLOWED: Map<String, Map<String, String>> = mapOf(
-            // The navigation rail is the tablet/landscape replacement for the bottom app bar, so by
-            // design it exists only in those configurations. NavigationWrapper.navigationRailView is
-            // null-checked at every use (e.g. ViewUserDetailActivity.java:318, :386, :911, :944).
-            "activity_view_multi_reddit_detail.xml" to mapOf(
-                "navigation_rail" to "Tablet/landscape only; null-checked via NavigationWrapper.",
-            ),
-            "activity_view_subreddit_detail.xml" to mapOf(
-                "navigation_rail" to "Tablet/landscape only; null-checked via NavigationWrapper.",
-            ),
-            "activity_view_user_detail.xml" to mapOf(
-                "navigation_rail" to "Tablet/landscape only; null-checked via NavigationWrapper.",
-            ),
-            "app_bar_main.xml" to mapOf(
-                "navigation_rail" to "Tablet/landscape only; null-checked via NavigationWrapper.",
-            ),
             // Separate post/comment panes exist only where there is room for two columns.
             // ViewPostDetailFragmentNew.java:240-246 reads the binding field into a local and
             // null-checks it before every use.
