@@ -652,6 +652,10 @@ public abstract class PostFragmentBase extends Fragment {
     public final void videoAutoplayChangeMutingOption(boolean isMute) {
         if (mVideoMuteManager.getRememberMuteOption()) {
             mVideoMuteManager.setMuted(isMute);
+            PostRecyclerViewAdapter adapter = getPostAdapter();
+            if (adapter != null) {
+                adapter.applyMuteToVideos(getPostRecyclerView(), isMute);
+            }
         }
     }
 

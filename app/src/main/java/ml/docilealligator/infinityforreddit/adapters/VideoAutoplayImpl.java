@@ -94,6 +94,8 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
         }
     };
     private float volume;
+    /** A video "Mute NSFW videos" covers: it stays silent whatever the remembered muting option says. */
+    private boolean forceMuted;
     @Nullable
     public Call<String> fetchRedgifsOrStreamableVideoCall;
     @Nullable
@@ -213,6 +215,30 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
 
     void setVolume(float volume) {
         this.volume = volume;
+    }
+
+    void setForceMuted(boolean forceMuted) {
+        this.forceMuted = forceMuted;
+    }
+
+    /**
+     * Follows a muting choice made on another video, so every video the feed has set up -- the
+     * ones sharing the screen when the limit allows several, and the ones ready below -- answers
+     * to the same mute state instead of keeping the volume they were prepared with.
+     */
+    void applyMute(boolean mute) {
+        if (forceMuted) {
+            // Stays silent unless the reader unmutes this very video with its own button.
+            return;
+        }
+        volume = mute ? 0f : 1f;
+        if (helper != null && helper.getPlayer() != null) {
+            helper.setVolume(volume);
+            if (muteButton.getVisibility() == View.VISIBLE) {
+                muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity,
+                        volume != 0f ? R.drawable.ic_unmute_24dp : R.drawable.ic_mute_24dp));
+            }
+        }
     }
 
     void resetVolume() {
@@ -520,7 +546,7 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
                             String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
                             if (mimeType != null && mimeType.contains("audio")) {
                                 if (host.fragment().getMasterMutingOption() != null) {
-                                    volume = host.fragment().getMasterMutingOption() ? 0f : 1f;
+                                    volume = host.fragment().getMasterMutingOption() || forceMuted ? 0f : 1f;
                                 }
                                 helper.setVolume(volume);
                                 muteButton.setVisibility(View.VISIBLE);
