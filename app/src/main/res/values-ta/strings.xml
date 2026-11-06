@@ -570,7 +570,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"அனைத்து முன் பக்க ஸ்க்ரோல் செய்யப்பட்ட நிலைகளையும் நீக்கு"</string>
     <string name="settings_delete_resume_state_title">"தொடர்தல் தரவை நீக்கு"</string>
     <string name="settings_delete_read_posts_in_database_title">"தரவுத்தளத்தில் எல்லா வாசித்த இடுகைகளையும் அழி"</string>
-    <string name="settings_delete_all_legacy_settings_title">"அனைத்து மரபு அமைப்புகளையும் நீக்கு"</string>
     <string name="settings_reset_all_settings_title">"எல்லா அமைவுகளையும் அகரமாக்கு"</string>
     <string name="restart_app_see_changes">"மாற்றங்களைப் காண செயலியை மறுதுவக்கு"</string>
     <string name="app_will_restart">"மதிப்பை மாற்றிய பின் திரும்பிச் செல்வது, ஆப்ஸை மறுதொடக்கம் செய்யும்."</string>
@@ -1226,7 +1225,6 @@
     <string name="delete_all_front_page_scrolled_positions_success">"முதல் பக்கத்தில் உள்ள அனைத்து உருட்டப்பட்ட நிலைகளையும் வெற்றிகரமாக நீக்கவும்"</string>
     <string name="delete_resume_state_success">"தொடர்தல் தரவு நீக்கப்பட்டது"</string>
     <string name="delete_all_read_posts_success">"படித்த அனைத்து இடுகைகளையும் வெற்றிகரமாக நீக்கவும்"</string>
-    <string name="delete_all_legacy_settings_success">"அனைத்து மரபு அமைப்புகளையும் வெற்றிகரமாக நீக்கவும்"</string>
     <string name="reset_all_settings_success">"அனைத்து அமைவுகளை அகரமாக்கல் வெற்றி"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

@@ -37,14 +37,6 @@
         app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        android:dependency="@string/enable_api_key_overrides_pref_key"
-        app:defaultValue="false"
-        app:key="@string/use_old_api_info_pref_key"
-        app:iconSpaceReserved="false"
-        app:title="@string/settings_use_old_api_info_title"
-        app:summary="@string/settings_use_old_api_info_summary" />
-
     <EditTextPreference
         android:key="@string/giphy_api_key_pref_key"
         android:title="@string/settings_giphy_api_key_title"

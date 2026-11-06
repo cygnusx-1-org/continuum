@@ -565,7 +565,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Adatbázisban szereplő összes Kezdőlap görgetett pozíció törlése"</string>
     <string name="settings_delete_resume_state_title">"A folytatási adatok törlése"</string>
     <string name="settings_delete_read_posts_in_database_title">"Adatbázisban szereplő összes olvasott poszt törlése"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Összes elavult beállítás törlése."</string>
     <string name="settings_reset_all_settings_title">"Összes beállítás visszaállítása"</string>
     <string name="restart_app_see_changes">"Indítsd újra az appot, hogy lásd a változásokat"</string>
     <string name="app_will_restart">"Ha egy érték módosítása után visszalép, az alkalmazás újraindul."</string>
@@ -1228,7 +1227,6 @@ Az alap az indigó amoled téma"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"A Kezdőlap összes görgetési pozíciójának törlése sikeres"</string>
     <string name="delete_resume_state_success">"A folytatási adatok törölve"</string>
     <string name="delete_all_read_posts_success">"Összes olvasott poszt törlése sikeres"</string>
-    <string name="delete_all_legacy_settings_success">"Összes elavult beállítás törlése sikeres"</string>
     <string name="reset_all_settings_success">"Összes beállítás visszaállítása sikeres"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

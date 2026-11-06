@@ -577,7 +577,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"删除数据库中的所有首页滚动位置"</string>
     <string name="settings_delete_resume_state_title">"删除恢复数据"</string>
     <string name="settings_delete_read_posts_in_database_title">"删除数据库中的所有已读帖子"</string>
-    <string name="settings_delete_all_legacy_settings_title">"删除所有旧版设置"</string>
     <string name="settings_reset_all_settings_title">"重置所有设置"</string>
     <string name="restart_app_see_changes">"重新启动应用以查看更改"</string>
     <string name="app_will_restart">"更改值后返回将导致应用程序重新启动。"</string>
@@ -1236,7 +1235,6 @@ Reddit 视频分辨率较低。
     <string name="delete_all_front_page_scrolled_positions_success">"成功删除所有首页滚动位置"</string>
     <string name="delete_resume_state_success">"恢复数据已删除"</string>
     <string name="delete_all_read_posts_success">"成功删除所有已读帖子"</string>
-    <string name="delete_all_legacy_settings_success">"成功删除所有旧版设置"</string>
     <string name="reset_all_settings_success">"成功重置所有设置"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

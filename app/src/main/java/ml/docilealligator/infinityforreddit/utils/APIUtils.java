@@ -201,24 +201,6 @@ public class APIUtils {
         apiKeysSharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
-    /**
-     * The "Use /api/info the Old Way" setting, on the API Keys screen and the same for every
-     * account. Reddit refuses /api/info and /api/morechildren for some client IDs (issues #475 and
-     * #476). Off, the default, Load More Comments and a logged-in account's lookups by id (History,
-     * Local Saved, random subreddits) go around both, at a request per thing; on, they use them as
-     * before, and fail while Reddit refuses them. The anonymous account asks /api/info first either
-     * way. Read live, so a change takes effect without a restart.
-     *
-     * <p>An override like the Client ID it goes with: the screen greys it out unless Enable
-     * Overrides is on, and it counts for nothing until then either, or a stored value nobody can
-     * reach to switch off would keep applying.
-     */
-    public static boolean useOldApiInfo() {
-        SharedPreferences sharedPreferences = apiKeysSharedPreferences;
-        return sharedPreferences != null && areOverridesEnabled(sharedPreferences)
-                && sharedPreferences.getBoolean(SharedPreferencesUtils.USE_OLD_API_INFO_PREF_KEY, false);
-    }
-
     // Method to retrieve Giphy API Key from SharedPreferences
     public static String getGiphyApiKey(Context context) {
         // Explicitly get SharedPreferences by file name to ensure consistency

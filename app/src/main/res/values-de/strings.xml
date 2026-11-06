@@ -577,7 +577,6 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Alle Scrollpositionen der Hauptseite aus der Datenbank löschen"</string>
     <string name="settings_delete_resume_state_title">"Daten zum Fortsetzen löschen"</string>
     <string name="settings_delete_read_posts_in_database_title">"Alle gelesenen Beitrage aus der Datenbank löschen"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Alle Legacy-Einstellungen löschen"</string>
     <string name="settings_reset_all_settings_title">"Alle Einstellungen zurücksetzen"</string>
     <string name="restart_app_see_changes">"Starte die App neu, um die Änderungen zu sehen"</string>
     <string name="app_will_restart">"Wenn du nach dem Ändern eines Werts zurückgehst, startet die App neu."</string>
@@ -1239,7 +1238,6 @@ Basiere auf Indigo-AMOLED-Thema"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Alle Scrollpositionen der Frontseite erfolgreich gelöscht"</string>
     <string name="delete_resume_state_success">"Daten zum Fortsetzen gelöscht"</string>
     <string name="delete_all_read_posts_success">"Alle gelesenen Beiträge erfolgreich gelöscht"</string>
-    <string name="delete_all_legacy_settings_success">"Alle Legacy-Einstellungen wurden erfolgreich gelöscht"</string>
     <string name="reset_all_settings_success">"Alle Einstellungen erfolgreich zurückgesetzt"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

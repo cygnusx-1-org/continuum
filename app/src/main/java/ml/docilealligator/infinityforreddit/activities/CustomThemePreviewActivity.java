@@ -268,7 +268,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                         params.bottomMargin = navBarHeight;
                         binding.fabThemePreviewActivity.setLayoutParams(params);
                         binding.linearLayoutBottomAppBarThemePreviewActivity.setPadding(0,
-                                (int) (6 * getResources().getDisplayMetrics().density), 0, navBarHeight);
+                                (int) Utils.convertDpToPixel(6, this), 0, navBarHeight);
                     }
                 }*/
             }

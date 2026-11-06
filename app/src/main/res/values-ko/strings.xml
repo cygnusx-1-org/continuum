@@ -573,7 +573,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"모든 첫 페이지 스크롤 위치 삭제"</string>
     <string name="settings_delete_resume_state_title">"재개 데이터 삭제"</string>
     <string name="settings_delete_read_posts_in_database_title">"읽은 게시물 모두 삭제"</string>
-    <string name="settings_delete_all_legacy_settings_title">"모든 레거시 설정 삭제"</string>
     <string name="settings_reset_all_settings_title">"모든 설정 초기화"</string>
     <string name="restart_app_see_changes">"변경 사항을 보려면 앱을 다시 시작하세요."</string>
     <string name="app_will_restart">"값을 변경한 후 되돌아가면 앱이 다시 시작됩니다."</string>
@@ -1229,7 +1228,6 @@
     <string name="delete_all_front_page_scrolled_positions_success">"첫 페이지에서 스크롤된 모든 위치를 성공적으로 삭제했습니다."</string>
     <string name="delete_resume_state_success">"재개 데이터가 삭제되었습니다"</string>
     <string name="delete_all_read_posts_success">"읽은 게시물을 모두 성공적으로 삭제했습니다."</string>
-    <string name="delete_all_legacy_settings_success">"모든 레거시 설정을 성공적으로 삭제했습니다."</string>
     <string name="reset_all_settings_success">"모든 설정을 성공적으로 재설정했습니다."</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

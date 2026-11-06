@@ -570,7 +570,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Διαγραφή Όλων των Θέσεων Κύλισης της Κεντρικής Σελίδας στη Βάση Δεδομένων"</string>
     <string name="settings_delete_resume_state_title">"Διαγραφή δεδομένων Συνέχισης"</string>
     <string name="settings_delete_read_posts_in_database_title">"Διαγραφή Όλων των Αναγνωσμένων Αναρτήσεων στη Βάση Δεδομένων"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Διαγραφή Όλων Των Απαρχαιωμένων Ρυθμίσεων"</string>
     <string name="settings_reset_all_settings_title">"Επαναφορά Όλων των Ρυθμίσεων"</string>
     <string name="restart_app_see_changes">"Επανεκκίνησε την εφαρμογή για να δεις τις αλλαγές"</string>
     <string name="app_will_restart">"Αν επιστρέψεις μετά την αλλαγή μιας τιμής, θα γίνει επανεκκίνηση της εφαρμογής."</string>
@@ -1232,7 +1231,6 @@
     <string name="delete_all_front_page_scrolled_positions_success">"Διαγραφή όλων των θέσεων σκρολ στην αρχική σελίδα με επιτυχία"</string>
     <string name="delete_resume_state_success">"Τα δεδομένα Συνέχισης διαγράφηκαν"</string>
     <string name="delete_all_read_posts_success">"Διαγραφή όλων των αναγνωσμένων αναρτήσεων με επιτυχία"</string>
-    <string name="delete_all_legacy_settings_success">"Διαγραφή όλων των απαρχαιωμένων ρυθμίσεων με επιτυχία"</string>
     <string name="reset_all_settings_success">"Έγινε επαναφορά ρυθμίσεων επιτυχώς"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

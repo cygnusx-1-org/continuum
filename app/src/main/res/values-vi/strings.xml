@@ -570,7 +570,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Xoá tất cả vị trí đã cuộn trong trang chính trong cơ sở dữ liệu"</string>
     <string name="settings_delete_resume_state_title">"Xóa dữ liệu tiếp tục"</string>
     <string name="settings_delete_read_posts_in_database_title">"Xoá tất cả bài đăng đã đọc trong cơ sở dữ liệu"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Xoá tất cả cài đặt cũ"</string>
     <string name="settings_reset_all_settings_title">"Đặt lại tất cả cài đặt"</string>
     <string name="restart_app_see_changes">"Khởi động lại ứng dụng để thấy các thay đổi"</string>
     <string name="app_will_restart">"Quay lại sau khi thay đổi giá trị sẽ khiến ứng dụng khởi động lại."</string>
@@ -1233,7 +1232,6 @@ Dựa trên chủ đề Chàm Amoled"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Xoá tất cả vị trí đã cuộn trong trang chính thành công"</string>
     <string name="delete_resume_state_success">"Đã xóa dữ liệu tiếp tục"</string>
     <string name="delete_all_read_posts_success">"Xoá tất cả bài đăng đã đọc thành công"</string>
-    <string name="delete_all_legacy_settings_success">"Xoá tất cả cài đặt cũ thành công"</string>
     <string name="reset_all_settings_success">"Đặt lại tất cả cài đặt thành công"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

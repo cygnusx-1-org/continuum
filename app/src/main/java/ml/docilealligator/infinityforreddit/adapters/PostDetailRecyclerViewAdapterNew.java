@@ -2643,7 +2643,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             button.setId(View.generateViewId());
             button.setIconResource(R.drawable.ic_image_day_night_24dp);
             button.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            button.setIconSize(Math.round(24 * itemView.getResources().getDisplayMetrics().density));
+            button.setIconSize(Math.round(Utils.convertDpToPixel(24, itemView.getContext())));
             button.setStrokeWidth(0);
             button.setContentDescription(itemView.getContext().getString(R.string.comment_media_button_description));
             button.setOnClickListener(view -> openCommentMedia());

@@ -563,7 +563,6 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Tirtir Dhammaan Bogga Hore ee Jagooyinka La-duubay"</string>
     <string name="settings_delete_resume_state_title">"Tirtir Xogta Dib u Bilowga ah"</string>
     <string name="settings_delete_read_posts_in_database_title">"Tirtir Dhammaan Qoraallada Akhriska"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Tirtir Dhammaan Dejinta Dhaxalka"</string>
     <string name="settings_reset_all_settings_title">"Dib u deji dhammaan Settings"</string>
     <string name="restart_app_see_changes">"Dib u bilow abka si aad u aragto isbedelada"</string>
     <string name="app_will_restart">"dib ugu noqoshada ka dib beddelka qiimaha waxay keenaysaa in abka uu dib u bilaabo."</string>
@@ -1219,7 +1218,6 @@
     <string name="delete_all_front_page_scrolled_positions_success">"Tirtir dhammaan boosaska la duuduubay ee bogga hore si guul leh"</string>
     <string name="delete_resume_state_success">"Xogta dib u bilaabista waa la tirtiray"</string>
     <string name="delete_all_read_posts_success">"Tirtir dhammaan qoraallada la akhriyey si guul leh"</string>
-    <string name="delete_all_legacy_settings_success">"Tirtir dhammaan dejinta dhaxalka si guul leh"</string>
     <string name="reset_all_settings_success">"Dib u deji dhammaan dejinta si guul leh"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

@@ -577,7 +577,6 @@ Caso contrário, altere o nome antes de ativar Material You"</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Eliminar Todas as Posições de Deslizamento da BD"</string>
     <string name="settings_delete_resume_state_title">"Apagar os dados de Continuar"</string>
     <string name="settings_delete_read_posts_in_database_title">"Eliminar Todas as publicações lidas da BD"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Eliminar Todas as Definições Datadas"</string>
     <string name="settings_reset_all_settings_title">"Repor Todas as Definições"</string>
     <string name="restart_app_see_changes">"Reinicie a aplicação para ver as alterações"</string>
     <string name="app_will_restart">"Voltar atrás após alterar um valor fará com que a aplicação seja reiniciada."</string>
@@ -1239,7 +1238,6 @@ com base no Tema Indigo Amoled"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Eliminação das posições de deslizamento com sucesso"</string>
     <string name="delete_resume_state_success">"Dados de Continuar apagados"</string>
     <string name="delete_all_read_posts_success">"Todas publicações lidas eliminadas com sucesso"</string>
-    <string name="delete_all_legacy_settings_success">"A eliminação das definições antigas foi bem sucedida"</string>
     <string name="reset_all_settings_success">"Todas as definições repostas com sucesso"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>

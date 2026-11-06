@@ -44,6 +44,25 @@
             android:contentDescription="@null"
             app:tint="@android:color/white" />
 
+        <!-- The picture's place in the gallery, small in the top left corner. Only the vertical
+             list turns it on. -->
+        <TextView
+            android:id="@+id/index_text_view_item_shadowbox_gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:background="@drawable/bg_gallery_item_number"
+            android:fontFamily="?attr/font_family"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="2dp"
+            android:textColor="#B8F7FF"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
     </FrameLayout>
 
     <TextView

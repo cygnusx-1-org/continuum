@@ -64,15 +64,7 @@ class LoadMorePostsWithoutSortTest {
     @After
     fun tearDown() {
         ThingLookup.INFO_BLOCKED.set(false)
-        useOldApiInfo(false)
         db.close()
-    }
-
-    /** The switch, and Enable Overrides, without which it counts for nothing. */
-    private fun useOldApiInfo(on: Boolean, overrides: Boolean = on) {
-        context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE).edit()
-            .putBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, overrides)
-            .putBoolean(SharedPreferencesUtils.USE_OLD_API_INFO_PREF_KEY, on).commit()
     }
 
     @Test
@@ -104,19 +96,6 @@ class LoadMorePostsWithoutSortTest {
         assertEquals(0, plainRequests.size)
         val request = oauthRequests.single()
         assertEquals("/comments/older.json", request.url.encodedPath)
-        assertNotNull(request.header(APIUtils.AUTHORIZATION_KEY))
-    }
-
-    @Test
-    fun `the old way loads a logged-in account's read posts from api info through its own OAuth client`() {
-        useOldApiInfo(true)
-
-        val (plainRequests, oauthRequests) = fetchMoreReadPosts("someone", "token")
-
-        assertEquals(0, plainRequests.size)
-        val request = oauthRequests.single()
-        assertEquals("/api/info.json", request.url.encodedPath)
-        assertEquals("t3_older", request.url.queryParameter("id"))
         assertNotNull(request.header(APIUtils.AUTHORIZATION_KEY))
     }
 

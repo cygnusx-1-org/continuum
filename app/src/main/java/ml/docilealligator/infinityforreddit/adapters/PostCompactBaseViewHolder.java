@@ -252,7 +252,7 @@ public class PostCompactBaseViewHolder extends PostViewHolder {
         loadingIndicator.setVisibility(View.GONE);
         noPreviewLinkImageFrameLayout.setBackground(host.createRoundedBackground(
                 host.noPreviewPostTypeBackgroundColor(),
-                host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD ? 16 :
+                SharedPreferencesUtils.isCardBottom(host.postLayout()) ? 16 :
                         SharedPreferencesUtils.isCardTop(host.postLayout()) ? 12 : 8));
         noPreviewLinkImageView.setBackground(null);
         noPreviewLinkImageView.setColorFilter(host.noPreviewPostTypeIconTint(), android.graphics.PorterDuff.Mode.SRC_IN);
@@ -374,7 +374,7 @@ public class PostCompactBaseViewHolder extends PostViewHolder {
     }
 
     void applyCompactItemBackground(boolean isReadPost) {
-        if (host.postLayout() == SharedPreferencesUtils.POST_LAYOUT_CARD) {
+        if (SharedPreferencesUtils.isCardBottom(host.postLayout())) {
             int backgroundColor = isReadPost ? host.readPostCardViewBackgroundColor() : host.cardViewBackgroundColor();
             setRoundedItemViewBackground(backgroundColor, 16);
         } else if (SharedPreferencesUtils.isCardTop(host.postLayout())) {

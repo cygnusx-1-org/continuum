@@ -36,7 +36,7 @@ object SubmittedPostMedia {
     fun awaitProcessed(api: RedditAPIKt, headers: Map<String, String>, postId: String) {
         // Reddit refuses /api/info for some client IDs (issue #476); the lookup can read the post's
         // own listing instead.
-        val lookup = PostLookup.forOauthApi(api, headers, APIUtils.useOldApiInfo())
+        val lookup = PostLookup.forOauthApi(api, headers, false)
         awaitProcessed(INTERVAL_MILLIS) {
             try {
                 lookup.loadBlocking(listOf(postId)).body()

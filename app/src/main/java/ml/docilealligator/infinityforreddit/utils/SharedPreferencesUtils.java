@@ -92,12 +92,17 @@ public class SharedPreferencesUtils {
     public static final int POST_LAYOUT_GALLERY = 2;
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
-    /** Card Top without the row of buttons under the content; swiping does the same things. */
+    /** Card Bottom without the row of buttons under the content; swiping does the same things. */
     public static final int POST_LAYOUT_CARD_CLEAN = 6;
 
-    /** Whether {@code postLayout} draws the Card Top rows: Card Top itself, and Card Clean. */
+    /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Card Clean. */
+    public static boolean isCardBottom(int postLayout) {
+        return postLayout == POST_LAYOUT_CARD || postLayout == POST_LAYOUT_CARD_CLEAN;
+    }
+
+    /** Whether {@code postLayout} draws the Card Top rows. */
     public static boolean isCardTop(int postLayout) {
-        return postLayout == POST_LAYOUT_CARD_3 || postLayout == POST_LAYOUT_CARD_CLEAN;
+        return postLayout == POST_LAYOUT_CARD_3;
     }
 
     public static final String FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.front_page_scrolled_position";
@@ -159,9 +164,6 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_TOOLBAR_HIDDEN = "comment_toolbar_hidden";
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
-    // Per account, before it became the global USE_OLD_API_INFO_PREF_KEY; only
-    // OldApiInfoMigration reads it now.
-    public static final String USE_LEGACY_MORE_CHILDREN = "use_legacy_more_children";
     public static final String SHOW_COMMENT_DIVIDER = "show_comment_divider";
     public static final String SHOW_COMMENT_TOP_PADDING = "show_comment_top_padding";
     public static final String SHOW_ABSOLUTE_NUMBER_OF_VOTES = "show_absolute_number_of_votes";
@@ -170,7 +172,6 @@ public class SharedPreferencesUtils {
     public static final String CUSTOMIZE_AMOLED_THEME = "customize_amoled_theme";
     public static final String MANAGE_THEMES = "manage_themes";
     public static final String DELETE_ALL_THEMES_IN_DATABASE = "delete_all_themes_in_database";
-    public static final String DELETE_ALL_LEGACY_SETTINGS = "delete_all_legacy_settings";
     public static final String RESET_ALL_SETTINGS = "reset_all_settings";
     public static final String COPY_SETTINGS_FROM_ACCOUNT = "copy_settings_from_account";
     public static final String RESET_ACCOUNT_SETTINGS = "reset_account_settings";
@@ -691,8 +692,6 @@ public class SharedPreferencesUtils {
     public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
     public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
     public static final String ENABLE_API_KEY_OVERRIDES_PREF_KEY = "enable_api_key_overrides_pref_key";
-    // On the API Keys screen, so in DEFAULT_PREFERENCES_FILE: read it through APIUtils.useOldApiInfo().
-    public static final String USE_OLD_API_INFO_PREF_KEY = "use_old_api_info_pref_key";
 
     public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 

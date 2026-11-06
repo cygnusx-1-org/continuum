@@ -573,7 +573,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">"Alle scrollposities verwijderen uit databank"</string>
     <string name="settings_delete_resume_state_title">"Hervattingsgegevens verwijderen"</string>
     <string name="settings_delete_read_posts_in_database_title">"Verwijder Alle Gelezen Posts In De Database"</string>
-    <string name="settings_delete_all_legacy_settings_title">"Verwijder alle legacyinstellingen"</string>
     <string name="settings_reset_all_settings_title">"Standaardwaarden herstellen"</string>
     <string name="restart_app_see_changes">"Start de app opnieuw om de wijzigingen te zien"</string>
     <string name="app_will_restart">"Als je teruggaat nadat je een waarde hebt gewijzigd, start de app opnieuw op."</string>
@@ -1236,7 +1235,6 @@ Gebaseerd op een Indigo Amoled Thema"</string>
     <string name="delete_all_front_page_scrolled_positions_success">"Verwijder alle gescrolde posities op de voorpagina gelukt"</string>
     <string name="delete_resume_state_success">"Hervattingsgegevens verwijderd"</string>
     <string name="delete_all_read_posts_success">"Verwijder alle gelezen posts succesvol"</string>
-    <string name="delete_all_legacy_settings_success">"Verwijder alle oude instellingen gelukt"</string>
     <string name="reset_all_settings_success">"Reset alle instellingen gelukt"</string>
     <string name="username_preview">"u/edgan"</string>
     <string name="subreddit_preview">"r/redditjr"</string>
