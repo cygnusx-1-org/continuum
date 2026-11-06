@@ -4,7 +4,7 @@
 
 8.3.3.9.1.26-beta.19 / 2026-11-6
 ============
-* Custom themes no longer have the "Bottom Navigation Bar Color" and "Bottom Navigation Bar Icon Color" rows, and the theme preview no longer draws a bottom bar. Existing themes are unaffected; the two stored values are simply no longer used
+* Custom themes no longer have the "Bottom Navigation Bar Color" and "Bottom Navigation Bar Icon Color" rows, and the theme preview no longer draws a bottom bar. The two stored colours are dropped from the theme table on the first start (database version 48); every other colour of your themes is kept
 
 8.3.3.9.1.26-beta.18 / 2026-11-6
 ============
