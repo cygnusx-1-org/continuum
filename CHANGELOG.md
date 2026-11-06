@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.27-beta.4 / 2026-11-6
+============
+**Fixed**
+* Animated GIFs in the vertical gallery list play as video: the mp4 Reddit publishes beside each GIF is played by the device's video decoder, one at a time on the row showing most of itself, instead of Glide decoding a multi-megabyte GIF frame by frame on the CPU. Galleries cached before this version, and GIFs with no mp4, keep the GIF path
+
+---
+
 8.3.3.9.1.27-beta.3 / 2026-11-6
 ============
 **Fixed**
