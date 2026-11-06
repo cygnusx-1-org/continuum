@@ -49,7 +49,7 @@ class LocalSavedLinkIdMigrationTest {
         val upgraded = RedditDataRoomDatabase.create(context).also { database = it }
 
         val db = upgraded.openHelper.writableDatabase
-        assertEquals(47, db.version)
+        assertEquals(48, db.version)
         db.query("SELECT full_name, state, time, link_id FROM local_saved WHERE username = 'alice'").use {
             assertEquals(1, it.count)
             it.moveToFirst()
@@ -68,7 +68,7 @@ class LocalSavedLinkIdMigrationTest {
 
         val reopened = RedditDataRoomDatabase.create(context).also { database = it }
 
-        assertEquals(47, reopened.openHelper.writableDatabase.version)
+        assertEquals(48, reopened.openHelper.writableDatabase.version)
     }
 
     @Test

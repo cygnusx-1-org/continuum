@@ -45,7 +45,7 @@ class AllFeedRenameMigrationTest {
         val upgraded = RedditDataRoomDatabase.create(context).also { database = it }
 
         val db = upgraded.openHelper.writableDatabase
-        assertEquals(47, db.version)
+        assertEquals(48, db.version)
         assertEquals(listOf("2:RedditJrAll", "2:pics", "3:ContinuumAll"), usages(db))
     }
 
