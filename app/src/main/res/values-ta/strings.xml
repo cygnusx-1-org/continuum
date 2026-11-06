@@ -559,7 +559,6 @@
     <string name="settings_enable_material_you_summary">"உங்கள் வால்பேப்பரின் அடிப்படையில் Reddit Jr. தனிப்பயனாக்கு"</string>
     <string name="settings_apply_material_you_title">"Material You ஐப் பயன்படுத்து"</string>
     <string name="settings_apply_material_you_summary">"Reddit Jr. கருப்பொருளை மாற்றவில்லை என்றால்"</string>
-    <string name="settings_global_settings_management_title">"உலகளாவிய அமைப்புகள் மேலாண்மை"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"தரவுதளத்தில் அனைத்து துணைரெட்டிட்களை அழி"</string>
     <string name="settings_delete_all_users_data_in_database_title">"தரவுதளத்தில் அனைத்து பயனர்களை அழி"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"தரவுதளத்தில் அனைத்து வரிசை வகைகளை அழி"</string>
@@ -718,8 +717,6 @@
     <string name="settings_hide_the_number_of_votes">"வாக்கெண்ணிக்கையை மறை"</string>
     <string name="settings_hide_the_number_of_comments">"கருத்தெண்ணிக்கையை மறை"</string>
     <string name="settings_show_avatar_on_the_right">"அவதாரை வலதுபுறத்தில் காட்டு"</string>
-    <string name="settings_category_backup_and_restore_title">"காப்புப்பிரதி மற்றும் மீட்டமை"</string>
-    <string name="settings_backup_and_restore_summary">"ஒவ்வொரு கணக்கின் அமைப்புகளையும் மறைகுறியாக்கப்பட்ட காப்பகத்தில் சேமிக்கவும் அல்லது மீண்டும் படிக்கவும்"</string>
     <string name="settings_backup_settings_title">"அமைவுகளைப் பிரதியெடு"</string>
     <string name="settings_restore_settings_title">"அமைவுகளை மீட்டமை"</string>
     <string name="settings_credits_love_animation_title">"காதல் அனிமேஷன்"</string>
@@ -817,7 +814,6 @@
     <string name="settings_sort_type_summary">"சப்ரெடிட்கள், பயனர்கள் மற்றும் கருத்துகளுக்கான இயல்புநிலை வகை மற்றும் நேர வரம்பு"</string>
     <string name="settings_download_location_summary">"பதிவிறக்கம் செய்யப்பட்ட படங்கள், GIFகள், வீடியோக்கள் மற்றும் NSFW மீடியாக்களுக்கான கோப்புறைகளைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="settings_miscellaneous_summary">"இணைப்பு கையாளுதல், உலாவி, தேடல் வரலாறு மற்றும் மொழி"</string>
-    <string name="settings_global_settings_management_summary">"ஒவ்வொரு கணக்கின் அமைப்புகளையும் மீட்டமைத்து, கணக்கில் இல்லாத தரவை அழிக்கவும்"</string>
     <string name="settings_api_keys_title">"API சாவிகள்"</string>
     <string name="settings_api_keys_summary">"உங்கள் கிளையண்ட் ஐடி உட்பட உங்களின் சொந்த API சாவிகளை உள்ளிடவும்"</string>
     <string name="settings_enable_api_key_overrides_title">"மேலெழுதலை இயக்கு"</string>

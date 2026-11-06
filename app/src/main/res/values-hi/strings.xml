@@ -557,7 +557,6 @@
     <string name="settings_enable_material_you_summary">"आपके वॉलपेपर के आधार पर Reddit Jr. को वैयक्तिकृत करें"</string>
     <string name="settings_apply_material_you_title">"Material You लागू करें"</string>
     <string name="settings_apply_material_you_summary">"मामले में Reddit Jr. ने थीम नहीं बदली"</string>
-    <string name="settings_global_settings_management_title">"वैश्विक सेटिंग्स प्रबंधन"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"डेटाबेस से सभी सबरैडिट्स मिटा दें "</string>
     <string name="settings_delete_all_users_data_in_database_title">"डेटाबेस से सभी यूजर्स हटा दें "</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"डेटाबेस से सभी क्रम प्रकार मिटा दें "</string>
@@ -719,8 +718,6 @@
     <string name="settings_hide_the_number_of_votes">"वोटों की संख्या छिपाएँ"</string>
     <string name="settings_hide_the_number_of_comments">"टिप्पणियों की संख्या छिपाएँ"</string>
     <string name="settings_show_avatar_on_the_right">"दाईं ओर अवतार दिखाएं"</string>
-    <string name="settings_category_backup_and_restore_title">"बैकअप और पुनर्स्थापना"</string>
-    <string name="settings_backup_and_restore_summary">"प्रत्येक खाते की सेटिंग्स को एन्क्रिप्टेड संग्रह में सहेजें, या एक को वापस पढ़ें"</string>
     <string name="settings_backup_settings_title">"बैकअप सेटिंग्स"</string>
     <string name="settings_restore_settings_title">"सेटिंग्स पुनर्स्थापित करें"</string>
     <string name="settings_credits_love_animation_title">"लव एनिमेशन"</string>
@@ -818,7 +815,6 @@
     <string name="settings_sort_type_summary">"सबरेडिट्स, उपयोगकर्ताओं और टिप्पणियों के लिए डिफ़ॉल्ट सॉर्ट प्रकार और समय सीमा"</string>
     <string name="settings_download_location_summary">"डाउनलोड की गई छवियों, GIF, वीडियो और NSFW मीडिया के लिए फ़ोल्डर चुनें"</string>
     <string name="settings_miscellaneous_summary">"लिंक हैंडलिंग, ब्राउज़र, खोज इतिहास और भाषा"</string>
-    <string name="settings_global_settings_management_summary">"प्रत्येक खाते की सेटिंग रीसेट करें, और वह डेटा साफ़ करें जो किसी खाते से संबंधित नहीं है"</string>
     <string name="settings_api_keys_title">"API कुंजियाँ"</string>
     <string name="settings_api_keys_summary">"अपनी क्लाइंट आईडी सहित अपनी स्वयं की API कुंजी दर्ज करें"</string>
     <string name="settings_enable_api_key_overrides_title">"ओवरराइड सक्षम करें"</string>

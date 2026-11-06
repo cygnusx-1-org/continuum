@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.26-beta.14 / 2026-11-6
+============
+* Settings: "Global Settings Management" is gone; its two actions, Delete All Themes and Reset All Settings, are on the Backup and Restore screen, now called "Backup, restore and reset"
+
+8.3.3.9.1.26-beta.13 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: the two ways of setting up a post row share the code that remembers its views, and the subreddit-name tap handler is written once
+
 8.3.3.9.1.26-beta.12 / 2026-11-6
 ============
 * Internal clean-up with no change in what you see: the upvote and downvote buttons in the post list share one routine instead of two near-identical 100-line copies

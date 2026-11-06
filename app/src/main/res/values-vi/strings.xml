@@ -559,7 +559,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_enable_material_you_summary">"Cá nhân hóa Reddit Jr. dựa vào hình nền của bạn"</string>
     <string name="settings_apply_material_you_title">"Áp dụng Material You"</string>
     <string name="settings_apply_material_you_summary">"Trong trường hợp Reddit Jr. không thay đổi chủ đề"</string>
-    <string name="settings_global_settings_management_title">"Quản lý cài đặt toàn cầu"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Xoá tất cả subreddit trong cơ sở dữ liệu"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Xoá tất cả người dùng trong cơ sở dữ liệu"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Xoá tất cả loại sắp xếp trong cơ sở dữ liệu"</string>
@@ -721,8 +720,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_hide_the_number_of_votes">"Ẩn số lượng vote"</string>
     <string name="settings_hide_the_number_of_comments">"Ẩn số lượng bình luận"</string>
     <string name="settings_show_avatar_on_the_right">"Hiện ảnh đại diện ở bên trái"</string>
-    <string name="settings_category_backup_and_restore_title">"Sao lưu và khôi phục"</string>
-    <string name="settings_backup_and_restore_summary">"Lưu cài đặt của mọi tài khoản vào kho lưu trữ được mã hóa hoặc đọc lại"</string>
     <string name="settings_backup_settings_title">"Sao lưu cài đặt"</string>
     <string name="settings_restore_settings_title">"Khôi phục cài đặt"</string>
     <string name="settings_credits_love_animation_title">"Hoạt ảnh yêu"</string>
@@ -820,7 +817,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_sort_type_summary">"Loại sắp xếp mặc định và phạm vi thời gian cho các tài khoản con, người dùng và bình luận"</string>
     <string name="settings_download_location_summary">"Chọn thư mục cho hình ảnh, GIF, video và NSFW phương tiện đã tải xuống"</string>
     <string name="settings_miscellaneous_summary">"Xử lý liên kết, trình duyệt, lịch sử tìm kiếm và ngôn ngữ"</string>
-    <string name="settings_global_settings_management_summary">"Đặt lại cài đặt của mọi tài khoản và xóa dữ liệu không thuộc về tài khoản"</string>
     <string name="settings_api_keys_title">"Khóa API"</string>
     <string name="settings_api_keys_summary">"Nhập khóa API của riêng bạn, bao gồm ID khách hàng của bạn"</string>
     <string name="settings_enable_api_key_overrides_title">"Kích hoạt ghi đè"</string>

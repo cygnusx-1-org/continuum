@@ -567,7 +567,6 @@ Renomeie-os antes de ativar o Material You se você tiver."</string>
     <string name="settings_enable_material_you_summary">"Customizar o Reddit Jr. baseado no seu papel de parede"</string>
     <string name="settings_apply_material_you_title">"Aplicar Material You"</string>
     <string name="settings_apply_material_you_summary">"Se o Reddit Jr. não houver mudado o tema"</string>
-    <string name="settings_global_settings_management_title">"Gerenciamento de configurações globais"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Excluir todo subreddit no banco de dados"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Excluir todo usuários no banco de dados"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Excluir todo modo de ordenação no banco de dados"</string>
@@ -729,8 +728,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_hide_the_number_of_votes">"Ocultar o número de votos"</string>
     <string name="settings_hide_the_number_of_comments">"Ocultar o Número de Comentários"</string>
     <string name="settings_show_avatar_on_the_right">"Exibir avatar na direita"</string>
-    <string name="settings_category_backup_and_restore_title">"Backup e restauração"</string>
-    <string name="settings_backup_and_restore_summary">"Salve as configurações de cada conta em um arquivo criptografado ou leia uma delas"</string>
     <string name="settings_backup_settings_title">"Ajustes de cópia de segurança"</string>
     <string name="settings_restore_settings_title">"Restaurar ajustes"</string>
     <string name="settings_credits_love_animation_title">"Animações de Amor"</string>
@@ -828,7 +825,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_sort_type_summary">"Tipo de classificação padrão e intervalo de tempo para subreddits, usuários e comentários"</string>
     <string name="settings_download_location_summary">"Escolha pastas para imagens baixadas, GIFs, vídeos e mídia NSFW"</string>
     <string name="settings_miscellaneous_summary">"Manipulação de link, navegador, histórico de pesquisa e idioma"</string>
-    <string name="settings_global_settings_management_summary">"Redefina as configurações de todas as contas e limpe os dados que não pertencem a nenhuma conta"</string>
     <string name="settings_api_keys_title">"Chaves da API"</string>
     <string name="settings_api_keys_summary">"Insira suas próprias chaves API, incluindo seu ID de cliente"</string>
     <string name="settings_enable_api_key_overrides_title">"Habilitar substituições"</string>

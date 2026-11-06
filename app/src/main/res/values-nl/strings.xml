@@ -562,7 +562,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_enable_material_you_summary">"Personaliseer Reddit Jr. op basis van je wallpaper"</string>
     <string name="settings_apply_material_you_title">"Material You Toepassen"</string>
     <string name="settings_apply_material_you_summary">"In het geval dat Reddit Jr. het thema niet heeft gewijzigd"</string>
-    <string name="settings_global_settings_management_title">"Globaal instellingenbeheer"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Alle subreddits verwijderen uit databank"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Alle gebruikers verwijderen uit databank"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Alle sorteertypen verwijderen uit databank"</string>
@@ -724,8 +723,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_hide_the_number_of_votes">"Verberg het Aantal Stemmen"</string>
     <string name="settings_hide_the_number_of_comments">"Verberg het aantal reacties"</string>
     <string name="settings_show_avatar_on_the_right">"Laat Avatar aan de Rechterkant Zien"</string>
-    <string name="settings_category_backup_and_restore_title">"Back-up en herstel"</string>
-    <string name="settings_backup_and_restore_summary">"Bewaar de instellingen van ieder account in een gecodeerd archief, of lees er één terug"</string>
     <string name="settings_backup_settings_title">"Backup Instellingen"</string>
     <string name="settings_restore_settings_title">"Instellingen Herstellen"</string>
     <string name="settings_credits_love_animation_title">"Liefde animatie"</string>
@@ -823,7 +820,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_sort_type_summary">"Standaard sorteertype en tijdbereik voor subreddits, gebruikers en opmerkingen"</string>
     <string name="settings_download_location_summary">"Kies mappen voor gedownloade afbeeldingen, GIF's, video's en NSFW media"</string>
     <string name="settings_miscellaneous_summary">"Linkverwerking, browser, zoekgeschiedenis en taal"</string>
-    <string name="settings_global_settings_management_summary">"Reset de instellingen van elk account en wis de gegevens die bij geen enkel account horen"</string>
     <string name="settings_api_keys_title">"API-sleutels"</string>
     <string name="settings_api_keys_summary">"Je eigen API-sleutels invoeren, inclusief je client-ID"</string>
     <string name="settings_enable_api_key_overrides_title">"Overschrijvingen inschakelen"</string>
