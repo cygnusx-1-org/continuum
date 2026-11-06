@@ -297,6 +297,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
             holder.bind(gallery.get(position));
+            holder.binding.indexTextViewItemShadowboxGallery.setText(String.valueOf(position + 1));
+            holder.binding.indexTextViewItemShadowboxGallery.setVisibility(View.VISIBLE);
             // Warm the next two pictures, so the first screenful after opening is not decoded
             // while it scrolls into view.
             for (int next = position + 1; next <= position + 2 && next < gallery.size(); next++) {
@@ -327,6 +329,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             this.binding = binding;
             if (typeface != null) {
                 binding.captionTextViewItemShadowboxGallery.setTypeface(typeface);
+                binding.indexTextViewItemShadowboxGallery.setTypeface(typeface);
             }
             itemView.setOnClickListener(view -> {
                 int position = getBindingAdapterPosition();
