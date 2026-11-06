@@ -170,17 +170,9 @@ public class CustomThemeSettingsItem implements Parcelable {
                 context.getString(R.string.theme_item_sent_message_background_color_detail),
                 customTheme.sentMessageBackgroundColor));
         customThemeSettingsItems.add(new CustomThemeSettingsItem(
-                context.getString(R.string.theme_item_bottom_app_bar_background_color),
-                context.getString(R.string.theme_item_bottom_app_bar_background_color_detail),
-                customTheme.bottomAppBarBackgroundColor));
-        customThemeSettingsItems.add(new CustomThemeSettingsItem(
                 context.getString(R.string.theme_item_primary_icon_color),
                 context.getString(R.string.theme_item_primary_icon_color_detail),
                 customTheme.primaryIconColor));
-        customThemeSettingsItems.add(new CustomThemeSettingsItem(
-                context.getString(R.string.theme_item_bottom_app_bar_icon_color),
-                context.getString(R.string.theme_item_bottom_app_bar_icon_color_detail),
-                customTheme.bottomAppBarIconColor));
         customThemeSettingsItems.add(new CustomThemeSettingsItem(
                 context.getString(R.string.theme_item_post_icon_and_info_color),
                 context.getString(R.string.theme_item_post_icon_and_info_color_detail),

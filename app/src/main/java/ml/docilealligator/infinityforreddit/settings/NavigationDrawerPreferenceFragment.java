@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.settings;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +9,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.adapters.navigationdrawer.DrawerSection;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeHideKarmaEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNavigationDrawerSectionsEvent;
@@ -21,6 +23,15 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         PreferenceManager preferenceManager = getPreferenceManager();
         preferenceManager.setSharedPreferencesName(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
+        // Older versions kept a collapse switch and a hide switch per section; turn them into the
+        // single choice before the screen shows it.
+        SharedPreferences drawerPreferences = mActivity.accountScopedPreferencesFor(
+                SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
+        if (drawerPreferences != null) {
+            for (DrawerSection section : DrawerSection.values()) {
+                section.read(drawerPreferences);
+            }
+        }
         setPreferencesFromResource(R.xml.navigation_drawer_preferences, rootKey);
 
         SwitchPreference showAvatarOnTheRightSwitch = findPreference(SharedPreferencesUtils.SHOW_AVATAR_ON_THE_RIGHT);
@@ -53,9 +64,9 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
             recentLimit.setOnPreferenceChangeListener(sectionListener);
         }
         for (String key : NAVIGATION_DRAWER_SECTION_KEYS) {
-            SwitchPreference sectionSwitch = findPreference(key);
-            if (sectionSwitch != null) {
-                sectionSwitch.setOnPreferenceChangeListener(sectionListener);
+            Preference sectionPreference = findPreference(key);
+            if (sectionPreference != null) {
+                sectionPreference.setOnPreferenceChangeListener(sectionListener);
             }
         }
     }
@@ -65,12 +76,9 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
             SharedPreferencesUtils.COLLAPSE_REDDIT_SECTION,
             SharedPreferencesUtils.COLLAPSE_POST_SECTION,
             SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION,
-            SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION,
-            SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION,
-            SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION,
-            SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION,
-            SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION,
-            SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS,
+            SharedPreferencesUtils.RECENT_SUBREDDITS_SECTION,
+            SharedPreferencesUtils.FAVORITE_SUBREDDITS_SECTION,
+            SharedPreferencesUtils.SUBSCRIBED_SUBREDDITS_SECTION,
             SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER,
             SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER,
             SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER,

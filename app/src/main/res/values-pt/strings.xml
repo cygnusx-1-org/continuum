@@ -489,7 +489,6 @@ Toque para tentar novamente."</string>
     <string name="settings_post_compact_thumbnail_size">"Tamanho da miniatura"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Mostrar Miniatura à Esquerda"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Mostrar miniatura à direita"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Alternar lado da miniatura"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Número de Colunas no Feed de Publicações"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Retrato"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Paisagem"</string>
@@ -506,7 +505,6 @@ Toque para tentar novamente."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar publicações de texto e publicações sem pré-visualização"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"O modo Shadowbox ignora todas as publicações de texto e qualquer outra publicação que não tenha imagem de pré-visualização."</string>
     <string name="settings_font_title">"Tipo de Letra"</string>
-    <string name="settings_preview_font_title">"Pré-visualizar Tipo de Letra"</string>
     <string name="settings_font_summary">"Tipo de Letra"</string>
     <string name="settings_title_font_summary">"Titulo"</string>
     <string name="settings_content_font_summary">"Conteúdo"</string>
@@ -626,10 +624,6 @@ Caso contrário, altere o nome antes de ativar Material You"</string>
     <string name="settings_require_authentication_to_show_accounts">"requer autenticação para mostrar as contas"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Pressionar longo para Esconder Barra de Ferramentas"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Esconder Barra de Ferramentas por Defeito"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Página Principal"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Outras Páginas"</string>
-    <string name="settings_bottom_app_bar_option_count">"Número de Opções"</string>
-    <string name="settings_bottom_app_bar_fab">"Botão de Ação Flutuante"</string>
     <string name="settings_data_saving_mode">"Modo de Poupança de Dados"</string>
     <string name="settings_data_saving_mode_info_summary">"No modo de poupança de dados:
 Pré-visualização de imagens em baixa resolução.
@@ -729,10 +723,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_collapse_reddit_section_title">"Recolher Secção do Reddit"</string>
     <string name="settings_collapse_post_section_title">"Colapsar Secção de Publicações"</string>
     <string name="settings_collapse_preferences_section_title">"Colapsar Secção de Preferências"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Colapsar Secção de Comunidades Favoritas"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Colapsar Secção de Comunidades Subscritas"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Esconder Secção de Comunidades Favoritas"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Esconder Secção de Comunidades Subscritas"</string>
     <string name="settings_quick_toggles_title">"Alternações rápidas"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Mostrar alternância de tema"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Mostrar NSFW Alternar"</string>
@@ -803,19 +793,15 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_proxy_type">"Tipo de proxy"</string>
     <string name="settings_proxy_hostname">"Nome do host"</string>
     <string name="settings_proxy_port">"Porta"</string>
-    <string name="settings_notification_master_summary">"Active as notificações push e defina com que frequência são verificadas"</string>
     <string name="settings_theme_summary">"Temas claros, escuros e AMOLED, Material You e cores de tema personalizadas"</string>
     <string name="settings_video_summary">"Reprodução automática, silenciamento, velocidade de reprodução, resolução padrão e comportamento de ecrã inteiro"</string>
     <string name="settings_gestures_and_buttons_summary">"Gestos de deslizar, navegação por teclas de volume, ações de toque longo e sensibilidade a gestos"</string>
     <string name="settings_security_summary">"Bloqueio de aplicação, biométrico ou PIN, modo seguro e autenticação para mostrar contas"</string>
-    <string name="settings_data_saving_mode_summary">"Desative as visualizações de imagens e reduza a resolução de vídeo para utilizar menos dados"</string>
-    <string name="settings_proxy_summary">"Encaminhar tráfego Reddit através de um proxy HTTP ou SOCKS"</string>
     <string name="settings_post_history_summary">"Marcar as mensagens como lidas, limitar o histórico de mensagens lidas e ocultar as mensagens lidas"</string>
     <string name="settings_over_18_and_spoiler_summary">"Mostrar ou desfocar NSFW conteúdo e desfocar spoilers"</string>
     <string name="settings_post_filter_summary">"Crie e gerencie filtros que ocultam publicações"</string>
     <string name="settings_comment_filter_summary">"Criar e gerir filtros que ocultam comentários"</string>
     <string name="settings_sort_type_summary">"Tipo de classificação padrão e intervalo de tempo para subreddits, utilizadores e comentários"</string>
-    <string name="settings_download_location_summary">"Escolha pastas para imagens descarregadas, GIFs, vídeos e media NSFW"</string>
     <string name="settings_miscellaneous_summary">"Manipulação de links, browser, histórico de pesquisa e idioma"</string>
     <string name="settings_api_keys_title">"Chaves da API"</string>
     <string name="settings_api_keys_summary">"Introduza as suas próprias chaves API, incluindo o seu ID de cliente"</string>
@@ -1032,12 +1018,8 @@ Reprodução automática de vídeos desativada."</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fundo de mensagens privadas recebidas"</string>
     <string name="theme_item_sent_message_background_color">"Cor de Fundo Mensagem Enviada"</string>
     <string name="theme_item_sent_message_background_color_detail">"Aplicado a: Fundo das mensagens privadas enviadas"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Cor da Barra de Navegação Inferior"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Aplicado a: Barra de navegação inferior"</string>
     <string name="theme_item_primary_icon_color">"Cor do Ícone Principal"</string>
     <string name="theme_item_primary_icon_color_detail">"Aplicado a: Ícones da gaveta de navegação."</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Cor dos Ícones da Barra de Navegação Inferior"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Aplicado a: Ícones da barra de navegação inferior"</string>
     <string name="theme_item_post_icon_and_info_color">"Cor do Ícone de Publicação e das Informações"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Aplicado a: Ícones, pontuação e número de comentários de publicação"</string>
     <string name="theme_item_comment_icon_and_info_color">"Cor do Ícone de Comentário e das Informações"</string>
@@ -1706,7 +1688,6 @@ Toque para tentar novamente."</string>
     <string name="content_description_video_indicator">"Indicador de vídeo"</string>
     <string name="content_description_no_subscriptions_indicator">"Sem indicador de assinaturas"</string>
     <string name="content_description_create_multireddit">"Criar MultiReddit"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Botão inferior da barra de navegação"</string>
     <string name="content_description_fab">"Botão de Ação Flutuante"</string>
     <string name="content_description_download">"Transferir"</string>
     <string name="content_description_share">"Partilhar"</string>

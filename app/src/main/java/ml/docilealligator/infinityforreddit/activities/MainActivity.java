@@ -143,6 +143,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
+import ml.docilealligator.infinityforreddit.utils.FloatingButtonAction;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
@@ -626,8 +627,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return;
         }
 
-        fabOption = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB,
-                SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
+        fabOption = FloatingButtonAction.mainActivity(mSharedPreferences, mBottomAppBarSharedPreference);
         switch (fabOption) {
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH:
                 fab.setImageResource(R.drawable.ic_refresh_day_night_24dp);

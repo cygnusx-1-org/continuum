@@ -481,7 +481,6 @@
     <string name="settings_post_compact_thumbnail_size">"Indexkép mérete"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Bélyegkép megjelenítése baloldalt"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatűr megjelenítése a jobb oldalon"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Bélyegkép oldala"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Az oszlopok száma a poszt feedben"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portré"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Tájlép"</string>
@@ -498,7 +497,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Szöveges bejegyzések és előnézet nélküli bejegyzések elrejtése"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"A Shadowbox mód minden szöveges bejegyzést kihagy, és minden olyan bejegyzést, amelynél nincs előnézeti kép."</string>
     <string name="settings_font_title">"Betűtípus"</string>
-    <string name="settings_preview_font_title">"Betűtípus előnézet"</string>
     <string name="settings_font_summary">"Betűtípus"</string>
     <string name="settings_title_font_summary">"Cím"</string>
     <string name="settings_content_font_summary">"Tartalom"</string>
@@ -614,10 +612,6 @@
     <string name="settings_require_authentication_to_show_accounts">"A fiókok megjelenítéséhez hitelesítés szükséges"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Nyomd hosszan, hogy elrejtsd az eszköztárat kompakt elrendezésben"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Az eszköztár alapértelmezve rejtett kompakt elrendezésben"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Főoldal"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Más oldalak"</string>
-    <string name="settings_bottom_app_bar_option_count">"Opció szám"</string>
-    <string name="settings_bottom_app_bar_fab">"Lebegő művelet gomb"</string>
     <string name="settings_data_saving_mode">"Adatcsökkentő mód"</string>
     <string name="settings_data_saving_mode_info_summary">"Adatcsökkentő módban:
 Előnézeti képek alacsonyabb felbontásban lesznek.
@@ -717,10 +711,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_collapse_reddit_section_title">"Összecsukás Reddit szakasz"</string>
     <string name="settings_collapse_post_section_title">"Poszt szekció becsukása"</string>
     <string name="settings_collapse_preferences_section_title">"Preferenciák szekció becsukása"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Kedvenc subreddit szekció becsukása"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Feliratkozott subredditek szekció becsukása"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Kedvenc subreddit szekció elrejtése"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Feliratkozott subreddit szekció elrejtése"</string>
     <string name="settings_quick_toggles_title">"gyorskapcsolók"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Téma megjelenítése kapcsoló"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"NSFW megjelenítése Váltás"</string>
@@ -791,19 +781,15 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_proxy_type">"proxy típus"</string>
     <string name="settings_proxy_hostname">"Gazdanév"</string>
     <string name="settings_proxy_port">"Port"</string>
-    <string name="settings_notification_master_summary">"Engedélyezd a push értesítéseket, és állítsd be, hogy milyen gyakran legyenek ellenőrizve"</string>
     <string name="settings_theme_summary">"Világos, sötét és AMOLED témák, Material You és egyéni témaszínek"</string>
     <string name="settings_video_summary">"Automatikus lejátszás, némítás, lejátszási sebesség, alapértelmezett felbontás és teljes képernyős viselkedés"</string>
     <string name="settings_gestures_and_buttons_summary">"Csúsztatási gesztusok, hangerőszabályzó-navigáció, hosszan lenyomott műveletek és gesztusérzékenység"</string>
     <string name="settings_security_summary">"Alkalmazászár, biometrikus vagy PIN kód, biztonságos mód és hitelesítés a fiókok megjelenítéséhez"</string>
-    <string name="settings_data_saving_mode_summary">"Tiltsd le a kép-előnézeteket és csökkentsd a videofelbontást, hogy kevesebb adatot használj"</string>
-    <string name="settings_proxy_summary">"Reddit forgalom útvonala HTTP vagy SOCKS proxyn keresztül"</string>
     <string name="settings_post_history_summary">"Bejegyzések megjelölése olvasottként, az olvasási bejegyzések előzményeinek korlátozása és az olvasott bejegyzések elrejtése"</string>
     <string name="settings_over_18_and_spoiler_summary">"NSFW tartalom megjelenítése vagy elhomályosítása és spoilerek elhomályosítása"</string>
     <string name="settings_post_filter_summary">"A bejegyzéseket elrejtő szűrők létrehozása és kezelése"</string>
     <string name="settings_comment_filter_summary">"A megjegyzéseket elrejtő szűrők létrehozása és kezelése"</string>
     <string name="settings_sort_type_summary">"Alapértelmezett rendezési típus és időtartomány az alredditek, a felhasználók és a megjegyzések számára"</string>
-    <string name="settings_download_location_summary">"Válassz mappákat a letöltött képek, GIF-ek, videók és NSFW média számára"</string>
     <string name="settings_miscellaneous_summary">"Linkkezelés, böngésző, keresési előzmények és nyelv"</string>
     <string name="settings_api_keys_title">"API kulcsok"</string>
     <string name="settings_api_keys_summary">"Add meg saját API kulcsait, beleértve az ügyfél-azonosítóját"</string>
@@ -1021,12 +1007,8 @@ https://play.google.com/store/"</string>
     <string name="theme_item_received_message_background_color_detail">"Beállítva: Beérkezett privát üzenet hátterére"</string>
     <string name="theme_item_sent_message_background_color">"Elküldött üzenet háttérszín"</string>
     <string name="theme_item_sent_message_background_color_detail">"Beállítva: Elküldött privát üzenet hátterére"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"Alsó navigációs sáv szín"</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"Beállítva: Alsó navigációs sávra"</string>
     <string name="theme_item_primary_icon_color">"Elsődleges ikon szín"</string>
     <string name="theme_item_primary_icon_color_detail">"Beállítva: Ikonokra a navigációs fiókban"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"Alsó navigációs sáv ikon szín"</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"Beállítva: Ikonokra az alsó navigációs sávban"</string>
     <string name="theme_item_post_icon_and_info_color">"Poszt ikon és infó szín"</string>
     <string name="theme_item_post_icon_and_info_color_detail">"Beállítva: Ikonokra, pontszámokra és a commentek számára a posztokban"</string>
     <string name="theme_item_comment_icon_and_info_color">"Komment ikon és infó szín"</string>
@@ -1690,7 +1672,6 @@ Az alap az indigó amoled téma"</string>
     <string name="content_description_video_indicator">"Videójelző"</string>
     <string name="content_description_no_subscriptions_indicator">"Nincs előfizetés jelző"</string>
     <string name="content_description_create_multireddit">"MultiReddit létrehozása"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Alsó navigációs sáv gomb"</string>
     <string name="content_description_fab">"Lebegő művelet gomb"</string>
     <string name="content_description_download">"Letöltés"</string>
     <string name="content_description_share">"Megosztás"</string>

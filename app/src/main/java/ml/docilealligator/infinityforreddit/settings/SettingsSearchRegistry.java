@@ -71,8 +71,6 @@ public class SettingsSearchRegistry {
         m.put(PostSwipeActionPreferenceFragment.class, R.xml.post_swipe_action_preferences);
         m.put(CommentSwipeActionPreferenceFragment.class, R.xml.comment_swipe_action_preferences);
         m.put(SecurityPreferenceFragment.class, R.xml.security_preferences);
-        m.put(DataSavingModePreferenceFragment.class, R.xml.data_saving_mode_preferences);
-        m.put(ProxyPreferenceFragment.class, R.xml.proxy_preferences);
         m.put(SortTypePreferenceFragment.class, R.xml.sort_type_preferences);
         m.put(DownloadLocationPreferenceFragment.class, R.xml.download_location_preferences);
         m.put(MiscellaneousPreferenceFragment.class, R.xml.miscellaneous_preferences);

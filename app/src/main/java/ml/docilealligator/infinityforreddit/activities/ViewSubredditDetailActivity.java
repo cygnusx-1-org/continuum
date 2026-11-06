@@ -125,6 +125,7 @@ import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
+import ml.docilealligator.infinityforreddit.utils.FloatingButtonAction;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -768,7 +769,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     
 
-        fabOption = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
+        fabOption = FloatingButtonAction.otherActivities(mSharedPreferences, mBottomAppBarSharedPreference);
         switch (fabOption) {
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_REFRESH:
                 fab.setImageResource(R.drawable.ic_refresh_day_night_24dp);

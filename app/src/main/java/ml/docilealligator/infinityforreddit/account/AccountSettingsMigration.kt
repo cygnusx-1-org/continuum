@@ -85,17 +85,7 @@ object AccountSettingsMigration {
      * signed-in one even when logged out.
      */
     private val BOTTOM_APP_BAR = listOf(
-        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT,
-        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1,
-        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2,
-        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3,
-        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4,
         SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB,
-        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT,
-        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1,
-        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2,
-        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3,
-        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4,
         SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB,
     )
 
@@ -140,30 +130,14 @@ object AccountSettingsMigration {
     )
 
     /**
-     * Where Random sat in each bottom app bar list it was dropped from. It went without the stored
+     * Where Random sat in each floating button list it was dropped from. It went without the stored
      * values being moved, so every option after it now sits one lower; Infinity still has it. Frozen
      * literals, like [LEGACY_ANONYMOUS_PREFIX]: this is the old numbering, not the current one.
      */
-    private val REMOVED_RANDOM_OPTION: Map<String, Int> = buildMap {
-        for (base in listOf(
-            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1,
-            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2,
-            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3,
-            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4,
-        )) {
-            put(base, 11)
-        }
-        for (base in listOf(
-            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1,
-            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2,
-            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3,
-            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4,
-        )) {
-            put(base, 12)
-        }
-        put(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 7)
-        put(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, 7)
-    }
+    private val REMOVED_RANDOM_OPTION: Map<String, Int> = mapOf(
+        SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB to 7,
+        SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB to 7,
+    )
 
     /**
      * Opens every preferences file itself rather than taking them injected: the injected ones are

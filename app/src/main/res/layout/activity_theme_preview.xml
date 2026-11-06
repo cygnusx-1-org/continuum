@@ -135,78 +135,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottom_navigation_theme_preview_activity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:fabAlignmentMode="center">
-
-        <LinearLayout
-            android:id="@+id/linear_layout_bottom_app_bar_theme_preview_activity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:weightSum="5">
-
-            <ImageView
-                android:id="@+id/subscriptions_bottom_app_bar_theme_preview_activity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:src="@drawable/ic_subscriptions_bottom_app_bar_day_night_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/content_description_bottom_navigation_bar_button" />
-
-            <ImageView
-                android:id="@+id/multi_reddit_bottom_app_bar_theme_preview_activity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:src="@drawable/ic_multi_reddit_day_night_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/content_description_bottom_navigation_bar_button" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent" />
-
-            <ImageView
-                android:id="@+id/message_bottom_app_bar_theme_preview_activity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:src="@drawable/ic_inbox_day_night_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/content_description_bottom_navigation_bar_button" />
-
-            <ImageView
-                android:id="@+id/profile_bottom_app_bar_theme_preview_activity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:gravity="center"
-                android:src="@drawable/ic_account_circle_day_night_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/content_description_bottom_navigation_bar_button" />
-
-        </LinearLayout>
-
-    </com.google.android.material.bottomappbar.BottomAppBar>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_theme_preview_activity"
         android:layout_width="wrap_content"
@@ -215,6 +143,6 @@
         android:contentDescription="@string/content_description_fab"
         app:srcCompat="@drawable/ic_add_day_night_24dp"
         app:tint="@android:color/white"
-        app:layout_anchor="@id/bottom_navigation_theme_preview_activity" />
+        android:layout_gravity="end|bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

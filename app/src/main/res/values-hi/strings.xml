@@ -484,7 +484,6 @@
     <string name="settings_post_compact_thumbnail_size">"थंबनेल आकार"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"संक्षिप्त विन्यास में थम्बनेल बाईं तरफ दिखाएं "</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"दाईं ओर थंबनेल दिखाएँ"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"थंबनेल साइड टॉगल करें"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"पोस्ट फीड में स्तम्भों की संख्या "</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"ऊर्ध्वाधर"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">" क्षैतिज "</string>
@@ -501,7 +500,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"बिना किसी पूर्वावलोकन के टेक्स्ट पोस्ट और पोस्ट छुपाएं"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"शैडोबॉक्स मोड प्रत्येक टेक्स्ट पोस्ट और किसी भी अन्य पोस्ट को छोड़ देता है जिसमें कोई पूर्वावलोकन छवि नहीं है।"</string>
     <string name="settings_font_title">"फॉन्ट "</string>
-    <string name="settings_preview_font_title">"फॉन्ट पूर्वदर्शन "</string>
     <string name="settings_font_summary">"फॉन्ट"</string>
     <string name="settings_title_font_summary">"शीर्षक "</string>
     <string name="settings_content_font_summary">"अंतःवस्तु"</string>
@@ -617,10 +615,6 @@
     <string name="settings_require_authentication_to_show_accounts">"खाते दिखाने के लिए प्रमाणीकरण की आवश्यकता है"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"संक्षिप्त विन्यास में टूलबार को छुपाने के लिए लॉंग प्रैस "</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"संक्षिप्त विन्यास में टूलबार पूर्वनिर्धारित रूप से अदृश्य "</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"मुख्य पृष्ट "</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"अन्य पृष्ट "</string>
-    <string name="settings_bottom_app_bar_option_count">"विकल्प संख्या "</string>
-    <string name="settings_bottom_app_bar_fab">"तैरता क्रिया बटन "</string>
     <string name="settings_data_saving_mode">"डेटा संरक्षण प्रणाली"</string>
     <string name="settings_data_saving_mode_info_summary">"डेटा संरक्षण प्रणाली:
 पूर्वावलोकित चित्र की कमतर स्पष्टता।
@@ -720,10 +714,6 @@
     <string name="settings_collapse_reddit_section_title">"संक्षिप्त करें Reddit अनुभाग"</string>
     <string name="settings_collapse_post_section_title">"पोस्ट सेक्शन को संक्षिप्त करें"</string>
     <string name="settings_collapse_preferences_section_title">"प्राथमिकता अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"पसंदीदा सबरेडिट अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"सब्स्क्राइब्ड सबरेडिट अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"पसंदीदा सबरेडिट अनुभाग छुपाएं"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"सब्स्क्राइब्ड सबरेडिट अनुभाग छुपाएं"</string>
     <string name="settings_quick_toggles_title">"त्वरित टॉगल"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"शो थीम टॉगल"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"शो NSFW टॉगल करें"</string>
@@ -794,19 +784,15 @@
     <string name="settings_proxy_type">"प्रॉक्सी प्रकार"</string>
     <string name="settings_proxy_hostname">"होस्टनाम"</string>
     <string name="settings_proxy_port">"पोर्ट"</string>
-    <string name="settings_notification_master_summary">"पुश नोटिफिकेशन सक्षम करें और सेट करें कि उन्हें कितनी बार चेक किया जाए"</string>
     <string name="settings_theme_summary">"हल्का, गहरा और AMOLED थीम, Material You और कस्टम थीम रंग"</string>
     <string name="settings_video_summary">"ऑटोप्ले, म्यूटिंग, प्लेबैक स्पीड, डिफ़ॉल्ट रिज़ॉल्यूशन और फुलस्क्रीन व्यवहार"</string>
     <string name="settings_gestures_and_buttons_summary">"स्वाइप जेस्चर, वॉल्यूम कुंजी नेविगेशन, लंबे समय तक प्रेस क्रियाएं, और जेस्चर संवेदनशीलता"</string>
     <string name="settings_security_summary">"ऐप लॉक, बायोमेट्रिक या पिन, सुरक्षित मोड और खाते दिखाने के लिए प्रमाणीकरण"</string>
-    <string name="settings_data_saving_mode_summary">"कम डेटा का उपयोग करने के लिए छवि पूर्वावलोकन और कम वीडियो रिज़ॉल्यूशन अक्षम करें"</string>
-    <string name="settings_proxy_summary">"रूट Reddit ट्रैफ़िक HTTP या SOCKS प्रॉक्सी के माध्यम से"</string>
     <string name="settings_post_history_summary">"पोस्ट को पढ़े गए के रूप में चिह्नित करें, पढ़े गए पोस्ट इतिहास को सीमित करें, और पढ़े गए पोस्ट को छुपाएं"</string>
     <string name="settings_over_18_and_spoiler_summary">"NSFW सामग्री दिखाएं या धुंधला करें और स्पॉइलर धुंधला करें"</string>
     <string name="settings_post_filter_summary">"पोस्ट छिपाने वाले फ़िल्टर बनाएं और प्रबंधित करें"</string>
     <string name="settings_comment_filter_summary">"टिप्पणियाँ छिपाने वाले फ़िल्टर बनाएं और प्रबंधित करें"</string>
     <string name="settings_sort_type_summary">"सबरेडिट्स, उपयोगकर्ताओं और टिप्पणियों के लिए डिफ़ॉल्ट सॉर्ट प्रकार और समय सीमा"</string>
-    <string name="settings_download_location_summary">"डाउनलोड की गई छवियों, GIF, वीडियो और NSFW मीडिया के लिए फ़ोल्डर चुनें"</string>
     <string name="settings_miscellaneous_summary">"लिंक हैंडलिंग, ब्राउज़र, खोज इतिहास और भाषा"</string>
     <string name="settings_api_keys_title">"API कुंजियाँ"</string>
     <string name="settings_api_keys_summary">"अपनी क्लाइंट आईडी सहित अपनी स्वयं की API कुंजी दर्ज करें"</string>
@@ -1023,12 +1009,8 @@
     <string name="theme_item_received_message_background_color_detail">"पर लागू होगा: प्राप्त व्यक्तिगत संदेश की पृष्ठभूमि "</string>
     <string name="theme_item_sent_message_background_color">"भेजे गए संदेश की पृष्टभूमि का रंग "</string>
     <string name="theme_item_sent_message_background_color_detail">"पर लागू होगा: भेजे गए व्यक्तिगत संदेश की पृष्टभूमि"</string>
-    <string name="theme_item_bottom_app_bar_background_color">"निचले नेवीगेशन बार का रंग "</string>
-    <string name="theme_item_bottom_app_bar_background_color_detail">"पर लागू होगा: निचला नेवीगेशन बार "</string>
     <string name="theme_item_primary_icon_color">"प्राथमिक आइकन रंग "</string>
     <string name="theme_item_primary_icon_color_detail">"पर लागू होगा: नेवीगेशन दराज में आइकन्स"</string>
-    <string name="theme_item_bottom_app_bar_icon_color">"निचले नेवीगेशन बार के आइकन्स के रंग "</string>
-    <string name="theme_item_bottom_app_bar_icon_color_detail">"पर लागू होगा: निचले नेवीगेशन बार के आइकन्स"</string>
     <string name="theme_item_post_icon_and_info_color">"पोस्ट आइकन एवं सूचना रंग "</string>
     <string name="theme_item_post_icon_and_info_color_detail">"पर लागू होगा: आइकन्स, अंक एवं पोस्ट में टिप्पणियों की संख्या "</string>
     <string name="theme_item_comment_icon_and_info_color">"टिप्पणी आइकन एवं सूचना रंग "</string>
@@ -1692,7 +1674,6 @@
     <string name="content_description_video_indicator">"वीडियो संकेतक"</string>
     <string name="content_description_no_subscriptions_indicator">"कोई सदस्यता संकेतक नहीं"</string>
     <string name="content_description_create_multireddit">"मल्टीरैडिट बनाएँ"</string>
-    <string name="content_description_bottom_navigation_bar_button">"निचला नेविगेशन बार बटन"</string>
     <string name="content_description_fab">"तैरता क्रिया बटन"</string>
     <string name="content_description_download">"डाउनलोड"</string>
     <string name="content_description_share">"दूसरो को भेजे"</string>

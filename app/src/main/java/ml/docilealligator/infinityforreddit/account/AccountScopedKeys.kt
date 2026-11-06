@@ -66,10 +66,8 @@ object AccountScopedKeys {
         "number_of_columns_in_post_feed_portrait_gallery_layout",
         "number_of_columns_in_post_feed_landscape_gallery_layout",
 
-        // Interface. The bottom app bar toggle belongs with the bar itself, which is a whole
-        // per-account file: without it here an account could arrange its own bar and then have
-        // another account switch the bar off for everyone.
-        "bottom_app_bar",
+        // Interface.
+        "main_activity_fab_action", "other_activities_fab_action",
         "hide_fab_in_post_feed", "hide_subreddit_banner", "hide_subreddit_icon", "hide_subreddit_description",
         "default_search_result_tab",
         "lazy_mode_interval", "shadowbox_hide_text_and_previewless_posts",
@@ -104,7 +102,7 @@ object AccountScopedKeys {
         "start_autoplay_visible_area_offset_landscape",
 
         // Gestures and buttons
-        "swipe_to_go_back_from_post_detail", "lock_toolbar", "lock_bottom_app_bar",
+        "swipe_to_go_back_from_post_detail", "lock_toolbar",
         "pull_to_refresh",
         "swipe_between_posts", "tab_switching_sensitivity", "swipe_right_to_go_back_sensitivity",
         "swipe_action_sensitivity_in_comments", "navigation_drawer_swipe_area",

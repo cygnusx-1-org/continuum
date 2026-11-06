@@ -239,12 +239,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
 
                         binding.viewPagerThemePreviewActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
 
-                        binding.linearLayoutBottomAppBarThemePreviewActivity.setPadding(
-                                binding.linearLayoutBottomAppBarThemePreviewActivity.getPaddingLeft(),
-                                binding.linearLayoutBottomAppBarThemePreviewActivity.getPaddingTop(),
-                                binding.linearLayoutBottomAppBarThemePreviewActivity.getPaddingRight(),
-                                allInsets.bottom
-                        );
 
                         setMargins(binding.toolbar,
                                 allInsets.left,
@@ -267,8 +261,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabThemePreviewActivity.getLayoutParams();
                         params.bottomMargin = navBarHeight;
                         binding.fabThemePreviewActivity.setLayoutParams(params);
-                        binding.linearLayoutBottomAppBarThemePreviewActivity.setPadding(0,
-                                (int) Utils.convertDpToPixel(6, this), 0, navBarHeight);
                     }
                 }*/
             }
@@ -398,12 +390,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         binding.subscribeSubredditChipThemePreviewActivity.setTextColor(customTheme.chipTextColor);
         binding.primaryTextTextViewThemePreviewActivity.setTextColor(customTheme.primaryTextColor);
         binding.secondaryTextTextViewThemePreviewActivity.setTextColor(customTheme.secondaryTextColor);
-        binding.bottomNavigationThemePreviewActivity.setBackgroundTint(ColorStateList.valueOf(customTheme.bottomAppBarBackgroundColor));
-        int bottomAppBarIconColor = customTheme.bottomAppBarIconColor;
-        binding.subscriptionsBottomAppBarThemePreviewActivity.setColorFilter(bottomAppBarIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-        binding.multiRedditBottomAppBarThemePreviewActivity.setColorFilter(bottomAppBarIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-        binding.messageBottomAppBarThemePreviewActivity.setColorFilter(bottomAppBarIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
-        binding.profileBottomAppBarThemePreviewActivity.setColorFilter(bottomAppBarIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
         applyTabLayoutTheme(binding.tabLayoutThemePreviewActivity);
         applyFABTheme(binding.fabThemePreviewActivity);
         unsubscribedColor = customTheme.unsubscribed;

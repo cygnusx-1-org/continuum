@@ -195,13 +195,13 @@ class AccountSettingsTest {
     @Test
     fun `a copy carries the bottom app bar`() {
         bottomAppBar.edit()
-            .putInt(key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), 9)
+            .putInt(key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), 9)
             .commit()
 
         AccountSettings.copyBetweenAccounts(context, database, "alice", "bob")
 
         assertEquals(9, bottomAppBar.getInt(
-            key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), 0))
+            key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), 0))
     }
 
     @Test
@@ -253,7 +253,7 @@ class AccountSettingsTest {
             .putString(key("alice", SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER), "[alice's tabs]")
             .commit()
         bottomAppBar.edit()
-            .putInt(key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), 9)
+            .putInt(key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), 9)
             .commit()
 
         AccountSettings.reset(context, database, "alice")
@@ -265,7 +265,7 @@ class AccountSettingsTest {
         assertFalse("a default tab set always loads, so there is no reason to keep the old one",
             mainPageTabs.contains(key("alice", SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER)))
         assertFalse(bottomAppBar.contains(
-            key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1)))
+            key("alice", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB)))
     }
 
     @Test
