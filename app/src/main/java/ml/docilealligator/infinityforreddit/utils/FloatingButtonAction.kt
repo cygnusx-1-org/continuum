@@ -10,18 +10,16 @@ import android.content.SharedPreferences
  * new key is looked at first and the old file only when it has none.
  */
 object FloatingButtonAction {
-    const val MAIN_ACTIVITY_KEY = "main_activity_fab_action"
-    const val OTHER_ACTIVITIES_KEY = "other_activities_fab_action"
 
     /** One of the `MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_*` values. */
     @JvmStatic
     fun mainActivity(current: SharedPreferences, legacy: SharedPreferences): Int =
-        read(current, legacy, MAIN_ACTIVITY_KEY, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB)
+        read(current, legacy, SharedPreferencesUtils.MAIN_ACTIVITY_FAB_ACTION, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB)
 
     /** One of the `OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_*` values. */
     @JvmStatic
     fun otherActivities(current: SharedPreferences, legacy: SharedPreferences): Int =
-        read(current, legacy, OTHER_ACTIVITIES_KEY, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB)
+        read(current, legacy, SharedPreferencesUtils.OTHER_ACTIVITIES_FAB_ACTION, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB)
 
     private fun read(current: SharedPreferences, legacy: SharedPreferences, key: String, legacyKey: String): Int =
         current.getString(key, null)?.toIntOrNull()

@@ -48,6 +48,8 @@ public class SharedPreferencesUtils {
     public static final String CUSTOM_FONT_FAMILY_KEY = "custom_font_family";
     public static final String CUSTOM_TITLE_FONT_FAMILY_KEY = "custom_title_font_family";
     public static final String CUSTOM_CONTENT_FONT_FAMILY_KEY = "custom_content_font_family";
+    public static final String MAIN_ACTIVITY_FAB_ACTION = "main_activity_fab_action";
+    public static final String OTHER_ACTIVITIES_FAB_ACTION = "other_activities_fab_action";
     public static final String HIDE_FAB_IN_POST_FEED = "hide_fab_in_post_feed";
     public static final String FORCE_MAX_REFRESH_RATE_KEY = "force_max_refresh_rate";
 
