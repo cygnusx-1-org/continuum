@@ -155,7 +155,7 @@ class BackupSettingsTest {
         // backup would hold whatever the signed-in account had and nothing of anyone else's.
         sortType.edit().putString(key("alice", "sort_type_best_post"), "top").commit()
         bottomAppBar.edit()
-            .putInt(key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), 9)
+            .putInt(key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), 9)
             .commit()
 
         val zip = backUp()
@@ -163,7 +163,7 @@ class BackupSettingsTest {
         assertEquals("top", backedUpFile(zip, SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)[
             key("alice", "sort_type_best_post")])
         assertEquals(9, backedUpFile(zip, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)[
-            key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1)])
+            key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB)])
     }
 
     /** One backed up database table, read back out of the zip as the JSON it was written as. */

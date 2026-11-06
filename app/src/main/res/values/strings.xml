@@ -553,7 +553,6 @@
     <string name="settings_post_compact_thumbnail_size">Thumbnail size</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">Show Thumbnail on the Left</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">Show Thumbnail on the Right</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">Toggle Thumbnail Side</string>
     <string name="settings_number_of_columns_in_post_feed_title">The Number of Columns in Post Feed</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">Portrait</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">Landscape</string>
@@ -570,7 +569,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">Hide Text Posts and Posts with No Preview</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">Shadowbox Mode skips every text post, and any other post that has no preview image.</string>
     <string name="settings_font_title">Font</string>
-    <string name="settings_preview_font_title">Font Preview</string>
     <string name="settings_font_summary">Font</string>
     <string name="settings_title_font_summary">Title</string>
     <string name="settings_content_font_summary">Content</string>
@@ -688,10 +686,6 @@
     <string name="settings_require_authentication_to_show_accounts">Require Authentication to Show Accounts</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">Long Press to Hide Toolbar</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">Hide Toolbar by Default</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">Main Page</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">Other Pages</string>
-    <string name="settings_bottom_app_bar_option_count">Option Count</string>
-    <string name="settings_bottom_app_bar_fab">Floating Action Button</string>
     <string name="settings_data_saving_mode">Data Saving Mode</string>
     <string name="settings_data_saving_mode_info_summary">In data saving mode:\nPreview images are in lower resolution.\nReddit and Redgifs videos are in lower resolution.\nVideo autoplay is disabled.</string>
     <string name="settings_translation_title">Translation</string>
@@ -705,6 +699,12 @@
     <string name="settings_group_account_more">Account · More</string>
     <string name="settings_account_settings_management_title">Account Settings Management</string>
     <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, put this one back to defaults, or delete what it has accumulated</string>
+    <string name="settings_data_saving_and_downloads_title">Data saving and downloads</string>
+    <string name="settings_data_saving_and_downloads_summary">Data saving mode, lower video resolutions, and where images, GIFs and videos are saved</string>
+    <string name="settings_notifications_and_proxy_title">Notifications and proxy</string>
+    <string name="settings_notifications_and_proxy_summary">Inbox notifications and how often they are checked, and an HTTP or SOCKS proxy for the app</string>
+    <string name="settings_main_activity_fab_action_title">Floating Button on the Main Page</string>
+    <string name="settings_other_activities_fab_action_title">Floating Button on Other Pages</string>
     <string name="settings_group_other">Other</string>
     <string name="settings_copy_settings_from_account_title">Copy Settings from Another Account</string>
     <string name="settings_copy_settings_from_account_summary">Give this account the settings another one has</string>
@@ -831,12 +831,14 @@
     <string name="settings_navigation_drawer_title">Navigation Drawer</string>
     <string name="settings_collapse_account_section_title">Collapse Account Section</string>
     <string name="settings_collapse_reddit_section_title">Collapse Reddit Section</string>
+    <string name="settings_drawer_recents_section_title">Recents Section</string>
+    <string name="settings_drawer_favorites_section_title">Favorite Subreddits Section</string>
+    <string name="settings_drawer_subscribed_section_title">Subscribed Subreddits Section</string>
+    <string name="settings_drawer_section_shown">Shown</string>
+    <string name="settings_drawer_section_collapsed">Collapsed</string>
+    <string name="settings_drawer_section_hidden">Hidden</string>
     <string name="settings_collapse_post_section_title">Collapse Post Section</string>
     <string name="settings_collapse_preferences_section_title">Collapse Preferences Section</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">Collapse Favorite Subreddits Section</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">Collapse Subscribed Subreddits Section</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">Hide Favorite Subreddits Section</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">Hide Subscribed Subreddits Section</string>
     <string name="settings_quick_toggles_title">Quick Toggles</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">Show Theme Toggle</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">Show NSFW Toggle</string>
@@ -909,20 +911,16 @@
     <string name="settings_proxy_port">Port</string>
 
     <!-- Settings section summaries -->
-    <string name="settings_notification_master_summary">Enable push notifications and set how often they are checked</string>
     <string name="settings_interface_summary">Display options, search, time format, immersive mode, refresh rate and other toggles that fit nowhere else</string>
     <string name="settings_theme_summary">Light, dark, and AMOLED themes, Material You, and custom theme colors</string>
     <string name="settings_video_summary">Autoplay, muting, playback speed, default resolution, and fullscreen behavior</string>
     <string name="settings_gestures_and_buttons_summary">Swipe gestures, volume key navigation, long-press actions, and gesture sensitivity</string>
     <string name="settings_security_summary">App lock, biometric or PIN, secure mode, and authentication to show accounts</string>
-    <string name="settings_data_saving_mode_summary">Disable image previews and lower video resolution to use less data</string>
-    <string name="settings_proxy_summary">Route Reddit traffic through an HTTP or SOCKS proxy</string>
     <string name="settings_post_history_summary">Mark posts as read, limit read post history, and hide read posts</string>
     <string name="settings_over_18_and_spoiler_summary">Show or blur NSFW content and blur spoilers</string>
     <string name="settings_post_filter_summary">Create and manage filters that hide posts</string>
     <string name="settings_comment_filter_summary">Create and manage filters that hide comments</string>
     <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
-    <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
     <string name="settings_miscellaneous_summary">Link handling, browser, search history, and language</string>
 
     <!-- API keys-->
@@ -1003,12 +1001,10 @@
 
     <string name="favorites">Favorites</string>
     <string name="recents">Recents</string>
-    <string name="settings_collapse_recent_subreddits_section_title">Collapse Recents Section</string>
     <string name="settings_recent_subreddits_limit_title">Number of Recents</string>
     <string name="recents_pin">Pin</string>
     <string name="recents_unpin">Unpin</string>
     <string name="recents_dismiss">Remove from Recents</string>
-    <string name="settings_hide_recent_subreddits_section_title">Hide Recents Section</string>
     <string name="all">All</string>
 
     <string name="link_post_layout_auto">Auto</string>
@@ -1978,7 +1974,6 @@
     <string name="content_description_video_indicator">Video indicator</string>
     <string name="content_description_no_subscriptions_indicator">No subscriptions indicator</string>
     <string name="content_description_create_multireddit">Create multireddit</string>
-    <string name="content_description_bottom_navigation_bar_button">Bottom navigation bar button</string>
     <string name="content_description_fab">Floating action button</string>
     <string name="content_description_download">Download</string>
     <string name="content_description_share">Share</string>

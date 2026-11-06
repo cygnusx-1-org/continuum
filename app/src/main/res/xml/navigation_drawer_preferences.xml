@@ -26,15 +26,13 @@
         app:key="collapse_preferences_section"
         app:title="@string/settings_collapse_preferences_section_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_recent_subreddits_section"
-        app:title="@string/settings_collapse_recent_subreddits_section_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="hide_recent_subreddits_section"
-        app:title="@string/settings_hide_recent_subreddits_section_title" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="shown"
+        app:entries="@array/settings_drawer_section_state"
+        app:entryValues="@array/settings_drawer_section_state_values"
+        app:key="recent_subreddits_section"
+        app:title="@string/settings_drawer_recents_section_title"
+        app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="5"
@@ -44,25 +42,21 @@
         app:title="@string/settings_recent_subreddits_limit_title"
         app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_favorite_subreddits_section"
-        app:title="@string/settings_collapse_favorite_subreddits_section_title" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="shown"
+        app:entries="@array/settings_drawer_section_state"
+        app:entryValues="@array/settings_drawer_section_state_values"
+        app:key="favorite_subreddits_section"
+        app:title="@string/settings_drawer_favorites_section_title"
+        app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_subscribed_subreddits_section"
-        app:title="@string/settings_collapse_subscribed_subreddits_section_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="hide_favorite_subreddits_sections"
-        app:title="@string/settings_hide_favorite_subreddits_sections_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="hide_subscribed_subreddits_sections"
-        app:title="@string/settings_hide_subscribed_subreddits_sections_title" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="shown"
+        app:entries="@array/settings_drawer_section_state"
+        app:entryValues="@array/settings_drawer_section_state_values"
+        app:key="subscribed_subreddits_section"
+        app:title="@string/settings_drawer_subscribed_section_title"
+        app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"

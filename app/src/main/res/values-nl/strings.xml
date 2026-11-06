@@ -485,7 +485,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_post_compact_thumbnail_size">"Miniatuurgrootte"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Miniatuur tonen aan linkerkant in compacte indeling"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatuur aan de rechterkant weergeven"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Miniatuurzijde schakelen"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Het Aantal Kolommen in de Postfeed"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Landschap"</string>
@@ -502,7 +501,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Tekstberichten en berichten zonder voorbeeld verbergen"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox-modus slaat elk tekstbericht over, en elk ander bericht dat geen voorbeeldafbeelding heeft."</string>
     <string name="settings_font_title">"Lettertype"</string>
-    <string name="settings_preview_font_title">"Voorvertoning"</string>
     <string name="settings_font_summary">"Lettertype"</string>
     <string name="settings_title_font_summary">"Titel"</string>
     <string name="settings_content_font_summary">"Inhoud"</string>
@@ -622,10 +620,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_require_authentication_to_show_accounts">"Authenticatie vereisen om accounts te tonen"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Druk lang in om werkbalk in compacte layout te verbergen"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Werkbalk in compacte layout standaard verborgen"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Hoofdpagina"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Pagina's"</string>
-    <string name="settings_bottom_app_bar_option_count">"Aantal Opties"</string>
-    <string name="settings_bottom_app_bar_fab">"Zwevende actieknop"</string>
     <string name="settings_data_saving_mode">"Databesparingsmodus"</string>
     <string name="settings_data_saving_mode_info_summary">"In gegevensbesparingsmodus:
 Voorbeeldafbeeldingen hebben een lagere resolutie.
@@ -725,10 +719,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_collapse_reddit_section_title">"Samenvouwen Reddit Sectie"</string>
     <string name="settings_collapse_post_section_title">"Postsectie samenvouwen"</string>
     <string name="settings_collapse_preferences_section_title">"Sectie Voorkeuren samenvouwen"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Sectie Favoriete subreddits samenvouwen"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Sectie Geabonneerde subreddits samenvouwen"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Verberg favoriete subreddits sectie"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Verberg geaboneerde subreddits sectie"</string>
     <string name="settings_quick_toggles_title">"Snelle schakelaars"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Themaschakelaar weergeven"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Tonen NSFW Wisselen"</string>
@@ -799,19 +789,15 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_proxy_type">"Proxytype"</string>
     <string name="settings_proxy_hostname">"Hostnaam"</string>
     <string name="settings_proxy_port">"Poort"</string>
-    <string name="settings_notification_master_summary">"Schakel pushmeldingen in en stel in hoe vaak deze worden gecontroleerd"</string>
     <string name="settings_theme_summary">"Lichte, donkere en AMOLED thema's, Material You en aangepaste themakleuren"</string>
     <string name="settings_video_summary">"Automatisch afspelen, dempen, afspeelsnelheid, standaardresolutie en gedrag op volledig scherm"</string>
     <string name="settings_gestures_and_buttons_summary">"Veeggebaren, volumetoetsnavigatie, lang indrukken en gebarengevoeligheid"</string>
     <string name="settings_security_summary">"App-vergrendeling, biometrisch of pincode, beveiligde modus en authenticatie om accounts te tonen"</string>
-    <string name="settings_data_saving_mode_summary">"Schakel afbeeldingsvoorbeelden uit en verlaag de videoresolutie om minder gegevens te gebruiken"</string>
-    <string name="settings_proxy_summary">"Routeer Reddit verkeer via een HTTP of SOCKS proxy"</string>
     <string name="settings_post_history_summary">"Markeer berichten als gelezen, beperk de geschiedenis van leesberichten en verberg gelezen berichten"</string>
     <string name="settings_over_18_and_spoiler_summary">"Toon of vervaag NSFW inhoud en vervaag spoilers"</string>
     <string name="settings_post_filter_summary">"Maak en beheer filters die berichten verbergen"</string>
     <string name="settings_comment_filter_summary">"Maak en beheer filters die opmerkingen verbergen"</string>
     <string name="settings_sort_type_summary">"Standaard sorteertype en tijdbereik voor subreddits, gebruikers en opmerkingen"</string>
-    <string name="settings_download_location_summary">"Kies mappen voor gedownloade afbeeldingen, GIF's, video's en NSFW media"</string>
     <string name="settings_miscellaneous_summary">"Linkverwerking, browser, zoekgeschiedenis en taal"</string>
     <string name="settings_api_keys_title">"API-sleutels"</string>
     <string name="settings_api_keys_summary">"Je eigen API-sleutels invoeren, inclusief je client-ID"</string>
@@ -1694,7 +1680,6 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="content_description_video_indicator">"Video-indicator"</string>
     <string name="content_description_no_subscriptions_indicator">"Geen abonnementsindicator"</string>
     <string name="content_description_create_multireddit">"MultiReddit aanmaken"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Knop op de navigatiebalk onderaan"</string>
     <string name="content_description_fab">"Zwevende actieknop"</string>
     <string name="content_description_download">"Downloaden"</string>
     <string name="content_description_share">"Delen"</string>

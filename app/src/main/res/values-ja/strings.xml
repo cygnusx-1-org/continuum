@@ -488,7 +488,6 @@
     <string name="settings_post_compact_thumbnail_size">"サムネイルのサイズ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"コンパクトレイアウトでサムネイルを左側に表示"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"右側にサムネイルを表示"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"サムネイルの横を切り替え"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"投稿フィードの表示列数"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"縦画面時"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"横画面時"</string>
@@ -505,7 +504,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"テキスト投稿とプレビューなしの投稿を非表示にする"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"シャドウボックス モードでは、すべてのテキスト投稿と、プレビュー画像のないその他の投稿がスキップされます。"</string>
     <string name="settings_font_title">"フォント"</string>
-    <string name="settings_preview_font_title">"フォントのプレビュー"</string>
     <string name="settings_font_summary">"フォント"</string>
     <string name="settings_title_font_summary">"タイトル"</string>
     <string name="settings_content_font_summary">"内容"</string>
@@ -625,10 +623,6 @@
     <string name="settings_require_authentication_to_show_accounts">"アカウントを表示するためには認証が必要です"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"コンパクトレイアウトのツールバーを長押しで非表示"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"コンパクトレイアウトのツールバーを標準で非表示"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"メインページ"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"他のページ"</string>
-    <string name="settings_bottom_app_bar_option_count">"ボタン数"</string>
-    <string name="settings_bottom_app_bar_fab">"アクションボタン"</string>
     <string name="settings_data_saving_mode">"データ節約モード"</string>
     <string name="settings_data_saving_mode_info_summary">"データ節約モード:\nプレビュー画像は低解像度です。\nReddit および Redgifs ビデオは低解像度です。\nビデオの自動再生は無効です。"</string>
     <string name="settings_translation_title">"翻訳"</string>
@@ -725,10 +719,6 @@
     <string name="settings_collapse_reddit_section_title">"「Reddit」セクションを折り畳む"</string>
     <string name="settings_collapse_post_section_title">"「投稿」セクションを折り畳む"</string>
     <string name="settings_collapse_preferences_section_title">"「環境設定」セクションを折り畳む"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"「お気に入りのSubreddit」セクションを折り畳む"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"「登録済みSubreddit」セクションを折り畳む"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"お気に入りの Subreddits セクションを非表示にする"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"購読済みの Subreddits セクションを非表示にする"</string>
     <string name="settings_quick_toggles_title">"クイックトグル"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"テーマの切り替えを表示"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"表示 NSFW トグル"</string>
@@ -799,19 +789,15 @@
     <string name="settings_proxy_type">"プロキシ タイプ"</string>
     <string name="settings_proxy_hostname">"ホスト名"</string>
     <string name="settings_proxy_port">"ポート"</string>
-    <string name="settings_notification_master_summary">"プッシュ通知を有効にし、プッシュ通知をチェックする頻度を設定します"</string>
     <string name="settings_theme_summary">"ライト、ダーク、AMOLED テーマ、Material You、およびカスタム テーマ カラー"</string>
     <string name="settings_video_summary">"自動再生、ミュート、再生速度、デフォルトの解像度、および全画面動作"</string>
     <string name="settings_gestures_and_buttons_summary">"スワイプ ジェスチャ、音量キー ナビゲーション、長押しアクション、およびジェスチャの感度"</string>
     <string name="settings_security_summary">"アプリ ロック、生体認証または PIN、セキュア モード、およびアカウントを表示するための認証"</string>
-    <string name="settings_data_saving_mode_summary">"画像プレビューを無効にし、ビデオ解像度を下げてデータ使用量を減らします"</string>
-    <string name="settings_proxy_summary">"Reddit トラフィックを HTTP または SOCKS プロキシ経由でルーティングします"</string>
     <string name="settings_post_history_summary">"投稿を既読としてマークし、既読の投稿履歴を制限し、既読の投稿を非表示にする"</string>
     <string name="settings_over_18_and_spoiler_summary">"NSFW コンテンツを表示またはぼかし、ネタバレをぼかします"</string>
     <string name="settings_post_filter_summary">"投稿を非表示にするフィルターを作成および管理する"</string>
     <string name="settings_comment_filter_summary">"コメントを非表示にするフィルターを作成および管理する"</string>
     <string name="settings_sort_type_summary">"サブレディット、ユーザー、コメントのデフォルトの並べ替えタイプと時間範囲"</string>
-    <string name="settings_download_location_summary">"ダウンロードした画像、GIF、ビデオ、および NSFW メディアのフォルダーを選択してください"</string>
     <string name="settings_miscellaneous_summary">"リンクの処理、ブラウザ、検索履歴、言語"</string>
     <string name="settings_api_keys_title">"API キー"</string>
     <string name="settings_api_keys_summary">"クライアント ID を含む独自の API キーを入力してください"</string>
@@ -1691,7 +1677,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_video_indicator">"ビデオインジケーター"</string>
     <string name="content_description_no_subscriptions_indicator">"サブスクリプションインジケーターがありません"</string>
     <string name="content_description_create_multireddit">"MultiReddit を作成"</string>
-    <string name="content_description_bottom_navigation_bar_button">"下部ナビゲーション バー ボタン"</string>
     <string name="content_description_fab">"アクションボタン"</string>
     <string name="content_description_download">"ダウンロード"</string>
     <string name="content_description_share">"共有"</string>

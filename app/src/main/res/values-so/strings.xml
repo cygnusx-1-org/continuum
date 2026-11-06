@@ -479,7 +479,6 @@
     <string name="settings_post_compact_thumbnail_size">"cabbirka sawirka thumbnail"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Muuji thumbnail dhinaca bidix"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Muuji thumbnail dhinaca midig"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"Beddel Dhinaca Tumbnailka"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"Tirada Tiirarka ku jira Quudinta Boostada"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"Sawirka"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"Muuqaalka muuqaalka"</string>
@@ -496,7 +495,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Qari Qoraallada iyo Qoraallada aan Horudhac lahayn"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Qaabka Shadowbox wuxuu ka boodaa qoraal kasta iyo qoraal kasta oo kale oo aan lahayn muuqaal horudhac ah."</string>
     <string name="settings_font_title">"Farta"</string>
-    <string name="settings_preview_font_title">"Font Horudhac"</string>
     <string name="settings_font_summary">"Farta"</string>
     <string name="settings_title_font_summary">"Ciwaanka"</string>
     <string name="settings_content_font_summary">"Nuxurka"</string>
@@ -612,10 +610,6 @@
     <string name="settings_require_authentication_to_show_accounts">"waxay u baahan tahay xaqiijin si loo muujiyo xisaabaadka"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"Riix dheer si aad u qariso Toolbar"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"Qari Toolbar sida ugu talagalka ah"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"Bogga ugu muhiimsan"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"Bogagga kale"</string>
-    <string name="settings_bottom_app_bar_option_count">"Tirada Doorashada"</string>
-    <string name="settings_bottom_app_bar_fab">"Badhanka Ficil Sabaynta"</string>
     <string name="settings_data_saving_mode">"Habka Keydinta Xogta"</string>
     <string name="settings_data_saving_mode_info_summary">"Habka kaydinta xogta:\nSawirada horudhaca ayaa xalin hoose ku jira.\nReddit iyo Redgifs fiidyowyo ayaa xalin hoose ku jira.\nFiidiyow-ku-ciyaarid toos ah waa naafo"</string>
     <string name="settings_translation_title">"Turjumaada"</string>
@@ -712,10 +706,6 @@
     <string name="settings_collapse_reddit_section_title">"Burbur Reddit Qaybta"</string>
     <string name="settings_collapse_post_section_title">"Burburka Qaybta Boostada"</string>
     <string name="settings_collapse_preferences_section_title">"Burburka Dookhyada Qaybta"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Burburka Qaybta hoosaadyada la jecel yahay"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Burburka Qaybta Subreddits-ka ee la rukumo"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Qari Qaybta Hoosaadka ee Jecel"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Qari Qaybta Subreddits-ka ee la rukumo"</string>
     <string name="settings_quick_toggles_title">"Toggles degdeg ah"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Tus Mawduuca beddelka"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Show NSFW Beddel"</string>
@@ -786,19 +776,15 @@
     <string name="settings_proxy_type">"Nooca Wakiil"</string>
     <string name="settings_proxy_hostname">"Magaca martida loo yahay"</string>
     <string name="settings_proxy_port">"Dekedda"</string>
-    <string name="settings_notification_master_summary">"Daree ogeysiisyada riixitaanka oo deji inta jeer ee la hubiyo"</string>
     <string name="settings_theme_summary">"Mawduucyo iftiin, madow iyo AMOLED ah, Material You iyo midabbo mawduuc gaar ah"</string>
     <string name="settings_video_summary">"Autoplay, aamusin, xawaaraha dib-u-ciyaarista, xallinta caadiga ah, iyo dhaqanka shaashada buuxda"</string>
     <string name="settings_gestures_and_buttons_summary">"Dhaqdhaqaaqa dhaqdhaqaajinta, hagitaan mugga mugga, ficillada saxaafadda dheer, iyo dareenka tilmaanta"</string>
     <string name="settings_security_summary">"App quful, biometric ama PIN, hab sugan, iyo xaqiijin si loo muujiyo akoonnada"</string>
-    <string name="settings_data_saving_mode_summary">"Jooji sawirada horudhacyada iyo xallinta fiidyaha hoose si aad u isticmaasho xog yar"</string>
-    <string name="settings_proxy_summary">"Jidka Reddit taraafikada dhex mara HTTP ama SOCKS wakiil"</string>
     <string name="settings_post_history_summary">"Calaamadee qoraallada sida loo akhriyay, xaddid akhrinta taariikhda boostada, oo qari qoraallada akhrinta"</string>
     <string name="settings_over_18_and_spoiler_summary">"Muuji ama blur NSFW nuxurka iyo kharribayaasha blur"</string>
     <string name="settings_post_filter_summary">"Abuur oo maamul filtarrada qariya qoraallada"</string>
     <string name="settings_comment_filter_summary">"Abuur oo maamul filtarrada qarinaya faallooyinka"</string>
     <string name="settings_sort_type_summary">"Nooca caadiga ah iyo wakhtiga kala duwan ee wax-ka-beddelka, isticmaalayaasha, iyo faallooyinka"</string>
-    <string name="settings_download_location_summary">"Dooro galka sawirada la soo dejiyay, GIF-yada, fiidyaha, iyo NSFW warbaahinta"</string>
     <string name="settings_miscellaneous_summary">"isku xidhka la tacaalidda, browserka, taariikhda goobidda, iyo luqadda"</string>
     <string name="settings_api_keys_title">"Furayaasha API"</string>
     <string name="settings_api_keys_summary">"Geli furayaashaada API, oo uu ku jiro aqoonsigaaga macmiilka"</string>
@@ -1676,7 +1662,6 @@
     <string name="content_description_video_indicator">"Tusiyaha Fiidiyowga"</string>
     <string name="content_description_no_subscriptions_indicator">"Ma jiro tilmaame is-diiwaangelin"</string>
     <string name="content_description_create_multireddit">"Samee Reddit-badane"</string>
-    <string name="content_description_bottom_navigation_bar_button">"Bottom bar navigation button"</string>
     <string name="content_description_fab">"badhanka ficil sabaynta"</string>
     <string name="content_description_download">"Daji"</string>
     <string name="content_description_share">"La wadaag"</string>

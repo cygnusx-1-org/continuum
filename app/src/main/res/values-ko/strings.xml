@@ -489,7 +489,6 @@
     <string name="settings_post_compact_thumbnail_size">"썸네일 크기"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"썸네일 좌측으로 표시"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"오른쪽에 썸네일 표시"</string>
-    <string name="bottom_app_bar_option_toggle_thumbnail_side">"썸네일 측면 전환"</string>
     <string name="settings_number_of_columns_in_post_feed_title">"포스트 피드의 열 수"</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">"초상화"</string>
     <string name="settings_number_of_columns_in_post_feed_landscape_title">"풍경"</string>
@@ -506,7 +505,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"미리보기 없이 텍스트 게시물 및 게시물 숨기기"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"섀도우박스 모드는 모든 텍스트 게시물과 미리보기 이미지가 없는 기타 게시물을 건너뜁니다."</string>
     <string name="settings_font_title">"폰트"</string>
-    <string name="settings_preview_font_title">"폰트 미리보기"</string>
     <string name="settings_font_summary">"폰트"</string>
     <string name="settings_title_font_summary">"제목"</string>
     <string name="settings_content_font_summary">"콘텐츠"</string>
@@ -622,10 +620,6 @@
     <string name="settings_require_authentication_to_show_accounts">"계정을 표시하려면 인증이 필요합니다."</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"길게 눌러 도구 모음 숨기기"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"기본적으로 도구 모음 숨기기"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"메인 페이지"</string>
-    <string name="settings_other_activities_bottom_app_bar_group_summary">"기타 페이지"</string>
-    <string name="settings_bottom_app_bar_option_count">"옵션 수"</string>
-    <string name="settings_bottom_app_bar_fab">"플로팅 작업 버튼"</string>
     <string name="settings_data_saving_mode">"데이터 절약 모드"</string>
     <string name="settings_data_saving_mode_info_summary">"데이터 절약 모드:\n미리보기 이미지의 해상도가 낮습니다.\nReddit 및 Redgifs 동영상의 해상도가 낮습니다.\n동영상 자동 재생이 비활성화됩니다."</string>
     <string name="settings_translation_title">"번역"</string>
@@ -722,10 +716,6 @@
     <string name="settings_collapse_reddit_section_title">"축소 Reddit 섹션"</string>
     <string name="settings_collapse_post_section_title">"포스트 섹션 축소"</string>
     <string name="settings_collapse_preferences_section_title">"기본 설정 섹션 축소"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"즐겨찾는 하위 레딧 섹션 축소"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"구독한 하위 레딧 섹션 접기"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"즐겨찾는 하위 레딧 섹션 숨기기"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"구독한 하위 레딧 섹션 숨기기"</string>
     <string name="settings_quick_toggles_title">"퀵 토글"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"표시 테마 토글"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"쇼 NSFW 토글"</string>
@@ -796,19 +786,15 @@
     <string name="settings_proxy_type">"프록시 유형"</string>
     <string name="settings_proxy_hostname">"호스트 이름"</string>
     <string name="settings_proxy_port">"포트"</string>
-    <string name="settings_notification_master_summary">"푸시 알림을 활성화하고 확인 빈도를 설정합니다."</string>
     <string name="settings_theme_summary">"밝음, 어두움 및 AMOLED 테마, Material You 및 사용자 정의 테마 색상"</string>
     <string name="settings_video_summary">"자동 재생, 음소거, 재생 속도, 기본 해상도 및 전체 화면 동작"</string>
     <string name="settings_gestures_and_buttons_summary">"스와이프 동작, 볼륨 키 탐색, 길게 누르기 동작 및 동작 감도"</string>
     <string name="settings_security_summary">"앱 잠금, 생체 인식 또는 PIN, 보안 모드 및 계정 표시를 위한 인증"</string>
-    <string name="settings_data_saving_mode_summary">"이미지 미리보기를 비활성화하고 비디오 해상도를 낮추어 데이터 사용량을 줄입니다."</string>
-    <string name="settings_proxy_summary">"HTTP 또는 SOCKS 프록시를 통해 Reddit 트래픽 라우팅"</string>
     <string name="settings_post_history_summary">"게시물을 읽음으로 표시하고, 읽은 게시물 기록을 제한하고, 읽은 게시물을 숨깁니다."</string>
     <string name="settings_over_18_and_spoiler_summary">"NSFW 콘텐츠를 표시하거나 흐리게 처리하고 스포일러를 흐리게 처리합니다"</string>
     <string name="settings_post_filter_summary">"게시물을 숨기는 필터 생성 및 관리"</string>
     <string name="settings_comment_filter_summary">"댓글을 숨기는 필터 생성 및 관리"</string>
     <string name="settings_sort_type_summary">"하위 레딧, 사용자 및 댓글에 대한 기본 정렬 유형 및 시간 범위"</string>
-    <string name="settings_download_location_summary">"다운로드한 이미지, GIF, 비디오 및 NSFW 미디어용 폴더를 선택하세요."</string>
     <string name="settings_miscellaneous_summary">"링크 처리, 브라우저, 검색 기록 및 언어"</string>
     <string name="settings_api_keys_title">"API 키"</string>
     <string name="settings_api_keys_summary">"클라이언트 ID를 포함하여 자신만의 API 키를 입력하세요."</string>
@@ -1684,7 +1670,6 @@
     <string name="content_description_video_indicator">"비디오 표시기"</string>
     <string name="content_description_no_subscriptions_indicator">"구독 표시 없음"</string>
     <string name="content_description_create_multireddit">"MultiReddit 생성"</string>
-    <string name="content_description_bottom_navigation_bar_button">"하단 탐색 모음 버튼"</string>
     <string name="content_description_fab">"플로팅 작업 버튼"</string>
     <string name="content_description_download">"다운로드"</string>
     <string name="content_description_share">"공유"</string>

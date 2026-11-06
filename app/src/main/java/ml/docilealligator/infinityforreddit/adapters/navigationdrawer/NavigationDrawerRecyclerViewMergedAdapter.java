@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.List;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits;
@@ -21,8 +22,8 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
     private final PostSectionRecyclerViewAdapter postSectionRecyclerViewAdapter;
     private final PreferenceSectionRecyclerViewAdapter preferenceSectionRecyclerViewAdapter;
     private final RecentSubredditsSectionRecyclerViewAdapter recentSubredditsSectionRecyclerViewAdapter;
-    private final FavoriteSubscribedSubredditsSectionRecyclerViewAdapter favoriteSubscribedSubredditsSectionRecyclerViewAdapter;
-    private final SubscribedSubredditsRecyclerViewAdapter subscribedSubredditsRecyclerViewAdapter;
+    private final SubredditListSectionRecyclerViewAdapter favoriteSubredditsSectionRecyclerViewAdapter;
+    private final SubredditListSectionRecyclerViewAdapter subscribedSubredditsRecyclerViewAdapter;
     private final AccountManagementSectionRecyclerViewAdapter accountManagementSectionRecyclerViewAdapter;
     private final ConcatAdapter mainPageConcatAdapter;
 
@@ -59,10 +60,12 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 accountName, sharedPreferences, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
         recentSubredditsSectionRecyclerViewAdapter = new RecentSubredditsSectionRecyclerViewAdapter(
                 baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
-        favoriteSubscribedSubredditsSectionRecyclerViewAdapter = new FavoriteSubscribedSubredditsSectionRecyclerViewAdapter(
-                baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
-        subscribedSubredditsRecyclerViewAdapter = new SubscribedSubredditsRecyclerViewAdapter(baseActivity, glide,
-                customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
+        favoriteSubredditsSectionRecyclerViewAdapter = new SubredditListSectionRecyclerViewAdapter(
+                baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences,
+                DrawerSection.FAVORITES, R.string.favorites, itemClickListener);
+        subscribedSubredditsRecyclerViewAdapter = new SubredditListSectionRecyclerViewAdapter(
+                baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences,
+                DrawerSection.SUBSCRIBED, R.string.subscriptions, itemClickListener);
         accountManagementSectionRecyclerViewAdapter = new AccountManagementSectionRecyclerViewAdapter(baseActivity,
                 customThemeWrapper, glide, !accountName.equals(Account.ANONYMOUS_ACCOUNT), itemClickListener);
 
@@ -73,7 +76,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 postSectionRecyclerViewAdapter,
                 preferenceSectionRecyclerViewAdapter,
                 recentSubredditsSectionRecyclerViewAdapter,
-                favoriteSubscribedSubredditsSectionRecyclerViewAdapter,
+                favoriteSubredditsSectionRecyclerViewAdapter,
                 subscribedSubredditsRecyclerViewAdapter);
     }
 
@@ -87,7 +90,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         mainPageConcatAdapter.removeAdapter(postSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(preferenceSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(recentSubredditsSectionRecyclerViewAdapter);
-        mainPageConcatAdapter.removeAdapter(favoriteSubscribedSubredditsSectionRecyclerViewAdapter);
+        mainPageConcatAdapter.removeAdapter(favoriteSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(subscribedSubredditsRecyclerViewAdapter);
 
         mainPageConcatAdapter.addAdapter(accountManagementSectionRecyclerViewAdapter);
@@ -113,7 +116,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         mainPageConcatAdapter.addAdapter(postSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(preferenceSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(recentSubredditsSectionRecyclerViewAdapter);
-        mainPageConcatAdapter.addAdapter(favoriteSubscribedSubredditsSectionRecyclerViewAdapter);
+        mainPageConcatAdapter.addAdapter(favoriteSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(subscribedSubredditsRecyclerViewAdapter);
 
         if (refreshHeader) {
@@ -158,18 +161,18 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
     }
 
     public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
-        favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setFavoriteSubscribedSubreddits(favoriteSubscribedSubreddits);
+        favoriteSubredditsSectionRecyclerViewAdapter.setSubreddits(favoriteSubscribedSubreddits);
     }
 
     public void setSubscribedSubreddits(List<SubscribedSubredditData> subscribedSubreddits) {
-        subscribedSubredditsRecyclerViewAdapter.setSubscribedSubreddits(subscribedSubreddits);
+        subscribedSubredditsRecyclerViewAdapter.setSubreddits(subscribedSubreddits);
     }
 
     public void setHideKarma(boolean hideKarma) {
         headerSectionRecyclerViewAdapter.setHideKarma(hideKarma);
     }
 
-    // Re-reads the collapse/hide section settings and applies them live to each section,
+    // Re-reads the section settings and applies them live to each section,
     // so the navigation drawer updates without an app restart.
     public void refreshNavigationDrawerSections(SharedPreferences navigationDrawerSharedPreferences) {
         accountSectionRecyclerViewAdapter.setCollapseAccountSection(
@@ -180,18 +183,9 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_POST_SECTION, false));
         preferenceSectionRecyclerViewAdapter.setCollapsePreferencesSection(
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false));
-        recentSubredditsSectionRecyclerViewAdapter.setCollapseSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, false));
-        recentSubredditsSectionRecyclerViewAdapter.setHideSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION, false));
-        favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setCollapseFavoriteSubredditsSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION, false));
-        favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setHideFavoriteSubredditsSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION, false));
-        subscribedSubredditsRecyclerViewAdapter.setCollapseSubscribedSubredditsSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION, false));
-        subscribedSubredditsRecyclerViewAdapter.setHideSubscribedSubredditsSection(
-                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS, false));
+        recentSubredditsSectionRecyclerViewAdapter.setState(DrawerSection.RECENTS.read(navigationDrawerSharedPreferences));
+        favoriteSubredditsSectionRecyclerViewAdapter.setState(DrawerSection.FAVORITES.read(navigationDrawerSharedPreferences));
+        subscribedSubredditsRecyclerViewAdapter.setState(DrawerSection.SUBSCRIBED.read(navigationDrawerSharedPreferences));
         preferenceSectionRecyclerViewAdapter.refreshVisibleRows(navigationDrawerSharedPreferences);
     }
 
