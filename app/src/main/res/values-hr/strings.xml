@@ -553,7 +553,6 @@
     <string name="settings_enable_material_you_summary">"Personaliziraj Reddit Jr. na temelju svoje pozadine"</string>
     <string name="settings_apply_material_you_title">"Primijeni Material You"</string>
     <string name="settings_apply_material_you_summary">"U slučaju da Reddit Jr. nije promijenio temu"</string>
-    <string name="settings_global_settings_management_title">"Upravljanje globalnim postavkama"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Obriši sve podreddite u bazi podataka"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Obriši sve korisnike u bazi podataka"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Obriši sve vrste sortiranja u bazi podataka"</string>
@@ -712,8 +711,6 @@
     <string name="settings_hide_the_number_of_votes">"Sakrij broj glasanja"</string>
     <string name="settings_hide_the_number_of_comments">"Sakrij broj komentara"</string>
     <string name="settings_show_avatar_on_the_right">"Prikazi sliku Avatara sa lijeve strane"</string>
-    <string name="settings_category_backup_and_restore_title">"Sigurnosno kopiranje i vraćanje"</string>
-    <string name="settings_backup_and_restore_summary">"Spremi postavke svakog računa u šifriranu arhivu ili ih pročitaj"</string>
     <string name="settings_backup_settings_title">"Postavke sigurnosne kopije"</string>
     <string name="settings_restore_settings_title">"Vrati postavke"</string>
     <string name="settings_credits_love_animation_title">"Ljubavna animacija"</string>
@@ -811,7 +808,6 @@
     <string name="settings_sort_type_summary">"Zadana vrsta sortiranja i vremenski raspon za subreddits, korisnike i komentare"</string>
     <string name="settings_download_location_summary">"Odaberi mape za preuzete slike, GIF-ove, videozapise i NSFW medije"</string>
     <string name="settings_miscellaneous_summary">"Rukovanje vezama, preglednik, povijest pretraživanja i jezik"</string>
-    <string name="settings_global_settings_management_summary">"Resetiraj sve postavke računa i izbriši podatke koji ne pripadaju nijednom računu"</string>
     <string name="settings_api_keys_title">"API ključevi"</string>
     <string name="settings_api_keys_summary">"Unesi svoje vlastite ključeve API, uključujući svoj ID klijenta"</string>
     <string name="settings_enable_api_key_overrides_title">"Omogući nadjačavanja"</string>

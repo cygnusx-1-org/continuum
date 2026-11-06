@@ -565,7 +565,6 @@
     <string name="settings_enable_material_you_summary">"壁紙に基いてReddit Jr.をパーソナライズ"</string>
     <string name="settings_apply_material_you_title">"Material Youを適用"</string>
     <string name="settings_apply_material_you_summary">"Reddit Jr. でテーマが変更されなかった場合"</string>
-    <string name="settings_global_settings_management_title">"グローバル設定管理"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"データベース中の全てのSubreddit情報を削除"</string>
     <string name="settings_delete_all_users_data_in_database_title">"データベース中の全てのユーザー情報を削除"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"データベース中の全ての並べ替え情報を削除"</string>
@@ -724,8 +723,6 @@
     <string name="settings_hide_the_number_of_votes">"投票数を非表示にする"</string>
     <string name="settings_hide_the_number_of_comments">"コメント数を非表示にする"</string>
     <string name="settings_show_avatar_on_the_right">"アバターを右側に表示"</string>
-    <string name="settings_category_backup_and_restore_title">"バックアップと復元"</string>
-    <string name="settings_backup_and_restore_summary">"すべてのアカウントの設定を暗号化されたアーカイブに保存するか、再度読み取ります"</string>
     <string name="settings_backup_settings_title">"設定をバックアップ"</string>
     <string name="settings_restore_settings_title">"設定を復元"</string>
     <string name="settings_credits_love_animation_title">"愛のアニメーション"</string>
@@ -823,7 +820,6 @@
     <string name="settings_sort_type_summary">"サブレディット、ユーザー、コメントのデフォルトの並べ替えタイプと時間範囲"</string>
     <string name="settings_download_location_summary">"ダウンロードした画像、GIF、ビデオ、および NSFW メディアのフォルダーを選択してください"</string>
     <string name="settings_miscellaneous_summary">"リンクの処理、ブラウザ、検索履歴、言語"</string>
-    <string name="settings_global_settings_management_summary">"すべてのアカウントの設定をリセットし、どのアカウントにも属さないデータをクリアします"</string>
     <string name="settings_api_keys_title">"API キー"</string>
     <string name="settings_api_keys_summary">"クライアント ID を含む独自の API キーを入力してください"</string>
     <string name="settings_enable_api_key_overrides_title">"オーバーライドを有効にする"</string>

@@ -562,7 +562,6 @@
     <string name="settings_enable_material_you_summary">"배경화면을 기반으로 Reddit Jr. 맞춤 설정"</string>
     <string name="settings_apply_material_you_title">"Material You 적용"</string>
     <string name="settings_apply_material_you_summary">"Reddit Jr. 테마가 변경되지 않은 경우"</string>
-    <string name="settings_global_settings_management_title">"전역 설정 관리"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"데이터베이스의 모든 서브레딧 삭제"</string>
     <string name="settings_delete_all_users_data_in_database_title">"데이터베이스의 모든 사용자 삭제"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"모든 정렬 유형 삭제"</string>
@@ -721,8 +720,6 @@
     <string name="settings_hide_the_number_of_votes">"투표수 숨기기"</string>
     <string name="settings_hide_the_number_of_comments">"댓글 수 숨기기"</string>
     <string name="settings_show_avatar_on_the_right">"오른쪽에 아바타 표시"</string>
-    <string name="settings_category_backup_and_restore_title">"백업 및 복원"</string>
-    <string name="settings_backup_and_restore_summary">"모든 계정의 설정을 암호화된 아카이브에 저장하거나 다시 읽어보세요"</string>
     <string name="settings_backup_settings_title">"백업 설정"</string>
     <string name="settings_restore_settings_title">"복원 설정"</string>
     <string name="settings_credits_love_animation_title">"사랑 애니메이션"</string>
@@ -820,7 +817,6 @@
     <string name="settings_sort_type_summary">"하위 레딧, 사용자 및 댓글에 대한 기본 정렬 유형 및 시간 범위"</string>
     <string name="settings_download_location_summary">"다운로드한 이미지, GIF, 비디오 및 NSFW 미디어용 폴더를 선택하세요."</string>
     <string name="settings_miscellaneous_summary">"링크 처리, 브라우저, 검색 기록 및 언어"</string>
-    <string name="settings_global_settings_management_summary">"모든 계정의 설정을 재설정하고 계정에 속하지 않은 데이터를 삭제합니다."</string>
     <string name="settings_api_keys_title">"API 키"</string>
     <string name="settings_api_keys_summary">"클라이언트 ID를 포함하여 자신만의 API 키를 입력하세요."</string>
     <string name="settings_enable_api_key_overrides_title">"재정의 활성화"</string>

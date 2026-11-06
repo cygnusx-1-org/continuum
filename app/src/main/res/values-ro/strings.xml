@@ -566,7 +566,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_enable_material_you_summary">"Personalizează Infinit pe baza Fundalului Tău"</string>
     <string name="settings_apply_material_you_title">"Aplică Material You"</string>
     <string name="settings_apply_material_you_summary">"În cazul în care Infinit nu a schimbat tema"</string>
-    <string name="settings_global_settings_management_title">"Gestionarea setărilor globale"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Șterge toate subreddit-urile din baza de date"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Șterge toți utilizatorii din baza de date"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Șterge toate tipurile de sortare din baza de date"</string>
@@ -728,8 +727,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_hide_the_number_of_votes">"Ascunde Numărul de Voturi"</string>
     <string name="settings_hide_the_number_of_comments">"Ascunde Numărul de Comentarii"</string>
     <string name="settings_show_avatar_on_the_right">"Afișează Avatarul în Dreapta"</string>
-    <string name="settings_category_backup_and_restore_title">"Backup și restaurare"</string>
-    <string name="settings_backup_and_restore_summary">"Salvează setările fiecărui cont într-o arhivă criptată sau citești una înapoi"</string>
     <string name="settings_backup_settings_title">"Setări pentru Copie de Rezervă"</string>
     <string name="settings_restore_settings_title">"Restabilirea Setărilor"</string>
     <string name="settings_credits_love_animation_title">"Animație de Dragoste"</string>
@@ -827,7 +824,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_sort_type_summary">"Tipul de sortare implicit și intervalul de timp pentru subreddite, utilizatori și comentarii"</string>
     <string name="settings_download_location_summary">"Alege foldere pentru imagini descărcate, GIF-uri, videoclipuri și NSFW media"</string>
     <string name="settings_miscellaneous_summary">"Gestionarea linkurilor, browser, istoric de căutare și limbă"</string>
-    <string name="settings_global_settings_management_summary">"Resetează setările fiecărui cont și șterge datele care nu aparțin niciunui cont"</string>
     <string name="settings_api_keys_title">"Chei API"</string>
     <string name="settings_api_keys_summary">"Introdu propriile chei API, inclusiv ID-ul tău de client"</string>
     <string name="settings_enable_api_key_overrides_title">"Activare suprascrieri"</string>

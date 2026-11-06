@@ -563,7 +563,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_enable_material_you_summary">"Reddit Jr.'yi Duvar Kağıdına Göre Kişiselleştir"</string>
     <string name="settings_apply_material_you_title">"Material You'yu Uygula"</string>
     <string name="settings_apply_material_you_summary">"Reddit Jr.'nin temayı değiştirmemesi durumunda"</string>
-    <string name="settings_global_settings_management_title">"Genel Ayarlar Yönetimi"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Veritabanındaki Tüm Subredditleri Sil"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Veritabanındaki Tüm Kullanıcıları Sil"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Veritabanındaki Tüm Sıralama Türlerini Sil"</string>
@@ -725,8 +724,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_hide_the_number_of_votes">"Oy Sayısını Gizle"</string>
     <string name="settings_hide_the_number_of_comments">"Yorum Sayısını Gizle"</string>
     <string name="settings_show_avatar_on_the_right">"Avatarı Solda Göster"</string>
-    <string name="settings_category_backup_and_restore_title">"Yedekleme ve Geri Yükleme"</string>
-    <string name="settings_backup_and_restore_summary">"Her hesabın ayarlarını şifrelenmiş bir arşive kaydedin veya bir hesabı tekrar okuyun"</string>
     <string name="settings_backup_settings_title">"Yedekleme Ayarları"</string>
     <string name="settings_restore_settings_title">"Ayarları Eski Haline Getir"</string>
     <string name="settings_credits_love_animation_title">"Aşk Animasyonu"</string>
@@ -824,7 +821,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_sort_type_summary">"Alt dizinler, kullanıcılar ve yorumlar için varsayılan sıralama türü ve zaman aralığı"</string>
     <string name="settings_download_location_summary">"İndirilen görseller, GIF'ler, videolar ve NSFW medya için klasörler seçin"</string>
     <string name="settings_miscellaneous_summary">"Bağlantı yönetimi, tarayıcı, arama geçmişi ve dil"</string>
-    <string name="settings_global_settings_management_summary">"Her hesabın ayarlarını sıfırlayın ve hiçbir hesaba ait olmayan verileri temizleyin"</string>
     <string name="settings_api_keys_title">"API anahtarları"</string>
     <string name="settings_api_keys_summary">"Client ID’n de dahil olmak üzere kendi API anahtarlarını gir"</string>
     <string name="settings_enable_api_key_overrides_title">"Geçersiz Kılmaları Etkinleştir"</string>

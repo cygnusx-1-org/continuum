@@ -552,7 +552,6 @@
     <string name="settings_enable_material_you_summary">"shaqsiyee Reddit Jr. ku saleysan warqadaada"</string>
     <string name="settings_apply_material_you_title">"Ku dalbo Material You"</string>
     <string name="settings_apply_material_you_summary">"Haddii ay dhacdo Reddit Jr. in aanu bedelin dulucda"</string>
-    <string name="settings_global_settings_management_title">"Maaraynta dejimaha guud"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Tirtir Dhammaan Qaybaha Hoosaadka"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Tirtir Dhammaan Isticmaalayaasha"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Tirtir Dhammaan Noocyada Kala-duwan"</string>
@@ -711,8 +710,6 @@
     <string name="settings_hide_the_number_of_votes">"qari tirada codadka"</string>
     <string name="settings_hide_the_number_of_comments">"Qari tirada faallooyinka"</string>
     <string name="settings_show_avatar_on_the_right">"Muuji Avatar dhinaca midig"</string>
-    <string name="settings_category_backup_and_restore_title">"Soo celinta iyo soo celinta"</string>
-    <string name="settings_backup_and_restore_summary">"Ku keydi dejinta akoon kasta kayd sir ah, ama mid dib u akhri"</string>
     <string name="settings_backup_settings_title">"Settings Backup"</string>
     <string name="settings_restore_settings_title">"Soo Celinta Dejinta"</string>
     <string name="settings_credits_love_animation_title">"Animation Jacaylka"</string>
@@ -810,7 +807,6 @@
     <string name="settings_sort_type_summary">"Nooca caadiga ah iyo wakhtiga kala duwan ee wax-ka-beddelka, isticmaalayaasha, iyo faallooyinka"</string>
     <string name="settings_download_location_summary">"Dooro galka sawirada la soo dejiyay, GIF-yada, fiidyaha, iyo NSFW warbaahinta"</string>
     <string name="settings_miscellaneous_summary">"isku xidhka la tacaalidda, browserka, taariikhda goobidda, iyo luqadda"</string>
-    <string name="settings_global_settings_management_summary">"Dib u deji dejinta akoon kasta, oo nadiifi xogta aan lahayn koontada"</string>
     <string name="settings_api_keys_title">"Furayaasha API"</string>
     <string name="settings_api_keys_summary">"Geli furayaashaada API, oo uu ku jiro aqoonsigaaga macmiilka"</string>
     <string name="settings_enable_api_key_overrides_title">"Daar u rogida"</string>

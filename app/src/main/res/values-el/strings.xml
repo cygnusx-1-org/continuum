@@ -559,7 +559,6 @@
     <string name="settings_enable_material_you_summary">"Κάνε το Infinty πιο προσωπικό βάσει της Ταπετσαρίας Σου"</string>
     <string name="settings_apply_material_you_title">"Εφαρμογή Material You"</string>
     <string name="settings_apply_material_you_summary">"Σε περίπτωση που το Reddit Jr. δεν άλλαξε το θέμα"</string>
-    <string name="settings_global_settings_management_title">"Διαχείριση καθολικών ρυθμίσεων"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Διαγραφή Όλων των Subreddits στη Βάση Δεδομένων"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Διαγραφή Όλων των Χρηστών από την Βάση Δεδομένων"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Διαγραφή Όλων των Τύπων Ταξινόμησης στη Βάση Δεδομένων"</string>
@@ -721,8 +720,6 @@
     <string name="settings_hide_the_number_of_votes">"Απόκρυψη Αριθμού Ψήφων"</string>
     <string name="settings_hide_the_number_of_comments">"Απόκρυψη Αριθμού Σχολίων"</string>
     <string name="settings_show_avatar_on_the_right">"Εμφάνιση Άβαταρ στα Δεξιά"</string>
-    <string name="settings_category_backup_and_restore_title">"Δημιουργία αντιγράφων ασφαλείας και επαναφορά"</string>
-    <string name="settings_backup_and_restore_summary">"Αποθήκευσε τις ρυθμίσεις κάθε λογαριασμού σε ένα κρυπτογραφημένο αρχείο ή διάβασε ένα πίσω"</string>
     <string name="settings_backup_settings_title">"Ρυθμίσεις Αντιγράφων ασφαλείας"</string>
     <string name="settings_restore_settings_title">"Ανάκτηση Ρυθμίσεων"</string>
     <string name="settings_credits_love_animation_title">"Εφέ Μου αρέσει"</string>
@@ -820,7 +817,6 @@
     <string name="settings_sort_type_summary">"Προεπιλεγμένος τύπος ταξινόμησης και χρονικό εύρος για subreddits, χρήστες και σχόλια"</string>
     <string name="settings_download_location_summary">"Επίλεξε φακέλους για εικόνες, GIF, βίντεο και πολυμέσα NSFW που έχεις λάβει"</string>
     <string name="settings_miscellaneous_summary">"Χειρισμός συνδέσμων, πρόγραμμα περιήγησης, ιστορικό αναζήτησης και γλώσσα"</string>
-    <string name="settings_global_settings_management_summary">"Επανάφερε τις ρυθμίσεις κάθε λογαριασμού και διάγραψε τα δεδομένα που δεν ανήκουν σε κανένα λογαριασμό"</string>
     <string name="settings_api_keys_title">"Κλειδιά API"</string>
     <string name="settings_api_keys_summary">"Εισάγαγε τα δικά σου κλειδιά API, συμπεριλαμβανομένου του αναγνωριστικού πελάτη σου"</string>
     <string name="settings_enable_api_key_overrides_title">"Ενεργοποίηση παρακάμψεων"</string>

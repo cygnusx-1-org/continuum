@@ -566,7 +566,6 @@
     <string name="settings_enable_material_you_summary">"根据 Your Wallpaper 个性化 Reddit Jr."</string>
     <string name="settings_apply_material_you_title">"应用 Material You"</string>
     <string name="settings_apply_material_you_summary">"如果 Reddit Jr. 未更改主题"</string>
-    <string name="settings_global_settings_management_title">"全局设置管理"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"删除数据库中的所有版块"</string>
     <string name="settings_delete_all_users_data_in_database_title">"删除数据库中的所有用户"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"删除数据库中的所有排序类型"</string>
@@ -728,8 +727,6 @@ Reddit 视频分辨率较低。
     <string name="settings_hide_the_number_of_votes">"隐藏投票数"</string>
     <string name="settings_hide_the_number_of_comments">"隐藏评论数"</string>
     <string name="settings_show_avatar_on_the_right">"在右侧显示头像"</string>
-    <string name="settings_category_backup_and_restore_title">"备份与恢复"</string>
-    <string name="settings_backup_and_restore_summary">"将每个帐户的设置保存到加密存档，或读回"</string>
     <string name="settings_backup_settings_title">"备份设置"</string>
     <string name="settings_restore_settings_title">"恢复设置"</string>
     <string name="settings_credits_love_animation_title">"喜爱动画"</string>
@@ -827,7 +824,6 @@ Reddit 视频分辨率较低。
     <string name="settings_sort_type_summary">"subreddits、用户和评论的默认排序类型和时间范围"</string>
     <string name="settings_download_location_summary">"选择用于下载的图像、GIF、视频和 NSFW 媒体的文件夹"</string>
     <string name="settings_miscellaneous_summary">"链接处理、浏览器、搜索历史和语言"</string>
-    <string name="settings_global_settings_management_summary">"重置每个账户的设置，并清除不属于任何账户的数据"</string>
     <string name="settings_api_keys_title">"API 密钥"</string>
     <string name="settings_api_keys_summary">"输入您自己的 API 密钥，包括您的客户端 ID"</string>
     <string name="settings_enable_api_key_overrides_title">"启用覆盖"</string>

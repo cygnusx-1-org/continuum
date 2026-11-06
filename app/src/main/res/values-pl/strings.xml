@@ -559,7 +559,6 @@ W przeciwnym razie, zmień ich nazwę przed włączeniem Material You."</string>
     <string name="settings_enable_material_you_summary">"Spersonalizuj Reddit Jr. na podstawie Twojej tapety"</string>
     <string name="settings_apply_material_you_title">"Zastosuj Material You"</string>
     <string name="settings_apply_material_you_summary">"W przypadku gdy Reddit Jr. nie zmieniło motywu"</string>
-    <string name="settings_global_settings_management_title">"Zarządzanie ustawieniami globalnymi"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Usuń wszystkie Subreddity w bazie danych"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Usuń wszystkich użytkowników w bazie danych"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Usuń wszystkie rodzaje sortowanie w bazie danych"</string>
@@ -721,8 +720,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_hide_the_number_of_votes">"Ukryj liczbę głosów"</string>
     <string name="settings_hide_the_number_of_comments">"Ukryj liczbę komentarzy"</string>
     <string name="settings_show_avatar_on_the_right">"Pokaż awatar po prawej stronie"</string>
-    <string name="settings_category_backup_and_restore_title">"Kopia zapasowa i przywracanie"</string>
-    <string name="settings_backup_and_restore_summary">"Zapisz ustawienia każdego konta w zaszyfrowanym archiwum lub przeczytaj je ponownie"</string>
     <string name="settings_backup_settings_title">"Opcje backupu"</string>
     <string name="settings_restore_settings_title">"Przywróć ustawienia"</string>
     <string name="settings_credits_love_animation_title">"Animacja miłości"</string>
@@ -820,7 +817,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_sort_type_summary">"Domyślny typ sortowania i zakres czasu dla subredditów, użytkowników i komentarzy"</string>
     <string name="settings_download_location_summary">"Wybierz foldery dla pobranych obrazów, GIF-ów, filmów i NSFW multimediów"</string>
     <string name="settings_miscellaneous_summary">"Obsługa łączy, przeglądarka, historia wyszukiwania i język"</string>
-    <string name="settings_global_settings_management_summary">"Zresetuj ustawienia każdego konta i wyczyść dane nienależące do żadnego konta"</string>
     <string name="settings_api_keys_title">"Klucze API"</string>
     <string name="settings_api_keys_summary">"Wprowadź własne klucze API, w tym swój identyfikator klienta"</string>
     <string name="settings_enable_api_key_overrides_title">"Włącz przesłonięcia"</string>
