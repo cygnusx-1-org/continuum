@@ -398,7 +398,7 @@ public class ViewVideoActivity extends AppCompatActivity
         LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
         // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
         // edge dead-zone so a swipe from the very edge isn't treated as a scrub.
-        final int fallbackGestureInset = (int) (32 * getResources().getDisplayMetrics().density);
+        final int fallbackGestureInset = (int) Utils.convertDpToPixel(32, this);
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
             @NonNull
             @Override

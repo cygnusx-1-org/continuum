@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.decoder;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
@@ -19,6 +20,7 @@ import io.noties.markwon.recycler.MarkwonAdapter;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.MarkdownDecoderBlockBinding;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 /**
  * Renders a DecoderBlock as a card: the decoded text, a Copy button, and search buttons.
@@ -49,11 +51,11 @@ public class DecoderEntry extends MarkwonAdapter.Entry<DecoderBlock, DecoderEntr
     public void bindHolder(@NonNull Markwon markwon, @NonNull Holder holder, @NonNull DecoderBlock node) {
         MarkdownDecoderBlockBinding b = holder.binding;
 
-        float density = b.getRoot().getResources().getDisplayMetrics().density;
+        Context context = b.getRoot().getContext();
         GradientDrawable background = new GradientDrawable();
         background.setColor(cardColor);
-        background.setCornerRadius(density * 8);
-        background.setStroke(Math.round(density), strokeColor);
+        background.setCornerRadius(Utils.convertDpToPixel(8, context));
+        background.setStroke(Math.round(Utils.convertDpToPixel(1, context)), strokeColor);
         b.getRoot().setBackground(background);
 
         b.labelTextViewMarkdownDecoderBlock.setText(node.label);

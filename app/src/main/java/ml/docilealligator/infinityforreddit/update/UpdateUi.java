@@ -32,6 +32,7 @@ import io.noties.markwon.Markwon;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 /**
  * Checks GitHub for a newer release, asks before downloading it, shows the download's progress,
@@ -108,7 +109,7 @@ public final class UpdateUi {
         progress.setIndeterminate(release.apkSize <= 0);
         progress.setMax(100);
         FrameLayout container = new FrameLayout(activity);
-        int padding = Math.round(activity.getResources().getDisplayMetrics().density * 24);
+        int padding = Math.round(Utils.convertDpToPixel(24, activity));
         container.setPadding(padding, padding / 2, padding, 0);
         container.addView(progress);
 

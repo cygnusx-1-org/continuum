@@ -6,6 +6,7 @@
 ============
 * Card Clean is now Card Bottom without its row of buttons (it was built on Card Top), and nothing of the row shows any more
 * The vertical gallery list now shows each picture's number in a small badge in its top left corner
+* Internal: dp-to-pixel conversions in a few screens now use the shared helper
 * Removed the "Delete All Legacy Settings" action and the "Use /api/info the Old Way" switch; the app always goes around /api/info, as it did with the switch off
 
 8.3.3.9.1.26-beta.4 / 2026-11-5

@@ -613,7 +613,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         if (border == null) {
             border = new View(card.getContext());
             border.setTag(TOP_BORDER_TAG);
-            int height = Math.round(3 * card.getResources().getDisplayMetrics().density);
+            int height = Math.round(Utils.convertDpToPixel(3, card.getContext()));
             card.addView(border, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, height, Gravity.TOP));
         }
@@ -663,7 +663,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             android.graphics.Rect area = new android.graphics.Rect();
             pin.getHitRect(area);
-            int extra = Math.round(14 * pin.getResources().getDisplayMetrics().density);
+            int extra = Math.round(Utils.convertDpToPixel(14, pin.getContext()));
             area.inset(-extra, -extra);
             parent.setTouchDelegate(new android.view.TouchDelegate(area, pin));
         });
