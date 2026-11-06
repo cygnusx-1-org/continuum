@@ -638,10 +638,8 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_credits_national_flags">"Nemzeti zászlók"</string>
     <string name="settings_credits_national_flags_summary">"Az ikont a Freepik készítette innen: www.flaticon.com"</string>
     <string name="settings_group_global">"Globális"</string>
-    <string name="settings_group_account">"Fiók"</string>
     <string name="settings_account_settings_management_title">"Fiókbeállítások kezelése"</string>
     <string name="settings_account_settings_management_summary">"Másolj át egy másik fiók beállításait erre, állítsd vissza az alapértelmezett értékeket, vagy töröld a felhalmozottakat"</string>
-    <string name="settings_group_themes">"témák"</string>
     <string name="settings_group_other">"Egyéb"</string>
     <string name="settings_copy_settings_from_account_title">"Másold a beállításokat egy másik fiókból"</string>
     <string name="settings_copy_settings_from_account_summary">"Add meg ennek a fióknak egy másik beállításait"</string>
@@ -806,7 +804,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_proxy_hostname">"Gazdanév"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Engedélyezd a push értesítéseket, és állítsd be, hogy milyen gyakran legyenek ellenőrizve"</string>
-    <string name="settings_interface_summary">"Betűtípusok, navigációs fiók, lapok, alsó alkalmazássáv, valamint bejegyzések és megjegyzések megjelenítési lehetőségei"</string>
     <string name="settings_theme_summary">"Világos, sötét és AMOLED témák, Material You és egyéni témaszínek"</string>
     <string name="settings_video_summary">"Automatikus lejátszás, némítás, lejátszási sebesség, alapértelmezett felbontás és teljes képernyős viselkedés"</string>
     <string name="settings_gestures_and_buttons_summary">"Csúsztatási gesztusok, hangerőszabályzó-navigáció, hosszan lenyomott műveletek és gesztusérzékenység"</string>

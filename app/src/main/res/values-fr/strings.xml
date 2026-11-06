@@ -638,10 +638,8 @@ Appuyez pour réessayer."</string>
     <string name="settings_credits_national_flags">"Drapeaux nationaux"</string>
     <string name="settings_credits_national_flags_summary">"Icône réalisée par Freepik de www.flaticon.com"</string>
     <string name="settings_group_global">"Mondial"</string>
-    <string name="settings_group_account">"Compte"</string>
     <string name="settings_account_settings_management_title">"Gestion des paramètres de compte"</string>
     <string name="settings_account_settings_management_summary">"Copiez les paramètres d'un autre compte sur celui-ci, remettez celui-ci aux valeurs par défaut ou supprimez ce qu'il a accumulé"</string>
-    <string name="settings_group_themes">"Thèmes"</string>
     <string name="settings_group_other">"Autre"</string>
     <string name="settings_copy_settings_from_account_title">"Copier les paramètres d'un autre compte"</string>
     <string name="settings_copy_settings_from_account_summary">"Donnez à ce compte les paramètres d'un autre compte"</string>
@@ -806,7 +804,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_proxy_hostname">"Nom d'hôte"</string>
     <string name="settings_proxy_port">"Port"</string>
     <string name="settings_notification_master_summary">"Activer les notifications push et définir la fréquence à laquelle elles sont vérifiées"</string>
-    <string name="settings_interface_summary">"Polices, tiroir de navigation, onglets, barre d'application inférieure et options d'affichage des publications et des commentaires"</string>
     <string name="settings_theme_summary">"Thèmes clairs, sombres et AMOLED, Material You et couleurs de thème personnalisées"</string>
     <string name="settings_video_summary">"Lecture automatique, mise en sourdine, vitesse de lecture, résolution par défaut et comportement en plein écran"</string>
     <string name="settings_gestures_and_buttons_summary">"Gestes de balayage, navigation par touches de volume, actions d'appui long et sensibilité des gestes"</string>

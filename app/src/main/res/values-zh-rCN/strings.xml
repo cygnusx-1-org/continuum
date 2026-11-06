@@ -650,10 +650,8 @@ Reddit 视频分辨率较低。
     <string name="settings_credits_national_flags">"国旗"</string>
     <string name="settings_credits_national_flags_summary">"图标由来自 www.flaticon.com 的 Freepik 制作"</string>
     <string name="settings_group_global">"全球"</string>
-    <string name="settings_group_account">"帐户"</string>
     <string name="settings_account_settings_management_title">"账户设置管理"</string>
     <string name="settings_account_settings_management_summary">"将另一个帐户的设置复制到此帐户上，将此帐户恢复为默认设置，或删除其累积的设置"</string>
-    <string name="settings_group_themes">"主题"</string>
     <string name="settings_group_other">"其他"</string>
     <string name="settings_copy_settings_from_account_title">"从另一个帐户复制设置"</string>
     <string name="settings_copy_settings_from_account_summary">"将此帐户设置为其他帐户的设置"</string>
@@ -818,7 +816,6 @@ Reddit 视频分辨率较低。
     <string name="settings_proxy_hostname">"主机名"</string>
     <string name="settings_proxy_port">"端口"</string>
     <string name="settings_notification_master_summary">"启用推送通知并设置检查频率"</string>
-    <string name="settings_interface_summary">"字体、导航抽屉、选项卡、底部应用栏以及帖子和评论显示选项"</string>
     <string name="settings_theme_summary">"浅色、深色和 AMOLED 主题、Material You 和自定义主题颜色"</string>
     <string name="settings_video_summary">"自动播放、静音、播放速度、默认分辨率和全屏行为"</string>
     <string name="settings_gestures_and_buttons_summary">"滑动手势、音量键导航、长按操作和手势灵敏度"</string>

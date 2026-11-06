@@ -651,10 +651,8 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_credits_national_flags">"Bandeiras nacionais"</string>
     <string name="settings_credits_national_flags_summary">"Ícone feito por Freepik - www.flaticon.com"</string>
     <string name="settings_group_global">"Global"</string>
-    <string name="settings_group_account">"Conta"</string>
     <string name="settings_account_settings_management_title">"Gerenciamento de configurações de conta"</string>
     <string name="settings_account_settings_management_summary">"Copie as configurações de outra conta para esta, coloque-a de volta nos padrões ou exclua o que ela acumulou"</string>
-    <string name="settings_group_themes">"Temas"</string>
     <string name="settings_group_other">"Outros"</string>
     <string name="settings_copy_settings_from_account_title">"Copiar configurações de outra conta"</string>
     <string name="settings_copy_settings_from_account_summary">"Dê a esta conta as configurações que outra conta possui"</string>
@@ -819,7 +817,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_proxy_hostname">"Nome do host"</string>
     <string name="settings_proxy_port">"Porta"</string>
     <string name="settings_notification_master_summary">"Habilite notificações push e defina com que frequência elas são verificadas"</string>
-    <string name="settings_interface_summary">"Fontes, gaveta de navegação, guias, barra inferior de aplicativos e opções de exibição de postagens e comentários"</string>
     <string name="settings_theme_summary">"Temas claros, escuros e AMOLED, Material You e cores de tema personalizadas"</string>
     <string name="settings_video_summary">"Reprodução automática, silenciamento, velocidade de reprodução, resolução padrão e comportamento de tela cheia"</string>
     <string name="settings_gestures_and_buttons_summary">"Gestos de deslizar, navegação por teclas de volume, ações de toque longo e sensibilidade a gestos"</string>

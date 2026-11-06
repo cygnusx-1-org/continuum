@@ -634,10 +634,8 @@
     <string name="settings_credits_national_flags">"Zastave država"</string>
     <string name="settings_credits_national_flags_summary">"Ikonu napravio Freepik na www.flaticon.com"</string>
     <string name="settings_group_global">"Globalno"</string>
-    <string name="settings_group_account">"Račun"</string>
     <string name="settings_account_settings_management_title">"Upravljanje postavkama računa"</string>
     <string name="settings_account_settings_management_summary">"Kopiraj postavke drugog računa na ovaj, vrati ovaj na zadane ili izbriši ono što je akumulirao"</string>
-    <string name="settings_group_themes">"Teme"</string>
     <string name="settings_group_other">"Ostalo"</string>
     <string name="settings_copy_settings_from_account_title">"Kopiraj postavke s drugog računa"</string>
     <string name="settings_copy_settings_from_account_summary">"Daj ovom računu postavke koje ima drugi"</string>
@@ -802,7 +800,6 @@
     <string name="settings_proxy_hostname">"Naziv glavnog računala"</string>
     <string name="settings_proxy_port">"Priključak"</string>
     <string name="settings_notification_master_summary">"Omogući push obavijesti i postavi koliko često se provjeravaju"</string>
-    <string name="settings_interface_summary">"Fontovi, ladica za navigaciju, kartice, donja traka aplikacije i opcije prikaza objava i komentara"</string>
     <string name="settings_theme_summary">"Svijetle, tamne i AMOLED teme, Material You i prilagođene boje tema"</string>
     <string name="settings_video_summary">"Automatska reprodukcija, isključivanje zvuka, brzina reprodukcije, zadana razlučivost i ponašanje preko cijelog zaslona"</string>
     <string name="settings_gestures_and_buttons_summary">"Pokreti prijelaza, navigacija tipkama za glasnoću, radnje dugog pritiska i osjetljivost pokreta"</string>

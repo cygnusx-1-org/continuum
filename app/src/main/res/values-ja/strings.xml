@@ -646,10 +646,8 @@
     <string name="settings_credits_national_flags">"国旗アイコン"</string>
     <string name="settings_credits_national_flags_summary">"Freepikにより作成されたアイコンを使用しています - www.flaticon.com"</string>
     <string name="settings_group_global">"グローバル"</string>
-    <string name="settings_group_account">"アカウント"</string>
     <string name="settings_account_settings_management_title">"アカウント設定管理"</string>
     <string name="settings_account_settings_management_summary">"別のアカウントの設定をこのアカウントにコピーするか、このアカウントをデフォルトに戻すか、蓄積されたものを削除します"</string>
-    <string name="settings_group_themes">"テーマ"</string>
     <string name="settings_group_other">"その他"</string>
     <string name="settings_copy_settings_from_account_title">"別のアカウントから設定をコピー"</string>
     <string name="settings_copy_settings_from_account_summary">"このアカウントに別のアカウントの設定を与えます"</string>
@@ -814,7 +812,6 @@
     <string name="settings_proxy_hostname">"ホスト名"</string>
     <string name="settings_proxy_port">"ポート"</string>
     <string name="settings_notification_master_summary">"プッシュ通知を有効にし、プッシュ通知をチェックする頻度を設定します"</string>
-    <string name="settings_interface_summary">"フォント、ナビゲーションドロワー、タブ、下部アプリバー、投稿およびコメントの表示オプション"</string>
     <string name="settings_theme_summary">"ライト、ダーク、AMOLED テーマ、Material You、およびカスタム テーマ カラー"</string>
     <string name="settings_video_summary">"自動再生、ミュート、再生速度、デフォルトの解像度、および全画面動作"</string>
     <string name="settings_gestures_and_buttons_summary">"スワイプ ジェスチャ、音量キー ナビゲーション、長押しアクション、およびジェスチャの感度"</string>

@@ -125,7 +125,7 @@ class SettingsSearchRegistryTest {
         val item = itemTitled(R.string.settings_interface_title)
 
         val expected = context.getString(R.string.settings_activity_label) +
-            " › " + context.getString(R.string.settings_group_account)
+            " › " + context.getString(R.string.settings_group_account_appearance)
         assertEquals(expected, item.breadcrumb)
         assertEquals(InterfacePreferenceFragment::class.java, item.fragmentClass)
     }

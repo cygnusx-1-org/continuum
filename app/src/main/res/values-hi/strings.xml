@@ -641,10 +641,8 @@
     <string name="settings_credits_national_flags">"राष्ट्रीय ध्वज "</string>
     <string name="settings_credits_national_flags_summary">"आइकन www.flaticon.com से Freepik द्वारा बनाया गया है। "</string>
     <string name="settings_group_global">"ग्लोबल"</string>
-    <string name="settings_group_account">"खाता"</string>
     <string name="settings_account_settings_management_title">"खाता सेटिंग्स प्रबंधन"</string>
     <string name="settings_account_settings_management_summary">"किसी अन्य खाते की सेटिंग्स को इस पर कॉपी करें, इसे डिफ़ॉल्ट पर वापस रखें, या इसमें जो भी जमा हुआ है उसे हटा दें"</string>
-    <string name="settings_group_themes">"थीम"</string>
     <string name="settings_group_other">"अन्य"</string>
     <string name="settings_copy_settings_from_account_title">"किसी अन्य खाते से सेटिंग्स कॉपी करें"</string>
     <string name="settings_copy_settings_from_account_summary">"इस खाते को वह सेटिंग दें जो किसी अन्य खाते में है"</string>
@@ -809,7 +807,6 @@
     <string name="settings_proxy_hostname">"होस्टनाम"</string>
     <string name="settings_proxy_port">"पोर्ट"</string>
     <string name="settings_notification_master_summary">"पुश नोटिफिकेशन सक्षम करें और सेट करें कि उन्हें कितनी बार चेक किया जाए"</string>
-    <string name="settings_interface_summary">"फ़ॉन्ट्स, नेविगेशन ड्रॉअर, टैब, निचला ऐप बार, और पोस्ट और टिप्पणी प्रदर्शन विकल्प"</string>
     <string name="settings_theme_summary">"हल्का, गहरा और AMOLED थीम, Material You और कस्टम थीम रंग"</string>
     <string name="settings_video_summary">"ऑटोप्ले, म्यूटिंग, प्लेबैक स्पीड, डिफ़ॉल्ट रिज़ॉल्यूशन और फुलस्क्रीन व्यवहार"</string>
     <string name="settings_gestures_and_buttons_summary">"स्वाइप जेस्चर, वॉल्यूम कुंजी नेविगेशन, लंबे समय तक प्रेस क्रियाएं, और जेस्चर संवेदनशीलता"</string>

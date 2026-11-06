@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.26-beta.7 / 2026-11-6
+============
+* Settings: the screens that were buried inside Interface -- Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar -- are now on the settings home, under four headings that say they belong to this account: Appearance, Posts and comments, Navigation, and More. Interface keeps the toggles that fit nowhere else. The Global group is unchanged
+
+8.3.3.9.1.26-beta.6 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: restoring a backup now reads its tables through two shared helpers instead of twenty near-identical blocks
+
 8.3.3.9.1.26-beta.5 / 2026-11-6
 ============
 * Card Clean is now Card Bottom without its row of buttons (it was built on Card Top), and nothing of the row shows any more
