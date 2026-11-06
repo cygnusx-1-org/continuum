@@ -316,7 +316,7 @@ class AnonymousAccountRenameTest {
         val upgraded = RedditDataRoomDatabase.create(context)
         try {
             val upgradedDb = upgraded.openHelper.writableDatabase
-            assertEquals(47, upgradedDb.version)
+            assertEquals(48, upgradedDb.version)
             for (table in RedditDataRoomDatabase.ACCOUNT_NAME_TABLES + "accounts") {
                 assertFalse("left under the old name in $table", "-" in usernamesIn(table, upgradedDb))
             }
