@@ -54,12 +54,12 @@
             android:layout_margin="8dp"
             android:background="@drawable/bg_gallery_item_number"
             android:fontFamily="?attr/font_family"
-            android:paddingStart="8dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="2dp"
+            android:paddingStart="10dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="3dp"
             android:textColor="#B8F7FF"
-            android:textSize="10sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:visibility="gone" />
 

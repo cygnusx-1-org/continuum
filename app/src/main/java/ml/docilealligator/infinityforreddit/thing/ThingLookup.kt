@@ -49,7 +49,6 @@ internal class ThingLookup<T>(
             return Response.success(listing(JSONArray()))
         }
         return when (infoUse) {
-            InfoUse.Only -> fetchInfo(things.joinToString(",", transform = fullname))
             InfoUse.Never -> loadIndividually(things)
             is InfoUse.First -> {
                 if (!infoUse.blocked.get()) {

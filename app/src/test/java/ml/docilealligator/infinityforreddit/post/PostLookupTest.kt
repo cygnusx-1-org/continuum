@@ -40,16 +40,6 @@ class PostLookupTest {
     )
 
     @Test
-    fun theOldWayAsksInfoAloneAndReportsItsRefusal() = runBlocking {
-        val response = lookup(infoUse = InfoUse.Only).load(listOf("a", "b"))
-
-        assertEquals(403, response.code())
-        assertEquals(listOf("t3_a,t3_b"), infoRequests)
-        assertTrue(postRequests.isEmpty())
-        assertFalse(infoBlocked.get())
-    }
-
-    @Test
     fun withoutTheOldWayInfoIsNeverAsked() = runBlocking {
         val response = lookup(info = { throw AssertionError("asked /api/info") }, infoUse = InfoUse.Never).load(listOf("b", "a"))
 

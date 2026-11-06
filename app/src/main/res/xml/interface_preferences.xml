@@ -2,11 +2,16 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="immersive_interface_entry"
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="immersive_interface"
         app:title="@string/settings_immersive_interface_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.ImmersiveInterfacePreferenceFragment"
-        app:isPreferenceVisible="false" />
+        app:summary="@string/settings_immersive_interface_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="disable_immersive_interface_in_landscape_mode"
+        app:title="@string/settings_disable_immersive_interface_in_landscape_mode" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
@@ -43,9 +48,18 @@
         app:title="@string/settings_default_search_result_tab"
         app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="show_elapsed_time"
+        app:title="@string/settings_show_elapsed_time" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="MMM d, yyyy, HH:mm"
+        app:entries="@array/settings_time_format"
+        app:entryValues="@array/settings_time_format_values"
+        app:key="time_format"
         app:title="@string/settings_time_format_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.TimeFormatPreferenceFragment" />
+        app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="2.5"

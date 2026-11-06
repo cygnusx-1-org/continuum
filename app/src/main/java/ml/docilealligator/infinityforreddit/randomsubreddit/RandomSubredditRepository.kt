@@ -264,7 +264,7 @@ class RandomSubredditRepository @Inject constructor(
         val infoUse = if (accountName == Account.ANONYMOUS_ACCOUNT) {
             InfoUse.First(ThingLookup.INFO_BLOCKED)
         } else {
-            InfoUse.forAccount(false)
+            InfoUse.Never
         }
         when (RandomSubredditNames.canonicalise(randomSubredditName)) {
             RandomSubredditNames.MYRANDOM -> pickSubscribed(accountName, retrofit, headers, handler, listener)
@@ -298,7 +298,6 @@ class RandomSubredditRepository @Inject constructor(
             }
 
             val askInfo = when (infoUse) {
-                InfoUse.Only -> true
                 InfoUse.Never -> false
                 is InfoUse.First -> !infoUse.blocked.get()
             }

@@ -91,14 +91,12 @@ class CommentLookup internal constructor(
         /**
          * For a logged-in account. [api] must be the OAuth Retrofit's, so that both requests carry
          * the account's own vote and saved state on each comment, as `/api/info` does.
-         *
-         * @param useOldApiInfo `APIUtils.useOldApiInfo()`: `/api/info` alone if set, else never
          */
         @JvmStatic
-        fun forOauthApi(api: RedditAPIKt, headers: Map<String, String>, useOldApiInfo: Boolean) = CommentLookup(
+        fun forOauthApi(api: RedditAPIKt, headers: Map<String, String>) = CommentLookup(
             { fullnames -> api.getInfoOauth(fullnames, headers) },
             { postId, commentId -> api.getFocusedCommentOauth(postId, commentId, null, 1, headers) },
-            InfoUse.forAccount(useOldApiInfo)
+            InfoUse.Never
         )
     }
 }
