@@ -611,7 +611,14 @@ public abstract class PostFragmentBase extends Fragment {
         }
         boolean enabled = nColumns == 1 && mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false);
         swipeActionEnabled = enabled;
-        touchHelper.attachToRecyclerView(enabled ? recyclerView : null, 1);
+        // Detach first, always. The helper is an item decoration as well as a touch listener, and a
+        // layout change clears every decoration, the helper's own among them; attaching to the list
+        // it is already attached to is a no-op, so without this it would stay "attached" with its
+        // decoration gone and its touch listener still eating the gestures.
+        touchHelper.attachToRecyclerView(null, 1);
+        if (enabled) {
+            touchHelper.attachToRecyclerView(recyclerView, 1);
+        }
     }
 
     public final void changePostLayout(int postLayout) {
