@@ -626,10 +626,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Ana Sayfa"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Diğer Sayfalar"</string>
     <string name="settings_bottom_app_bar_option_count">"Seçenek Sayısı"</string>
-    <string name="settings_bottom_app_bar_option_1">"Seçenek 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Seçenek 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Seçenek 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Seçenek 4"</string>
     <string name="settings_bottom_app_bar_fab">"Kayan İşlem Düğmesi"</string>
     <string name="settings_data_saving_mode">"Veri Tasarrufu Modu"</string>
     <string name="settings_data_saving_mode_info_summary">"Veri tasarrufu modunda:

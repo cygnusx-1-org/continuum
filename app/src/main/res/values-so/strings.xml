@@ -615,10 +615,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Bogga ugu muhiimsan"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Bogagga kale"</string>
     <string name="settings_bottom_app_bar_option_count">"Tirada Doorashada"</string>
-    <string name="settings_bottom_app_bar_option_1">"Xulashada 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Xulashada 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Xulashada 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Xulashada 4"</string>
     <string name="settings_bottom_app_bar_fab">"Badhanka Ficil Sabaynta"</string>
     <string name="settings_data_saving_mode">"Habka Keydinta Xogta"</string>
     <string name="settings_data_saving_mode_info_summary">"Habka kaydinta xogta:\nSawirada horudhaca ayaa xalin hoose ku jira.\nReddit iyo Redgifs fiidyowyo ayaa xalin hoose ku jira.\nFiidiyow-ku-ciyaarid toos ah waa naafo"</string>

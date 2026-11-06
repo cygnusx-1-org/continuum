@@ -691,10 +691,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">Main Page</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">Other Pages</string>
     <string name="settings_bottom_app_bar_option_count">Option Count</string>
-    <string name="settings_bottom_app_bar_option_1">Option 1</string>
-    <string name="settings_bottom_app_bar_option_2">Option 2</string>
-    <string name="settings_bottom_app_bar_option_3">Option 3</string>
-    <string name="settings_bottom_app_bar_option_4">Option 4</string>
     <string name="settings_bottom_app_bar_fab">Floating Action Button</string>
     <string name="settings_data_saving_mode">Data Saving Mode</string>
     <string name="settings_data_saving_mode_info_summary">In data saving mode:\nPreview images are in lower resolution.\nReddit and Redgifs videos are in lower resolution.\nVideo autoplay is disabled.</string>

@@ -620,10 +620,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"मुख्य पृष्ट "</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"अन्य पृष्ट "</string>
     <string name="settings_bottom_app_bar_option_count">"विकल्प संख्या "</string>
-    <string name="settings_bottom_app_bar_option_1">"विकल्प 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"विकल्प 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"विकल्प 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"विकल्प 4"</string>
     <string name="settings_bottom_app_bar_fab">"तैरता क्रिया बटन "</string>
     <string name="settings_data_saving_mode">"डेटा संरक्षण प्रणाली"</string>
     <string name="settings_data_saving_mode_info_summary">"डेटा संरक्षण प्रणाली:

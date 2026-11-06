@@ -622,10 +622,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"முதன்மை பக்கம்"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"பிற பக்கங்கள்"</string>
     <string name="settings_bottom_app_bar_option_count">"விருப்ப எண்ணிக்கை"</string>
-    <string name="settings_bottom_app_bar_option_1">"விருப்பம் 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"விருப்பம் 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"விருப்பம் 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"விருப்பம் 4"</string>
     <string name="settings_bottom_app_bar_fab">"மிதக்கும் செயல் பட்டன்"</string>
     <string name="settings_data_saving_mode">"தரவு சேமிப்பு பயன்முறை"</string>
     <string name="settings_data_saving_mode_info_summary">"தரவு சேமிப்பு முறையில்:\nமுன்னோட்ட படங்கள் குறைந்த தெளிவுத்திறனில் உள்ளன.\nReddit மற்றும் Redgifs வீடியோக்கள் குறைந்த தெளிவுத்திறனில் உள்ளன.\nவீடியோ ஆட்டோபிளே முடக்கப்பட்டுள்ளது."</string>

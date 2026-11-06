@@ -625,10 +625,6 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Hoofdpagina"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Andere Pagina's"</string>
     <string name="settings_bottom_app_bar_option_count">"Aantal Opties"</string>
-    <string name="settings_bottom_app_bar_option_1">"Optie 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Optie 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Optie 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Optie 4"</string>
     <string name="settings_bottom_app_bar_fab">"Zwevende actieknop"</string>
     <string name="settings_data_saving_mode">"Databesparingsmodus"</string>
     <string name="settings_data_saving_mode_info_summary">"In gegevensbesparingsmodus:

@@ -630,10 +630,6 @@ Se hai dei temi con questi nomi devi cambiarli prima di attivare la Personalizza
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Pagina principale"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Altre pagine"</string>
     <string name="settings_bottom_app_bar_option_count">"Conteggio delle opzioni"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opzione 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opzione 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opzione 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opzione 4"</string>
     <string name="settings_bottom_app_bar_fab">"Pulsante d'azione flottante"</string>
     <string name="settings_data_saving_mode">"Modalità risparmio dati"</string>
     <string name="settings_data_saving_mode_info_summary">"In modalità di risparmio dati:

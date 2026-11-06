@@ -622,10 +622,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Κεντρική Σελίδα"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Άλλες Σελίδες"</string>
     <string name="settings_bottom_app_bar_option_count">"Καταμέτρηση Επιλογής"</string>
-    <string name="settings_bottom_app_bar_option_1">"Επιλογή 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Επιλογή 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Επιλογή 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Επιλογή 4"</string>
     <string name="settings_bottom_app_bar_fab">"Αιωρούμενο Κουμπί Ενέργειας"</string>
     <string name="settings_data_saving_mode">"Λειτουργία Εξοικονόμησης Δεδομένων"</string>
     <string name="settings_data_saving_mode_info_summary">"Σε λειτουργία εξοικονόμησης δεδομένων:

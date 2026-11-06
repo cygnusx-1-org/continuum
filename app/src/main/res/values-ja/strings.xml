@@ -628,10 +628,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"メインページ"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"他のページ"</string>
     <string name="settings_bottom_app_bar_option_count">"ボタン数"</string>
-    <string name="settings_bottom_app_bar_option_1">"ボタン1"</string>
-    <string name="settings_bottom_app_bar_option_2">"ボタン2"</string>
-    <string name="settings_bottom_app_bar_option_3">"ボタン3"</string>
-    <string name="settings_bottom_app_bar_option_4">"ボタン4"</string>
     <string name="settings_bottom_app_bar_fab">"アクションボタン"</string>
     <string name="settings_data_saving_mode">"データ節約モード"</string>
     <string name="settings_data_saving_mode_info_summary">"データ節約モード:\nプレビュー画像は低解像度です。\nReddit および Redgifs ビデオは低解像度です。\nビデオの自動再生は無効です。"</string>
