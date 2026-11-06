@@ -30,8 +30,7 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
     private final RequestManager glide;
     private final int primaryTextColor;
     private final int secondaryTextColor;
-    private boolean collapseSection;
-    private boolean hideSection;
+    private DrawerSectionState state;
     private final SharedPreferences navigationDrawerSharedPreferences;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
     private List<RecentSubreddits.Entry> recentSubreddits = new ArrayList<>();
@@ -45,18 +44,12 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         this.navigationDrawerSharedPreferences = navigationDrawerSharedPreferences;
-        collapseSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, false);
-        hideSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION, false);
+        state = DrawerSection.RECENTS.read(navigationDrawerSharedPreferences);
         this.itemClickListener = itemClickListener;
     }
 
-    public void setCollapseSection(boolean collapseSection) {
-        this.collapseSection = collapseSection;
-        notifyDataSetChanged();
-    }
-
-    public void setHideSection(boolean hideSection) {
-        this.hideSection = hideSection;
+    public void setState(DrawerSectionState state) {
+        this.state = state;
         notifyDataSetChanged();
     }
 
@@ -87,15 +80,14 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
         if (holder instanceof MenuGroupTitleViewHolder) {
             ItemNavDrawerMenuGroupTitleBinding binding = ((MenuGroupTitleViewHolder) holder).binding;
             binding.titleTextViewItemNavDrawerMenuGroupTitle.setText(R.string.recents);
-            binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(collapseSection
+            binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(state == DrawerSectionState.COLLAPSED
                     ? R.drawable.ic_baseline_arrow_drop_up_24dp : R.drawable.ic_baseline_arrow_drop_down_24dp);
 
             holder.itemView.setOnClickListener(view -> {
-                collapseSection = !collapseSection;
+                state = state == DrawerSectionState.COLLAPSED ? DrawerSectionState.SHOWN : DrawerSectionState.COLLAPSED;
                 // Kept, so it is still collapsed (or not) after a restart.
-                navigationDrawerSharedPreferences.edit()
-                        .putBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, collapseSection).apply();
-                if (collapseSection) {
+                DrawerSection.RECENTS.write(navigationDrawerSharedPreferences, state);
+                if (state == DrawerSectionState.COLLAPSED) {
                     notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, recentSubreddits.size());
                 } else {
                     notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, recentSubreddits.size());
@@ -146,10 +138,10 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
 
     @Override
     public int getItemCount() {
-        if (hideSection) {
+        if (state == DrawerSectionState.HIDDEN) {
             return 0;
         }
-        return recentSubreddits.isEmpty() ? 0 : (collapseSection ? 1 : recentSubreddits.size() + 1);
+        return recentSubreddits.isEmpty() ? 0 : (state == DrawerSectionState.COLLAPSED ? 1 : recentSubreddits.size() + 1);
     }
 
     @Override
