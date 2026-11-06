@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.26-beta.17 / 2026-11-6
+============
+* Internal clean-up with no change in what you see: the code that ran the bottom app bar's buttons, its hide-on-scroll and its inbox badge is removed from the main feed, subreddit, user and multireddit screens
+
 8.3.3.9.1.26-beta.16 / 2026-11-6
 ============
 * Removed the bottom app bar settings: Enable Bottom App Bar, Customize Bottom App Bar and Lock Bottom App Bar. The bar stays off whatever an older version stored
