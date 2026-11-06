@@ -500,7 +500,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Masquer les publications texte et les publications sans aperçu"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Le mode Shadowbox ignore chaque publication texte et toute autre publication sans image d'aperçu."</string>
     <string name="settings_font_title">"Police"</string>
-    <string name="settings_preview_font_title">"Prévisualisation de la police"</string>
     <string name="settings_font_summary">"Police"</string>
     <string name="settings_title_font_summary">"Titre"</string>
     <string name="settings_content_font_summary">"Contenu"</string>
@@ -712,10 +711,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_collapse_reddit_section_title">"Réduire Section Reddit"</string>
     <string name="settings_collapse_post_section_title">"Réduire la section publication"</string>
     <string name="settings_collapse_preferences_section_title">"Réduire la section des préférences"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Réduire la section Subreddit favoris"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Réduire la section Subreddit Suivi"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Cacher la section de subreddits favoris"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Caché la section Subreddit Suivi"</string>
     <string name="settings_quick_toggles_title">"Bascules rapides"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Afficher la bascule du thème"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Afficher NSFW Bascule"</string>

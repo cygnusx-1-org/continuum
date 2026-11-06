@@ -500,7 +500,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"बिना किसी पूर्वावलोकन के टेक्स्ट पोस्ट और पोस्ट छुपाएं"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"शैडोबॉक्स मोड प्रत्येक टेक्स्ट पोस्ट और किसी भी अन्य पोस्ट को छोड़ देता है जिसमें कोई पूर्वावलोकन छवि नहीं है।"</string>
     <string name="settings_font_title">"फॉन्ट "</string>
-    <string name="settings_preview_font_title">"फॉन्ट पूर्वदर्शन "</string>
     <string name="settings_font_summary">"फॉन्ट"</string>
     <string name="settings_title_font_summary">"शीर्षक "</string>
     <string name="settings_content_font_summary">"अंतःवस्तु"</string>
@@ -715,10 +714,6 @@
     <string name="settings_collapse_reddit_section_title">"संक्षिप्त करें Reddit अनुभाग"</string>
     <string name="settings_collapse_post_section_title">"पोस्ट सेक्शन को संक्षिप्त करें"</string>
     <string name="settings_collapse_preferences_section_title">"प्राथमिकता अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"पसंदीदा सबरेडिट अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"सब्स्क्राइब्ड सबरेडिट अनुभाग को संक्षिप्त करें"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"पसंदीदा सबरेडिट अनुभाग छुपाएं"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"सब्स्क्राइब्ड सबरेडिट अनुभाग छुपाएं"</string>
     <string name="settings_quick_toggles_title">"त्वरित टॉगल"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"शो थीम टॉगल"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"शो NSFW टॉगल करें"</string>

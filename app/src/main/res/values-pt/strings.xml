@@ -505,7 +505,6 @@ Toque para tentar novamente."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar publicações de texto e publicações sem pré-visualização"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"O modo Shadowbox ignora todas as publicações de texto e qualquer outra publicação que não tenha imagem de pré-visualização."</string>
     <string name="settings_font_title">"Tipo de Letra"</string>
-    <string name="settings_preview_font_title">"Pré-visualizar Tipo de Letra"</string>
     <string name="settings_font_summary">"Tipo de Letra"</string>
     <string name="settings_title_font_summary">"Titulo"</string>
     <string name="settings_content_font_summary">"Conteúdo"</string>
@@ -724,10 +723,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_collapse_reddit_section_title">"Recolher Secção do Reddit"</string>
     <string name="settings_collapse_post_section_title">"Colapsar Secção de Publicações"</string>
     <string name="settings_collapse_preferences_section_title">"Colapsar Secção de Preferências"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Colapsar Secção de Comunidades Favoritas"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Colapsar Secção de Comunidades Subscritas"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Esconder Secção de Comunidades Favoritas"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Esconder Secção de Comunidades Subscritas"</string>
     <string name="settings_quick_toggles_title">"Alternações rápidas"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Mostrar alternância de tema"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Mostrar NSFW Alternar"</string>

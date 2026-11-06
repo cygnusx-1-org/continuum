@@ -506,7 +506,6 @@ Toque para tentar de novo."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar postagens de texto e postagens sem visualização"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"O modo Shadowbox ignora todas as postagens de texto e qualquer outra postagem que não tenha imagem de visualização."</string>
     <string name="settings_font_title">"Fonte"</string>
-    <string name="settings_preview_font_title">"Prever fonte"</string>
     <string name="settings_font_summary">"Fonte"</string>
     <string name="settings_title_font_summary">"Título"</string>
     <string name="settings_content_font_summary">"Conteúdo"</string>
@@ -725,10 +724,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_collapse_reddit_section_title">"Retrair seção do Reddit"</string>
     <string name="settings_collapse_post_section_title">"Retrair seção de postagem"</string>
     <string name="settings_collapse_preferences_section_title">"Retrair seção de preferências"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Retrair seção de subreddits favoritos"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Retrair seção de subreddits que estou inscrito"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Ocultar seção de subreddits favoritos"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Ocultar seção de subreddits que estou inscrito"</string>
     <string name="settings_quick_toggles_title">"Alternações rápidas"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Mostrar alternância de tema"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Mostrar NSFW Alternar"</string>

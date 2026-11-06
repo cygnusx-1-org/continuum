@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestManager;
 import java.util.ArrayList;
@@ -15,48 +16,57 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerMenuGroupTitleBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerSubscribedThingBinding;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
-import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
-public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+/**
+ * A titled list of subreddits in the navigation drawer, which can be shown, collapsed or hidden.
+ * The favorites and the subscriptions are two of these.
+ */
+public class SubredditListSectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int VIEW_TYPE_MENU_GROUP_TITLE = 1;
-    private static final int VIEW_TYPE_FAVORITE_SUBSCRIBED_SUBREDDIT = 2;
+    private static final int VIEW_TYPE_SUBREDDIT = 2;
 
     private final BaseActivity baseActivity;
     private final RequestManager glide;
     private final int primaryTextColor;
     private final int secondaryTextColor;
-    private boolean collapseFavoriteSubredditsSection;
-    private boolean hideFavoriteSubredditsSection;
+    private final SharedPreferences navigationDrawerSharedPreferences;
+    private final DrawerSection section;
+    @StringRes
+    private final int titleRes;
+    private DrawerSectionState state;
+    private ArrayList<SubscribedSubredditData> subreddits = new ArrayList<>();
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
-    private ArrayList<SubscribedSubredditData> favoriteSubscribedSubreddits = new ArrayList<>();
 
-    public FavoriteSubscribedSubredditsSectionRecyclerViewAdapter(BaseActivity baseActivity, RequestManager glide,
-                                                                  CustomThemeWrapper customThemeWrapper,
-                                                                  SharedPreferences navigationDrawerSharedPreferences,
-                                                                  NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
+    public SubredditListSectionRecyclerViewAdapter(BaseActivity baseActivity, RequestManager glide,
+                                                   CustomThemeWrapper customThemeWrapper,
+                                                   SharedPreferences navigationDrawerSharedPreferences,
+                                                   DrawerSection section, @StringRes int titleRes,
+                                                   NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
         this.baseActivity = baseActivity;
         this.glide = glide;
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
-        collapseFavoriteSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION, false);
-        hideFavoriteSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION, false);
+        this.navigationDrawerSharedPreferences = navigationDrawerSharedPreferences;
+        this.section = section;
+        this.titleRes = titleRes;
+        this.state = section.read(navigationDrawerSharedPreferences);
         this.itemClickListener = itemClickListener;
     }
 
-    public void setCollapseFavoriteSubredditsSection(boolean collapseFavoriteSubredditsSection) {
-        this.collapseFavoriteSubredditsSection = collapseFavoriteSubredditsSection;
+    public void setState(DrawerSectionState state) {
+        this.state = state;
         notifyDataSetChanged();
     }
 
-    public void setHideFavoriteSubredditsSection(boolean hideFavoriteSubredditsSection) {
-        this.hideFavoriteSubredditsSection = hideFavoriteSubredditsSection;
+    public void setSubreddits(List<SubscribedSubredditData> subreddits) {
+        this.subreddits = (ArrayList<SubscribedSubredditData>) subreddits;
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_FAVORITE_SUBSCRIBED_SUBREDDIT;
+        return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_SUBREDDIT;
     }
 
     @NonNull
@@ -66,7 +76,7 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
             return new MenuGroupTitleViewHolder(ItemNavDrawerMenuGroupTitleBinding
                     .inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else {
-            return new FavoriteSubscribedThingViewHolder(ItemNavDrawerSubscribedThingBinding
+            return new SubredditViewHolder(ItemNavDrawerSubscribedThingBinding
                     .inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
     }
@@ -74,38 +84,39 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof MenuGroupTitleViewHolder) {
-            ((MenuGroupTitleViewHolder) holder).binding.titleTextViewItemNavDrawerMenuGroupTitle.setText(R.string.favorites);
-            if (collapseFavoriteSubredditsSection) {
-                ((MenuGroupTitleViewHolder) holder).binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_up_24dp);
-            } else {
-                ((MenuGroupTitleViewHolder) holder).binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_down_24dp);
-            }
+            ItemNavDrawerMenuGroupTitleBinding binding = ((MenuGroupTitleViewHolder) holder).binding;
+            binding.titleTextViewItemNavDrawerMenuGroupTitle.setText(titleRes);
+            binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(
+                    state == DrawerSectionState.COLLAPSED
+                            ? R.drawable.ic_baseline_arrow_drop_up_24dp : R.drawable.ic_baseline_arrow_drop_down_24dp);
 
             holder.itemView.setOnClickListener(view -> {
-                if (collapseFavoriteSubredditsSection) {
-                    collapseFavoriteSubredditsSection = !collapseFavoriteSubredditsSection;
-                    notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, favoriteSubscribedSubreddits.size());
+                boolean wasCollapsed = state == DrawerSectionState.COLLAPSED;
+                state = wasCollapsed ? DrawerSectionState.SHOWN : DrawerSectionState.COLLAPSED;
+                // Kept, so it is still collapsed (or not) after a restart.
+                section.write(navigationDrawerSharedPreferences, state);
+                if (wasCollapsed) {
+                    notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, subreddits.size());
                 } else {
-                    collapseFavoriteSubredditsSection = !collapseFavoriteSubredditsSection;
-                    notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, favoriteSubscribedSubreddits.size());
+                    notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, subreddits.size());
                 }
                 notifyItemChanged(holder.getBindingAdapterPosition());
             });
-        } else if (holder instanceof FavoriteSubscribedThingViewHolder) {
-            SubscribedSubredditData subreddit = favoriteSubscribedSubreddits.get(position - 1);
+        } else if (holder instanceof SubredditViewHolder) {
+            SubscribedSubredditData subreddit = subreddits.get(position - 1);
             String subredditName = subreddit.getName();
             String iconUrl = subreddit.getIconUrl();
-            ((FavoriteSubscribedThingViewHolder) holder).binding.thingNameTextViewItemNavDrawerSubscribedThing.setText(subredditName);
+            ((SubredditViewHolder) holder).binding.thingNameTextViewItemNavDrawerSubscribedThing.setText(subredditName);
             if (iconUrl != null && !iconUrl.equals("")) {
                 glide.load(iconUrl)
                         .transform(new RoundedCornersTransformation(72, 0))
                         .error(glide.load(R.drawable.subreddit_default_icon)
                                 .transform(new RoundedCornersTransformation(72, 0)))
-                        .into(((FavoriteSubscribedThingViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
+                        .into(((SubredditViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             } else {
                 glide.load(R.drawable.subreddit_default_icon)
                         .transform(new RoundedCornersTransformation(72, 0))
-                        .into(((FavoriteSubscribedThingViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
+                        .into(((SubredditViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             }
 
             holder.itemView.setOnClickListener(view -> {
@@ -116,23 +127,18 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
 
     @Override
     public int getItemCount() {
-        if (hideFavoriteSubredditsSection) {
+        if (state == DrawerSectionState.HIDDEN) {
             return 0;
         }
-        return favoriteSubscribedSubreddits.isEmpty() ? 0 : (collapseFavoriteSubredditsSection ? 1 : favoriteSubscribedSubreddits.size() + 1);
+        return subreddits.isEmpty() ? 0 : (state == DrawerSectionState.COLLAPSED ? 1 : subreddits.size() + 1);
     }
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
-        if (holder instanceof FavoriteSubscribedThingViewHolder) {
-            glide.clear(((FavoriteSubscribedThingViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
+        if (holder instanceof SubredditViewHolder) {
+            glide.clear(((SubredditViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
         }
-    }
-
-    public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
-        this.favoriteSubscribedSubreddits = (ArrayList<SubscribedSubredditData>) favoriteSubscribedSubreddits;
-        notifyDataSetChanged();
     }
 
     class MenuGroupTitleViewHolder extends RecyclerView.ViewHolder {
@@ -149,10 +155,10 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
         }
     }
 
-    class FavoriteSubscribedThingViewHolder extends RecyclerView.ViewHolder {
+    class SubredditViewHolder extends RecyclerView.ViewHolder {
         ItemNavDrawerSubscribedThingBinding binding;
 
-        FavoriteSubscribedThingViewHolder(@NonNull ItemNavDrawerSubscribedThingBinding binding) {
+        SubredditViewHolder(@NonNull ItemNavDrawerSubscribedThingBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             if (baseActivity.typeface != null) {

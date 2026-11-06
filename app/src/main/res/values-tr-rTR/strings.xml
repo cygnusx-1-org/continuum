@@ -506,7 +506,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Metin Gönderilerini ve Önizlemesiz Gönderileri Gizle"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox Modu, her metin gönderisini ve önizleme görüntüsü olmayan diğer tüm gönderileri atlar."</string>
     <string name="settings_font_title">"Yazı Tipi"</string>
-    <string name="settings_preview_font_title">"Yazı Tipi Önizlemesi"</string>
     <string name="settings_font_summary">"Yazı Tipi"</string>
     <string name="settings_title_font_summary">"Başlık"</string>
     <string name="settings_content_font_summary">"İçerik"</string>
@@ -721,10 +720,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_collapse_reddit_section_title">"Reddit Bölümünü Daralt"</string>
     <string name="settings_collapse_post_section_title">"Gönderi Bölümünü Daralt"</string>
     <string name="settings_collapse_preferences_section_title">"Tercihler Bölümünü Daralt"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Favori Subreddit'ler Bölümünü Daralt"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Abone Olunan Subreddit'ler Bölümünü Daralt"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Favori Subreddi'tler Bölümünü Gizle"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Abone Olunan Subreddit'ler Bölümünü Gizle"</string>
     <string name="settings_quick_toggles_title">"Hızlı Geçişler"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Temayı Göster Geçişi"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Göster NSFW Değiştir"</string>

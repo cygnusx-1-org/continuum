@@ -143,21 +143,6 @@ private fun getTypography(context: Context, sharedPreferences: SharedPreferences
 private fun getFontFamily(context: Context, fontFamily: String?): FontFamily? {
     return when (fontFamily) {
         "Default" -> null
-        "BalsamiqSans" -> FontFamily(Font(R.font.balsamiq_sans))
-        "BalsamiqSansBold" -> FontFamily(Font(R.font.balsamiq_sans_bold_version))
-        "NotoSans" -> FontFamily(Font(R.font.noto_sans))
-        "NotoSansBold" -> FontFamily(Font(R.font.noto_sans_bold_version))
-        "RobotoCondensed" -> FontFamily(Font(R.font.roboto_condensed))
-        "RobotoCondensedBold" -> FontFamily(Font(R.font.roboto_condensed_bold_version))
-        "HarmoniaSans" -> FontFamily(Font(R.font.harmonia_sans))
-        "HarmoniaSansBold" -> FontFamily(Font(R.font.harmonia_sans_bold))
-        "Inter" -> FontFamily(Font(R.font.inter))
-        "InterBold" -> FontFamily(Font(R.font.inter_bold))
-        "Manrope" -> FontFamily(Font(R.font.manrope))
-        "ManropeBold" -> FontFamily(Font(R.font.manrope_bold))
-        "Sriracha" -> FontFamily(Font(R.font.sriracha_regular))
-        "AtkinsonHyperlegible" -> FontFamily(Font(R.font.atkinson_hyperlegible))
-        "AtkinsonHyperlegibleBold" -> FontFamily(Font(R.font.atkinson_hyperlegible_bold_version))
         "Custom" -> (context.applicationContext as Infinity).typeface?.let { FontFamily(it) }
         else -> null
     }

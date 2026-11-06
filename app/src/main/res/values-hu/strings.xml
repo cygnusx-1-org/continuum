@@ -497,7 +497,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Szöveges bejegyzések és előnézet nélküli bejegyzések elrejtése"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"A Shadowbox mód minden szöveges bejegyzést kihagy, és minden olyan bejegyzést, amelynél nincs előnézeti kép."</string>
     <string name="settings_font_title">"Betűtípus"</string>
-    <string name="settings_preview_font_title">"Betűtípus előnézet"</string>
     <string name="settings_font_summary">"Betűtípus"</string>
     <string name="settings_title_font_summary">"Cím"</string>
     <string name="settings_content_font_summary">"Tartalom"</string>
@@ -712,10 +711,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_collapse_reddit_section_title">"Összecsukás Reddit szakasz"</string>
     <string name="settings_collapse_post_section_title">"Poszt szekció becsukása"</string>
     <string name="settings_collapse_preferences_section_title">"Preferenciák szekció becsukása"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Kedvenc subreddit szekció becsukása"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Feliratkozott subredditek szekció becsukása"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Kedvenc subreddit szekció elrejtése"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Feliratkozott subreddit szekció elrejtése"</string>
     <string name="settings_quick_toggles_title">"gyorskapcsolók"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Téma megjelenítése kapcsoló"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"NSFW megjelenítése Váltás"</string>

@@ -505,7 +505,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ascunde postările text și postările fără previzualizare"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Modul Shadowbox omite fiecare postare text și orice altă postare care nu are nicio imagine de previzualizare."</string>
     <string name="settings_font_title">"Font"</string>
-    <string name="settings_preview_font_title">"Previzualizare font"</string>
     <string name="settings_font_summary">"Font"</string>
     <string name="settings_title_font_summary">"Titlu"</string>
     <string name="settings_content_font_summary">"Conținut"</string>
@@ -724,10 +723,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_collapse_reddit_section_title">"Restrânge Secția Reddit"</string>
     <string name="settings_collapse_post_section_title">"Restrânge Secția de Postare"</string>
     <string name="settings_collapse_preferences_section_title">"Restrânge Secția de Preferințe"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Restrânge Secția Subreddit-urilor Favorite"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Restrânge Secția Subreddit-urilor Abonate"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Ascunde Secțiunea Subreddit-urilor Favorite"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Ascunde Secțiunea Subreddit-urilor Abonate"</string>
     <string name="settings_quick_toggles_title">"Comutări rapide"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Afișare comutare teme"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Afișează NSFW Comută"</string>

@@ -505,7 +505,6 @@
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Приховати текстові дописи та дописи без попереднього перегляду"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Режим Shadowbox пропускає кожну текстову публікацію та будь-яку іншу публікацію, яка не має попереднього зображення."</string>
     <string name="settings_font_title">"Шрифт"</string>
-    <string name="settings_preview_font_title">"Перегляд шрифтів"</string>
     <string name="settings_font_summary">"Шрифт"</string>
     <string name="settings_title_font_summary">"Заголовок"</string>
     <string name="settings_content_font_summary">"Вміст"</string>
@@ -724,10 +723,6 @@
     <string name="settings_collapse_reddit_section_title">"Згорнути розділ Reddit"</string>
     <string name="settings_collapse_post_section_title">"Згорнути розділ Допис"</string>
     <string name="settings_collapse_preferences_section_title">"Згорнути розділ Властивості"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Згорнути розділ відібраних сабредитів"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Згорнути розділ підписаних сабредитів"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Сховати розділ відібраних сабредитів"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Сховати розділ підписаних сабредитів"</string>
     <string name="settings_quick_toggles_title">"Швидкі перемикачі"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Показати перемикач теми"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Показати NSFW Перемикач"</string>

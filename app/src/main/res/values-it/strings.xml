@@ -506,7 +506,6 @@ Tocca per riprovare."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Nascondi post di testo e post senza anteprima"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"La modalità Shadowbox salta ogni post di testo e qualsiasi altro post privo di immagine di anteprima."</string>
     <string name="settings_font_title">"Caratteri"</string>
-    <string name="settings_preview_font_title">"Anteprima carattere"</string>
     <string name="settings_font_summary">"Caratteri"</string>
     <string name="settings_title_font_summary">"Titolo"</string>
     <string name="settings_content_font_summary">"Contenuto"</string>
@@ -725,10 +724,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_collapse_reddit_section_title">"Comprimi la sezione Reddit"</string>
     <string name="settings_collapse_post_section_title">"Comprimi la sezione Post"</string>
     <string name="settings_collapse_preferences_section_title">"Comprimi la sezione Preferenze"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Comprimi la sezione Subreddit preferiti"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Comprimi la sezione Subreddit sottoscritti"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Nascondi sezione Subreddit preferiti"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Nascondi la sezione Subreddit a cui sei iscritto"</string>
     <string name="settings_quick_toggles_title">"Commutatori rapidi"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Mostra alternanza tema"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Mostra NSFW Attiva/disattiva"</string>

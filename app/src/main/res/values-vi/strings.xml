@@ -498,7 +498,6 @@ Nhấn để thử lại."</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ẩn bài viết văn bản và bài viết không có bản xem trước"</string>
     <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Chế độ hộp bóng bỏ qua mọi bài đăng văn bản và bất kỳ bài đăng nào khác không có hình ảnh xem trước."</string>
     <string name="settings_font_title">"Phông chữ"</string>
-    <string name="settings_preview_font_title">"Xem trước phông chữ"</string>
     <string name="settings_font_summary">"Phông chữ"</string>
     <string name="settings_title_font_summary">"Tiêu đề"</string>
     <string name="settings_content_font_summary">"Nội dung"</string>
@@ -717,10 +716,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_collapse_reddit_section_title">"Thu gọn khu vực Reddit"</string>
     <string name="settings_collapse_post_section_title">"Thu gọn khu vực bài đăng"</string>
     <string name="settings_collapse_preferences_section_title">"Thu gọn khu vực cài đặt"</string>
-    <string name="settings_collapse_favorite_subreddits_section_title">"Thu gọn khu vực subreddit yêu thích"</string>
-    <string name="settings_collapse_subscribed_subreddits_section_title">"Thu gọn khu vực subreddit đã đăng ký"</string>
-    <string name="settings_hide_favorite_subreddits_sections_title">"Ẩn khu vực subreddit yêu thích"</string>
-    <string name="settings_hide_subscribed_subreddits_sections_title">"Ẩn khu vực subreddit đã đăng ký"</string>
     <string name="settings_quick_toggles_title">"Chuyển đổi nhanh"</string>
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">"Hiển thị chủ đề Chuyển đổi"</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">"Hiển thị NSFW Chuyển đổi"</string>
