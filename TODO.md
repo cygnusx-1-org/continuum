@@ -13,7 +13,7 @@ Things deliberately left alone, and why. State as of 2026-11-06: `8.3.3.9.1.26-b
 
 ## Release housekeeping
 
-- [ ] `versionName` is still a beta (`8.3.3.9.1.26-beta.14` on master). The next stable release needs a plain version and tag.
+- [x] `8.3.3.9.1.26` is the stable release that rolls up the betas since `.22`. Betas after it start again at `8.3.3.9.1.27-beta.1`.
 - [ ] The stray tag `v8.3.3.9.1.23-beta.1` is still on the remote (a deletion was denied once). `git push origin :refs/tags/v8.3.3.9.1.23-beta.1` removes it.
 - [ ] Backups are plain zips and hold accounts, Client ID and the Giphy key; the English description says to keep the file private.
 

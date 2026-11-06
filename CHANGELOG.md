@@ -2,6 +2,31 @@
 
 ---
 
+8.3.3.9.1.26 / 2026-11-6
+============
+This stable release rolls up every beta since 8.3.3.9.1.22 (the entries below have the detail).
+
+**New**
+* Card Clean layout: the Card Bottom layout without its row of buttons, for people who swipe to vote, save and share
+* Settings is at the bottom of the three-dot menu on every screen; Change Post Layout is a short list there instead of a bottom sheet
+* Picture numbers in the vertical gallery list
+* The floating button's action is a plain setting again, one for the main page and one for the other pages (Settings > Interface)
+
+**Changed**
+* Card Layout is now Card Bottom, Card Layout 3 is Card Top, Compact Layout 2 is Compact Layout; Compact Layout 1 and Card Layout 2 are gone (feeds that used them show a card layout)
+* Backing up and restoring settings no longer asks for a password
+* The bottom app bar and the landscape/tablet navigation rail are removed, with their settings and the two bottom bar colours of custom themes; in landscape and on tablets the floating button now hides on scroll like in portrait
+* Settings reorganised: Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar settings moved out of Interface onto the settings home; Time Format and Immersive Interface are on Interface; Data Saving is on the Download Location screen ("Data saving and downloads"); Proxy is on the Notifications screen; Global Settings Management is part of Backup and Restore ("Backup, restore and reset")
+* Navigation drawer: Recents, Favorite Subreddits and Subscribed Subreddits are each Shown, Collapsed or Hidden
+* Fonts: only Default and Custom are offered for the app, titles and content; the bundled fonts and the Font Preview screen are removed
+* Changing the post layout waits for the menu to close and turns swipe actions on or off to match the new layout
+
+**Removed**
+* Delete All Legacy Settings, Use /api/info the Old Way, and the volume-key navigation settings and code
+
+**Inside**
+* The post list adapter was split into separate files and its upvote/downvote code is shared; the settings migration code and the repeated restore steps are shared helpers; the custom theme table drops two unused columns (database version 48)
+
 8.3.3.9.1.26-beta.22 / 2026-11-6
 ============
 * Navigation drawer settings: Recents, Favorite Subreddits and Subscribed Subreddits each have one choice, Shown, Collapsed or Hidden, instead of a collapse switch and a hide switch. What you had set is carried over (hidden wins over collapsed, as before). Tapping a section's title in the drawer now remembers the collapse for the favorites and subscriptions too, as it already did for recents
