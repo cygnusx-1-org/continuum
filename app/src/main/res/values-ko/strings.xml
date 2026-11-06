@@ -625,10 +625,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"메인 페이지"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"기타 페이지"</string>
     <string name="settings_bottom_app_bar_option_count">"옵션 수"</string>
-    <string name="settings_bottom_app_bar_option_1">"옵션 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"옵션 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"옵션 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"옵션 4"</string>
     <string name="settings_bottom_app_bar_fab">"플로팅 작업 버튼"</string>
     <string name="settings_data_saving_mode">"데이터 절약 모드"</string>
     <string name="settings_data_saving_mode_info_summary">"데이터 절약 모드:\n미리보기 이미지의 해상도가 낮습니다.\nReddit 및 Redgifs 동영상의 해상도가 낮습니다.\n동영상 자동 재생이 비활성화됩니다."</string>

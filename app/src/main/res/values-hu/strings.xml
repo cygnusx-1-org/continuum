@@ -617,10 +617,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Főoldal"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Más oldalak"</string>
     <string name="settings_bottom_app_bar_option_count">"Opció szám"</string>
-    <string name="settings_bottom_app_bar_option_1">"1. opció"</string>
-    <string name="settings_bottom_app_bar_option_2">"2. opció"</string>
-    <string name="settings_bottom_app_bar_option_3">"3. opció"</string>
-    <string name="settings_bottom_app_bar_option_4">"4. opció"</string>
     <string name="settings_bottom_app_bar_fab">"Lebegő művelet gomb"</string>
     <string name="settings_data_saving_mode">"Adatcsökkentő mód"</string>
     <string name="settings_data_saving_mode_info_summary">"Adatcsökkentő módban:

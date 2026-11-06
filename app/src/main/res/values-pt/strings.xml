@@ -629,10 +629,6 @@ Caso contrário, altere o nome antes de ativar Material You"</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Página Principal"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Outras Páginas"</string>
     <string name="settings_bottom_app_bar_option_count">"Número de Opções"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opção 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opção 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opção 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opção 4"</string>
     <string name="settings_bottom_app_bar_fab">"Botão de Ação Flutuante"</string>
     <string name="settings_data_saving_mode">"Modo de Poupança de Dados"</string>
     <string name="settings_data_saving_mode_info_summary">"No modo de poupança de dados:

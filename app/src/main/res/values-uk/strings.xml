@@ -629,10 +629,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Основна сторінка"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Інші сторінки"</string>
     <string name="settings_bottom_app_bar_option_count">"Кількість параметрів"</string>
-    <string name="settings_bottom_app_bar_option_1">"Параметр 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Параметр 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Параметр 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Параметр 4"</string>
     <string name="settings_bottom_app_bar_fab">"Плаваюча кнопка дії"</string>
     <string name="settings_data_saving_mode">"Режим збереження даних"</string>
     <string name="settings_data_saving_mode_info_summary">"У режимі зберігання даних:

@@ -83,7 +83,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UserThingSortTypeBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
-import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewUserDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
@@ -199,7 +199,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private final FeedResumeState resumeFeed = new FeedResumeState();
     private int resumeTab = -1;
     private RequestManager glide;
-    private NavigationWrapper navigationWrapper;
+    private FloatingActionButton fab;
     @Nullable
     private Runnable autoCompleteRunnable;
     @Nullable
@@ -242,8 +242,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private int topSystemBarHeight;
     private boolean showToast = false;
     private boolean hideFab;
-    private boolean showBottomAppBar;
-    private boolean lockBottomAppBar;
     @Nullable
     private String mMessageFullname;
     @Nullable
@@ -269,14 +267,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         claimResumeState();
 
         hideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED, false);
-        // The bottom app bar is gone as a setting; this keeps its code paths switched off.
-        showBottomAppBar = false;
 
-        navigationWrapper = new NavigationWrapper(findViewById(R.id.bottom_app_bar_bottom_app_bar), findViewById(R.id.linear_layout_bottom_app_bar),
-                findViewById(R.id.option_1_bottom_app_bar), findViewById(R.id.option_2_bottom_app_bar),
-                findViewById(R.id.option_3_bottom_app_bar), findViewById(R.id.option_4_bottom_app_bar),
-                findViewById(R.id.fab_view_user_detail_activity),
-                findViewById(R.id.navigation_rail), customThemeWrapper, showBottomAppBar);
+        fab = findViewById(R.id.fab_view_user_detail_activity);
 
         EventBus.getDefault().register(this);
 
@@ -299,7 +291,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
         fragmentManager = getSupportFragmentManager();
 
-        lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
 
         if (username.equalsIgnoreCase("me")) {
             username = accountName;
@@ -356,58 +347,19 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
                         int padding16 = (int) Utils.convertDpToPixel(16, ViewUserDetailActivity.this);
 
-                        if (navigationWrapper.navigationRailView == null) {
-                            if (navigationWrapper.bottomAppBar.getVisibility() != View.VISIBLE) {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        padding16 + allInsets.right,
-                                        padding16 + allInsets.bottom);
-                            } else {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        allInsets.bottom);
-                            }
-                        } else {
-                            if (navigationWrapper.navigationRailView.getVisibility() != View.VISIBLE) {
-                                setMargins(navigationWrapper.floatingActionButton,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        padding16 + allInsets.right,
-                                        padding16 + allInsets.bottom);
+                        setMargins(fab,
+                                BaseActivity.IGNORE_MARGIN,
+                                BaseActivity.IGNORE_MARGIN,
+                                padding16 + allInsets.right,
+                                padding16 + allInsets.bottom);
 
-                                binding.viewPagerViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-                            } else {
-                                navigationWrapper.navigationRailView.setFitsSystemWindows(false);
-                                navigationWrapper.navigationRailView.setPadding(0, 0, 0, allInsets.bottom);
-
-                                setMargins(navigationWrapper.navigationRailView,
-                                        allInsets.left,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN,
-                                        BaseActivity.IGNORE_MARGIN
-                                );
-
-                                binding.viewPagerViewUserDetailActivity.setPadding(0, 0, allInsets.right, 0);
-                            }
-                        }
+                        binding.viewPagerViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
 
                         binding.toolbarConstraintLayoutViewUserDetailActivity.setPadding(
                                 padding16 + allInsets.left,
                                 binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingTop(),
                                 padding16 + allInsets.right,
                                 binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingBottom());
-
-                        if (navigationWrapper.bottomAppBar != null) {
-                            navigationWrapper.linearLayoutBottomAppBar.setPadding(
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingLeft(),
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingTop(),
-                                    navigationWrapper.linearLayoutBottomAppBar.getPaddingRight(),
-                                    allInsets.bottom
-                            );
-                        }
 
                         setMargins(binding.toolbarViewUserDetailActivity,
                                 allInsets.left,
@@ -420,16 +372,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         return insets;
                     }
                 });
-                /*adjustToolbar(binding.toolbarViewUserDetailActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    if (navigationWrapper.navigationRailView == null) {
-                        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) navigationWrapper.floatingActionButton.getLayoutParams();
-                        params.bottomMargin += navBarHeight;
-                        navigationWrapper.floatingActionButton.setLayoutParams(params);
-                    }
-                }*/
                 showToast = true;
             }
 
@@ -829,8 +771,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         binding.userNameTextViewViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getUsername());
         binding.karmaTextViewViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
         binding.cakedayTextViewViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
-        navigationWrapper.applyCustomTheme(mCustomThemeWrapper.getBottomAppBarIconColor(), mCustomThemeWrapper.getBottomAppBarBackgroundColor());
-        applyFABTheme(navigationWrapper.floatingActionButton);
+        applyFABTheme(fab);
         binding.descriptionTextViewViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
         binding.subscribeUserChipViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getChipTextColor());
         // Sits on the header background, not the toolbar, so it takes the same colour as the rest
@@ -888,11 +829,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             lockSwipeRightToGoBack();
         }
 
-        if (showBottomAppBar) {
-            navigationWrapper.showNavigation();
-        }
         if (!hideFab) {
-            navigationWrapper.showFab();
+            fab.show();
         }
 
         sectionsPagerAdapter.displaySortTypeInToolbar();
@@ -973,145 +911,57 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             });
         }
 
-        navigationWrapper.floatingActionButton.setVisibility(hideFab ? View.GONE : View.VISIBLE);
+        fab.setVisibility(hideFab ? View.GONE : View.VISIBLE);
 
-        if (showBottomAppBar) {
-            int optionCount = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT, 4);
-            int option1 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HOME);
-            int option2 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS);
-
-            if (optionCount == 2) {
-                navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1), getBottomAppBarOptionDrawableResource(option2));
-                navigationWrapper.bindOptions(option1, option2);
-
-                if (navigationWrapper.navigationRailView == null) {
-                    navigationWrapper.option2BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option1);
-                    });
-
-                    navigationWrapper.option4BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option2);
-                    });
-
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option2BottomAppBar, option1);
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option4BottomAppBar, option2);
-                } else {
-                    navigationWrapper.navigationRailView.setOnItemSelectedListener(item -> {
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.navigation_rail_option_1) {
-                            bottomAppBarOptionAction(option1);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_2) {
-                            bottomAppBarOptionAction(option2);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            } else {
-                int option3 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_MULTIREDDITS : SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX);
-                int option4 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_REFRESH : SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_PROFILE);
-
-                navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1),
-                        getBottomAppBarOptionDrawableResource(option2), getBottomAppBarOptionDrawableResource(option3),
-                        getBottomAppBarOptionDrawableResource(option4));
-                navigationWrapper.bindOptions(option1, option2, option3, option4);
-
-                if (navigationWrapper.navigationRailView == null) {
-                    navigationWrapper.option1BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option1);
-                    });
-
-                    navigationWrapper.option2BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option2);
-                    });
-
-                    navigationWrapper.option3BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option3);
-                    });
-
-                    navigationWrapper.option4BottomAppBar.setOnClickListener(view -> {
-                        bottomAppBarOptionAction(option4);
-                    });
-
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option1BottomAppBar, option1);
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option2BottomAppBar, option2);
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option3BottomAppBar, option3);
-                    navigationWrapper.setOtherActivitiesContentDescription(this, navigationWrapper.option4BottomAppBar, option4);
-                } else {
-                    navigationWrapper.navigationRailView.setOnItemSelectedListener(item -> {
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.navigation_rail_option_1) {
-                            bottomAppBarOptionAction(option1);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_2) {
-                            bottomAppBarOptionAction(option2);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_3) {
-                            bottomAppBarOptionAction(option3);
-                            return true;
-                        } else if (itemId == R.id.navigation_rail_option_4) {
-                            bottomAppBarOptionAction(option4);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-            }
-        } else {
-            CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) navigationWrapper.floatingActionButton.getLayoutParams();
-            lp.setAnchorId(View.NO_ID);
-            lp.gravity = Gravity.END | Gravity.BOTTOM;
-            navigationWrapper.floatingActionButton.setLayoutParams(lp);
-        }
+    
 
         fabOption = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
         switch (fabOption) {
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_REFRESH:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_refresh_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_refresh_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_CHANGE_SORT_TYPE:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_sort_toolbar_24dp);
+                fab.setImageResource(R.drawable.ic_sort_toolbar_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_CHANGE_POST_LAYOUT:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_post_layout_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_post_layout_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SEARCH:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_search_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_search_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_GO_TO_SUBREDDIT:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_subreddit_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_subreddit_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_GO_TO_USER:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_user_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_user_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_HIDE_READ_POSTS:
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
                     fabOption = SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_FILTER_POSTS;
                 } else {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_hide_read_posts_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_hide_read_posts_day_night_24dp);
                 }
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_FILTER_POSTS:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
                 break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_GO_TO_TOP:
-                navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_keyboard_double_arrow_up_day_night_24dp);
+                fab.setImageResource(R.drawable.ic_keyboard_double_arrow_up_day_night_24dp);
                 break;
             default:
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_filter_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_filter_day_night_24dp);
                     fabOption = SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_FILTER_POSTS;
                 } else {
-                    navigationWrapper.floatingActionButton.setImageResource(R.drawable.ic_add_day_night_24dp);
+                    fab.setImageResource(R.drawable.ic_add_day_night_24dp);
                 }
                 break;
         }
 
-        setOtherActivitiesFabContentDescription(navigationWrapper.floatingActionButton, fabOption);
+        setOtherActivitiesFabContentDescription(fab, fabOption);
 
-        navigationWrapper.floatingActionButton.setOnClickListener(view -> {
+        fab.setOnClickListener(view -> {
             switch (fabOption) {
                 case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_REFRESH: {
                     if (sectionsPagerAdapter != null) {
@@ -1162,7 +1012,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     break;
             }
         });
-        navigationWrapper.floatingActionButton.setOnLongClickListener(view -> {
+        fab.setOnLongClickListener(view -> {
             FABMoreOptionsBottomSheetFragment fabMoreOptionsBottomSheetFragment = new FABMoreOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putBoolean(FABMoreOptionsBottomSheetFragment.EXTRA_ANONYMOUS_MODE, accountName.equals(Account.ANONYMOUS_ACCOUNT));
@@ -1171,163 +1021,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             return true;
         });
 
-        InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
-    }
-
-    private void bottomAppBarOptionAction(int option) {
-        switch (option) {
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HOME: {
-                EventBus.getDefault().post(new GoBackToMainPageEvent());
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS: {
-                Intent intent = new Intent(this, SubscribedThingListingActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX: {
-                Intent intent = new Intent(this, InboxActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_PROFILE: {
-                Intent intent = new Intent(this, ViewUserDetailActivity.class);
-                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, accountName);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_MULTIREDDITS: {
-                Intent intent = new Intent(this, SubscribedThingListingActivity.class);
-                intent.putExtra(SubscribedThingListingActivity.EXTRA_SHOW_MULTIREDDITS, true);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS: {
-                PostTypeBottomSheetFragment postTypeBottomSheetFragment = new PostTypeBottomSheetFragment();
-                postTypeBottomSheetFragment.show(getSupportFragmentManager(), postTypeBottomSheetFragment.getTag());
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_REFRESH: {
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.refresh();
-                }
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE: {
-                displaySortTypeBottomSheetFragment();
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT: {
-                PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-                postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SEARCH: {
-                Intent intent = new Intent(this, SearchActivity.class);
-                intent.putExtra(SearchActivity.EXTRA_SEARCH_IN_SUBREDDIT_OR_USER_NAME, username);
-                intent.putExtra(SearchActivity.EXTRA_SEARCH_IN_THING_TYPE, SelectThingReturnKey.THING_TYPE.USER);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT:
-                goToSubreddit();
-                break;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_USER:
-                goToUser();
-                break;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS:
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.hideReadPosts();
-                }
-                break;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_FILTER_POSTS:
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.filterPosts();
-                }
-                break;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_UPVOTED: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_UPVOTED);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_DOWNVOTED: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_DOWNVOTED);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDDEN: {
-                Intent intent = new Intent(this, AccountPostsActivity.class);
-                intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_HIDDEN);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED: {
-                Intent intent = new Intent(ViewUserDetailActivity.this, AccountSavedThingActivity.class);
-                startActivity(intent);
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT: {
-                boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
-                mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
-                EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
-                break;
-            }
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
-            default: {
-                if (sectionsPagerAdapter != null) {
-                    sectionsPagerAdapter.goBackToTop();
-                }
-                break;
-            }
-        }
-    }
-
-    private int getBottomAppBarOptionDrawableResource(int option) {
-        switch (option) {
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HOME:
-                return R.drawable.ic_home_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS:
-                return R.drawable.ic_subscriptions_bottom_app_bar_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX:
-                return R.drawable.ic_inbox_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_PROFILE:
-                return R.drawable.ic_account_circle_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_MULTIREDDITS:
-                return R.drawable.ic_multi_reddit_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS:
-                return R.drawable.ic_add_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_REFRESH:
-                return R.drawable.ic_refresh_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE:
-                return R.drawable.ic_sort_toolbar_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_CHANGE_POST_LAYOUT:
-                return R.drawable.ic_post_layout_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SEARCH:
-                return R.drawable.ic_search_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_SUBREDDIT:
-                return R.drawable.ic_subreddit_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_USER:
-                return R.drawable.ic_user_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS:
-                return R.drawable.ic_hide_read_posts_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_FILTER_POSTS:
-                return R.drawable.ic_filter_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_UPVOTED:
-                return R.drawable.ic_arrow_upward_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_DOWNVOTED:
-                return R.drawable.ic_arrow_downward_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDDEN:
-                return R.drawable.ic_lock_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED:
-                return R.drawable.ic_bookmarks_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT:
-                return R.drawable.ic_thumbnail_left_day_night_24dp;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
-            default:
-                return R.drawable.ic_keyboard_double_arrow_up_day_night_24dp;
-        }
     }
 
     private void displaySortTypeBottomSheetFragment() {
@@ -1392,11 +1085,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
     public void toggleReplyNotifications(Comment comment, int position) {
         sectionsPagerAdapter.toggleCommentReplyNotification(comment, position);
-    }
-
-    @ExperimentalBadgeUtils
-    private void setInboxCount(int inboxCount) {
-        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     /**
@@ -1835,21 +1523,15 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
     @Override
     public void contentScrollUp() {
-        if (showBottomAppBar && !lockBottomAppBar) {
-            navigationWrapper.showNavigation();
-        }
-        if (!(showBottomAppBar && lockBottomAppBar) && !hideFab) {
-            navigationWrapper.showFab();
+        if (!hideFab) {
+            fab.show();
         }
     }
 
     @Override
     public void contentScrollDown() {
-        if (!(showBottomAppBar && lockBottomAppBar) && !hideFab) {
-            navigationWrapper.hideFab();
-        }
-        if (showBottomAppBar && !lockBottomAppBar) {
-            navigationWrapper.hideNavigation();
+        if (!hideFab) {
+            fab.hide();
         }
     }
 

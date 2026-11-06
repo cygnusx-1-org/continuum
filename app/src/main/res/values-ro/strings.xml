@@ -629,10 +629,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Pagina Principală"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Alte Pagini"</string>
     <string name="settings_bottom_app_bar_option_count">"Număr de Opțiuni"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opțiunea 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opțiunea 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opțiunea 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opțiunea 4"</string>
     <string name="settings_bottom_app_bar_fab">"Buton de Acțiune Plutitor"</string>
     <string name="settings_data_saving_mode">"Regim de Economisire a Datelor"</string>
     <string name="settings_data_saving_mode_info_summary">"În regimul de economisire a datelor:

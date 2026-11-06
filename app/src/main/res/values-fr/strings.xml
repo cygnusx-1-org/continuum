@@ -620,10 +620,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Page Principale"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Autres pages"</string>
     <string name="settings_bottom_app_bar_option_count">"Nombre d'options"</string>
-    <string name="settings_bottom_app_bar_option_1">"Option 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Option 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Option 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Option 4"</string>
     <string name="settings_bottom_app_bar_fab">"Action du bouton flottant"</string>
     <string name="settings_data_saving_mode">"Mode économie de données"</string>
     <string name="settings_data_saving_mode_info_summary">"En mode d'économie de données :\nLes images d'aperçu sont en résolution inférieure.\nReddit et Redgifs les vidéos sont en résolution inférieure.\nLa lecture automatique des vidéos est désactivée."</string>

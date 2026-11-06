@@ -628,10 +628,6 @@
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Главная страница"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Другие страницы"</string>
     <string name="settings_bottom_app_bar_option_count">"Количество вариантов"</string>
-    <string name="settings_bottom_app_bar_option_1">"Действие 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Действие 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Действие 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Действие 4"</string>
     <string name="settings_bottom_app_bar_fab">"Плавающая кнопка действий"</string>
     <string name="settings_data_saving_mode">"Режим экономии трафика"</string>
     <string name="settings_data_saving_mode_info_summary">"В режиме экономии трафика:

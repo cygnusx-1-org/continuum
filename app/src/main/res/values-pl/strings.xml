@@ -622,10 +622,6 @@ W przeciwnym razie, zmień ich nazwę przed włączeniem Material You."</string>
     <string name="settings_main_activity_bottom_app_bar_group_summary">"Strona główna"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"Inne strony"</string>
     <string name="settings_bottom_app_bar_option_count">"Liczba opcji"</string>
-    <string name="settings_bottom_app_bar_option_1">"Opcja 1"</string>
-    <string name="settings_bottom_app_bar_option_2">"Opcja 2"</string>
-    <string name="settings_bottom_app_bar_option_3">"Opcja 3"</string>
-    <string name="settings_bottom_app_bar_option_4">"Opcja 4"</string>
     <string name="settings_bottom_app_bar_fab">"Pływający przycisk akcji"</string>
     <string name="settings_data_saving_mode">"Tryb oszczędzania danych"</string>
     <string name="settings_data_saving_mode_info_summary">"W trybie oszczędzania danych:
