@@ -1,49 +1,58 @@
 # TODO
 
-Things deliberately left alone, and why.
+Things deliberately left alone, and why. State as of 2026-11-06: `8.3.3.9.1.26-beta.14` is released; the layout-change fix in PR #41 (`beta.15`) is built and waiting for a merge.
 
-- [ ] **Split up `PostRecyclerViewAdapter`: the moving is done; the DRY pass is parked.** The adapter went from 7,911 lines to about 4,030. Every family is moved and the owner confirmed all betas through `8.3.3.9.1.25-beta.6` on a phone (2026-11-05). **Order of work from here: feature enhancements and settings cleanup first, then the DRY pass below.** Each DRY step is its own pull request and release.
+## Waiting on the owner
 
-  **Where we left off (2026-11-05).** The last family (the card previews: `PostWithPreviewTypeViewHolder`, `PostBaseGalleryTypeViewHolder`, `PostGalleryTypeViewHolder` and the two Material3 rows) shipped as `beta.6`, behind `PostPreviewHost`. Only `StickiedCollapsedViewHolder` and `RowHost` stay inside the adapter on purpose. The "Still inside the adapter" bullet and the card previews notes below are history. `versionName` on master still carries `-beta.6`, so the next stable release needs a plain version and tag.
+- [ ] **Phone-check the betas from `8.3.3.9.1.26-beta.1` on.** Nothing since `8.3.3.9.1.25-beta.6` has been confirmed. Riskiest first: voting in every layout (the handlers were rewritten, `beta.12`); backup and restore, which no longer asks for a password; Card Clean (now built on Card Bottom, button row invisible); the settings home and settings search; the layout submenu; the number badges in the vertical gallery list. The full list was given in the chat on 2026-11-06; if it is lost, rebuild it from `CHANGELOG.md` (every entry since `8.3.3.9.1.25-beta.6` is something to look at).
+- [ ] **Layout change stall (reported 2026-11-06).** Changing the layout from the three-dot submenu froze the screen, and swipe actions and touch scrolling seemed to fail. PR #41 (`beta.15`) delays the rebuild until the menu has closed and re-syncs swipe actions with the new column count, but the stall was never reproduced. If it persists, ask for: which layout from and to, which screen, whether the floating layout button (which still opens the bottom sheet) does the same, and whether touch comes back by itself. The rebuild itself (`PostFragment.refreshAdapter`) still resets the adapter and rebinds every visible row.
+- [ ] **Which settings to cut.** Decode NATO Binary, Swap Tap and Long Press in Comments, Disable Profile Avatar Animation, the dozen "Collapse X Section" navigation drawer toggles, and the three font families that each have a custom variant. Already removed: Delete All Legacy Settings, Use /api/info the Old Way, the volume-key navigation settings and code. Do not remove anything else without the owner's say.
+- [ ] **The feature enhancements** the owner mentioned at the start of the settings work. Not named yet.
 
-  **What the moves did (history).**
-  - Compact Layout and Card Layout 2 were deleted, Card Layout became *Card Bottom*, Card Layout 3 became *Card Top*, and Compact Layout 2 became *Compact Layout* (display names only; the resource names and stored values `0`, `2`, `4`, `5` are unchanged, and `SharedPreferencesUtils.normalizePostLayout` maps the old `1` and `3` to Compact 2 and Card).
-  - Moved out so far, each into its own file(s) in `adapters/`: `PostViewHolder`, the compact rows (`PostCompactBaseViewHolder` and `PostCompact2Left/RightThumbnailViewHolder`), the gallery rows (`PostGalleryViewHolder`, `PostGalleryBaseGalleryTypeViewHolder`, `PostGalleryGalleryTypeViewHolder`), `PostBaseViewHolder` with the text rows (`PostTextTypeViewHolder`, `PostMaterial3CardTextTypeViewHolder`), and the video rows (`VideoAutoplayImpl`, `PostBaseVideoAutoplayViewHolder` and its four leaf rows).
-  - Shipped and confirmed on the phone: up to `8.3.3.9.1.25-beta.1` (PostViewHolder, compact, and the layout removal). Merged and released but **not yet confirmed on a phone**: gallery (`beta.3`), text and `PostBaseViewHolder` (`beta.4`), video (`beta.5`); `beta.2` is only the Compact Layout rename. Do not start the next family until the owner has tried those.
-  - **Still inside the adapter:** `PostWithPreviewTypeViewHolder`, `PostBaseGalleryTypeViewHolder` (a Toro player), `PostGalleryTypeViewHolder`, and the Material3 preview and gallery-type rows (`PostMaterial3CardWithPreviewViewHolder`, `PostMaterial3CardGalleryTypeViewHolder`), plus `StickiedCollapsedViewHolder`. Moving them leaves only binding, recycling and view-type code in the adapter. `PostBaseViewHolder` still names `PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder` by its adapter-qualified name; that goes away with this family.
+## Release housekeeping
 
-  **How a family is moved (it worked five times).**
-  1. Read the family's classes and list every adapter field and method they touch. Put those on a host interface that extends `PostRowHost` (see `PostCompactHost`, `PostGalleryHost`, `PostVideoHost`). The adapter's named inner class `RowHost` implements all of them and reads the adapter's fields **at call time**, so settings the fragment changes while a feed is open still reach rows that already exist. Anything two families share goes up into `PostRowHost`.
-  2. Move the classes to top-level classes in the same package, with no logic changes. Each class that needs the activity keeps its own `private final BaseActivity mActivity` and its own `host`; do not make them package-private, or the adapter's remaining inner subclasses will bind to the wrong `mActivity`.
-  3. Change the adapter only where it creates the rows (pass `mRowHost` as the last constructor argument) and where it uses `instanceof` or casts. `PostFragmentBase` names some row classes too; update it and its imports.
-  4. Bump the version, add a changelog entry, push a branch, open the pull request with `gh pr create --repo jayblah/redditjr` (without `--repo` it opens a pull request in the upstream project), and let CI compile it. There is no JDK on the work machine, so CI is the only compiler.
+- [ ] `versionName` is still a beta (`8.3.3.9.1.26-beta.14` on master). The next stable release needs a plain version and tag.
+- [ ] The stray tag `v8.3.3.9.1.23-beta.1` is still on the remote (a deletion was denied once). `git push origin :refs/tags/v8.3.3.9.1.23-beta.1` removes it.
+- [ ] Backups are plain zips and hold accounts, Client ID and the Giphy key; the English description says to keep the file private.
 
-  **Things that went wrong, so they do not again.**
-  - A row's `setItemViewBackgroundColor` override can run inside its superclass constructor, before the row's own fields exist. Rows like that must read the host through `rowHost()` on `PostViewHolder`, not a field of their own (a field would be null and crash the row on creation, and CI would not catch it).
-  - Fields the adapter reads from a moved class (`toroPlayer.isManuallyPaused`, `mediaUri` and so on) were `private` while the class was inner; they must become package-private.
-  - NullAway wants `@SuppressWarnings("NullAway.Init")` on classes whose views or `post` are assigned after construction, and `@Nullable` on host methods that return nullable fields.
-  - Script edits left behind annotations of deleted classes (`@UnstableApi`) and doubled a `)` in a constructor call; read the diff for those.
-  - A string removed from `values/strings.xml` must also be removed from every `values-*/strings.xml`, and `SettingsSearchRegistryTest` and `AccountScopedKeysTest` list preference keys and titles, so a removed setting needs them updated.
+## Settings reorganisation: phases 1 to 4 done, more possible
 
-  **Take care with the card previews family.**
-  - `PostBaseGalleryTypeViewHolder` is a Toro player. Its play, pause, release and "manually paused" state must move as they are; its logic lives in `GalleryGifAutoplay` and the adapter's bind and recycle code, not in the holder.
-  - Rows are recycled. The bind code sets and clears things in both directions because a row can arrive carrying the last post's state. Keep every "set it back" line.
-  - Do not change how the adapter picks a view type, the stickied one-line row, the card top border or the vote hiding.
+The settings home is grouped by scope, on purpose: "Account · ..." headings are per-account and "Global" is shared, and `AccountScopedScreenKeysTest` and `SettingsSearchRegistryTest` enforce that. Never regroup the home purely by topic.
 
-  **How to check a family.** The layout snapshot tests (`RoborazziLayoutTest`, `PostPreviewSnapshotTest`) cover the XML layouts, not the adapter's binding, so a green build is not enough. After CI passes and the beta is out, the owner gets a checklist of what to open on the phone: every layout the family appears in (Card Bottom, Card Top, Compact Layout, Gallery) with a text post, an image, a GIF, a video, a gallery and an NSFW post, plus scrolling a long feed, voting, saving, hiding and undoing, read and unread swipes, and rotating the phone. Wait for the "looks good" before starting the next family.
+- Done: Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar were promoted out of Interface (`beta.7`). Time Format and Immersive Interface were folded into Interface (`beta.8`). The repeated volume-key rows are gone and Disable Swiping Between Tabs sits with Tab Switching Sensitivity (`beta.10`). Global Settings Management was merged into Backup and Restore, now "Backup, restore and reset" (`beta.14`).
+- Not done, and why:
+  - "Enable Bottom App Bar" is still on Interface. Customize Bottom App Bar is a custom screen with no preference XML to hold the switch; it would have to become a switch row on the home, which needs a switch variant that matches the home's row backgrounds.
+  - Media settings are still in Video, Data Saving Mode, Download Location and Device.
+  - Notifications, Proxy and Security are small separate Global screens. Merge them only among Global screens.
+  - Account Settings Management is per-account and cannot join the global screens.
+- The Post Details screen is not a duplicate of Posts: they are the same options for the feed and for the detail view, stored in separate files.
+- How: one screen group per release. Moving XML rows is safe; the screen's listeners have to move with them, and `SCREEN_RESOURCES` in `SettingsSearchRegistry` loses the screen. Deleting or renaming a key needs a migration. Every string removed from `values/strings.xml` must go from the 23 `values-*` files too, and `AccountScopedKeysTest` and `SettingsSearchRegistryTest` list keys, titles and breadcrumbs. New strings are English only; other languages fall back to it.
 
-  **After the last family: the real DRY work, one release each.** The moves above deliberately changed no logic, so the duplication is still there: upvote and downvote in `PostViewHolder` were two near-identical 100-line blocks (now one `vote(target, ...)`, `beta.12`), `PostViewHolder`'s two `setBaseView` overloads now share `keepViews` (`beta.13`); what is left is each card type's long binding lists, each card type repeats long binding lists, and the host getters are written twice (interface and `RowHost`). Merging the vote blocks is the biggest and best-tested win; give each its own release and a vote-by-vote phone check.
+## `PostRecyclerViewAdapter` split and DRY pass: finished, with a little left over
 
-  **Stop and ask if** a row needs something from the adapter that cannot be passed in cleanly, or a family cannot be moved without changing how its rows behave.
-- [ ] **Reorganise Settings: phase 1 done (`8.3.3.9.1.26-beta.7`), more phases to go.** About 350 settings on 30 screens. **The settings home is grouped by scope, on purpose:** "Account" headings are per-account and "Global" is shared, and `AccountScopedScreenKeysTest` and `SettingsSearchRegistryTest` enforce that, so never regroup the home purely by topic. Every per-account heading is therefore titled "Account · ..." (Appearance, Posts and comments, Navigation, More).
-  - Phase 1 (done): Font, Posts, Post Details, Comments, Navigation Drawer, Main Page Tabs and Bottom App Bar were promoted out of Interface to the home. No preference key moved. The "Post Details repeats Post" worry in the audit was wrong: they are the same options for the feed and for the detail view, stored separately.
-  - Phase 2 (Time Format and Immersive Interface folded into Interface, `beta.8`): done. Still small: Notifications, Proxy, Security, Backup and Restore (two to four settings each, all in the Global group, so merging them is a scope-safe move only among Global screens). Moving XML rows is safe; the child fragment's listeners have to move with them, and `SCREEN_RESOURCES` in `SettingsSearchRegistry` loses the entry.
-  - Phase 3 (`beta.10`): the duplicate volume-key rows are gone and Disable Swiping Between Tabs sits with Tab Switching Sensitivity. Not done: "Enable Bottom App Bar" is still on Interface, because Customize Bottom App Bar is a custom screen with no preference XML to put the switch in; it would have to become a switch row on the settings home, which needs a switch variant that matches the home's row backgrounds.
-  - Phase 4 (`beta.14`): Global Settings Management is merged into Backup and Restore ("Backup, restore and reset"). Not done: media settings are still in Video, Data Saving, Download Location and Device, and Notifications, Proxy and Security are still small separate Global screens; Account Settings Management cannot join the global ones because it is per-account.
-  - Still to ask the owner about before removing: Decode NATO Binary, Swap Tap and Long Press in Comments, Disable Profile Avatar Animation, the dozen "Collapse X Section" drawer toggles, three font families each with a custom variant. Already removed: Delete All Legacy Settings, Use /api/info the Old Way.
-  - How: one screen group per release. Deleting or renaming a key needs a migration. Every string removed from `values/strings.xml` must go from the 23 `values-*` files too; `AccountScopedKeysTest` and `SettingsSearchRegistryTest` list keys, titles and breadcrumbs.
-- [ ] **Audit leftovers.** Found but left alone as larger or riskier than a quick win:
-  - `RestoreSettings` now shares its repeated steps through `restoreRows` and `restoreFilters`; the remaining per-table blocks (anonymous subscriptions, themes, accounts) each have their own rules.
-  - The hand-written dp conversions are done; the remaining `getDisplayMetrics().density` reads are the adapters' `mScale` fields and two vendored library files.
+The adapter went from 7,911 lines to about 4,030. Every family of rows is in its own files behind the host interfaces (`PostRowHost`, `PostCompactHost`, `PostGalleryHost`, `PostVideoHost`, `PostPreviewHost`); `RowHost` inside the adapter implements them and reads the adapter's fields at call time. The DRY steps are done too: one `vote(target, ...)` routine in `PostViewHolder` (`beta.12`), one `keepViews` for the two `setBaseView` overloads (`beta.13`).
+
+- Left over, judged not worth the risk: each card type's 28-argument binding call (the generated view-binding classes share no type), and the one-line host getters in `RowHost` (the cost of the host pattern).
+- `InfoUse.Only` and the `useOldApiInfo` parameters are gone; `InfoUse` is now `First` and `Never`.
+- Lessons, so they do not repeat:
+  - A row's `setItemViewBackgroundColor` override can run inside its superclass constructor, before the row's own fields exist. Rows like that must read the host through `rowHost()`, not a field of their own.
+  - Fields the adapter reads from a moved class must be package-private, not private.
+  - NullAway wants `@SuppressWarnings("NullAway.Init")` on classes whose views or `post` are assigned after construction, and `@Nullable` on host methods that return nullable fields. A bare `Integer.MAX_VALUE` is not a valid Android menu order (use `Menu.CATEGORY_SECONDARY | 0xFFFF`). `ReadPostType` values are ints, not an enum.
+  - The layout snapshot tests cover the XML layouts, not the adapter's binding, so a green build is not enough: rows are recycled, and the bind code sets and clears things in both directions. Keep every "set it back" line.
+  - Do not change how the adapter picks a view type, the stickied one-line row, the card top border or the vote hiding without a phone check.
+
+## Working notes
+
+- There is no JDK on the work machine; CI (Compile and Unit tests, with NullAway and Error Prone) is the only compiler.
+- Open pull requests with `gh pr create --repo jayblah/redditjr`; without `--repo` they open in the upstream project.
+- Stacked pull requests: after the first merge, GitHub refuses to merge the next ("Base branch was modified"); retarget it to master with `gh pr edit N --base master` and merge it. Check that master has every change before tagging.
+- Release: the tag must equal `versionName` exactly (`.github/workflows/build.yml`); a `-beta.N` suffix makes a pre-release; the `CHANGELOG.md` heading `X / date` supplies the notes.
+
+## Audit leftovers
+
+Found but left alone as larger or riskier than a quick win:
+
+- `RestoreSettings` shares its repeated steps through `restoreRows` and `restoreFilters`; the remaining per-table blocks (anonymous subscriptions, themes, accounts) each have their own rules and the restore test is the safety net.
+- The hand-written dp conversions are done; the remaining `getDisplayMetrics().density` reads are the adapters' `mScale` fields and two vendored library files.
 
 Kept on purpose: the README credits Continuum and Infinity for Reddit as upstream, because their AGPL license requires it.
