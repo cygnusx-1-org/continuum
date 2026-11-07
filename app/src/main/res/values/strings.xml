@@ -106,7 +106,6 @@
     <string name="action_playback_speed">Playback Speed</string>
     <string name="action_contact_mods">Contact Mods</string>
     <string name="action_more_options">More Options</string>
-    <string name="action_add_to_home_screen">Add to Home screen</string>
     <string name="action_reset_fab_position">Reset FAB position</string>
     <string name="action_download_all_gallery_media">Download All Gallery Media</string>
     <string name="action_download_all_imgur_album_media">Download All Imgur Album Media</string>

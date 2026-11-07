@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Lejátszási sebesség"</string>
     <string name="action_contact_mods">"Érintkező modok"</string>
     <string name="action_more_options">"További lehetőségek"</string>
-    <string name="action_add_to_home_screen">"Hozzáadás a kezdőképernyőhöz"</string>
     <string name="action_reset_fab_position">"FAB pozíció visszaállítása"</string>
     <string name="action_download_all_gallery_media">"A galéria összes adathordozója letöltése"</string>
     <string name="action_download_all_imgur_album_media">"Az összes letöltése Imgur Album Media"</string>

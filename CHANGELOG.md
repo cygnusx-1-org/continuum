@@ -2,6 +2,17 @@
 
 ---
 
+8.3.3.9.1.27-beta.8 / 2026-11-7
+============
+**Fixed**
+* Slide inside a screen with tabs (a subreddit's Posts and About): the tabs no longer answer sideways swipes while Slide is up, so a swipe can only change posts. Tap a tab to switch
+* Slide's bottom edge is measured against the screen it is in rather than worked out from the top bar, so short media is centred in what you can see
+
+**Removed**
+* Add to Home Screen in a subreddit's menu, and the shortcut code behind it
+
+---
+
 8.3.3.9.1.27-beta.7 / 2026-11-7
 ============
 **Fixed**

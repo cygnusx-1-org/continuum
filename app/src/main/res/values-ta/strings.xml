@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"பிளேபேக் வேகம்"</string>
     <string name="action_contact_mods">"தொடர்பு மோட்ஸ்"</string>
     <string name="action_more_options">"கூடுதல் விருப்பங்கள்"</string>
-    <string name="action_add_to_home_screen">"முகப்புத் திரையில் சேர்"</string>
     <string name="action_reset_fab_position">"FAB நிலையை மீட்டமைக்கவும்"</string>
     <string name="action_download_all_gallery_media">"அனைத்து கேலரி மீடியாவைப் பதிவிறக்கவும்"</string>
     <string name="action_download_all_imgur_album_media">"அனைத்து Imgur ஆல்பம் மீடியாவைப் பதிவிறக்கவும்"</string>

@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Rychlost přehrávání"</string>
     <string name="action_contact_mods">"Kontaktovat moderátory"</string>
     <string name="action_more_options">"Další možnosti"</string>
-    <string name="action_add_to_home_screen">"Přidat na domovskou obrazovku"</string>
     <string name="action_reset_fab_position">"Resetuj polohu FAB"</string>
     <string name="action_download_all_gallery_media">"Stáhnout všechna média galerie"</string>
     <string name="action_download_all_imgur_album_media">"Stáhnout všechna média alba Imgur"</string>

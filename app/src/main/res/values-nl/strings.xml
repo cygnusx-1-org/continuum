@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Afspeelsnelheid"</string>
     <string name="action_contact_mods">"Contactmod"</string>
     <string name="action_more_options">"Meer opties"</string>
-    <string name="action_add_to_home_screen">"Toevoegen aan startscherm"</string>
     <string name="action_reset_fab_position">"FAB-positie resetten"</string>
     <string name="action_download_all_gallery_media">"Download alle galerijmedia"</string>
     <string name="action_download_all_imgur_album_media">"Alles downloaden Imgur Albummedia"</string>

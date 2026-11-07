@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Tốc độ phát"</string>
     <string name="action_contact_mods">"Liên hệ Quản trị viên"</string>
     <string name="action_more_options">"Tùy chọn khác"</string>
-    <string name="action_add_to_home_screen">"Thêm vào màn hình chính"</string>
     <string name="action_reset_fab_position">"Đặt lại vị trí FAB"</string>
     <string name="action_download_all_gallery_media">"Tải xuống tất cả phương tiện thư viện"</string>
     <string name="action_download_all_imgur_album_media">"Tải xuống tất cả Imgur Album Media"</string>
