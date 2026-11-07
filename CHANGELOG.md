@@ -2,7 +2,7 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.27-beta.7 / 2026-11-7
 ============
 **Fixed**
 * Slide inside a screen with its own tabs (a subreddit's Posts and About): a sideways swipe on a slide only changes posts and no longer drifts into the other tab
