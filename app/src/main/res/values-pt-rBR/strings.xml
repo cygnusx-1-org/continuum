@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Erro ao analisar a informação do usuário"</string>
     <string name="no_system_webview_error">"Erro ao abrir o WebView do sistema"</string>
     <string name="error_loading_image_tap_to_retry">"Erro ao carregar a imagem. Toque para tentar de novo."</string>
-    <string name="video_error_tap_to_retry">"Erro ao reproduzir o vídeo. Toque para tentar de novo."</string>
     <string name="load_posts_error">"Erro ao carregar postagens.
 Toque para tentar de novo."</string>
     <string name="load_posts_error_anonymous_403">"Devido às limitações da plataforma, o conteúdo não pode ser carregado no momento.\n \n\nVocê pode tentar novamente em breve ou assinar para obter uma experiência mais confiável."</string>
@@ -225,14 +224,6 @@ Toque para tentar de novo."</string>
     <string name="no_posts_no_lazy_mode">"Sem postagens disponíveis"</string>
     <string name="lazy_mode_start">"Modo preguiçoso inicia em %1$.1fs"</string>
     <string name="lazy_mode_stop">"Modo Preguiçoso parou"</string>
-    <string name="shadowbox_no_posts">"Nenhuma postagem disponível para o modo Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Toque para revelar"</string>
-    <string name="shadowbox_open_full_viewer">"Abrir no visualizador completo"</string>
-    <string name="shadowbox_open_comments">"Abrir comentários"</string>
-    <string name="shadowbox_more_options">"Mais Opções"</string>
-    <string name="shadowbox_mute">"Silenciar"</string>
-    <string name="shadowbox_play_pause">"Reproduzir ou pausar"</string>
-    <string name="shadowbox_gallery_item_error">"Erro ao carregar este item da galeria"</string>
     <string name="write_comment_hint">"Escreva algo interessante"</string>
     <string name="comment_content_required">"Onde está seu comentário?"</string>
     <string name="sending_comment">"Enviando"</string>
@@ -500,8 +491,6 @@ Toque para tentar de novo."</string>
     <string name="settings_lock_toolbar_title">"Bloquear a barra de ferramentas"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Deslizar para Cima para Ocultar o Botão de Avanço para Próximo Comentário Mais Votado"</string>
     <string name="settings_lazy_mode_interval_title">"Intervalo do Modo Preguiçoso"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar postagens de texto e postagens sem visualização"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"O modo Shadowbox ignora todas as postagens de texto e qualquer outra postagem que não tenha imagem de visualização."</string>
     <string name="settings_font_title">"Fonte"</string>
     <string name="settings_font_summary">"Fonte"</string>
     <string name="settings_title_font_summary">"Título"</string>

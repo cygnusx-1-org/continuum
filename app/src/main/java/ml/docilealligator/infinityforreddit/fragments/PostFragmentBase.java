@@ -162,10 +162,7 @@ public abstract class PostFragmentBase extends Fragment {
     private int postFeedTopBufferPx;
     protected boolean isInLazyMode = false;
     protected boolean isLazyModePaused = false;
-    /** The layout whose rows the feed draws; for Shadowbox, the rows beneath it. See {@link #shadowboxLayout}. */
     protected int postLayout;
-    /** The feed is in the Shadowbox layout, which {@link #postLayout} cannot say. */
-    protected boolean shadowboxLayout;
     protected boolean swipeActionEnabled;
     @SuppressWarnings("NullAway.Init")
     protected SwipeActionPainter swipeActionPainter;
@@ -622,20 +619,6 @@ public abstract class PostFragmentBase extends Fragment {
         if (enabled) {
             touchHelper.attachToRecyclerView(recyclerView, 1);
         }
-    }
-
-    /**
-     * Takes a saved or default layout as this feed's: remembers whether it is Shadowbox, and
-     * returns the layout to draw rows for.
-     */
-    protected final int adoptLayout(int layout) {
-        shadowboxLayout = SharedPreferencesUtils.isShadowbox(layout);
-        return SharedPreferencesUtils.rowLayout(layout);
-    }
-
-    /** The layout the feed is in, as {@link #changePostLayout(int, boolean)} and the saved choice name it. */
-    protected final int currentLayout() {
-        return shadowboxLayout ? SharedPreferencesUtils.POST_LAYOUT_SHADOWBOX : postLayout;
     }
 
     public final void changePostLayout(int postLayout) {

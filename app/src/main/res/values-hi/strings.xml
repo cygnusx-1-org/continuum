@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"यूजर की जानकारी प्राप्ति में त्रुटि"</string>
     <string name="no_system_webview_error">"सिस्टम WebView खोलने में त्रुटि"</string>
     <string name="error_loading_image_tap_to_retry">"चित्र खुलने में त्रुटि। पुनः प्रयास के लिए यहां दबाएं।"</string>
-    <string name="video_error_tap_to_retry">"वीडियो चलाने में त्रुटि। पुनः प्रयास के लिए यहां दबाएं।"</string>
     <string name="load_posts_error">"पोस्ट लोड करने में त्रुटि।\nपुनः प्रयास करने के लिए टैप करें।"</string>
     <string name="load_posts_error_anonymous_403">"प्लेटफ़ॉर्म सीमाओं के कारण, सामग्री अभी लोड नहीं की जा सकती।\n \n\nआप शीघ्र ही पुनः प्रयास कर सकते हैं या अधिक विश्वसनीय अनुभव के लिए सदस्यता ले सकते हैं।"</string>
     <string name="load_posts_error_with_reason">"पोस्ट लोड करने में त्रुटि। कारण: %1$s.\nपुनः प्रयास करने के लिए टैप करें।"</string>
@@ -219,14 +218,6 @@
     <string name="no_posts_no_lazy_mode">"कोई पोस्ट उपलब्ध नहीं"</string>
     <string name="lazy_mode_start">"औटो मोड शुरू होगी %1$.1fs"</string>
     <string name="lazy_mode_stop">"औटो मोड रुक गयी"</string>
-    <string name="shadowbox_no_posts">"शैडोबॉक्स मोड के लिए कोई पोस्ट उपलब्ध नहीं है"</string>
-    <string name="shadowbox_tap_to_reveal">"प्रकट करने के लिए टैप करें"</string>
-    <string name="shadowbox_open_full_viewer">"पूर्ण व्यूअर में खोलें"</string>
-    <string name="shadowbox_open_comments">"टिप्पणियाँ खोलें"</string>
-    <string name="shadowbox_more_options">"अधिक विकल्प"</string>
-    <string name="shadowbox_mute">"म्यूट"</string>
-    <string name="shadowbox_play_pause">"चलाएं या रोकें"</string>
-    <string name="shadowbox_gallery_item_error">"इस गैलरी आइटम को लोड करने में त्रुटि"</string>
     <string name="write_comment_hint">"यहां आपके रुचिकर विचार"</string>
     <string name="comment_content_required">"आपका रूचिकर विचार कहाँ है?"</string>
     <string name="sending_comment">"जा रहा है"</string>
@@ -494,8 +485,6 @@
     <string name="settings_lock_toolbar_title">"टूलबार लॉक करें"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"अगली शीर्ष स्तर की टिप्पणी पर जाने वाले बटन को छुपाने के  लिए ऊपर की ओर स्वाइप"</string>
     <string name="settings_lazy_mode_interval_title">"आलस्य प्रणाली अंतराल "</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"बिना किसी पूर्वावलोकन के टेक्स्ट पोस्ट और पोस्ट छुपाएं"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"शैडोबॉक्स मोड प्रत्येक टेक्स्ट पोस्ट और किसी भी अन्य पोस्ट को छोड़ देता है जिसमें कोई पूर्वावलोकन छवि नहीं है।"</string>
     <string name="settings_font_title">"फॉन्ट "</string>
     <string name="settings_font_summary">"फॉन्ट"</string>
     <string name="settings_title_font_summary">"शीर्षक "</string>

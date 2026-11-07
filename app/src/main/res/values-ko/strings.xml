@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"사용자 정보를 파싱하는데 오류가 발생했습니다"</string>
     <string name="no_system_webview_error">"시스템의 웹뷰를 여는데 오류가 발생했습니다"</string>
     <string name="error_loading_image_tap_to_retry">"사진을 로드하는데 오류가 발생했습니다. 재시도하려면 탭하세요."</string>
-    <string name="video_error_tap_to_retry">"비디오를 재생하는데 오류가 발생했습니다. 재시도하려면 탭하세요."</string>
     <string name="load_posts_error">"글들을 불러오는데 오류가 발생했습니다.
 재시도하려면 탭하세요."</string>
     <string name="load_posts_error_anonymous_403">"플랫폼 제한으로 인해 지금은 콘텐츠를 로드할 수 없습니다.\n \n\n곧 다시 시도하거나 구독하여 더욱 안정적인 환경을 경험할 수 있습니다."</string>
@@ -224,14 +223,6 @@
     <string name="no_posts_no_lazy_mode">"글 없음"</string>
     <string name="lazy_mode_start">"게으른 모드는 %1$.1fs 이후 시작됩니다"</string>
     <string name="lazy_mode_stop">"게으른 모드 중지됨"</string>
-    <string name="shadowbox_no_posts">"섀도우박스 모드에 사용할 수 있는 게시물이 없습니다."</string>
-    <string name="shadowbox_tap_to_reveal">"탭하여 표시"</string>
-    <string name="shadowbox_open_full_viewer">"전체 뷰어에서 열기"</string>
-    <string name="shadowbox_open_comments">"댓글 열기"</string>
-    <string name="shadowbox_more_options">"더많은 설정"</string>
-    <string name="shadowbox_mute">"음소거"</string>
-    <string name="shadowbox_play_pause">"재생 또는 일시 정지"</string>
-    <string name="shadowbox_gallery_item_error">"이 갤러리 항목을 로드하는 중 오류가 발생했습니다."</string>
     <string name="write_comment_hint">"흥미로운 생각들 여기에 적기"</string>
     <string name="comment_content_required">"흥미로운 생각이 무엇인가요?"</string>
     <string name="sending_comment">"전송 중"</string>
@@ -499,8 +490,6 @@
     <string name="settings_lock_toolbar_title">"도구 모음 잠금"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"위로 스와이프하여 숨기기 다음 최상위 댓글 버튼으로 이동"</string>
     <string name="settings_lazy_mode_interval_title">"게으른 모드 간격"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"미리보기 없이 텍스트 게시물 및 게시물 숨기기"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"섀도우박스 모드는 모든 텍스트 게시물과 미리보기 이미지가 없는 기타 게시물을 건너뜁니다."</string>
     <string name="settings_font_title">"폰트"</string>
     <string name="settings_font_summary">"폰트"</string>
     <string name="settings_title_font_summary">"제목"</string>

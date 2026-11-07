@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"No fue posible procesar la información del usuario"</string>
     <string name="no_system_webview_error">"Error iniciando WebView del sistema"</string>
     <string name="error_loading_image_tap_to_retry">"Error al cargar la imagen. Toca para reintentar."</string>
-    <string name="video_error_tap_to_retry">"Error al reproducir el vídeo. Toca para reintentar."</string>
     <string name="load_posts_error">"Error al cargar las publicaciones.
 Toca para reintentar."</string>
     <string name="load_posts_error_anonymous_403">"Debido a limitaciones de la plataforma, el contenido no se puede cargar en este momento.\n \n\nPuedes volver a intentarlo en breve o suscribirte para disfrutar de una experiencia más confiable."</string>
@@ -224,14 +223,6 @@ Toca para reintentar."</string>
     <string name="no_posts_no_lazy_mode">"No hay publicaciones disponibles"</string>
     <string name="lazy_mode_start">"El modo automático empieza en %1$.1fs"</string>
     <string name="lazy_mode_stop">"Se ha detenido el modo automático"</string>
-    <string name="shadowbox_no_posts">"No hay publicaciones disponibles para el modo Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Toque para revelar"</string>
-    <string name="shadowbox_open_full_viewer">"Abrir en visor completo"</string>
-    <string name="shadowbox_open_comments">"Abrir comentarios"</string>
-    <string name="shadowbox_more_options">"Más opciones"</string>
-    <string name="shadowbox_mute">"Silencio"</string>
-    <string name="shadowbox_play_pause">"Reproducir o pausar"</string>
-    <string name="shadowbox_gallery_item_error">"Error al cargar este elemento de la galería"</string>
     <string name="write_comment_hint">"Escribe tus ideas aquí"</string>
     <string name="comment_content_required">"¿Dónde ha quedado ese pensamiento interesante?"</string>
     <string name="sending_comment">"Enviando"</string>
@@ -499,8 +490,6 @@ Toca para reintentar."</string>
     <string name="settings_lock_toolbar_title">"Bloquear la barra de herramientas"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Deslizar hacia arriba para ocultar el botón de siguiente comentario más alto"</string>
     <string name="settings_lazy_mode_interval_title">"Tiempo para la pausa del modo automático"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ocultar publicaciones de texto y publicaciones sin vista previa"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"El modo Shadowbox omite todas las publicaciones de texto y cualquier otra publicación que no tenga una imagen de vista previa."</string>
     <string name="settings_font_title">"Fuente"</string>
     <string name="settings_font_summary">"Fuente"</string>
     <string name="settings_title_font_summary">"Título"</string>

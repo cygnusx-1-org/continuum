@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Při parsování informací o uživateli se vyskytla chyba"</string>
     <string name="no_system_webview_error">"Chyba při otevírání systémového WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Chyba při načítání obrázku. Ťukni pro opakování."</string>
-    <string name="video_error_tap_to_retry">"Chyba při přehrávání videa. Ťukni pro opakování."</string>
     <string name="load_posts_error">"Chyba při načítání příspěvků.
 Ťukni pro opakování."</string>
     <string name="load_posts_error_anonymous_403">"Kvůli omezením platformy nelze nyní načíst obsah.\n \n\nZa chvíli to můžeš zkusit znovu nebo se přihlásit k odběru pro spolehlivější zážitek."</string>
@@ -224,14 +223,6 @@
     <string name="no_posts_no_lazy_mode">"Nejsou dostupné žádné příspěvky"</string>
     <string name="lazy_mode_start">"Líný režim bude spuštěn za %1$.1fs"</string>
     <string name="lazy_mode_stop">"Líný režim zastaven"</string>
-    <string name="shadowbox_no_posts">"Pro režim Shadowbox nejsou k dispozici žádné příspěvky"</string>
-    <string name="shadowbox_tap_to_reveal">"Klepnutím zobrazíš"</string>
-    <string name="shadowbox_open_full_viewer">"Otevřít v plném prohlížeči"</string>
-    <string name="shadowbox_open_comments">"Otevřít komentáře"</string>
-    <string name="shadowbox_more_options">"Další možnosti"</string>
-    <string name="shadowbox_mute">"Ztlumit"</string>
-    <string name="shadowbox_play_pause">"Přehrát nebo pozastavit"</string>
-    <string name="shadowbox_gallery_item_error">"Chyba při načítání této položky galerie"</string>
     <string name="write_comment_hint">"Tvoje zajímavé myšlenky patří sem"</string>
     <string name="comment_content_required">"Kde je tvoje zajímavá myšlenka?"</string>
     <string name="sending_comment">"Odesílání"</string>
@@ -499,8 +490,6 @@
     <string name="settings_lock_toolbar_title">"Uzamknout panel nástrojů"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Posunutí nahoru pro skrytí skoku na další komentář nejvyšší úrovně"</string>
     <string name="settings_lazy_mode_interval_title">"Interval líného režimu"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Skrýt textové příspěvky a příspěvky bez náhledu"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Režim stínového pole přeskočí každý textový příspěvek a jakýkoli jiný příspěvek, který nemá žádný náhledový obrázek."</string>
     <string name="settings_font_title">"Písmo"</string>
     <string name="settings_font_summary">"Písmo"</string>
     <string name="settings_title_font_summary">"Nadpid"</string>

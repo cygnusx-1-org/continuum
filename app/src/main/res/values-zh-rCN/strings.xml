@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"解析用户信息错误"</string>
     <string name="no_system_webview_error">"打开系统 WebView 错误"</string>
     <string name="error_loading_image_tap_to_retry">"加载图片错误。点击以重试。"</string>
-    <string name="video_error_tap_to_retry">"播放视频错误。点击以重试。"</string>
     <string name="load_posts_error">"加载帖子错误。
 点击以重试。"</string>
     <string name="load_posts_error_anonymous_403">"由于平台限制，目前无法加载内容。\n\n\n您可以稍后重试或订阅以获得更可靠的体验。"</string>
@@ -224,14 +223,6 @@
     <string name="no_posts_no_lazy_mode">"暂无可用帖子"</string>
     <string name="lazy_mode_start">"懒人模式已启用，滑动间隔 %1$.1f 秒"</string>
     <string name="lazy_mode_stop">"懒人模式已停用"</string>
-    <string name="shadowbox_no_posts">"没有适用于 Shadowbox 模式的帖子"</string>
-    <string name="shadowbox_tap_to_reveal">"点击显示"</string>
-    <string name="shadowbox_open_full_viewer">"在完整查看器中打开"</string>
-    <string name="shadowbox_open_comments">"开放评论"</string>
-    <string name="shadowbox_more_options">"更多选项"</string>
-    <string name="shadowbox_mute">"静音"</string>
-    <string name="shadowbox_play_pause">"播放或暂停"</string>
-    <string name="shadowbox_gallery_item_error">"加载此画廊项目时出错"</string>
     <string name="write_comment_hint">"在此写下您的想法"</string>
     <string name="comment_content_required">"在想些什么？"</string>
     <string name="sending_comment">"发送中"</string>
@@ -499,8 +490,6 @@
     <string name="settings_lock_toolbar_title">"锁定工具栏"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"向上滑动以隐藏跳转到下一个顶层评论按钮"</string>
     <string name="settings_lazy_mode_interval_title">"懒人模式间隔时间"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"隐藏文本帖子和无预览的帖子"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox 模式会跳过每个文本帖子以及任何其他没有预览图像的帖子。"</string>
     <string name="settings_font_title">"字体"</string>
     <string name="settings_font_summary">"字体"</string>
     <string name="settings_title_font_summary">"标题"</string>

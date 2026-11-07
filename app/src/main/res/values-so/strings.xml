@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Cilad ayaa dhacday markii la kala saarayay macluumaadka isticmaalaha"</string>
     <string name="no_system_webview_error">"Cilad furitaanka Nidaamka WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Cilad soo rarista sawirka Taabo si aad dib isugu daydo"</string>
-    <string name="video_error_tap_to_retry">"Cilad ciyaarista fiidyaha. Taabo si aad dib isugu daydo."</string>
     <string name="load_posts_error">"Cilad soo rarista qoraalada\nTaabo si aad dib isugu daydo"</string>
     <string name="load_posts_error_anonymous_403">"Sababtoo ah xaddidaadyada goobta, waxa ku jira lama rari karo hadda.\n        \n\nWaxaad isku dayi kartaa mar labaad wax yar ka dib ama waxaad isku qori kartaa waayo-aragnimo la isku halayn karo"</string>
     <string name="load_posts_error_with_reason">"cilad soo dejinta posts Sababta: %1$s.\nTaabo si aad dib isugu daydo."</string>
@@ -216,14 +215,6 @@
     <string name="no_posts_no_lazy_mode">"Qoraallo lama hayo"</string>
     <string name="lazy_mode_start">"Qaabka caajiska ah ee wuxuu ku bilaabmaa %1$.1fs"</string>
     <string name="lazy_mode_stop">"Qaabka caajiska ah ee waa joogsaday"</string>
-    <string name="shadowbox_no_posts">"Ma jiraan qoraallo loo heli karo Habka Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Taabo si aad u muujiso"</string>
-    <string name="shadowbox_open_full_viewer">"Ku furan daawade buuxa"</string>
-    <string name="shadowbox_open_comments">"Faallo furan"</string>
-    <string name="shadowbox_more_options">"doorashooyin badan"</string>
-    <string name="shadowbox_mute">"aamus"</string>
-    <string name="shadowbox_play_pause">"Ciyaar ama hakad"</string>
-    <string name="shadowbox_gallery_item_error">"Khalad soo dejinta shaygan gallery"</string>
     <string name="write_comment_hint">"Fikradahaaga xiisaha leh halkan"</string>
     <string name="comment_content_required">"Aaway fikirkaaga xiisaha leh?"</string>
     <string name="sending_comment">"Diraya"</string>
@@ -489,8 +480,6 @@
     <string name="settings_lock_toolbar_title">"Quful shaxda qalabka"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"U dhufo si aad u qariso U bood badhanka faallooyinka heerka sare ee xiga"</string>
     <string name="settings_lazy_mode_interval_title">"Dhexdhexaadinta Qaabka caajiska ah ee"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Qari Qoraallada iyo Qoraallada aan Horudhac lahayn"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Qaabka Shadowbox wuxuu ka boodaa qoraal kasta iyo qoraal kasta oo kale oo aan lahayn muuqaal horudhac ah."</string>
     <string name="settings_font_title">"Farta"</string>
     <string name="settings_font_summary">"Farta"</string>
     <string name="settings_title_font_summary">"Ciwaanka"</string>

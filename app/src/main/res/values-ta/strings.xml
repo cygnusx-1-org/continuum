@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"பயனர் தகவலைக் கூறாக்கும்போது பிழை ஏற்பட்டது"</string>
     <string name="no_system_webview_error">"இயங்குதளத்தின் வலைப்பார்வையைத் திறப்பதில் பிழை"</string>
     <string name="error_loading_image_tap_to_retry">"படத்தை ஏற்றுவதில் பிழை. மறுமுயல தட்டுக."</string>
-    <string name="video_error_tap_to_retry">"வீடியோவை இயக்குவதில் பிழை. மறுமுயல தட்டுக."</string>
     <string name="load_posts_error">"இடுகைகளை ஏற்றுவதில் பிழை.
 மறுமுயல தட்டுக."</string>
     <string name="load_posts_error_anonymous_403">"இயங்குதள வரம்புகள் காரணமாக, இப்போது உள்ளடக்கத்தை ஏற்ற முடியாது.\n        \n\nநீங்கள் விரைவில் மீண்டும் முயற்சிக்கலாம் அல்லது மிகவும் நம்பகமான அனுபவத்திற்கு குழுசேரலாம்."</string>
@@ -222,14 +221,6 @@
     <string name="no_posts_no_lazy_mode">"இடுகைகள் ஏதுமில்லை"</string>
     <string name="lazy_mode_start">"சோம்பேறி பயன்முறை %1$.1fs இல் தொடங்குகிறது"</string>
     <string name="lazy_mode_stop">"சோம்பல் பயன்முறை நின்றது"</string>
-    <string name="shadowbox_no_posts">"ஷேடோபாக்ஸ் பயன்முறைக்கு இடுகைகள் இல்லை"</string>
-    <string name="shadowbox_tap_to_reveal">"வெளிப்படுத்த தட்டவும்"</string>
-    <string name="shadowbox_open_full_viewer">"முழு பார்வையாளரில் திறக்கவும்"</string>
-    <string name="shadowbox_open_comments">"கருத்துகளைத் திற"</string>
-    <string name="shadowbox_more_options">"மேலும் விருப்பங்கள்"</string>
-    <string name="shadowbox_mute">"முடக்கு"</string>
-    <string name="shadowbox_play_pause">"விளையாடவும் அல்லது இடைநிறுத்தவும்"</string>
-    <string name="shadowbox_gallery_item_error">"இந்த கேலரி உருப்படியை ஏற்றுவதில் பிழை"</string>
     <string name="write_comment_hint">"எண்ணங்களை இங்கே பதிவு செய்க"</string>
     <string name="comment_content_required">"உம் ஆர்வமிகு எண்ணம் எங்கே?"</string>
     <string name="sending_comment">"அனுப்புகிறது"</string>
@@ -496,8 +487,6 @@
     <string name="settings_lock_toolbar_title">"கருவிப்பட்டியைப் பூட்டு"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"மறைக்க மேலே ஸ்வைப் செய்யவும் அடுத்த மேல் நிலை கருத்து பட்டன் செல்லவும்"</string>
     <string name="settings_lazy_mode_interval_title">"சோம்பேறி பயன்முறை இடைவெளி"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"உரை இடுகைகள் மற்றும் இடுகைகளை முன்னோட்டம் இல்லாமல் மறை"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"ஷேடோபாக்ஸ் பயன்முறை ஒவ்வொரு உரை இடுகையையும் மற்றும் முன்னோட்டப் படம் இல்லாத பிற இடுகைகளையும் தவிர்க்கிறது."</string>
     <string name="settings_font_title">"எழுத்துரு"</string>
     <string name="settings_font_summary">"எழுத்துரு"</string>
     <string name="settings_title_font_summary">"தலைப்பு"</string>

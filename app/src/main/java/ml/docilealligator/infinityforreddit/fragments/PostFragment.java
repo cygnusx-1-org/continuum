@@ -93,13 +93,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
-import android.view.ViewParent;
-import android.view.ViewTreeObserver;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.FragmentManager;
-import androidx.viewpager2.widget.ViewPager2;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
-import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPagerFragment;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -119,8 +113,7 @@ import retrofit2.Retrofit;
 /**
  * A simple {@link PostFragmentBase} subclass.
  */
-public class PostFragment extends PostFragmentBase implements FragmentCommunicator, PostModerationActionHandler,
-        ShadowboxPagerFragment.SlideHost {
+public class PostFragment extends PostFragmentBase implements FragmentCommunicator, PostModerationActionHandler {
 
     public static final String EXTRA_NAME = "EN";
     public static final String EXTRA_USER_NAME = "EUN";
@@ -141,28 +134,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
-    private static final String SLIDE_TAG = "slide_pager";
-    /** The pager up over the feed was built from posts that have since been reloaded; see {@link #syncSlide}. */
-    private boolean slideStale;
-    /** The Slide layout found nothing to show, so the list stands in until it is chosen afresh. */
-    private boolean slideSuppressed;
-    /** What the system covers at the bottom edge, for the pager to keep its panel clear of. */
-    private int slideBottomInset;
-    /** Whether {@link #takeOverScreen} has been done and not yet given back. */
-    private boolean slideScreenTaken;
-    /** The tabs pager the feed sits in, if any, and whether it let the user swipe before Slide. */
-    @Nullable
-    private ViewPager2 slideTabs;
-    private boolean slideTabsSwipeable;
-    /** The screen the feed sits in, which the pager must not reach below. */
-    @Nullable
-    private CoordinatorLayout slideScreen;
-    @Nullable
-    private ViewTreeObserver slideObserver;
-    private final ViewTreeObserver.OnPreDrawListener slidePreDrawListener = () -> {
-        padSlideToScreen();
-        return true;
-    };
     private static final String SORT_TYPE_STATE = "STS";
     private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
@@ -330,11 +301,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     getPostRecyclerView().setPadding(
                             0, 0, 0, allInsets.bottom
                     );
-                    slideBottomInset = allInsets.bottom;
-                    ShadowboxPagerFragment slide = (ShadowboxPagerFragment) getChildFragmentManager().findFragmentByTag(SLIDE_TAG);
-                    if (slide != null) {
-                        slide.setBottomInset(allInsets.bottom);
-                    }
                     return WindowInsetsCompat.CONSUMED;
                 }
             });
@@ -452,7 +418,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             }
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -524,7 +490,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // own -- the same reason the firehose feeds do.
             boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName)
                     || randomSubredditPseudoName != null;
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -599,8 +565,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                    defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -664,7 +630,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             settingsSortType = savedOrDefaultSortType();
             SortType overrideSortType = getOverrideSortType(savedInstanceState);
             sortType = overrideSortType != null ? overrideSortType : settingsSortType;
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -727,7 +693,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
 
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -794,7 +760,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 }
             }
 
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -855,7 +821,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // The duplicates endpoint has its own ordering and ignores the standard sort params; the
             // ViewModel still needs a non-null SortType, so use a neutral default.
             sortType = new SortType(SortType.Type.BEST);
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -896,7 +862,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             } else {
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -1175,7 +1141,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                                 : SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"), true);
                     } else {
                         // Its own layout stays, but the column count is re-read.
-                        changePostLayout(currentLayout(), true);
+                        changePostLayout(postLayout, true);
                     }
                 });
 
@@ -1396,16 +1362,12 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             LoadState appendLoadState = combinedLoadStates.getAppend();
 
             binding.swipeRefreshLayoutPostFragment.setRefreshing(refreshLoadState instanceof LoadState.Loading);
-            if (refreshLoadState instanceof LoadState.Loading) {
-                dropSlide();
-            }
             if (refreshLoadState instanceof LoadState.NotLoading) {
                 if (refreshLoadState.getEndOfPaginationReached() && mAdapter.getItemCount() < 1) {
                     noPostFound();
                 } else {
                     binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
                     hasPost = true;
-                    syncSlide();
                 }
             } else if (refreshLoadState instanceof LoadState.Error) {
                 binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(view -> refresh());
@@ -1481,148 +1443,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         return false;
     }
 
-    /**
-     * Puts the Slide pager over the feed when the feed is in that layout and has posts, and takes
-     * it away when the layout is something else. Safe to call whenever either might have changed:
-     * a pager that is already up is left alone, so scrolling and loading more do not rebuild it.
-     */
-    private void syncSlide() {
-        if (binding == null || !isAdded()) {
-            return;
-        }
-        FragmentManager fm = getChildFragmentManager();
-        ShadowboxPagerFragment slide = (ShadowboxPagerFragment) fm.findFragmentByTag(SLIDE_TAG);
-        if (!shadowboxLayout) {
-            if (slide != null) {
-                fm.beginTransaction().remove(slide).commitAllowingStateLoss();
-            }
-            showSlide(false);
-            return;
-        }
-        if (!hasPost || mAdapter == null || slideSuppressed) {
-            return;
-        }
-        if (slide == null || slideStale) {
-            int position = Math.max(ScrollAnchor.captureTopmost(binding.recyclerViewPostFragment).position, 0);
-            // Replaced rather than added, so a pager that is stale and one that is wanted can be
-            // queued back to back without the first still being found in the way.
-            fm.beginTransaction().replace(R.id.slide_container_post_fragment,
-                    ShadowboxPagerFragment.newInstance(getPostFragmentId(), position, getIsNsfwSubreddit()),
-                    SLIDE_TAG).commitAllowingStateLoss();
-            slideStale = false;
-        }
-        showSlide(true);
-    }
-
-    /**
-     * The posts under the pager are about to change (a refresh, a new sort): what it holds is out
-     * of date, so the feed's own list shows while it loads and a fresh pager follows.
-     */
-    private void dropSlide() {
-        slideStale = true;
-        slideSuppressed = false;
-        showSlide(false);
-    }
-
-    private void showSlide(boolean show) {
-        if (binding == null) {
-            return;
-        }
-        binding.slideContainerPostFragment.setVisibility(show ? View.VISIBLE : View.GONE);
-        binding.swipeRefreshLayoutPostFragment.setVisibility(show ? View.GONE : View.VISIBLE);
-        if (show) {
-            takeOverScreen();
-        } else {
-            giveBackScreen();
-        }
-    }
-
-    /**
-     * Makes the screen around the feed fit the Slide pager while it is up.
-     *
-     * <p>Sideways swipes are the pager's alone, so the tabs the feed may sit in (a subreddit's
-     * Posts and About) stop answering them -- a touch handed back to them from the last slide, or
-     * one that drifted, changed tab; the tabs themselves still work. And the pager gives up the
-     * part of itself that hangs below the screen: the screens that hold a feed size it for a top
-     * bar that has scrolled away, so while the bar is showing, the lower end of the pager, with a
-     * slide's bottom edge and info panel, is off screen. A list scrolls the bar out of the way; a
-     * slide does not.
-     */
-    private void takeOverScreen() {
-        if (slideScreenTaken || binding == null) {
-            return;
-        }
-        slideScreenTaken = true;
-        for (ViewParent parent = binding.getRoot().getParent(); parent != null; parent = parent.getParent()) {
-            if (slideTabs == null && parent instanceof ViewPager2) {
-                slideTabs = (ViewPager2) parent;
-                slideTabsSwipeable = slideTabs.isUserInputEnabled();
-                slideTabs.setUserInputEnabled(false);
-            } else if (parent instanceof CoordinatorLayout) {
-                slideScreen = (CoordinatorLayout) parent;
-                break;
-            }
-        }
-        if (slideScreen != null) {
-            slideObserver = binding.slideContainerPostFragment.getViewTreeObserver();
-            slideObserver.addOnPreDrawListener(slidePreDrawListener);
-        }
-    }
-
-    private void giveBackScreen() {
-        if (!slideScreenTaken) {
-            return;
-        }
-        slideScreenTaken = false;
-        if (slideTabs != null) {
-            slideTabs.setUserInputEnabled(slideTabsSwipeable);
-            slideTabs = null;
-        }
-        if (slideObserver != null && slideObserver.isAlive()) {
-            slideObserver.removeOnPreDrawListener(slidePreDrawListener);
-        }
-        slideObserver = null;
-        slideScreen = null;
-        if (binding != null) {
-            binding.slideContainerPostFragment.setPadding(0, 0, 0, 0);
-        }
-    }
-
-    /** Pads the pager's bottom by however far it reaches below the screen it sits in. */
-    private void padSlideToScreen() {
-        if (binding == null || slideScreen == null) {
-            return;
-        }
-        View container = binding.slideContainerPostFragment;
-        int[] containerAt = new int[2];
-        int[] screenAt = new int[2];
-        container.getLocationOnScreen(containerAt);
-        slideScreen.getLocationOnScreen(screenAt);
-        int overhang = Math.max(0, containerAt[1] + container.getHeight() - (screenAt[1] + slideScreen.getHeight()));
-        if (overhang != container.getPaddingBottom()) {
-            container.setPadding(0, 0, 0, overhang);
-        }
-    }
-
-    @Override
-    public int getSlideBottomInset() {
-        return slideBottomInset;
-    }
-
-    @Override
-    public void onSlideUnavailable() {
-        // Nothing to slide through: the feed's own list shows until the layout is chosen afresh.
-        slideSuppressed = true;
-        ShadowboxPagerFragment slide = (ShadowboxPagerFragment) getChildFragmentManager().findFragmentByTag(SLIDE_TAG);
-        if (slide != null) {
-            getChildFragmentManager().beginTransaction().remove(slide).commitAllowingStateLoss();
-        }
-        showSlide(false);
-    }
-
     private void noPostFound() {
         hasPost = false;
-        dropSlide();
         if (isInLazyMode) {
             stopLazyMode();
         }
@@ -2001,7 +1823,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void refresh() {
         binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
         hasPost = false;
-        dropSlide();
         // A refresh is a request for the top of the listing, which is the one thing a resume must
         // not serve. Dropped here rather than in the view model alone so the pull-to-refresh, the
         // retry button and the random-tab roll below all take it.
@@ -2171,31 +1992,26 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
-    public void changePostLayout(int chosenLayout, boolean temporary) {
-        boolean wasShadowbox = shadowboxLayout;
-        this.postLayout = adoptLayout(chosenLayout);
-        if (shadowboxLayout && !wasShadowbox) {
-            // Chosen afresh, so it gets another go at finding something to show.
-            slideSuppressed = false;
-        }
+    public void changePostLayout(int postLayout, boolean temporary) {
+        this.postLayout = postLayout;
         if (!temporary) {
             switch (postType) {
                 case PostType.FRONT_PAGE:
                 case PostType.ANONYMOUS_FRONT_PAGE:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, chosenLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, postLayout).apply();
                     break;
                 case PostType.SUBREDDIT:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, chosenLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, postLayout).apply();
                     break;
                 case PostType.USER:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, chosenLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, postLayout).apply();
                     break;
                 case PostType.SEARCH:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, chosenLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, postLayout).apply();
                     break;
                 case PostType.MULTIREDDIT:
                 case PostType.ANONYMOUS_MULTIREDDIT:
-                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, chosenLayout).apply();
+                    mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, postLayout).apply();
                     break;
             }
         }
@@ -2244,7 +2060,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         applyMediaOnlyPosts();
-        syncSlide();
     }
 
     @Override
@@ -2336,7 +2151,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Subscribe
     public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
         // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
-        changePostLayout(currentLayout(), true);
+        changePostLayout(postLayout, true);
     }
 
     @Subscribe
@@ -2518,7 +2333,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public void onDestroyView() {
-        giveBackScreen();
         binding.recyclerViewPostFragment.addOnWindowFocusChangedListener(null);
         // A trailing resume store still pending would fire against a torn-down view.
         binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);

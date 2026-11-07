@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Hiba történt a felhasználói információk értelmezése során"</string>
     <string name="no_system_webview_error">"Hiba a rendszer WebView szolgáltatásának megnyitása során"</string>
     <string name="error_loading_image_tap_to_retry">"Hiba a kép betöltése során. Koppints az újrapróbálkozáshoz."</string>
-    <string name="video_error_tap_to_retry">"Hiba a videó lejátszása során. Koppints az újrapróbálkozáshoz."</string>
     <string name="load_posts_error">"Hiba történt a bejegyzések betöltésekor.\nKoppints az újrapróbálkozáshoz."</string>
     <string name="load_posts_error_anonymous_403">"A platform korlátai miatt a tartalom jelenleg nem tölthető be.\n \n\nHamarosan újrapróbálhatja, vagy előfizethet a megbízhatóbb élmény érdekében."</string>
     <string name="load_posts_error_with_reason">"Hiba a bejegyzések betöltésekor. Ok: %1$s.\nKoppints az újrapróbálkozáshoz."</string>
@@ -218,14 +217,6 @@
     <string name="no_posts_no_lazy_mode">"Nincs rendelkezésre álló bejegyzés"</string>
     <string name="lazy_mode_start">"Lusta mód kezdete: %1$.1fs"</string>
     <string name="lazy_mode_stop">"A lusta mód leállt"</string>
-    <string name="shadowbox_no_posts">"Nincsenek hozzászólások a Shadowbox módhoz"</string>
-    <string name="shadowbox_tap_to_reveal">"Koppints a felfedéshez"</string>
-    <string name="shadowbox_open_full_viewer">"Megnyitás teljes megtekintőben"</string>
-    <string name="shadowbox_open_comments">"Nyisd meg a megjegyzéseket"</string>
-    <string name="shadowbox_more_options">"További lehetőségek"</string>
-    <string name="shadowbox_mute">"Némítás"</string>
-    <string name="shadowbox_play_pause">"Lejátszás vagy szünet"</string>
-    <string name="shadowbox_gallery_item_error">"Hiba a galériaelem betöltésekor"</string>
     <string name="write_comment_hint">"Ide jöhetnek az érdekes gondolatai"</string>
     <string name="comment_content_required">"Hol vannak az érdekes gondolatai?"</string>
     <string name="sending_comment">"Küldés"</string>
@@ -491,8 +482,6 @@
     <string name="settings_lock_toolbar_title">"Eszköztár rögzítése"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Húzz fefelé, hogy elrejtsd a következő felső szintű komment gombot"</string>
     <string name="settings_lazy_mode_interval_title">"Lusta mód entervallum"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Szöveges bejegyzések és előnézet nélküli bejegyzések elrejtése"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"A Shadowbox mód minden szöveges bejegyzést kihagy, és minden olyan bejegyzést, amelynél nincs előnézeti kép."</string>
     <string name="settings_font_title">"Betűtípus"</string>
     <string name="settings_font_summary">"Betűtípus"</string>
     <string name="settings_title_font_summary">"Cím"</string>

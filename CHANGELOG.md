@@ -2,6 +2,13 @@
 
 ---
 
+Unreleased
+============
+**Removed**
+* The Slide layout, and with it the one-post-per-screen pager, its info panel, its media pages, and the "Hide Text Posts and Posts with No Preview" setting that only it used. A feed saved on Slide shows its posts as Card Top until another layout is chosen
+
+---
+
 8.3.3.9.1.27-beta.8 / 2026-11-7
 ============
 **Fixed**
