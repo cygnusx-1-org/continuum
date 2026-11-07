@@ -1,7 +1,8 @@
 package ml.docilealligator.infinityforreddit.shadowbox
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel
@@ -17,11 +18,12 @@ import java.util.IdentityHashMap
  * twice and two positions must still not share an id.
  */
 class ShadowboxPagerAdapter(
-    activity: FragmentActivity,
+    fragmentManager: FragmentManager,
+    lifecycle: Lifecycle,
     private val viewModel: ViewPostDetailActivityViewModel,
     private val blurPolicy: (Post) -> Boolean,
     private val showPost: (Post) -> Boolean
-) : FragmentStateAdapter(activity) {
+) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
     private val idsByPost = IdentityHashMap<Post, Long>()
     private val postsById = HashMap<Long, Post>()

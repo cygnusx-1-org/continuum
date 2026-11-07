@@ -17,6 +17,14 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <!-- The Slide layout's pager, put here while the feed is in that layout. -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/slide_container_post_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/fetch_post_info_linear_layout_post_fragment"
         android:layout_width="match_parent"
