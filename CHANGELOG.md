@@ -2,7 +2,7 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
 **New**
 * Gallery layout: videos autoplay as their tile scrolls into view, muted, under the same Video Autoplay settings, NSFW and spoiler rules and simultaneous-autoplay limit as the other layouts. A tap still opens the post as it did
