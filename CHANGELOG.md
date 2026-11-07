@@ -2,6 +2,13 @@
 
 ---
 
+Unreleased
+============
+**Removed**
+* The vertical gallery list is gone: tapping a gallery opens the swipe viewer on that picture again. The Slide layout is the way to scroll through posts and galleries
+
+---
+
 8.3.3.9.1.27-beta.5 / 2026-11-6
 ============
 **New**

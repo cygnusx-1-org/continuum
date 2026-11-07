@@ -1242,11 +1242,6 @@ public class Post implements Parcelable {
         // whether `url` is small enough to load in place of a downscale that is too narrow.
         public int sourceWidth;
         public int sourceHeight;
-        // The same animation as `url` for a gif, as an mp4 Reddit publishes beside it (`s.mp4`): a
-        // fraction of the size, and decoded by the video hardware instead of frame by frame on the CPU.
-        // Null where there is none, and for posts restored from a cache written before this field.
-        @Nullable
-        public String mp4Url;
         public String fileName;
         public int mediaType;
         public String caption;
@@ -1292,7 +1287,6 @@ public class Post implements Parcelable {
             mediaType = in.readInt();
             caption = Objects.requireNonNull(in.readString());
             captionUrl = Objects.requireNonNull(in.readString());
-            mp4Url = in.readString();
         }
 
         public static final Creator<Gallery> CREATOR = new Creator<Gallery>() {
@@ -1326,7 +1320,6 @@ public class Post implements Parcelable {
             parcel.writeInt(mediaType);
             parcel.writeString(caption);
             parcel.writeString(captionUrl);
-            parcel.writeString(mp4Url);
         }
 
         public void setFallbackUrl(String fallbackUrl) { this.fallbackUrl = fallbackUrl; }

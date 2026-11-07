@@ -11,11 +11,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -35,15 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import app.futured.hauler.DragDirection;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.request.target.Target;
-import androidx.media3.common.MediaItem;
-import androidx.media3.common.Player;
-import androidx.media3.exoplayer.ExoPlayer;
 import com.google.gson.Gson;
 import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonSyntaxException;
@@ -58,7 +47,6 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.SetAsWallpaperCallback;
 import ml.docilealligator.infinityforreddit.WallpaperSetter;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewRedditGalleryBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemShadowboxGalleryBinding;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.ContentFontStyle;
@@ -89,16 +77,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
      */
     public static final String EXTRA_POST_JSON = "EPJ";
     public static final String EXTRA_GALLERY_ITEM_INDEX = "EGII";
-    /**
-     * Open on a vertical list of every item rather than the swipe viewer; a tap on an item opens
-     * the viewer on it, and back returns to the list.
-     */
-    public static final String EXTRA_SCROLL_LIST = "ESL";
-
     /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
     private static final String STATE_RESUME_PAGE = "RP";
-    private static final String STATE_SHOWING_LIST = "SSL";
-    private static final String STATE_CAME_FROM_LIST = "SCFL";
 
     @Inject
     @Named("default")
@@ -120,21 +100,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     // Resume where I left off: which item of the gallery was open. The gallery itself replays in the
     // extras, so this needs no network of its own.
     private int resumePage = -1;
-    private boolean showingList = false;
-    // Whether the list may animate its GIFs, under the app's Video Autoplay settings.
-    private boolean autoplayGifs;
-    /** Plays the mp4 of the one gif the vertical list is resting on. */
-    @Nullable
-    private ExoPlayer gifPlayer;
-    @Nullable
-    private GalleryListViewHolder gifVideoHolder;
-    // Enabled while the pager is open over the list, so back returns to the list instead of leaving.
-    private final OnBackPressedCallback backToList = new OnBackPressedCallback(false) {
-        @Override
-        public void handleOnBackPressed() {
-            showList(binding.viewPagerViewRedditGalleryActivity.getCurrentItem());
-        }
-    };
     private ActivityViewRedditGalleryBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
 
@@ -222,8 +187,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 params.topMargin = allInsets.top;
                 binding.toolbarViewRedditGalleryActivity.setLayoutParams(params);
 
-                binding.recyclerViewViewRedditGalleryActivity.setPadding(allInsets.left, allInsets.top, allInsets.right, allInsets.bottom);
-
                 viewGalleryViewModel.setInsets(allInsets);
                 return WindowInsetsCompat.CONSUMED;
             }
@@ -256,7 +219,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
         subredditName = post.getSubredditName();
         isNsfw = post.isNSFW();
-        autoplayGifs = shouldAutoplayGifs();
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
             binding.haulerViewViewRedditGalleryActivity.setOnDragDismissedListener(dragDirection -> {
@@ -268,349 +230,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             binding.haulerViewViewRedditGalleryActivity.setDragEnabled(false);
         }
 
-        getOnBackPressedDispatcher().addCallback(this, backToList);
-        boolean scrollList = getIntent().getBooleanExtra(EXTRA_SCROLL_LIST, false);
-        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_SHOWING_LIST)) {
-            showList(0);
-        } else if (savedInstanceState == null && scrollList) {
-            Bundle resumeState = ResumeState.claim(this);
-            if (resumeState != null) {
-                restoreResumeState(resumeState);
-            }
-            int index = getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0);
-            if (index == 0 && resumePage > 0 && resumePage < gallery.size()) {
-                index = resumePage;
-            }
-            showList(index);
-        } else {
-            setupViewPager(savedInstanceState);
-            backToList.setEnabled(savedInstanceState != null
-                    && savedInstanceState.getBoolean(STATE_CAME_FROM_LIST));
-        }
-    }
-
-    // A picture decoded at the screen's width, whatever size the file is.
-    private RequestBuilder<Drawable> sizedRequest(String url) {
-        return Glide.with(this).load(url)
-                .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL);
-    }
-
-    private class GalleryListAdapter extends RecyclerView.Adapter<GalleryListViewHolder> {
-        @NonNull
-        @Override
-        public GalleryListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new GalleryListViewHolder(ItemShadowboxGalleryBinding.inflate(getLayoutInflater(), parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
-            holder.bind(gallery.get(position));
-            holder.binding.indexTextViewItemShadowboxGallery.setText(String.valueOf(position + 1));
-            holder.binding.indexTextViewItemShadowboxGallery.setVisibility(View.VISIBLE);
-            // Warm the next two pictures, so the first screenful after opening is not decoded
-            // while it scrolls into view.
-            for (int next = position + 1; next <= position + 2 && next < gallery.size(); next++) {
-                Post.Gallery item = gallery.get(next);
-                String url = urlFor(item);
-                if (url != null) {
-                    sizedRequest(url).preload();
-                }
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return gallery.size();
-        }
-
-        @Override
-        public void onViewRecycled(@NonNull GalleryListViewHolder holder) {
-            if (holder.videoPlaying) {
-                stopGifVideo();
-            }
-            holder.animated = false;
-            Glide.with(ViewRedditGalleryActivity.this).clear(holder.binding.imageViewItemShadowboxGallery);
-        }
-
-        @Override
-        public void onViewDetachedFromWindow(@NonNull GalleryListViewHolder holder) {
-            // Off the screen, a row gives its animation back: the decoded frames of a long GIF are
-            // what the list ran out of memory and time on when every row it had passed kept its own.
-            if (holder.videoPlaying) {
-                stopGifVideo();
-            }
-            holder.stopAnimation();
-        }
-    }
-
-    private class GalleryListViewHolder extends RecyclerView.ViewHolder {
-        final ItemShadowboxGalleryBinding binding;
-        @Nullable
-        Post.Gallery item;
-        /** The animated source is what the row shows, rather than its still. */
-        boolean animated;
-        /** This row is the one the gif player is showing. */
-        boolean videoPlaying;
-
-        GalleryListViewHolder(ItemShadowboxGalleryBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-            if (typeface != null) {
-                binding.captionTextViewItemShadowboxGallery.setTypeface(typeface);
-                binding.indexTextViewItemShadowboxGallery.setTypeface(typeface);
-            }
-            itemView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    showPager(position);
-                }
-            });
-        }
-
-        void stopAnimation() {
-            Post.Gallery current = item;
-            if (!animated || current == null) {
-                return;
-            }
-            animated = false;
-            String still = current.feedPreviewUrl;
-            if (still != null) {
-                sizedRequest(still).into(binding.imageViewItemShadowboxGallery);
-            }
-        }
-
-        void bind(Post.Gallery item) {
-            this.item = item;
-            animated = false;
-            // The source's own size reserves the row's height before the picture arrives, so the
-            // list does not jump as items load; without it the row sizes to the picture.
-            binding.imageViewItemShadowboxGallery.setRatio(
-                    item.sourceWidth > 0 && item.sourceHeight > 0 ? (float) item.sourceHeight / item.sourceWidth : 0f);
-            binding.errorImageViewItemShadowboxGallery.setVisibility(View.GONE);
-            boolean video = item.mediaType == Post.Gallery.TYPE_VIDEO;
-            binding.playBadgeImageViewItemShadowboxGallery.setVisibility(video ? View.VISIBLE : View.GONE);
-
-            String still = item.feedPreviewUrl;
-            String main = urlFor(item);
-            if (main == null) {
-                Glide.with(ViewRedditGalleryActivity.this).clear(binding.imageViewItemShadowboxGallery);
-                binding.imageViewItemShadowboxGallery.setImageDrawable(null);
-                binding.playBadgeImageViewItemShadowboxGallery.setVisibility(View.GONE);
-                binding.errorImageViewItemShadowboxGallery.setVisibility(View.VISIBLE);
-            } else {
-                // Decoded at the screen's width, whatever size the file is.
-                RequestBuilder<Drawable> request = sizedRequest(main);
-                if (still != null && !still.equals(main)) {
-                    // The still stands in while an animated GIF downloads.
-                    request = request.thumbnail(sizedRequest(still));
-                }
-                request.into(binding.imageViewItemShadowboxGallery);
-            }
-
-            itemView.post(() -> {
-                if (ViewRedditGalleryActivity.this.binding.recyclerViewViewRedditGalleryActivity.getScrollState()
-                        == RecyclerView.SCROLL_STATE_IDLE) {
-                    animateGifIfResting(this);
-                }
-            });
-
-            if (TextUtils.isEmpty(item.caption)) {
-                binding.captionTextViewItemShadowboxGallery.setVisibility(View.GONE);
-            } else {
-                binding.captionTextViewItemShadowboxGallery.setVisibility(View.VISIBLE);
-                binding.captionTextViewItemShadowboxGallery.setText(item.caption);
-            }
-        }
-    }
-
-    /**
-     * Swaps a GIF row's still for the animation, once the row is on screen and the list is not
-     * moving. Rows flung past never start the download, and the ones the list is resting on are
-     * the only ones decoding frames.
-     */
-    private void animateGifIfResting(GalleryListViewHolder holder) {
-        Post.Gallery item = holder.item;
-        if (item == null || holder.animated || !autoplayGifs || item.mediaType != Post.Gallery.TYPE_GIF
-                || item.mp4Url != null || !holder.itemView.isAttachedToWindow() || item.url == null) {
-            return;
-        }
-        String still = item.feedPreviewUrl;
-        if (still == null || still.equals(item.url)) {
-            // Nothing cheaper was shown, so the animation is already what the row has.
-            return;
-        }
-        holder.animated = true;
-        sizedRequest(item.url).thumbnail(sizedRequest(still)).into(holder.binding.imageViewItemShadowboxGallery);
-    }
-
-    private void animateRestingGifs() {
-        RecyclerView list = binding.recyclerViewViewRedditGalleryActivity;
-        GalleryListViewHolder best = null;
-        int bestVisible = 0;
-        for (int i = 0; i < list.getChildCount(); i++) {
-            View child = list.getChildAt(i);
-            RecyclerView.ViewHolder holder = list.getChildViewHolder(child);
-            if (!(holder instanceof GalleryListViewHolder)) {
-                continue;
-            }
-            GalleryListViewHolder row = (GalleryListViewHolder) holder;
-            animateGifIfResting(row);
-            Post.Gallery item = row.item;
-            if (item != null && autoplayGifs && item.mediaType == Post.Gallery.TYPE_GIF && item.mp4Url != null) {
-                int visible = Math.min(child.getBottom(), list.getHeight()) - Math.max(child.getTop(), 0);
-                if (visible > bestVisible) {
-                    bestVisible = visible;
-                    best = row;
-                }
-            }
-        }
-        // One gif plays at a time -- the row showing most of itself -- as a video, which the
-        // device's decoder handles where the same animation as a GIF is decoded by the CPU.
-        if (best == null) {
-            stopGifVideo();
-        } else if (!best.videoPlaying) {
-            startGifVideo(best);
-        }
-    }
-
-    private void startGifVideo(GalleryListViewHolder holder) {
-        Post.Gallery item = holder.item;
-        if (item == null || item.mp4Url == null) {
-            return;
-        }
-        stopGifVideo();
-        if (gifPlayer == null) {
-            gifPlayer = new ExoPlayer.Builder(this).build();
-            gifPlayer.setVolume(0f);
-            gifPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
-        }
-        holder.binding.playerViewItemShadowboxGallery.setPlayer(gifPlayer);
-        holder.binding.playerViewItemShadowboxGallery.setVisibility(View.VISIBLE);
-        holder.videoPlaying = true;
-        gifVideoHolder = holder;
-        gifPlayer.setMediaItem(MediaItem.fromUri(item.mp4Url));
-        gifPlayer.setPlayWhenReady(true);
-        gifPlayer.prepare();
-    }
-
-    private void stopGifVideo() {
-        GalleryListViewHolder holder = gifVideoHolder;
-        gifVideoHolder = null;
-        if (holder != null) {
-            holder.videoPlaying = false;
-            holder.binding.playerViewItemShadowboxGallery.setPlayer(null);
-            holder.binding.playerViewItemShadowboxGallery.setVisibility(View.GONE);
-        }
-        if (gifPlayer != null) {
-            gifPlayer.stop();
-            gifPlayer.clearMediaItems();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        stopGifVideo();
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (showingList) {
-            binding.recyclerViewViewRedditGalleryActivity.post(this::animateRestingGifs);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (gifPlayer != null) {
-            gifPlayer.release();
-            gifPlayer = null;
-        }
-        super.onDestroy();
-    }
-
-    /**
-     * What the list loads for an item. The resolution-bounded still Reddit publishes, for every
-     * type: the source is several thousand pixels wide and decoding a screenful of those is what
-     * made the list stutter. A video's url is the mp4, which an ImageView cannot show, so its still
-     * stands in; a GIF is a still too, and is swapped for the animation only while its row rests on screen
-     * (see {@link #animateGifIfResting}) where the Video Autoplay settings allow it.
-     */
-    @Nullable
-    private String urlFor(Post.Gallery item) {
-        String still = item.feedPreviewUrl;
-        if (item.mediaType == Post.Gallery.TYPE_VIDEO) {
-            return still;
-        }
-        return still != null ? still : item.url;
-    }
-
-    /**
-     * The same rule the feed applies: Video Autoplay set to never, or to Wi-Fi only while on
-     * mobile data, means nothing plays by itself, and Autoplay NSFW Videos excludes NSFW posts.
-     */
-    private boolean shouldAutoplayGifs() {
-        String setting = sharedPreferences.getString(
-                SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
-        boolean allowed = SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON.equals(setting)
-                || (SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI.equals(setting)
-                && Utils.getConnectedNetwork(this) == Utils.NETWORK_TYPE_WIFI);
-        return allowed && (!isNsfw || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true));
-    }
-
-    /**
-     * Lays every item out in one vertical list. The pager is not created until an item is tapped,
-     * so no fragment (and no video) starts while the list is up.
-     */
-    private void showList(int scrollTo) {
-        showingList = true;
-        backToList.setEnabled(false);
-        binding.viewPagerViewRedditGalleryActivity.setVisibility(View.GONE);
-        binding.viewPagerViewRedditGalleryActivity.setAdapter(null);
-        binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.VISIBLE);
-        if (binding.recyclerViewViewRedditGalleryActivity.getAdapter() == null) {
-            binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
-            binding.recyclerViewViewRedditGalleryActivity.setItemViewCacheSize(6);
-            binding.recyclerViewViewRedditGalleryActivity.setAdapter(new GalleryListAdapter());
-            binding.recyclerViewViewRedditGalleryActivity.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        animateRestingGifs();
-                    }
-                }
-            });
-        }
-        if (scrollTo > 0 && scrollTo < gallery.size()) {
-            binding.recyclerViewViewRedditGalleryActivity.scrollToPosition(scrollTo);
-        }
-    }
-
-    /**
-     * Opens the swipe viewer, with zoom, download and share, on one item of the list.
-     */
-    private void showPager(int index) {
-        showingList = false;
-        backToList.setEnabled(true);
-        stopGifVideo();
-        binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.GONE);
-        binding.viewPagerViewRedditGalleryActivity.setVisibility(View.VISIBLE);
-        createPagerAdapter();
-        binding.viewPagerViewRedditGalleryActivity.setCurrentItem(index, false);
+        setupViewPager(savedInstanceState);
     }
 
     private void createPagerAdapter() {
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_SHOWING_LIST, showingList);
-        outState.putBoolean(STATE_CAME_FROM_LIST, backToList.isEnabled());
     }
 
     private void setupViewPager(@Nullable Bundle savedInstanceState) {
