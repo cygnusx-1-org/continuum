@@ -22,6 +22,13 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
+    <!-- Inflated only for a video that autoplays; see PostGalleryVideoAutoplayViewHolder. -->
+    <ViewStub
+        android:id="@+id/video_player_stub_item_post_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/item_post_gallery_video_player" />
+
     <ImageView
         android:id="@+id/image_view_no_preview_item_post_gallery"
         android:layout_width="match_parent"

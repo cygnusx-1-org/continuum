@@ -148,6 +148,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final int VIEW_TYPE_POST_COMPACT_2 = 6;
     private static final int VIEW_TYPE_POST_GALLERY = 7;
     private static final int VIEW_TYPE_POST_GALLERY_GALLERY_TYPE = 8;
+    private static final int VIEW_TYPE_POST_GALLERY_VIDEO_AUTOPLAY_TYPE = 9;
     private static final int VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE = 13;
     private static final int VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE = 14;
     private static final int VIEW_TYPE_POST_CARD_3_GALLERY_TYPE = 15;
@@ -697,6 +698,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
+    /** Whether the video of a post plays by itself in the feed: autoplay is on, and NSFW and spoiler posts are not held back. */
+    private boolean autoplaysVideo(Post post) {
+        return mAutoplay && !((!mAutoplayNsfwVideos && post.isNSFW()) || post.isSpoiler());
+    }
+
     /**
      * The view type a row showing {@code post} gets, or the layout's default while the post is not
      * loaded. Separate from {@link #getItemViewType} so {@link CompactThumbnailPreloader} can ask what
@@ -711,10 +717,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             return VIEW_TYPE_POST_COMPACT_2;
                         }
 
-                        if (mAutoplay) {
-                            if ((!mAutoplayNsfwVideos && post.isNSFW()) || post.isSpoiler()) {
-                                return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
-                            }
+                        if (autoplaysVideo(post)) {
                             return VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE;
                         }
 
@@ -779,6 +782,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (post != null) {
                 if (post.getPostType() == Post.GALLERY_TYPE) {
                     return VIEW_TYPE_POST_GALLERY_GALLERY_TYPE;
+                } else if (post.getPostType() == Post.VIDEO_TYPE && autoplaysVideo(post)) {
+                    return VIEW_TYPE_POST_GALLERY_VIDEO_AUTOPLAY_TYPE;
                 } else {
                     return VIEW_TYPE_POST_GALLERY;
                 }
@@ -793,10 +798,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             return VIEW_TYPE_POST_COMPACT_2;
                         }
 
-                        if (mAutoplay) {
-                            if ((!mAutoplayNsfwVideos && post.isNSFW()) || post.isSpoiler()) {
-                                return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
-                            }
+                        if (autoplaysVideo(post)) {
                             return VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE;
                         }
 
@@ -878,6 +880,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
             return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
+        } else if (viewType == VIEW_TYPE_POST_GALLERY_VIDEO_AUTOPLAY_TYPE) {
+            if (mDataSavingMode) {
+                return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
+            }
+            return new PostGalleryVideoAutoplayViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
         } else if (viewType == VIEW_TYPE_POST_GALLERY_GALLERY_TYPE) {
             return new PostGalleryGalleryTypeViewHolder(ItemPostGalleryGalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
         } else if (viewType == VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE) {
@@ -1271,17 +1278,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
                     VideoAutoplayImpl toroPlayer = asVideo.toroPlayer;
                     if (!mFixedHeightPreviewInCard && preview != null) {
-                        toroPlayer.previewFrameLayout.setSquarePreview(false);
-                        toroPlayer.aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
+                        asVideo.previewFrameLayout.setSquarePreview(false);
+                        asVideo.aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
                         // Restated because a recycled holder may carry the centred scale type the
                         // placeholder below sets, which would crop a real preview.
                         toroPlayer.previewImageView.setScaleType(ImageView.ScaleType.FIT_START);
                     } else {
                         // The square is the wrapper's to impose, so that it can bound the height;
                         // clearing the media3 frame's own ratio makes it honour that measurement.
-                        toroPlayer.aspectRatioFrameLayout.setAspectRatio(0);
-                        toroPlayer.previewFrameLayout.setMaxHeight(getMaxPreviewHeight());
-                        toroPlayer.previewFrameLayout.setSquarePreview(true);
+                        asVideo.aspectRatioFrameLayout.setAspectRatio(0);
+                        asVideo.previewFrameLayout.setMaxHeight(getMaxPreviewHeight());
+                        asVideo.previewFrameLayout.setSquarePreview(true);
                         // Fitted rather than cropped, because the clip this still stands in for is
                         // fitted: the PlayerView keeps media3's default fit mode, so a 16:9 video
                         // in the square is shown whole between black bars. Cropping the still
@@ -1303,16 +1310,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 .listener(toroPlayer.previewRequestListener)
                                 .into(toroPlayer.previewImageView);
                     }
-                    asVideo.toroPlayer.setForceMuted(post.isNSFW() && mMuteNSFWVideo);
-                    if (!asVideo.toroPlayer.isManuallyPaused) {
-                        if (mFragment.getMasterMutingOption() == null) {
-                            asVideo.toroPlayer.setVolume(mMuteAutoplayingVideos || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
-                        } else {
-                            asVideo.toroPlayer.setVolume(mFragment.getMasterMutingOption() || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
-                        }
-                    }
-
-                    asVideo.toroPlayer.loadVideo();
+                    bindAutoplayVideo(asVideo.toroPlayer, post, false);
                     applyTypeColor(asVideo.typeTextView, post.getPostType());
                 } else if (holder instanceof PostWithPreviewTypeViewHolder asPreview) {
                     // Both snippet slots start hidden on every bind, not only on a recycle: a
@@ -1882,6 +1880,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 asGallery.binding.imageViewNoPreviewItemPostGallery.setVisibility(View.VISIBLE);
                                 asGallery.binding.imageViewNoPreviewItemPostGallery.setImageResource(R.drawable.ic_video_day_night_24dp);
                             }
+                            if (holder instanceof PostGalleryVideoAutoplayViewHolder asVideo) {
+                                // The tile plays itself; the badge that says it can is not needed.
+                                asGallery.binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(View.GONE);
+                                bindAutoplayVideo(asVideo.toroPlayer(), post, true);
+                            }
                             break;
                         }
                         case Post.LINK_TYPE: {
@@ -2411,7 +2414,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (position == RecyclerView.NO_POSITION) {
                 continue;
             }
-            if (holder instanceof PostBaseVideoAutoplayViewHolder asVideo) {
+            if (holder instanceof VideoAutoplayRow asVideo) {
                 // The same question Toro asks of its own candidates.
                 if (asVideo.wantsToPlay()) {
                     candidates.add(position);
@@ -2463,6 +2466,24 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 && !(mAutoplay && mAutoplayNsfwVideos))
                 || (post.isSpoiler() && mNeedBlurSpoiler);
         return blurImage ? null : mediaView;
+    }
+
+    /**
+     * Starts {@code toroPlayer} on the clip of {@code post}, with the sound the feed's muting
+     * settings give it, or none at all when {@code silent}: a gallery tile has no mute button to
+     * answer to.
+     */
+    private void bindAutoplayVideo(VideoAutoplayImpl toroPlayer, Post post, boolean silent) {
+        boolean muted = silent || (post.isNSFW() && mMuteNSFWVideo);
+        toroPlayer.setForceMuted(muted);
+        if (!toroPlayer.isManuallyPaused) {
+            if (mFragment.getMasterMutingOption() == null) {
+                toroPlayer.setVolume(mMuteAutoplayingVideos || muted ? 0f : 1f);
+            } else {
+                toroPlayer.setVolume(mFragment.getMasterMutingOption() || muted ? 0f : 1f);
+            }
+        }
+        toroPlayer.loadVideo();
     }
 
     /** Loads the animation or the still into {@code holder}, if it is not already showing it. */
@@ -3483,25 +3504,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             if (holder instanceof PostBaseViewHolder) {
                 if (holder instanceof PostBaseVideoAutoplayViewHolder asVideo) {
-                    asVideo.toroPlayer.mediaUri = null;
-                    if (asVideo.toroPlayer.fetchRedgifsOrStreamableVideoCall != null
-                            && !asVideo.toroPlayer.fetchRedgifsOrStreamableVideoCall.isCanceled()) {
-                        asVideo.toroPlayer.fetchRedgifsOrStreamableVideoCall.cancel();
-                        asVideo.toroPlayer.fetchRedgifsOrStreamableVideoCall = null;
-                    }
-                    if (asVideo.toroPlayer.fetchShortClipVideoCancellable != null) {
-                        asVideo.toroPlayer.fetchShortClipVideoCancellable.cancel();
-                        asVideo.toroPlayer.fetchShortClipVideoCancellable = null;
-                    }
-                    asVideo.toroPlayer.errorLoadingRedgifsImageView.setVisibility(View.GONE);
-                    asVideo.toroPlayer.videoQualityButton.setVisibility(View.GONE);
-                    asVideo.toroPlayer.muteButton.setVisibility(View.GONE);
-                    if (!asVideo.toroPlayer.isManuallyPaused) {
-                        asVideo.toroPlayer.resetVolume();
-                    }
+                    asVideo.toroPlayer.reset();
                     mGlide.clear(asVideo.toroPlayer.previewImageView);
                     asVideo.toroPlayer.previewImageView.setVisibility(View.GONE);
-                    asVideo.toroPlayer.setDefaultResolutionAlready = false;
                 } else if (holder instanceof PostWithPreviewTypeViewHolder asPreview) {
                     mGlide.clear(asPreview.imageView);
                     // The next post bound here starts on its still like any other.
@@ -3566,6 +3571,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
             }
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
+            if (holder instanceof PostGalleryVideoAutoplayViewHolder asVideo) {
+                asVideo.toroPlayer().reset();
+            }
 
             asGallery.binding.titleTextViewItemPostGallery.setText("");
             asGallery.binding.titleTextViewItemPostGallery.setVisibility(View.GONE);

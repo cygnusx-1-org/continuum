@@ -2,8 +2,11 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
+**New**
+* Gallery layout: videos autoplay as their tile scrolls into view, muted, under the same Video Autoplay settings, NSFW and spoiler rules and simultaneous-autoplay limit as the other layouts. A tap still opens the post as it did
+
 **Removed**
 * The Slide layout, and with it the one-post-per-screen pager, its info panel, its media pages, and the "Hide Text Posts and Posts with No Preview" setting that only it used. A feed saved on Slide shows its posts as Card Top until another layout is chosen
 
