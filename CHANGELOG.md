@@ -2,6 +2,13 @@
 
 ---
 
+Unreleased
+============
+**Changed**
+* The Shadowbox layout is now called Slide
+
+---
+
 8.3.3.9.1.27-beta.5 / 2026-11-6
 ============
 **New**
