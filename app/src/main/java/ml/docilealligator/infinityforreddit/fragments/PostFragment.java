@@ -565,8 +565,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                    defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
