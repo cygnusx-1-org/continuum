@@ -80,8 +80,8 @@ android {
 
         minSdk 24
         targetSdk 36
-        versionCode 269
-        versionName "8.3.3.9.1.27-beta.6"
+        versionCode 270
+        versionName "8.3.3.9.1.27-beta.7"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
         // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled

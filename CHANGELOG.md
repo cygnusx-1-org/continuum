@@ -2,6 +2,15 @@
 
 ---
 
+8.3.3.9.1.27-beta.7 / 2026-11-7
+============
+**Fixed**
+* Slide inside a screen with its own tabs (a subreddit's Posts and About): a sideways swipe on a slide only changes posts and no longer drifts into the other tab
+* Slide on a subreddit, user or other screen with a banner or top bar: the slide fits the part of the screen you can see, so a video no longer hangs below the bottom edge and the info panel is not pushed off screen
+* Slide galleries: each picture is as tall as it really is, instead of every picture taking the first one's height and leaving bars between short and tall pictures
+
+---
+
 8.3.3.9.1.27-beta.6 / 2026-11-6
 ============
 **Changed**

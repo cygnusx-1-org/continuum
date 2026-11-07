@@ -93,7 +93,10 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import android.view.ViewParent;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentManager;
+import com.google.android.material.appbar.AppBarLayout;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPagerFragment;
 import ml.docilealligator.infinityforreddit.thing.SortType;
@@ -144,6 +147,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private boolean slideSuppressed;
     /** What the system covers at the bottom edge, for the pager to keep its panel clear of. */
     private int slideBottomInset;
+    /** The screen's top bar, while the Slide pager is up; see {@link #followAppBar}. */
+    @Nullable
+    private AppBarLayout slideAppBar;
+    private final AppBarLayout.OnOffsetChangedListener slideAppBarListener =
+            (appBar, verticalOffset) -> padSlideForAppBar(verticalOffset);
     private static final String SORT_TYPE_STATE = "STS";
     private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
@@ -1511,6 +1519,58 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
         binding.slideContainerPostFragment.setVisibility(show ? View.VISIBLE : View.GONE);
         binding.swipeRefreshLayoutPostFragment.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (show) {
+            followAppBar();
+        } else {
+            releaseAppBar();
+        }
+    }
+
+    /**
+     * Keeps the Slide pager inside the part of the screen that can be seen. The screens that hold
+     * a feed size it for a top bar that has scrolled away -- a subreddit's banner and tabs, say --
+     * so while the bar is showing, its lower end hangs below the screen, and with it a slide's
+     * bottom edge and info panel. A list scrolls the bar out of the way; a slide does not, so
+     * the pager gives up the overhang instead.
+     */
+    private void followAppBar() {
+        if (slideAppBar != null || binding == null) {
+            return;
+        }
+        for (ViewParent parent = binding.getRoot().getParent(); parent != null; parent = parent.getParent()) {
+            if (parent instanceof CoordinatorLayout) {
+                CoordinatorLayout coordinator = (CoordinatorLayout) parent;
+                for (int i = 0; i < coordinator.getChildCount(); i++) {
+                    View child = coordinator.getChildAt(i);
+                    if (child instanceof AppBarLayout) {
+                        slideAppBar = (AppBarLayout) child;
+                        slideAppBar.addOnOffsetChangedListener(slideAppBarListener);
+                        padSlideForAppBar(slideAppBar.getTop());
+                        return;
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    private void releaseAppBar() {
+        if (slideAppBar != null) {
+            slideAppBar.removeOnOffsetChangedListener(slideAppBarListener);
+            slideAppBar = null;
+        }
+        if (binding != null) {
+            binding.slideContainerPostFragment.setPadding(0, 0, 0, 0);
+        }
+    }
+
+    /** [offset] is how far the bar has scrolled up: 0 when it is fully showing. */
+    private void padSlideForAppBar(int offset) {
+        if (binding == null || slideAppBar == null) {
+            return;
+        }
+        int overhang = Math.max(0, slideAppBar.getTotalScrollRange() + offset);
+        binding.slideContainerPostFragment.setPadding(0, 0, 0, overhang);
     }
 
     @Override
@@ -2427,6 +2487,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public void onDestroyView() {
+        releaseAppBar();
         binding.recyclerViewPostFragment.addOnWindowFocusChangedListener(null);
         // A trailing resume store still pending would fire against a torn-down view.
         binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);

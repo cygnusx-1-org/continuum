@@ -32,19 +32,21 @@ class ShadowboxGalleryPageFragment : ShadowboxPageFragment() {
     private var panelHeight = 0
     private var bottomInset = 0
 
-    /** Height-to-width ratio the tiles are measured at before their image arrives. */
+    /**
+     * Height-to-width ratio a tile is measured at when its own item does not say what size it is:
+     * the post's preview, which Reddit builds from the first item.
+     */
     private var tileRatio = 1f
 
     /**
-     * The size a tile is measured to, and so the size its picture is asked for.
+     * The width a tile is measured to, and so the width its picture is asked for.
      *
-     * The list is the page, edge to edge, so the tile width is the window's; the height follows
-     * from the ratio under the same cap the tiles are given. Naming it on the request is what lets
-     * a tile be decoded as it binds, instead of a frame later once the list has been laid out and
-     * Glide has a view size to work from.
+     * The list is the page, edge to edge, so the tile width is the window's. Naming the size on
+     * the request is what lets a tile be decoded as it binds, instead of a frame later once the
+     * list has been laid out and Glide has a view size to work from. The height is each tile's
+     * own, from its item's ratio.
      */
     private var tileWidth = 0
-    private var tileHeight = 0
 
     /** Whether this page's gallery may animate its gifs, under the app's autoplay rule. */
     private var autoplayGif = false
@@ -62,6 +64,9 @@ class ShadowboxGalleryPageFragment : ShadowboxPageFragment() {
         val binding = ShadowboxMediaGalleryBinding.inflate(inflater, container, true)
         _binding = binding
         binding.recyclerViewShadowboxMediaGallery.layoutManager = LinearLayoutManagerBugFixed(host)
+        // The page sits in a feed whose top bar may collapse as a list scrolls; the pager must not
+        // move under the user's thumb, so the list does not take part in that.
+        binding.recyclerViewShadowboxMediaGallery.isNestedScrollingEnabled = false
         // Tapping anywhere in the list toggles the chrome, exactly as tapping an image page does;
         // the panel's fullscreen button opens the gallery viewer on whichever item is in view.
         addTapToToggleChrome(binding.recyclerViewShadowboxMediaGallery)
@@ -73,7 +78,6 @@ class ShadowboxGalleryPageFragment : ShadowboxPageFragment() {
         tileRatio = ShadowboxPreviews.galleryTileRatio(preview)
         val metrics = resources.displayMetrics
         tileWidth = metrics.widthPixels
-        tileHeight = ShadowboxPreviews.galleryTileHeight(tileRatio, tileWidth, metrics.heightPixels)
         autoplayGif = shouldAutoplay()
         val adapter = GalleryAdapter(post.gallery ?: emptyList())
         this.adapter = adapter
@@ -128,8 +132,20 @@ class ShadowboxGalleryPageFragment : ShadowboxPageFragment() {
             host.typeface?.let { binding.captionTextViewItemShadowboxGallery.typeface = it }
         }
 
+        /** The height this tile is measured to, which is also the height its picture is asked for. */
+        private var tileHeight = 0
+
         fun bind(item: Post.Gallery, position: Int) {
-            binding.imageViewItemShadowboxGallery.setRatio(tileRatio)
+            // Each tile takes its own item's shape. One ratio for all of them -- the first item's --
+            // left a short picture floating in a tall tile, with black bars between it and the
+            // next.
+            val ratio = if (item.sourceWidth > 0 && item.sourceHeight > 0) {
+                item.sourceHeight.toFloat() / item.sourceWidth
+            } else {
+                tileRatio
+            }
+            tileHeight = ShadowboxPreviews.galleryTileHeight(ratio, tileWidth, resources.displayMetrics.heightPixels)
+            binding.imageViewItemShadowboxGallery.setRatio(ratio)
             // A portrait ratio on a full-width tile can work out taller than the screen; cap it so
             // one image cannot fill a whole scroll of the page.
             binding.imageViewItemShadowboxGallery.setRatioMaxHeight(resources.displayMetrics.heightPixels)
