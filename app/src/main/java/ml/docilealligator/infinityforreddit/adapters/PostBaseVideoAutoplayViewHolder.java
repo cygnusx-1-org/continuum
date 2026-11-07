@@ -25,8 +25,10 @@ import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import pl.droidsonroids.gif.GifImageView;
 
 @UnstableApi
-abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implements ToroPlayer {
+abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implements VideoAutoplayRow {
     VideoAutoplayImpl toroPlayer;
+    final MaxHeightSquareFrameLayout previewFrameLayout;
+    final AspectRatioFrameLayout aspectRatioFrameLayout;
     private final BaseActivity mActivity;
 
     @OptIn(markerClass = UnstableApi.class)
@@ -64,6 +66,9 @@ abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implem
                                     MaterialButton shareButton) {
         super(rootView, host);
         this.mActivity = host.activity();
+        this.previewFrameLayout = previewFrameLayout;
+        this.aspectRatioFrameLayout = aspectRatioFrameLayout;
+        aspectRatioFrameLayout.setOnClickListener(null);
         setBaseView(
                 iconGifImageView,
                 subredditTextView,
@@ -86,11 +91,11 @@ abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implem
                 saveButton,
                 shareButton);
 
-        toroPlayer = new VideoAutoplayImpl(rootView, previewFrameLayout, aspectRatioFrameLayout, previewImageView,
-                errorLoadingRedgifsImageView, videoPlayer, videoQualityButton, muteButton, fullscreenButton, playPauseButton,
-                progressBar,
-                AppCompatResources.getDrawable(mActivity, R.drawable.ic_play_arrow_24dp),
-                AppCompatResources.getDrawable(mActivity, R.drawable.ic_pause_24dp),
+        toroPlayer = new VideoAutoplayImpl(rootView, previewImageView, errorLoadingRedgifsImageView, videoPlayer,
+                new VideoAutoplayImpl.Controls(videoQualityButton, muteButton, fullscreenButton, playPauseButton,
+                        progressBar,
+                        AppCompatResources.getDrawable(mActivity, R.drawable.ic_play_arrow_24dp),
+                        AppCompatResources.getDrawable(mActivity, R.drawable.ic_pause_24dp)),
                 host) {
             @Override
             public int getPlayerOrder() {
@@ -114,50 +119,8 @@ abstract class PostBaseVideoAutoplayViewHolder extends PostBaseViewHolder implem
         };
     }
 
-    @NonNull
     @Override
-    public View getPlayerView() {
-        return toroPlayer.getPlayerView();
-    }
-
-    @NonNull
-    @Override
-    public PlaybackInfo getCurrentPlaybackInfo() {
-        return toroPlayer.getCurrentPlaybackInfo();
-    }
-
-    @Override
-    public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
-        toroPlayer.initialize(container, playbackInfo);
-    }
-
-    @Override
-    public void play() {
-        toroPlayer.play();
-    }
-
-    @Override
-    public void pause() {
-        toroPlayer.pause();
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return toroPlayer.isPlaying();
-    }
-
-    @Override
-    public void release() {
-        toroPlayer.release();
-    }
-
-    @Override
-    public boolean wantsToPlay() {
-        return toroPlayer.wantsToPlay();
-    }
-
-    @Override
-    public int getPlayerOrder() {
-        return toroPlayer.getPlayerOrder();
+    public VideoAutoplayImpl toroPlayer() {
+        return toroPlayer;
     }
 }
