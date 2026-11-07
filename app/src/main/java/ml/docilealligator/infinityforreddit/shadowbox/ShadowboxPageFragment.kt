@@ -23,6 +23,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.activities.BaseActivity
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.databinding.FragmentShadowboxPageBinding
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager
@@ -80,7 +81,10 @@ abstract class ShadowboxPageFragment : Fragment() {
     @Inject
     lateinit var videoMuteManager: VideoMuteManager
 
-    protected lateinit var host: ShadowboxActivity
+    protected lateinit var host: BaseActivity
+
+    /** The Slide pager this page sits in; the state shared by all the pages lives there. */
+    protected lateinit var pager: ShadowboxPagerFragment
     protected lateinit var glide: RequestManager
 
     /** Index of this page's post in the activity's list. */
@@ -113,7 +117,8 @@ abstract class ShadowboxPageFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         (context.applicationContext as Infinity).appComponent.inject(this)
-        host = context as ShadowboxActivity
+        host = context as BaseActivity
+        pager = requireParentFragment() as ShadowboxPagerFragment
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,9 +132,9 @@ abstract class ShadowboxPageFragment : Fragment() {
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentShadowboxPageBinding.inflate(inflater, container, false)
         glide = Glide.with(this)
-        // The list is gone only after a process death, and the activity finishes itself before the
-        // pager is rebuilt; a page restored by the fragment manager in between just stays blank.
-        val post = host.viewModel.getPost(position) ?: return binding.root
+        // The list is gone only after a process death, when the pager drops itself before it is
+        // rebuilt; a page restored by the fragment manager in between just stays blank.
+        val post = pager.viewModel.getPost(position) ?: return binding.root
         this.post = post
 
         onCreateMediaView(inflater, binding.mediaContainerShadowboxPageFragment)
@@ -137,8 +142,8 @@ abstract class ShadowboxPageFragment : Fragment() {
         val panel = ShadowboxInfoPanel(
             binding.infoPanelShadowboxPageFragment, host, glide, retrofit, oauthRetrofit,
             redditDataRoomDatabase, executor, sharedPreferences, postHistorySharedPreferences,
-            customThemeWrapper, host.supportFragmentManager, host.isNsfwSubreddit,
-            host::markPostReadAfterVoting, ::openFullViewer
+            customThemeWrapper, host.supportFragmentManager, pager.isNsfwSubreddit,
+            pager::markPostReadAfterVoting, ::openFullViewer
         )
         panel.bind(post, position)
         this.panel = panel
@@ -148,9 +153,9 @@ abstract class ShadowboxPageFragment : Fragment() {
         // A shown panel swallows presses on its own background, so a miss next to the upvote
         // button does not reach the media behind it and collapse the bar.
         panelRoot.isClickable = true
-        panelRoot.alpha = if (host.panelVisible.value == true) 1f else 0f
-        panelRoot.visibility = if (host.panelVisible.value == true) View.VISIBLE else View.INVISIBLE
-        host.panelVisible.observe(viewLifecycleOwner) { visible ->
+        panelRoot.alpha = if (pager.panelVisible.value == true) 1f else 0f
+        panelRoot.visibility = if (pager.panelVisible.value == true) View.VISIBLE else View.INVISIBLE
+        pager.panelVisible.observe(viewLifecycleOwner) { visible ->
             // A hidden panel goes INVISIBLE once it has faded, so it stops taking presses meant
             // for the media underneath -- an INVISIBLE view is not offered them at all. It is the
             // panel as a whole that is taken out, never its children's clickability: a TextView
@@ -164,15 +169,15 @@ abstract class ShadowboxPageFragment : Fragment() {
                 panelRoot.animate().alpha(0f).setDuration(PANEL_FADE_MS).withEndAction {
                     // Cancelling an animation runs its end action too, so a fade-out interrupted
                     // by a fade-in would otherwise hide the panel it was bringing back.
-                    if (host.panelVisible.value == false) {
+                    if (pager.panelVisible.value == false) {
                         panelRoot.visibility = View.INVISIBLE
                     }
                 }.start()
             }
             onChromeVisibilityChanged(visible)
         }
-        host.insetsViewModel.insets.observe(viewLifecycleOwner) { insets -> applyInsets(insets) }
-        host.currentPage.observe(viewLifecycleOwner) { page ->
+        pager.insetsViewModel.insets.observe(viewLifecycleOwner) { insets -> applyInsets(insets) }
+        pager.currentPage.observe(viewLifecycleOwner) { page ->
             // Re-asserted on every page change rather than only on a transition. Playback has to
             // follow from "is this the page in front", and a flag that ever fell out of step --
             // a page built while it was already current, say -- left a video playing behind the
@@ -238,7 +243,7 @@ abstract class ShadowboxPageFragment : Fragment() {
     }
 
     protected fun toggleChrome() {
-        host.toggleChrome()
+        pager.toggleChrome()
     }
 
     /**

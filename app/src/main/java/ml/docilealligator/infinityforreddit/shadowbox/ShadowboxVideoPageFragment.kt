@@ -625,7 +625,7 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         button.setIconResource(
             if (playing) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
         )
-        val chromeVisible = host.panelVisible.value != false
+        val chromeVisible = pager.panelVisible.value != false
         val visible = !playbackFailed && (!playing || (chromeVisible && !playButtonTimedOut))
         button.visibility = if (visible) View.VISIBLE else View.GONE
         // One clock, restarted by whatever shows the button on a playing video; a paused video's

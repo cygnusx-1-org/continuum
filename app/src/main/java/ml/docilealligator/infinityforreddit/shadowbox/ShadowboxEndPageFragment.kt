@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import ml.docilealligator.infinityforreddit.R
+import ml.docilealligator.infinityforreddit.activities.BaseActivity
 import ml.docilealligator.infinityforreddit.databinding.FragmentShadowboxEndPageBinding
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus
 
@@ -21,15 +22,16 @@ class ShadowboxEndPageFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentShadowboxEndPageBinding.inflate(inflater, container, false)
-        val activity = requireActivity() as ShadowboxActivity
+        val activity = requireActivity() as BaseActivity
+        val pager = requireParentFragment() as ShadowboxPagerFragment
         activity.typeface?.let { binding.statusTextViewShadowboxEndPageFragment.typeface = it }
         binding.root.setOnClickListener {
             // Only a failed load is worth retrying; the model refuses while loading or when done.
-            activity.fetchMorePosts()
+            pager.fetchMorePosts()
         }
-        // The activity's own instance: asking ViewModelProvider for it without the factory it was
+        // The pager's own instance: asking ViewModelProvider for it without the factory it was
         // created with would try to construct one, and this model has no no-arg constructor.
-        activity.viewModel.loadMorePostsState.observe(viewLifecycleOwner) { state -> render(state.status) }
+        pager.viewModel.loadMorePostsState.observe(viewLifecycleOwner) { state -> render(state.status) }
         return binding.root
     }
 

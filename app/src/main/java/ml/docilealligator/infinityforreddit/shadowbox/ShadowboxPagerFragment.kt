@@ -1,16 +1,13 @@
 package ml.docilealligator.infinityforreddit.shadowbox
 
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.media.AudioManager
 import android.os.Bundle
-import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
@@ -22,13 +19,11 @@ import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.activities.BaseActivity
-import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
-import ml.docilealligator.infinityforreddit.databinding.ActivityShadowboxBinding
+import ml.docilealligator.infinityforreddit.databinding.FragmentShadowboxPagerBinding
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent
 import ml.docilealligator.infinityforreddit.events.PostPositionUpdateEventToPostList
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent
-import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.PostType
@@ -50,16 +45,25 @@ import javax.inject.Inject
 import javax.inject.Named
 
 /**
- * Shadowbox Mode: a fullscreen pager that flips through the current feed one post per page.
+ * The Slide layout: a pager that flips through the current feed one post per page, sitting in the
+ * feed's own fragment so the screen's top bar stays where it is.
  *
- * The post list is not passed in the Intent -- a feed's worth of Parcelable posts blows the Binder
- * limit -- but requested from the feed fragment over EventBus, exactly as ViewPostDetailActivity
- * does for swipe-between-posts, and kept in the same [ViewPostDetailActivityViewModel] so paging
- * past the feed's snapshot reuses its load-more code. Because the handoff is a shallow copy, the
- * pages share Post objects with the feed: a vote here changes the feed's row as soon as it is told
- * to repaint.
+ * The post list is not passed in the arguments -- a feed's worth of Parcelable posts blows the
+ * Binder limit -- but requested from the feed fragment over EventBus, exactly as
+ * ViewPostDetailActivity does for swipe-between-posts, and kept in the same
+ * [ViewPostDetailActivityViewModel] so paging past the feed's snapshot reuses its load-more code.
+ * Because the handoff is a shallow copy, the pages share Post objects with the feed: a vote here
+ * changes the feed's row as soon as it is told to repaint.
  */
-class ShadowboxActivity : BaseActivity() {
+class ShadowboxPagerFragment : Fragment() {
+
+    /** Implemented by the feed fragment that holds this one, to say how much the system covers at its bottom edge. */
+    interface SlideHost {
+        fun getSlideBottomInset(): Int
+
+        /** There is nothing to slide through (no posts, or every one filtered out): show the feed's own list. */
+        fun onSlideUnavailable()
+    }
 
     @Inject
     @Named("no_oauth")
@@ -77,10 +81,6 @@ class ShadowboxActivity : BaseActivity() {
     lateinit var sharedPreferences: SharedPreferences
 
     @Inject
-    @Named("current_account")
-    lateinit var mCurrentAccountSharedPreferences: SharedPreferences
-
-    @Inject
     @Named("post_history")
     lateinit var postHistorySharedPreferences: SharedPreferences
 
@@ -89,26 +89,27 @@ class ShadowboxActivity : BaseActivity() {
     lateinit var nsfwAndSpoilerSharedPreferences: SharedPreferences
 
     @Inject
-    lateinit var mCustomThemeWrapper: CustomThemeWrapper
-
-    @Inject
     lateinit var executor: Executor
 
     @Inject
     lateinit var loader: UserProfileImagesBatchLoader
+
+    private lateinit var host: BaseActivity
 
     lateinit var viewModel: ViewPostDetailActivityViewModel
         private set
     lateinit var insetsViewModel: ViewGalleryViewModel
         private set
 
-    private lateinit var binding: ActivityShadowboxBinding
+    private var _binding: FragmentShadowboxPagerBinding? = null
+    private val binding: FragmentShadowboxPagerBinding
+        get() = _binding!!
     private var adapter: ShadowboxPagerAdapter? = null
 
-    /** Index of the page the pager is on; only that page plays media. */
+    /** Index of the post the pager is on; only that page plays media. */
     val currentPage = MutableLiveData<Int>()
 
-    /** Whether the info panel (and the system bars) are shown; pages fade their panel on it. */
+    /** Whether the info panel is shown; pages fade their panel on it. */
     val panelVisible = MutableLiveData(true)
 
     var feedFragmentId = 0L
@@ -122,7 +123,6 @@ class ShadowboxActivity : BaseActivity() {
     private var launchPosition = 0
     private var pagerScrollState = ViewPager2.SCROLL_STATE_IDLE
     private var swipedAway = false
-    private var chromeVisible = true
     private var markPostsAsRead = false
     private var hideTextAndPreviewlessPosts = false
 
@@ -148,80 +148,98 @@ class ShadowboxActivity : BaseActivity() {
     private var mediaOnly = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (application as Infinity).appComponent.inject(this)
         super.onCreate(savedInstanceState)
-
-        setUpWindow()
+        (requireContext().applicationContext as Infinity).appComponent.inject(this)
+        host = requireActivity() as BaseActivity
 
         // Image pages inflate a BigImageView, which takes the loader installed here.
         BigImageViewer.initialize(
-            GlideImageLoader.with(applicationContext, ImageOkHttpClient.get(applicationContext))
+            GlideImageLoader.with(requireContext().applicationContext, ImageOkHttpClient.get(requireContext().applicationContext))
         )
 
-        binding = ActivityShadowboxBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        volumeControlStream = AudioManager.STREAM_MUSIC
-
         markPostsAsRead = postHistorySharedPreferences.getBoolean(
-            AccountScope.key(accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false
+            AccountScope.key(host.accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false
         )
         hideTextAndPreviewlessPosts = sharedPreferences.getBoolean(
             SharedPreferencesUtils.SHADOWBOX_HIDE_TEXT_AND_PREVIEWLESS_POSTS, false
         )
 
-        feedFragmentId = intent.getLongExtra(EXTRA_POST_FRAGMENT_ID, 0L)
-        launchPosition = intent.getIntExtra(EXTRA_POST_LIST_POSITION, 0)
-        isNsfwSubreddit = intent.getBooleanExtra(EXTRA_IS_NSFW_SUBREDDIT, false)
+        val args = requireArguments()
+        feedFragmentId = args.getLong(ARG_POST_FRAGMENT_ID, 0L)
+        launchPosition = args.getInt(ARG_POST_LIST_POSITION, 0)
+        isNsfwSubreddit = args.getBoolean(ARG_IS_NSFW_SUBREDDIT, false)
 
         viewModel = ViewModelProvider(
             this,
             ViewPostDetailActivityViewModel.provideFactory(
-                retrofit, oauthRetrofit, redditDataRoomDatabase, accessToken, loader
+                retrofit, oauthRetrofit, redditDataRoomDatabase, host.accessToken, loader
             )
         )[ViewPostDetailActivityViewModel::class.java]
         insetsViewModel = ViewModelProvider(this)[ViewGalleryViewModel::class.java]
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            // Ignoring visibility keeps the panel's padding the same whether the bars are shown or
-            // hidden, so toggling the chrome never moves it.
-            insetsViewModel.setInsets(
-                insets.getInsetsIgnoringVisibility(
-                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-                )
-            )
-            WindowInsetsCompat.CONSUMED
-        }
-
+        // Registered before the request below, which is answered on the spot.
         EventBus.getDefault().register(this)
+        requestPostList()
+    }
 
+    /**
+     * Asks the feed fragment for its posts and listing parameters. Done on every start rather than
+     * once: a fragment restored after a configuration change comes back with none of the
+     * parameters, and without them every later fetch would give up.
+     */
+    private fun requestPostList() {
         if (feedFragmentId > 0) {
-            // Answered synchronously by the feed fragment underneath, if it is still there. Asked
-            // even when the model already has the posts: a configuration change this activity does
-            // not declare -- a dark-mode switch, a font-scale change -- rebuilds it around the
-            // surviving model, and the listing parameters below live on the activity, so without
-            // this they would be back at their defaults and every later fetch would give up.
             EventBus.getDefault().post(NeedForPostListFromPostFragmentEvent(feedFragmentId))
         }
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentShadowboxPagerBinding.inflate(inflater, container, false)
+        buildPager()
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        requestPostList()
+        applyHostInsets()
+        if (adapter == null && viewModel.posts.isNullOrEmpty()) {
+            buildPager()
+        }
+        if (adapter == null) {
+            (parentFragment as? SlideHost)?.onSlideUnavailable()
+        }
+    }
+
+    private fun applyHostInsets() {
+        val bottom = (parentFragment as? SlideHost)?.getSlideBottomInset() ?: 0
+        setBottomInset(bottom)
+    }
+
+    /** The system bars cover this much of the bottom edge; the pages keep their panels clear of it. */
+    fun setBottomInset(bottom: Int) {
+        insetsViewModel.setInsets(Insets.of(0, 0, 0, bottom))
+    }
+
+    private fun buildPager() {
         val posts = viewModel.posts
-        if (posts.isNullOrEmpty()) {
-            Toast.makeText(this, R.string.shadowbox_no_posts, Toast.LENGTH_SHORT).show()
-            finish()
+        if (_binding == null || posts.isNullOrEmpty()) {
             return
         }
-
-        val adapter = ShadowboxPagerAdapter(this, viewModel, ::shouldBlur, ::shouldShowPost)
+        val adapter = ShadowboxPagerAdapter(
+            childFragmentManager, viewLifecycleOwner.lifecycle, viewModel, ::shouldBlur, ::shouldShowPost
+        )
         adapter.buildPages()
         builtPostCount = posts.size
         if (adapter.pageCount == 0) {
             // Every post the feed handed over was filtered out by the hide-text-and-previewless
             // setting.
-            Toast.makeText(this, R.string.shadowbox_no_posts, Toast.LENGTH_SHORT).show()
-            finish()
+            Toast.makeText(requireContext(), R.string.shadowbox_no_posts, Toast.LENGTH_SHORT).show()
             return
         }
         this.adapter = adapter
-        binding.viewPager2ShadowboxActivity.adapter = adapter
+        val pager = binding.viewPager2ShadowboxPager
+        pager.adapter = adapter
         // Build the page either side of the one in front, rather than when the swipe starts.
         //
         // This is what stops a page from drawing its picture in place after the swipe has landed.
@@ -231,14 +249,16 @@ class ShadowboxActivity : BaseActivity() {
         // make up for it. A page built early has its pictures in its own views, which no cache
         // evicts. The cost is that a video page either side prepares its player, the same trade
         // the feed makes for autoplay.
-        binding.viewPager2ShadowboxActivity.offscreenPageLimit = 1
-        launchPosition = launchPosition.coerceIn(0, posts.size - 1)
-        val launchPage = adapter.pageForPostIndex(launchPosition)
+        pager.offscreenPageLimit = 1
+        // A view rebuilt around a surviving model goes back to the post it was on.
+        val resumeAt = currentPage.value ?: launchPosition
+        val startPosition = resumeAt.coerceIn(0, posts.size - 1)
+        val launchPage = adapter.pageForPostIndex(startPosition)
         // The post the feed was on may itself be filtered out; the page the pager opens on is the
         // first one kept at or after it, and that is the post to measure a swipe against.
         launchPosition = adapter.postIndexForPage(launchPage)
-        binding.viewPager2ShadowboxActivity.setCurrentItem(launchPage, false)
-        binding.viewPager2ShadowboxActivity.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        pager.setCurrentItem(launchPage, false)
+        pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageScrollStateChanged(state: Int) {
                 pagerScrollState = state
             }
@@ -251,24 +271,7 @@ class ShadowboxActivity : BaseActivity() {
         // it, so the launch page gets its side effects by hand.
         onPageShown(launchPage)
 
-        viewModel.loadMorePostsState.observe(this) { state -> onLoadMoreState(state) }
-    }
-
-    private fun setUpWindow() {
-        val window = window
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        // BaseActivity applied the theme's bar colours and, on Android 15+, a decor listener that
-        // paints the primary colour behind a toolbar. This screen is black edge to edge.
-        ViewCompat.setOnApplyWindowInsetsListener(window.decorView, null)
-        window.decorView.setBackgroundColor(Color.BLACK)
-        @Suppress("DEPRECATION")
-        window.statusBarColor = Color.TRANSPARENT
-        @Suppress("DEPRECATION")
-        window.navigationBarColor = Color.TRANSPARENT
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        controller.isAppearanceLightStatusBars = false
-        controller.isAppearanceLightNavigationBars = false
-        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        viewModel.loadMorePostsState.observe(viewLifecycleOwner) { state -> onLoadMoreState(state) }
     }
 
     /** [page] indexes the pager; the post it shows may sit further along the list when filtering. */
@@ -293,7 +296,7 @@ class ShadowboxActivity : BaseActivity() {
      * page never hears that it is no longer current.
      */
     private fun stopPlaybackExcept(postIndex: Int) {
-        for (fragment in supportFragmentManager.fragments) {
+        for (fragment in childFragmentManager.fragments) {
             if (fragment is ShadowboxPageFragment && fragment.position != postIndex) {
                 fragment.pausePlayback()
             }
@@ -303,7 +306,7 @@ class ShadowboxActivity : BaseActivity() {
     /** Asks for the next page of the feed's listing; the model ignores the call while one is in flight or the list is done. */
     fun fetchMorePosts() {
         viewModel.fetchMorePosts(
-            accessToken, accountName, false, postType,
+            host.accessToken, host.accountName, false, postType,
             subredditName, concatenatedSubredditNames, username,
             userWhere, multiPath, query, sortType, sortTime, postFilter,
             readPostType, readPostsList, mediaOnly
@@ -328,7 +331,7 @@ class ShadowboxActivity : BaseActivity() {
         // count from the adapter rather than from the event: while this screen is stopped the
         // model can append more than once and LiveData delivers only the last of those.
         val oldPageCount = adapter.pageCount
-        val wasOnEndPage = binding.viewPager2ShadowboxActivity.currentItem == oldPageCount
+        val wasOnEndPage = binding.viewPager2ShadowboxPager.currentItem == oldPageCount
         val added = adapter.appendPages()
         if (added == 0) {
             // The whole fetched page was filtered out. Keep asking, bounded, or the user is left
@@ -341,8 +344,8 @@ class ShadowboxActivity : BaseActivity() {
         barrenFetches = 0
         if (wasOnEndPage) {
             // Parked on the end page while it loaded: slide onto the first post that arrived.
-            binding.viewPager2ShadowboxActivity.post {
-                binding.viewPager2ShadowboxActivity.setCurrentItem(oldPageCount, true)
+            binding.viewPager2ShadowboxPager.post {
+                _binding?.viewPager2ShadowboxPager?.setCurrentItem(oldPageCount, true)
             }
         }
     }
@@ -377,17 +380,18 @@ class ShadowboxActivity : BaseActivity() {
     private fun markRead(post: Post, position: Int) {
         post.markAsRead()
         ReadPostModification.insertReadPost(
-            redditDataRoomDatabase, executor, accountName, post.id, ReadPostType.READ_POSTS,
-            ReadPostsUtils.GetReadPostsLimit(accountName, postHistorySharedPreferences)
+            redditDataRoomDatabase, executor, host.accountName, post.id, ReadPostType.READ_POSTS,
+            ReadPostsUtils.GetReadPostsLimit(host.accountName, postHistorySharedPreferences)
         )
         EventBus.getDefault().post(PostUpdateEventToPostList(post, position))
     }
 
     /**
-     * Keeps the feed in step with the pager, so backing out lands on the post being looked at.
-     * Ported from ViewPostDetailActivity.notifyPostListOfCurrentPost, guards included: nothing is
-     * reported until the pager has actually left the launch page, and never for an idle-state
-     * callback, which is a layout or data-set change substituting a page rather than a swipe.
+     * Keeps the feed in step with the pager, so a switch back to a list layout lands on the post
+     * being looked at. Ported from ViewPostDetailActivity.notifyPostListOfCurrentPost, guards
+     * included: nothing is reported until the pager has actually left the launch page, and never
+     * for an idle-state callback, which is a layout or data-set change substituting a page rather
+     * than a swipe.
      */
     private fun notifyFeedOfCurrentPost(posts: List<Post>, position: Int) {
         if (feedFragmentId <= 0 || posts.isEmpty() || position < 0) {
@@ -411,33 +415,26 @@ class ShadowboxActivity : BaseActivity() {
 
     private fun shouldBlur(post: Post): Boolean {
         val needBlurNsfw = nsfwAndSpoilerSharedPreferences.getBoolean(
-            AccountScope.key(accountName, SharedPreferencesUtils.BLUR_NSFW_BASE), true
+            AccountScope.key(host.accountName, SharedPreferencesUtils.BLUR_NSFW_BASE), true
         )
         val doNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean(
-            AccountScope.key(accountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false
+            AccountScope.key(host.accountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false
         )
         val needBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean(
-            AccountScope.key(accountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), false
+            AccountScope.key(host.accountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), false
         )
         return (post.isNSFW && needBlurNsfw && !(doNotBlurNsfwInNsfwSubreddits && isNsfwSubreddit))
                 || (post.isSpoiler && needBlurSpoiler)
     }
 
-    /** Shows or hides the info panel together with the system bars. */
+    /** Shows or hides the info panel; the screen's top bar and the system bars stay as they are. */
     fun toggleChrome() {
-        chromeVisible = !chromeVisible
-        panelVisible.value = chromeVisible
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        if (chromeVisible) {
-            controller.show(WindowInsetsCompat.Type.systemBars())
-        } else {
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-        }
+        panelVisible.value = panelVisible.value == false
     }
 
     /** The page fragment showing [position], if the pager has one built. */
     private fun pageAt(position: Int): ShadowboxPageFragment? {
-        for (fragment in supportFragmentManager.fragments) {
+        for (fragment in childFragmentManager.fragments) {
             if (fragment is ShadowboxPageFragment && fragment.position == position) {
                 return fragment
             }
@@ -452,7 +449,7 @@ class ShadowboxActivity : BaseActivity() {
         }
         // The list is taken only once: the model's own may already have grown past the feed's
         // snapshot, and replacing it would throw those posts away. The listing parameters are
-        // taken every time, because they are the activity's and a recreated one has none.
+        // taken every time, because they are this fragment's and a recreated one has none.
         if (viewModel.posts == null) {
             viewModel.posts = event.posts
         }
@@ -499,16 +496,9 @@ class ShadowboxActivity : BaseActivity() {
         pageAt(index)?.rebindPanel()
     }
 
-    @Subscribe
-    fun onAccountSwitchEvent(event: SwitchAccountEvent) {
-        if (javaClass.name != event.excludeActivityClassName) {
-            finish()
-        }
-    }
-
     override fun onResume() {
         super.onResume()
-        for (fragment in supportFragmentManager.fragments) {
+        for (fragment in childFragmentManager.fragments) {
             if (fragment is ShadowboxPageFragment) {
                 fragment.restoreMedia()
             }
@@ -522,11 +512,17 @@ class ShadowboxActivity : BaseActivity() {
         // nothing to come back to. Then every page lets go of its player, so the screen opening
         // on top finds the decoders free; see ShadowboxPageFragment.releaseMedia.
         stopPlaybackExcept(currentPage.value ?: -1)
-        for (fragment in supportFragmentManager.fragments) {
+        for (fragment in childFragmentManager.fragments) {
             if (fragment is ShadowboxPageFragment) {
                 fragment.releaseMedia()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        adapter = null
+        _binding = null
+        super.onDestroyView()
     }
 
     override fun onDestroy() {
@@ -534,25 +530,27 @@ class ShadowboxActivity : BaseActivity() {
         super.onDestroy()
     }
 
-    override fun getDefaultSharedPreferences(): SharedPreferences = sharedPreferences
-
-    override fun getCurrentAccountSharedPreferences(): SharedPreferences = mCurrentAccountSharedPreferences
-
-    override fun getCustomThemeWrapper(): CustomThemeWrapper = mCustomThemeWrapper
-
-    override fun applyCustomTheme() {
-        // Black edge to edge; nothing here takes a theme colour.
-    }
-
     companion object {
-        const val EXTRA_POST_FRAGMENT_ID = "EPFI"
-        const val EXTRA_POST_LIST_POSITION = "EPLP"
-        const val EXTRA_IS_NSFW_SUBREDDIT = "EINS"
+        private const val ARG_POST_FRAGMENT_ID = "EPFI"
+        private const val ARG_POST_LIST_POSITION = "EPLP"
+        private const val ARG_IS_NSFW_SUBREDDIT = "EINS"
 
         /** How close to the end of the list a page has to be before the next page is requested. */
         private const val LOAD_MORE_THRESHOLD = 5
 
         /** How many fetches this mode's filter may empty before it stops asking for more. */
         private const val MAX_BARREN_FETCHES = 5
+
+        /** [feedFragmentId] is the feed fragment to ask for posts; [position] the post to open on. */
+        @JvmStatic
+        fun newInstance(feedFragmentId: Long, position: Int, isNsfwSubreddit: Boolean): ShadowboxPagerFragment {
+            val fragment = ShadowboxPagerFragment()
+            fragment.arguments = Bundle().apply {
+                putLong(ARG_POST_FRAGMENT_ID, feedFragmentId)
+                putInt(ARG_POST_LIST_POSITION, position)
+                putBoolean(ARG_IS_NSFW_SUBREDDIT, isNsfwSubreddit)
+            }
+            return fragment
+        }
     }
 }

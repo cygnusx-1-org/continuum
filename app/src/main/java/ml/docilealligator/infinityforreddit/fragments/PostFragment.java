@@ -93,8 +93,9 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import androidx.fragment.app.FragmentManager;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
-import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxActivity;
+import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPagerFragment;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -114,7 +115,8 @@ import retrofit2.Retrofit;
 /**
  * A simple {@link PostFragmentBase} subclass.
  */
-public class PostFragment extends PostFragmentBase implements FragmentCommunicator, PostModerationActionHandler {
+public class PostFragment extends PostFragmentBase implements FragmentCommunicator, PostModerationActionHandler,
+        ShadowboxPagerFragment.SlideHost {
 
     public static final String EXTRA_NAME = "EN";
     public static final String EXTRA_USER_NAME = "EUN";
@@ -135,9 +137,13 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
-    private static final String SHADOWBOX_LAUNCHED_STATE = "SBLS";
-    /** Shadowbox was opened for this feed in its Shadowbox layout; see {@link #openShadowboxIfDue}. */
-    private boolean shadowboxLaunched;
+    private static final String SLIDE_TAG = "slide_pager";
+    /** The pager up over the feed was built from posts that have since been reloaded; see {@link #syncSlide}. */
+    private boolean slideStale;
+    /** The Slide layout found nothing to show, so the list stands in until it is chosen afresh. */
+    private boolean slideSuppressed;
+    /** What the system covers at the bottom edge, for the pager to keep its panel clear of. */
+    private int slideBottomInset;
     private static final String SORT_TYPE_STATE = "STS";
     private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
@@ -280,7 +286,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             binding.recyclerViewPostFragment.onWindowVisibilityChanged(View.VISIBLE);
         }
         applyPendingSortType();
-        openShadowboxIfDue();
     }
 
     @Override
@@ -306,6 +311,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     getPostRecyclerView().setPadding(
                             0, 0, 0, allInsets.bottom
                     );
+                    slideBottomInset = allInsets.bottom;
+                    ShadowboxPagerFragment slide = (ShadowboxPagerFragment) getChildFragmentManager().findFragmentByTag(SLIDE_TAG);
+                    if (slide != null) {
+                        slide.setBottomInset(allInsets.bottom);
+                    }
                     return WindowInsetsCompat.CONSUMED;
                 }
             });
@@ -328,8 +338,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             userAnchorOffset = savedInstanceState.getInt(RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE, 0);
 
             isInLazyMode = savedInstanceState.getBoolean(IS_IN_LAZY_MODE_STATE);
-            // A feed rebuilt behind the Shadowbox it opened must not open it a second time.
-            shadowboxLaunched = savedInstanceState.getBoolean(SHADOWBOX_LAUNCHED_STATE);
             postFilter = savedInstanceState.getParcelable(POST_FILTER_STATE);
             concatenatedSubredditNames = savedInstanceState.getString(CONCATENATED_SUBREDDIT_NAMES_STATE);
             postFragmentId = savedInstanceState.getLong(POST_FRAGMENT_ID_STATE);
@@ -1369,13 +1377,16 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             LoadState appendLoadState = combinedLoadStates.getAppend();
 
             binding.swipeRefreshLayoutPostFragment.setRefreshing(refreshLoadState instanceof LoadState.Loading);
+            if (refreshLoadState instanceof LoadState.Loading) {
+                dropSlide();
+            }
             if (refreshLoadState instanceof LoadState.NotLoading) {
                 if (refreshLoadState.getEndOfPaginationReached() && mAdapter.getItemCount() < 1) {
                     noPostFound();
                 } else {
                     binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
                     hasPost = true;
-                    openShadowboxIfDue();
+                    syncSlide();
                 }
             } else if (refreshLoadState instanceof LoadState.Error) {
                 binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(view -> refresh());
@@ -1452,38 +1463,75 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     /**
-     * Opens Shadowbox when the feed is in that layout and has not opened it yet: once the posts are
-     * in, and the feed is the screen being looked at. Being backed out of it leaves the feed on its
-     * rows, for the layout menu, so this does not open it again until the layout is chosen afresh.
+     * Puts the Slide pager over the feed when the feed is in that layout and has posts, and takes
+     * it away when the layout is something else. Safe to call whenever either might have changed:
+     * a pager that is already up is left alone, so scrolling and loading more do not rebuild it.
      */
-    private void openShadowboxIfDue() {
-        if (!shadowboxLayout || shadowboxLaunched || !hasPost || mAdapter == null || !isResumed()) {
+    private void syncSlide() {
+        if (binding == null || !isAdded()) {
             return;
         }
-        shadowboxLaunched = true;
-        startShadowboxMode();
+        FragmentManager fm = getChildFragmentManager();
+        ShadowboxPagerFragment slide = (ShadowboxPagerFragment) fm.findFragmentByTag(SLIDE_TAG);
+        if (!shadowboxLayout) {
+            if (slide != null) {
+                fm.beginTransaction().remove(slide).commitAllowingStateLoss();
+            }
+            showSlide(false);
+            return;
+        }
+        if (!hasPost || mAdapter == null || slideSuppressed) {
+            return;
+        }
+        if (slide == null || slideStale) {
+            int position = Math.max(ScrollAnchor.captureTopmost(binding.recyclerViewPostFragment).position, 0);
+            // Replaced rather than added, so a pager that is stale and one that is wanted can be
+            // queued back to back without the first still being found in the way.
+            fm.beginTransaction().replace(R.id.slide_container_post_fragment,
+                    ShadowboxPagerFragment.newInstance(getPostFragmentId(), position, getIsNsfwSubreddit()),
+                    SLIDE_TAG).commitAllowingStateLoss();
+            slideStale = false;
+        }
+        showSlide(true);
     }
 
     /**
-     * Opens Shadowbox Mode on this feed, starting from the post at the top of the screen. The
-     * activity asks this fragment for the loaded posts over EventBus (the list is far too big for
-     * an Intent), so it only gets the fragment's id and where to start.
+     * The posts under the pager are about to change (a refresh, a new sort): what it holds is out
+     * of date, so the feed's own list shows while it loads and a fresh pager follows.
      */
-    private void startShadowboxMode() {
-        if (!hasPost || mAdapter == null) {
-            Toast.makeText(mActivity, R.string.no_posts_no_lazy_mode, Toast.LENGTH_SHORT).show();
+    private void dropSlide() {
+        slideStale = true;
+        slideSuppressed = false;
+        showSlide(false);
+    }
+
+    private void showSlide(boolean show) {
+        if (binding == null) {
             return;
         }
-        int position = ScrollAnchor.captureTopmost(binding.recyclerViewPostFragment).position;
-        Intent intent = new Intent(mActivity, ShadowboxActivity.class);
-        intent.putExtra(ShadowboxActivity.EXTRA_POST_FRAGMENT_ID, getPostFragmentId());
-        intent.putExtra(ShadowboxActivity.EXTRA_POST_LIST_POSITION, Math.max(position, 0));
-        intent.putExtra(ShadowboxActivity.EXTRA_IS_NSFW_SUBREDDIT, getIsNsfwSubreddit());
-        mActivity.startActivity(intent);
+        binding.slideContainerPostFragment.setVisibility(show ? View.VISIBLE : View.GONE);
+        binding.swipeRefreshLayoutPostFragment.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    @Override
+    public int getSlideBottomInset() {
+        return slideBottomInset;
+    }
+
+    @Override
+    public void onSlideUnavailable() {
+        // Nothing to slide through: the feed's own list shows until the layout is chosen afresh.
+        slideSuppressed = true;
+        ShadowboxPagerFragment slide = (ShadowboxPagerFragment) getChildFragmentManager().findFragmentByTag(SLIDE_TAG);
+        if (slide != null) {
+            getChildFragmentManager().beginTransaction().remove(slide).commitAllowingStateLoss();
+        }
+        showSlide(false);
     }
 
     private void noPostFound() {
         hasPost = false;
+        dropSlide();
         if (isInLazyMode) {
             stopLazyMode();
         }
@@ -1643,7 +1691,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_IN_LAZY_MODE_STATE, isInLazyMode);
-        outState.putBoolean(SHADOWBOX_LAUNCHED_STATE, shadowboxLaunched);
 
         ScrollAnchor.Anchor anchor = ScrollAnchor.capture(
                 binding.recyclerViewPostFragment, userAnchorPos, userAnchorOffset);
@@ -1863,6 +1910,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void refresh() {
         binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
         hasPost = false;
+        dropSlide();
         // A refresh is a request for the top of the listing, which is the one thing a resume must
         // not serve. Dropped here rather than in the view model alone so the pull-to-refresh, the
         // retry button and the random-tab roll below all take it.
@@ -2035,9 +2083,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void changePostLayout(int chosenLayout, boolean temporary) {
         boolean wasShadowbox = shadowboxLayout;
         this.postLayout = adoptLayout(chosenLayout);
-        if (shadowboxLayout && (!temporary || !wasShadowbox)) {
-            // Chosen afresh, so it opens, even if the feed was in it before and was backed out of.
-            shadowboxLaunched = false;
+        if (shadowboxLayout && !wasShadowbox) {
+            // Chosen afresh, so it gets another go at finding something to show.
+            slideSuppressed = false;
         }
         if (!temporary) {
             switch (postType) {
@@ -2105,7 +2153,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         applyMediaOnlyPosts();
-        openShadowboxIfDue();
+        syncSlide();
     }
 
     @Override
