@@ -64,6 +64,8 @@ class ShadowboxTextPageFragment : ShadowboxPageFragment() {
             binding.contentRecyclerViewShadowboxMediaText.visibility = View.VISIBLE
         }
         binding.contentRecyclerViewShadowboxMediaText.layoutManager = LinearLayoutManagerBugFixed(host)
+        // See ShadowboxGalleryPageFragment: the feed's top bar is not this list's to move.
+        binding.contentRecyclerViewShadowboxMediaText.isNestedScrollingEnabled = false
         binding.root.setOnClickListener { toggleChrome() }
         addTapToToggleChrome(binding.contentRecyclerViewShadowboxMediaText)
     }

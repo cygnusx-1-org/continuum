@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.shadowbox
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -10,6 +11,7 @@ import androidx.core.graphics.Insets
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
@@ -250,6 +252,19 @@ class ShadowboxPagerFragment : Fragment() {
         // evicts. The cost is that a video page either side prepares its player, the same trade
         // the feed makes for autoplay.
         pager.offscreenPageLimit = 1
+        // Swiping sideways here is for the next post, and only that. The screen this sits in may
+        // be a pager of its own -- a subreddit's Posts and About tabs -- which would otherwise take
+        // over a swipe that starts on the last slide, or one that drifts, and change tabs. Taking
+        // the gesture on the way down keeps the outer pager out of it; the tabs are still there to
+        // tap.
+        (pager.getChildAt(0) as? RecyclerView)?.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                if (e.actionMasked == MotionEvent.ACTION_DOWN) {
+                    rv.parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                return false
+            }
+        })
         // A view rebuilt around a surviving model goes back to the post it was on.
         val resumeAt = currentPage.value ?: launchPosition
         val startPosition = resumeAt.coerceIn(0, posts.size - 1)
