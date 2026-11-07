@@ -1,7 +1,5 @@
 package ml.docilealligator.infinityforreddit.activities;
 
-import static android.graphics.BitmapFactory.decodeResource;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -119,7 +117,6 @@ import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditSubscription;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditViewModel;
-import ml.docilealligator.infinityforreddit.subreddit.shortcut.ShortcutManager;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
@@ -242,8 +239,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private int topSystemBarHeight;
     @Nullable
     private MaterialAlertDialogBuilder nsfwWarningBuilder;
-    @Nullable
-    private Bitmap subredditIconBitmap;
     private ActivityViewSubredditDetailBinding binding;
     @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
@@ -569,13 +564,11 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                             .into(new CustomTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    subredditIconBitmap = resource;
                                     binding.iconGifImageViewViewSubredditDetailActivity.setImageBitmap(resource);
                                 }
 
                                 @Override
                                 public void onLoadCleared(@Nullable Drawable placeholder) {
-                                    subredditIconBitmap = null;
                                 }
                             });
                     binding.iconGifImageViewViewSubredditDetailActivity.setOnClickListener(view -> {
@@ -1194,9 +1187,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             intent.putExtra(SendPrivateMessageActivity.EXTRA_RECIPIENT_USERNAME, "r/" + subredditName);
             startActivity(intent);
             return true;
-        } else if (itemId == R.id.action_add_to_home_screen_view_subreddit_detail_activity) {
-            Bitmap icon = subredditIconBitmap == null ? decodeResource(getResources(), R.drawable.subreddit_default_icon) : subredditIconBitmap;
-            return ShortcutManager.requestPinShortcut(this, subredditName, icon);
         }
         return false;
     }

@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"प्लेबैक स्पीड"</string>
     <string name="action_contact_mods">"संपर्क मॉड"</string>
     <string name="action_more_options">"अधिक विकल्प"</string>
-    <string name="action_add_to_home_screen">"होम स्क्रीन पर जोड़ें"</string>
     <string name="action_reset_fab_position">"FAB स्थिति रीसेट करें"</string>
     <string name="action_download_all_gallery_media">"सभी गैलरी मीडिया डाउनलोड करें"</string>
     <string name="action_download_all_imgur_album_media">"सभी Imgur एल्बम मीडिया डाउनलोड करें"</string>

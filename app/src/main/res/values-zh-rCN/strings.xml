@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"播放速度"</string>
     <string name="action_contact_mods">"联系管理员"</string>
     <string name="action_more_options">"更多选项"</string>
-    <string name="action_add_to_home_screen">"添加到主屏幕"</string>
     <string name="action_reset_fab_position">"复位FAB位置"</string>
     <string name="action_download_all_gallery_media">"下载所有图库媒体"</string>
     <string name="action_download_all_imgur_album_media">"下载全部Imgur专辑媒体"</string>

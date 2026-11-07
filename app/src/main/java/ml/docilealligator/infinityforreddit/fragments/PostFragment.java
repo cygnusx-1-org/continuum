@@ -94,9 +94,10 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.FragmentManager;
-import com.google.android.material.appbar.AppBarLayout;
+import androidx.viewpager2.widget.ViewPager2;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPagerFragment;
 import ml.docilealligator.infinityforreddit.thing.SortType;
@@ -147,11 +148,21 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private boolean slideSuppressed;
     /** What the system covers at the bottom edge, for the pager to keep its panel clear of. */
     private int slideBottomInset;
-    /** The screen's top bar, while the Slide pager is up; see {@link #followAppBar}. */
+    /** Whether {@link #takeOverScreen} has been done and not yet given back. */
+    private boolean slideScreenTaken;
+    /** The tabs pager the feed sits in, if any, and whether it let the user swipe before Slide. */
     @Nullable
-    private AppBarLayout slideAppBar;
-    private final AppBarLayout.OnOffsetChangedListener slideAppBarListener =
-            (appBar, verticalOffset) -> padSlideForAppBar(verticalOffset);
+    private ViewPager2 slideTabs;
+    private boolean slideTabsSwipeable;
+    /** The screen the feed sits in, which the pager must not reach below. */
+    @Nullable
+    private CoordinatorLayout slideScreen;
+    @Nullable
+    private ViewTreeObserver slideObserver;
+    private final ViewTreeObserver.OnPreDrawListener slidePreDrawListener = () -> {
+        padSlideToScreen();
+        return true;
+    };
     private static final String SORT_TYPE_STATE = "STS";
     private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
@@ -1520,57 +1531,77 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         binding.slideContainerPostFragment.setVisibility(show ? View.VISIBLE : View.GONE);
         binding.swipeRefreshLayoutPostFragment.setVisibility(show ? View.GONE : View.VISIBLE);
         if (show) {
-            followAppBar();
+            takeOverScreen();
         } else {
-            releaseAppBar();
+            giveBackScreen();
         }
     }
 
     /**
-     * Keeps the Slide pager inside the part of the screen that can be seen. The screens that hold
-     * a feed size it for a top bar that has scrolled away -- a subreddit's banner and tabs, say --
-     * so while the bar is showing, its lower end hangs below the screen, and with it a slide's
-     * bottom edge and info panel. A list scrolls the bar out of the way; a slide does not, so
-     * the pager gives up the overhang instead.
+     * Makes the screen around the feed fit the Slide pager while it is up.
+     *
+     * <p>Sideways swipes are the pager's alone, so the tabs the feed may sit in (a subreddit's
+     * Posts and About) stop answering them -- a touch handed back to them from the last slide, or
+     * one that drifted, changed tab; the tabs themselves still work. And the pager gives up the
+     * part of itself that hangs below the screen: the screens that hold a feed size it for a top
+     * bar that has scrolled away, so while the bar is showing, the lower end of the pager, with a
+     * slide's bottom edge and info panel, is off screen. A list scrolls the bar out of the way; a
+     * slide does not.
      */
-    private void followAppBar() {
-        if (slideAppBar != null || binding == null) {
+    private void takeOverScreen() {
+        if (slideScreenTaken || binding == null) {
             return;
         }
+        slideScreenTaken = true;
         for (ViewParent parent = binding.getRoot().getParent(); parent != null; parent = parent.getParent()) {
-            if (parent instanceof CoordinatorLayout) {
-                CoordinatorLayout coordinator = (CoordinatorLayout) parent;
-                for (int i = 0; i < coordinator.getChildCount(); i++) {
-                    View child = coordinator.getChildAt(i);
-                    if (child instanceof AppBarLayout) {
-                        slideAppBar = (AppBarLayout) child;
-                        slideAppBar.addOnOffsetChangedListener(slideAppBarListener);
-                        padSlideForAppBar(slideAppBar.getTop());
-                        return;
-                    }
-                }
-                return;
+            if (slideTabs == null && parent instanceof ViewPager2) {
+                slideTabs = (ViewPager2) parent;
+                slideTabsSwipeable = slideTabs.isUserInputEnabled();
+                slideTabs.setUserInputEnabled(false);
+            } else if (parent instanceof CoordinatorLayout) {
+                slideScreen = (CoordinatorLayout) parent;
+                break;
             }
+        }
+        if (slideScreen != null) {
+            slideObserver = binding.slideContainerPostFragment.getViewTreeObserver();
+            slideObserver.addOnPreDrawListener(slidePreDrawListener);
         }
     }
 
-    private void releaseAppBar() {
-        if (slideAppBar != null) {
-            slideAppBar.removeOnOffsetChangedListener(slideAppBarListener);
-            slideAppBar = null;
+    private void giveBackScreen() {
+        if (!slideScreenTaken) {
+            return;
         }
+        slideScreenTaken = false;
+        if (slideTabs != null) {
+            slideTabs.setUserInputEnabled(slideTabsSwipeable);
+            slideTabs = null;
+        }
+        if (slideObserver != null && slideObserver.isAlive()) {
+            slideObserver.removeOnPreDrawListener(slidePreDrawListener);
+        }
+        slideObserver = null;
+        slideScreen = null;
         if (binding != null) {
             binding.slideContainerPostFragment.setPadding(0, 0, 0, 0);
         }
     }
 
-    /** [offset] is how far the bar has scrolled up: 0 when it is fully showing. */
-    private void padSlideForAppBar(int offset) {
-        if (binding == null || slideAppBar == null) {
+    /** Pads the pager's bottom by however far it reaches below the screen it sits in. */
+    private void padSlideToScreen() {
+        if (binding == null || slideScreen == null) {
             return;
         }
-        int overhang = Math.max(0, slideAppBar.getTotalScrollRange() + offset);
-        binding.slideContainerPostFragment.setPadding(0, 0, 0, overhang);
+        View container = binding.slideContainerPostFragment;
+        int[] containerAt = new int[2];
+        int[] screenAt = new int[2];
+        container.getLocationOnScreen(containerAt);
+        slideScreen.getLocationOnScreen(screenAt);
+        int overhang = Math.max(0, containerAt[1] + container.getHeight() - (screenAt[1] + slideScreen.getHeight()));
+        if (overhang != container.getPaddingBottom()) {
+            container.setPadding(0, 0, 0, overhang);
+        }
     }
 
     @Override
@@ -2487,7 +2518,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public void onDestroyView() {
-        releaseAppBar();
+        giveBackScreen();
         binding.recyclerViewPostFragment.addOnWindowFocusChangedListener(null);
         // A trailing resume store still pending would fire against a torn-down view.
         binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);

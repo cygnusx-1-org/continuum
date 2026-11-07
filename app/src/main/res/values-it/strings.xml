@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Velocità di riproduzione"</string>
     <string name="action_contact_mods">"Contatta i moderatori"</string>
     <string name="action_more_options">"Più opzioni"</string>
-    <string name="action_add_to_home_screen">"Aggiungi alla schermata Home"</string>
     <string name="action_reset_fab_position">"Ripristina la posizione FAB"</string>
     <string name="action_download_all_gallery_media">"Scarica tutti i contenuti multimediali della Galleria"</string>
     <string name="action_download_all_imgur_album_media">"Scarica tutti i supporti degli album Imgur"</string>

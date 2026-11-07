@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Скорость воспроизведения"</string>
     <string name="action_contact_mods">"Связь с модераторами"</string>
     <string name="action_more_options">"Ещё…"</string>
-    <string name="action_add_to_home_screen">"Добавить на главный экран"</string>
     <string name="action_reset_fab_position">"Сброс положения FAB"</string>
     <string name="action_download_all_gallery_media">"Скачать все медиафайлы галереи"</string>
     <string name="action_download_all_imgur_album_media">"Скачать все медиафайлы Imgur альбома"</string>

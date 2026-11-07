@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"재생 속도"</string>
     <string name="action_contact_mods">"연락처 모드"</string>
     <string name="action_more_options">"더많은 설정"</string>
-    <string name="action_add_to_home_screen">"홈 화면에 추가"</string>
     <string name="action_reset_fab_position">"FAB 위치 재설정"</string>
     <string name="action_download_all_gallery_media">"모든 갤러리 미디어 다운로드"</string>
     <string name="action_download_all_imgur_album_media">"모두 다운로드 Imgur 앨범 미디어"</string>

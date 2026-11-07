@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"Brzina reprodukcije"</string>
     <string name="action_contact_mods">"Modifikacije za kontakt"</string>
     <string name="action_more_options">"Više opcija"</string>
-    <string name="action_add_to_home_screen">"Dodaj na početni zaslon"</string>
     <string name="action_reset_fab_position">"Reset FAB položaj"</string>
     <string name="action_download_all_gallery_media">"Preuzmi sve galerijske medije"</string>
     <string name="action_download_all_imgur_album_media">"Preuzmi sve medije albuma Imgur"</string>

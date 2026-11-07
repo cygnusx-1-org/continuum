@@ -101,7 +101,6 @@
     <string name="action_playback_speed">"再生速度"</string>
     <string name="action_contact_mods">"モデレーターに連絡"</string>
     <string name="action_more_options">"その他のオプション"</string>
-    <string name="action_add_to_home_screen">"ホーム画面に追加"</string>
     <string name="action_reset_fab_position">"FAB 位置をリセット"</string>
     <string name="action_download_all_gallery_media">"すべてのギャラリー メディアをダウンロード"</string>
     <string name="action_download_all_imgur_album_media">"Imgur アルバム メディアをすべてダウンロード"</string>
