@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Une erreur s'est produite lors de l'analyse des informations utilisateur"</string>
     <string name="no_system_webview_error">"Erreur lors de l'ouverture du WebView Système"</string>
     <string name="error_loading_image_tap_to_retry">"Erreur de chargement de l'image. Appuyez pour réessayer."</string>
-    <string name="video_error_tap_to_retry">"Erreur de lecture de la vidéo. Appuyez pour réessayer."</string>
     <string name="load_posts_error">"Erreur de chargement des publications.
 Appuyez pour réessayer."</string>
     <string name="load_posts_error_anonymous_403">"En raison des limitations de la plate-forme, le contenu ne peut pas être chargé pour le moment.\n \n\nTu peux réessayer sous peu ou t’abonner pour une expérience plus fiable."</string>
@@ -219,14 +218,6 @@ Appuyez pour réessayer."</string>
     <string name="no_posts_no_lazy_mode">"Aucune publication disponible"</string>
     <string name="lazy_mode_start">"Le Mode Paresseux commence dans %1$.1fs"</string>
     <string name="lazy_mode_stop">"Mode Paresseux arrêté"</string>
-    <string name="shadowbox_no_posts">"Aucune publication disponible pour le mode Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Appuyez pour révéler"</string>
-    <string name="shadowbox_open_full_viewer">"Ouvrir dans la visionneuse complète"</string>
-    <string name="shadowbox_open_comments">"Ouvrir les commentaires"</string>
-    <string name="shadowbox_more_options">"Plus d'options"</string>
-    <string name="shadowbox_mute">"Sourdine"</string>
-    <string name="shadowbox_play_pause">"Lecture ou pause"</string>
-    <string name="shadowbox_gallery_item_error">"Erreur lors du chargement de cet élément de la galerie"</string>
     <string name="write_comment_hint">"Tes réflexions intéressantes ici"</string>
     <string name="comment_content_required">"Où se trouve ta réflexion intéressante ?"</string>
     <string name="sending_comment">"Envoi"</string>
@@ -494,8 +485,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_lock_toolbar_title">"Verrouiller la barre d\'outils"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Balayer ver le haut pour masquer le bouton «Passer au commentaire de niveau supérieur suivant»"</string>
     <string name="settings_lazy_mode_interval_title">"Intervalle du Mode Paresseux"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Masquer les publications texte et les publications sans aperçu"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Le mode Shadowbox ignore chaque publication texte et toute autre publication sans image d'aperçu."</string>
     <string name="settings_font_title">"Police"</string>
     <string name="settings_font_summary">"Police"</string>
     <string name="settings_title_font_summary">"Titre"</string>

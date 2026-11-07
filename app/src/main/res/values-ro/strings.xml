@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Eroare la afișarea informației utilizatorului"</string>
     <string name="no_system_webview_error">"Eroare la deschiderea WebView-ului sistemului"</string>
     <string name="error_loading_image_tap_to_retry">"Eroare la încărcarea imaginii. Apasă pentru reîncercare."</string>
-    <string name="video_error_tap_to_retry">"Eroare la redarea videoclipului. Apasă pentru reîncercare."</string>
     <string name="load_posts_error">"Eroare la încărcarea postărilor.
 Apasă pentru reîncercare."</string>
     <string name="load_posts_error_anonymous_403">"Din cauza limitărilor platformei, conținutul nu poate fi încărcat acum.\n \n\nPoți încerca din nou în scurt timp sau te poți abona pentru o experiență mai fiabilă."</string>
@@ -224,14 +223,6 @@ Apasă pentru reîncercare."</string>
     <string name="no_posts_no_lazy_mode">"Nicio postare disponibilă"</string>
     <string name="lazy_mode_start">"Mod Leneș începe în %1$.1fs"</string>
     <string name="lazy_mode_stop">"Mod Leneș oprit"</string>
-    <string name="shadowbox_no_posts">"Nu există postări disponibile pentru Modul Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Atinge pentru a dezvălui"</string>
-    <string name="shadowbox_open_full_viewer">"Deschide în vizualizatorul complet"</string>
-    <string name="shadowbox_open_comments">"Deschide comentariile"</string>
-    <string name="shadowbox_more_options">"Mai multe opțiuni"</string>
-    <string name="shadowbox_mute">"Dezactivare"</string>
-    <string name="shadowbox_play_pause">"Redă sau întrerupe"</string>
-    <string name="shadowbox_gallery_item_error">"Eroare la încărcarea acestui articol din galerie"</string>
     <string name="write_comment_hint">"Împărtășește-ți gândurile aici"</string>
     <string name="comment_content_required">"Unde te sunt gândurile interesante?"</string>
     <string name="sending_comment">"Se trimite"</string>
@@ -499,8 +490,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_lock_toolbar_title">"Blochează bara de instrumente"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Glisează în sus pentru a ascunde butonul „Mergi la următorul comentariu de top”"</string>
     <string name="settings_lazy_mode_interval_title">"Intervalul Modului Leneș"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ascunde postările text și postările fără previzualizare"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Modul Shadowbox omite fiecare postare text și orice altă postare care nu are nicio imagine de previzualizare."</string>
     <string name="settings_font_title">"Font"</string>
     <string name="settings_font_summary">"Font"</string>
     <string name="settings_title_font_summary">"Titlu"</string>

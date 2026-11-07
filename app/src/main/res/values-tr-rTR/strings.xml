@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Kullanıcı bilgileri ayrıştırılırken hata oluştu"</string>
     <string name="no_system_webview_error">"Sistem Web Görünümü açılırken hata oluştu"</string>
     <string name="error_loading_image_tap_to_retry">"Görüntü yüklenirken hata oluştu. Tekrar denemek için tıklayın."</string>
-    <string name="video_error_tap_to_retry">"Video oynatılırken hata oluştu. Tekrar denemek için tıklayın."</string>
     <string name="load_posts_error">"Gönderiler yüklenirken hata oluştu.
 Tekrar denemek için tıklayın."</string>
     <string name="load_posts_error_anonymous_403">"Platform sınırlamaları nedeniyle içerik şu anda yüklenemiyor.\n \n\nKısa bir süre sonra tekrar deneyebilir veya daha güvenilir bir deneyim için abone olabilirsin."</string>
@@ -225,14 +224,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="no_posts_no_lazy_mode">"Hiç gönderi yok"</string>
     <string name="lazy_mode_start">"Uyuşuk Modu %1$.1fs'da başlıyor"</string>
     <string name="lazy_mode_stop">"Uyuşuk Modu durdu"</string>
-    <string name="shadowbox_no_posts">"Shadowbox Modu için gönderi yok"</string>
-    <string name="shadowbox_tap_to_reveal">"Ortaya çıkarmak için dokunun"</string>
-    <string name="shadowbox_open_full_viewer">"Tam görüntüleyicide aç"</string>
-    <string name="shadowbox_open_comments">"Yorumları aç"</string>
-    <string name="shadowbox_more_options">"Daha Fazla Seçenek"</string>
-    <string name="shadowbox_mute">"Sessiz"</string>
-    <string name="shadowbox_play_pause">"Oynat veya duraklat"</string>
-    <string name="shadowbox_gallery_item_error">"Bu galeri öğesi yüklenirken hata oluştu"</string>
     <string name="write_comment_hint">"Ne düşünüyorsun?"</string>
     <string name="comment_content_required">"İlginç düşünceniz nerede?"</string>
     <string name="sending_comment">"Gönderiliyor"</string>
@@ -500,8 +491,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_lock_toolbar_title">"Araç Çubuğunu Kilitle"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Gizlemek İçin Yukarı Kaydır ve Sonraki En İyi Yorumlar Düğmesine Git"</string>
     <string name="settings_lazy_mode_interval_title">"Uyuşuk Mod Aralığı"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Metin Gönderilerini ve Önizlemesiz Gönderileri Gizle"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox Modu, her metin gönderisini ve önizleme görüntüsü olmayan diğer tüm gönderileri atlar."</string>
     <string name="settings_font_title">"Yazı Tipi"</string>
     <string name="settings_font_summary">"Yazı Tipi"</string>
     <string name="settings_title_font_summary">"Başlık"</string>

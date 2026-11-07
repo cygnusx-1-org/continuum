@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Σφάλμα κατά την ανάλυση πληροφοριών χρήστη"</string>
     <string name="no_system_webview_error">"Σφάλμα κατα το άνοιγμα System's WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Σφάλμα κατά τη φόρτωση της εικόνας. Πάτα για επανάληψη."</string>
-    <string name="video_error_tap_to_retry">"Σφάλμα κατά την αναπαραγωγή του βίντεο. Πάτα για επανάληψη."</string>
     <string name="load_posts_error">"Σφάλμα φόρτωσης αναρτήσεων.\nΠάτα για να προσπαθήσεις ξανά."</string>
     <string name="load_posts_error_anonymous_403">"Λόγω περιορισμών πλατφόρμας, το περιεχόμενο δεν μπορεί να φορτωθεί αυτήν τη στιγμή.\n \n\nΜπορείς να δοκιμάσεις ξανά σύντομα ή να εγγραφείς για μια πιο αξιόπιστη εμπειρία."</string>
     <string name="load_posts_error_with_reason">"Σφάλμα φόρτωσης αναρτήσεων. Αιτία: %1$s.\nΠάτα για να προσπαθήσεις ξανά."</string>
@@ -218,14 +217,6 @@
     <string name="no_posts_no_lazy_mode">"Καμία ανάρτηση"</string>
     <string name="lazy_mode_start">"Το Lazy Mode ξεκινάει σε %1$.1fs"</string>
     <string name="lazy_mode_stop">"Το Lazy Mode σταμάτησε"</string>
-    <string name="shadowbox_no_posts">"Δεν υπάρχουν διαθέσιμες αναρτήσεις για τη λειτουργία Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Πάτα για αποκάλυψη"</string>
-    <string name="shadowbox_open_full_viewer">"Άνοιγμα σε πλήρη προβολή"</string>
-    <string name="shadowbox_open_comments">"Άνοιξε τα σχόλια"</string>
-    <string name="shadowbox_more_options">"Περισσότερες επιλογές"</string>
-    <string name="shadowbox_mute">"Σίγαση"</string>
-    <string name="shadowbox_play_pause">"Αναπαραγωγή ή παύση"</string>
-    <string name="shadowbox_gallery_item_error">"Σφάλμα κατά τη φόρτωση αυτού του στοιχείου συλλογής"</string>
     <string name="write_comment_hint">"Οι σκέψεις σου εδώ"</string>
     <string name="comment_content_required">"Που είναι οι σκεψεις σου"</string>
     <string name="sending_comment">"Αποστολή"</string>
@@ -492,8 +483,6 @@
     <string name="settings_lock_toolbar_title">"Διατήρησε τη γραμμή εργαλείων σταθερή"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Σύρε προς τα Πάνω για Απόκρυψη Κουμπιού Άλμα προς το Σχόλιο Άνω Επιπέδου"</string>
     <string name="settings_lazy_mode_interval_title">"Διάστημα Λειτουργίας Τεμπέλη"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Απόκρυψη αναρτήσεων κειμένου και αναρτήσεων χωρίς προεπισκόπηση"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Η λειτουργία Shadowbox Mode παραλείπει κάθε ανάρτηση κειμένου και οποιαδήποτε άλλη ανάρτηση που δεν έχει εικόνα προεπισκόπησης."</string>
     <string name="settings_font_title">"Γραμματοσειρά"</string>
     <string name="settings_font_summary">"Γραμματοσειρά"</string>
     <string name="settings_title_font_summary">"Τίτλος"</string>

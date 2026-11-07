@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"De gebruikersinformatie kan niet worden verwerkt"</string>
     <string name="no_system_webview_error">"WebView kan niet worden geopend"</string>
     <string name="error_loading_image_tap_to_retry">"De afbeelding kan niet worden geladen. Druk om opnieuw te proberen."</string>
-    <string name="video_error_tap_to_retry">"De video kan niet worden afgespeeld. Druk om opnieuw te proberen."</string>
     <string name="load_posts_error">"Fout bij het laden van berichten.\nTik om het opnieuw te proberen."</string>
     <string name="load_posts_error_anonymous_403">"Vanwege platformbeperkingen kan de inhoud momenteel niet worden geladen.\n \n\nJe kunt het binnenkort opnieuw proberen of je abonneren voor een betrouwbaardere ervaring."</string>
     <string name="load_posts_error_with_reason">"Fout bij het laden van berichten. Reden: %1$s.\nTik om het opnieuw te proberen."</string>
@@ -220,14 +219,6 @@ Druk om opnieuw te proberen."</string>
     <string name="no_posts_no_lazy_mode">"Geen berichten beschikbaar"</string>
     <string name="lazy_mode_start">"De luie modus start over %1$.1fs"</string>
     <string name="lazy_mode_stop">"De luie modus is gestopt"</string>
-    <string name="shadowbox_no_posts">"Er zijn geen berichten beschikbaar voor de Shadowbox-modus"</string>
-    <string name="shadowbox_tap_to_reveal">"Tik om te onthullen"</string>
-    <string name="shadowbox_open_full_viewer">"Openen in volledige weergave"</string>
-    <string name="shadowbox_open_comments">"Opmerkingen openen"</string>
-    <string name="shadowbox_more_options">"Meer opties"</string>
-    <string name="shadowbox_mute">"Dempen"</string>
-    <string name="shadowbox_play_pause">"Afspelen of pauzeren"</string>
-    <string name="shadowbox_gallery_item_error">"Fout bij het laden van dit galerijitem"</string>
     <string name="write_comment_hint">"Zeg waar je aan denkt"</string>
     <string name="comment_content_required">"Waar denk je aan?"</string>
     <string name="sending_comment">"Bezig met versturen…"</string>
@@ -495,8 +486,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_lock_toolbar_title">"Werkbalk vergrendelen"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Omhoog vegen beperken tot volgende reactie op het hoogste niveau"</string>
     <string name="settings_lazy_mode_interval_title">"Luie modus: tussenpoos"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Tekstberichten en berichten zonder voorbeeld verbergen"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox-modus slaat elk tekstbericht over, en elk ander bericht dat geen voorbeeldafbeelding heeft."</string>
     <string name="settings_font_title">"Lettertype"</string>
     <string name="settings_font_summary">"Lettertype"</string>
     <string name="settings_title_font_summary">"Titel"</string>

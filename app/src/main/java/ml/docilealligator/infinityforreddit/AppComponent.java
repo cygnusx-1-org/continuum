@@ -118,8 +118,6 @@ import ml.docilealligator.infinityforreddit.settings.SecurityPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.ThemePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.TranslationFragment;
 import ml.docilealligator.infinityforreddit.settings.VideoPreferenceFragment;
-import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPagerFragment;
-import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxPageFragment;
 import ml.docilealligator.infinityforreddit.worker.MaterialYouWorker;
 import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
 
@@ -372,9 +370,7 @@ public interface AppComponent {
 
     void inject(BootCompletedBroadcastReceiver bootCompletedBroadcastReceiver);
 
-    void inject(ShadowboxPagerFragment shadowboxPagerFragment);
 
-    void inject(ShadowboxPageFragment shadowboxPageFragment);
 
     @Component.Factory
     interface Factory {

@@ -134,7 +134,6 @@
     <string name="no_system_webview_error">Error opening System\'s WebView</string>
 
     <string name="error_loading_image_tap_to_retry">Error loading the image. Tap to retry.</string>
-    <string name="video_error_tap_to_retry">Error playing the video. Tap to retry.</string>
     <string name="load_posts_error">Error loading posts.\nTap to retry.</string>
     <string name="load_posts_error_anonymous_403">Due to platform limitations, content cannot be loaded right now.
         \n\nYou can try again shortly or subscribe for a more reliable experience.</string>
@@ -233,14 +232,6 @@
     <string name="no_posts_no_lazy_mode">No posts available</string>
     <string name="lazy_mode_start">Lazy Mode starts in %1$.1fs</string>
     <string name="lazy_mode_stop">Lazy Mode stopped</string>
-    <string name="shadowbox_no_posts">No posts available for Slide</string>
-    <string name="shadowbox_tap_to_reveal">Tap to reveal</string>
-    <string name="shadowbox_open_full_viewer">Open in full viewer</string>
-    <string name="shadowbox_open_comments">Open comments</string>
-    <string name="shadowbox_more_options">More options</string>
-    <string name="shadowbox_mute">Mute</string>
-    <string name="shadowbox_play_pause">Play or pause</string>
-    <string name="shadowbox_gallery_item_error">Error loading this gallery item</string>
 
     <string name="write_comment_hint">Your interesting thoughts here</string>
     <string name="comment_content_required">Where is your interesting thought?</string>
@@ -563,8 +554,6 @@
     <string name="settings_lock_toolbar_title">Lock Toolbar</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">Swipe Up to Hide Jump to Next Top-level Comment Button</string>
     <string name="settings_lazy_mode_interval_title">Lazy Mode Interval</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">Hide Text Posts and Posts with No Preview</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">Slide skips every text post, and any other post that has no preview image.</string>
     <string name="settings_font_title">Font</string>
     <string name="settings_font_summary">Font</string>
     <string name="settings_title_font_summary">Title</string>
@@ -1008,7 +997,6 @@
     <string name="post_layout_compact_2">Compact Layout</string>
     <string name="post_layout_gallery">Gallery Layout</string>
     <string name="post_layout_card_3">Card Top</string>
-    <string name="post_layout_shadowbox">Slide</string>
     <string name="post_layout_card_clean">Card Clean</string>
 
     <string name="elapsed_time_just_now">Just Now</string>

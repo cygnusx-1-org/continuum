@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Ein Fehler trat beim Abruf der Benutzerinformationen auf"</string>
     <string name="no_system_webview_error">"Fehler beim Öffnen des System-WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Fehler beim Laden des Bildes. Tippen für Neuversuch."</string>
-    <string name="video_error_tap_to_retry">"Fehler beim Abspielen des Videos. Tippen für Neuversuch."</string>
     <string name="load_posts_error">"Fehler beim Laden der Beiträge.
 Tippen für Neuversuch."</string>
     <string name="load_posts_error_anonymous_403">"Aufgrund von Plattformeinschränkungen können Inhalte derzeit nicht geladen werden.\n \n\nDu kannst es in Kürze noch einmal versuchen oder dich für ein zuverlässigeres Erlebnis anmelden."</string>
@@ -224,14 +223,6 @@ Tippen für Neuversuch."</string>
     <string name="no_posts_no_lazy_mode">"Keine Beiträge verfügbar"</string>
     <string name="lazy_mode_start">"Faulheitsmodus startet in %1$.1fs"</string>
     <string name="lazy_mode_stop">"Faulheitsmodus gestoppt"</string>
-    <string name="shadowbox_no_posts">"Für den Shadowbox-Modus sind keine Beiträge verfügbar"</string>
-    <string name="shadowbox_tap_to_reveal">"Zum Anzeigen antippen"</string>
-    <string name="shadowbox_open_full_viewer">"Im Vollbild-Viewer öffnen"</string>
-    <string name="shadowbox_open_comments">"Kommentare öffnen"</string>
-    <string name="shadowbox_more_options">"Weitere Optionen"</string>
-    <string name="shadowbox_mute">"Stummschaltung"</string>
-    <string name="shadowbox_play_pause">"Wiedergabe oder Pause"</string>
-    <string name="shadowbox_gallery_item_error">"Fehler beim Laden dieses Galerieelements"</string>
     <string name="write_comment_hint">"Deine interessanten Gedanken hier"</string>
     <string name="comment_content_required">"Wo bleibt dein interessanter Gedanke?"</string>
     <string name="sending_comment">"Sende"</string>
@@ -499,8 +490,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_lock_toolbar_title">"Symbolleiste sperren"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Nach oben wischen, um den \"Zum nächsten Top-Level-Kommentar springen\"-Knopf zu verstecken"</string>
     <string name="settings_lazy_mode_interval_title">"Intervall für Faulen Modus"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Textbeiträge und Beiträge ohne Vorschau ausblenden"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Der Shadowbox-Modus überspringt jeden Textbeitrag und jeden anderen Beitrag, der kein Vorschaubild hat."</string>
     <string name="settings_font_title">"Schriftart"</string>
     <string name="settings_font_summary">"Schriftart"</string>
     <string name="settings_title_font_summary">"Titel"</string>

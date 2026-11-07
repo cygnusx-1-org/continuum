@@ -254,7 +254,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                                 : null);
         Locale locale = getResources().getConfiguration().locale;
 
-        postLayout = adoptLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout));
+        postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout);
 
         mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                 mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -581,10 +581,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
-    public void changePostLayout(int chosenLayout, boolean temporary) {
-        this.postLayout = adoptLayout(chosenLayout);
+    public void changePostLayout(int postLayout, boolean temporary) {
+        this.postLayout = postLayout;
         if (!temporary) {
-            mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, chosenLayout).apply();
+            mPostLayoutSharedPreferences.edit().putInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, postLayout).apply();
         }
 
         int previousPosition = -1;
@@ -760,7 +760,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     @Subscribe
     public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
         // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
-        changePostLayout(currentLayout(), true);
+        changePostLayout(postLayout, true);
     }
 
     @Subscribe

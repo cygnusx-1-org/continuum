@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Došlo je do pogreške prilikom rasčlanjivanja korisničkih podataka"</string>
     <string name="no_system_webview_error">"Pogreška pri otvaranju Sistemskog WebViewa"</string>
     <string name="error_loading_image_tap_to_retry">"Pogreška pri učitavanju slike. Dodirni za ponovni pokušaj."</string>
-    <string name="video_error_tap_to_retry">"Pogreška pri reprodukciji videa. Dodirni za ponovni pokušaj."</string>
     <string name="load_posts_error">"Pogreška pri učitavanju objava.\nDodirni za ponovni pokušaj."</string>
     <string name="load_posts_error_anonymous_403">"Zbog ograničenja platforme, sadržaj se trenutno ne može učitati.\n \n\nMožete pokušati ponovo uskoro ili se pretplatiti za pouzdanije iskustvo."</string>
     <string name="load_posts_error_with_reason">"Pogreška pri učitavanju objava. Razlog: %1$s.\nDodirni za ponovni pokušaj."</string>
@@ -217,14 +216,6 @@
     <string name="no_posts_no_lazy_mode">"Nema dostupnih objava"</string>
     <string name="lazy_mode_start">"Mod za lijenčine počinje za %1$.1fs"</string>
     <string name="lazy_mode_stop">"Mod za lijenčine zaustavljen"</string>
-    <string name="shadowbox_no_posts">"Nema dostupnih postova za Shadowbox Mode"</string>
-    <string name="shadowbox_tap_to_reveal">"Dodirni za otkrivanje"</string>
-    <string name="shadowbox_open_full_viewer">"Otvori u punom pregledniku"</string>
-    <string name="shadowbox_open_comments">"Otvori komentare"</string>
-    <string name="shadowbox_more_options">"Više opcija"</string>
-    <string name="shadowbox_mute">"Isključi zvuk"</string>
-    <string name="shadowbox_play_pause">"Pusti ili pauziraj"</string>
-    <string name="shadowbox_gallery_item_error">"Pogreška pri učitavanju ove stavke galerije"</string>
     <string name="write_comment_hint">"Tvoje interesantne misli ovdje"</string>
     <string name="comment_content_required">"Gdje je Tvoja interesantna misao?"</string>
     <string name="sending_comment">"Slanje"</string>
@@ -490,8 +481,6 @@
     <string name="settings_lock_toolbar_title">"Zaključaj alatnu traku"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Prelazak prstom prema gore za skrivanje ''Skoći na sljedeći Top komentar'' gumba"</string>
     <string name="settings_lazy_mode_interval_title">"Interval Moda za lijenčine"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Sakrij tekstualne postove i postove bez pregleda"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Shadowbox Mode preskače svaki tekstualni post i svaki drugi post koji nema sliku za pregled."</string>
     <string name="settings_font_title">"Font"</string>
     <string name="settings_font_summary">"Font"</string>
     <string name="settings_title_font_summary">"Naslov"</string>

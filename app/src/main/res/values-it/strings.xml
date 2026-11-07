@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Si è verificato un errore durante l'analisi delle informazioni dell'utente"</string>
     <string name="no_system_webview_error">"Errore apertura del System WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Errore durante il caricamento dell'immagine. Tocca per riprovare."</string>
-    <string name="video_error_tap_to_retry">"Errore durante la riproduzione del video. Tocca per riprovare."</string>
     <string name="load_posts_error">"Errore durante il caricamento dei post.
 Tocca per riprovare."</string>
     <string name="load_posts_error_anonymous_403">"A causa delle limitazioni della piattaforma, al momento non è possibile caricare i contenuti.\n \n\nPuoi riprovare a breve o iscriverti per un'esperienza più affidabile."</string>
@@ -225,14 +224,6 @@ Tocca per riprovare."</string>
     <string name="no_posts_no_lazy_mode">"Nessun post disponibile"</string>
     <string name="lazy_mode_start">"Modalità di scorrimento automatico partirà tra %1$.1fs"</string>
     <string name="lazy_mode_stop">"Modalità scorrimento automatico disattivata"</string>
-    <string name="shadowbox_no_posts">"Nessun post disponibile per la modalità Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Tocca per rivelare"</string>
-    <string name="shadowbox_open_full_viewer">"Apri nel visualizzatore completo"</string>
-    <string name="shadowbox_open_comments">"Apri commenti"</string>
-    <string name="shadowbox_more_options">"Più opzioni"</string>
-    <string name="shadowbox_mute">"Muto"</string>
-    <string name="shadowbox_play_pause">"Riproduci o metti in pausa"</string>
-    <string name="shadowbox_gallery_item_error">"Errore durante il caricamento di questo elemento della galleria"</string>
     <string name="write_comment_hint">"Commenta qui con i tuoi pensieri"</string>
     <string name="comment_content_required">"Dove sono i tuoi pensieri interessanti?"</string>
     <string name="sending_comment">"Invio…"</string>
@@ -500,8 +491,6 @@ Tocca per riprovare."</string>
     <string name="settings_lock_toolbar_title">"Blocca barra degli strumenti"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Scorri Verso l'Alto per Nascondere il Tasto per Saltare al Prossimo Commento di Primo Livello"</string>
     <string name="settings_lazy_mode_interval_title">"Intervallo Modalità Pigra"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Nascondi post di testo e post senza anteprima"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"La modalità Shadowbox salta ogni post di testo e qualsiasi altro post privo di immagine di anteprima."</string>
     <string name="settings_font_title">"Caratteri"</string>
     <string name="settings_font_summary">"Caratteri"</string>
     <string name="settings_title_font_summary">"Titolo"</string>

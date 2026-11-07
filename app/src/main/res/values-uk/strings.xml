@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Помилка відбулася під час аналізу інформації користувача"</string>
     <string name="no_system_webview_error">"Помилка відкривання системного вебперегляду"</string>
     <string name="error_loading_image_tap_to_retry">"Помилка завантаження зображення. Натисни, щоб повторити."</string>
-    <string name="video_error_tap_to_retry">"Помилка відтворення відео. Натисни, щоб повторити."</string>
     <string name="load_posts_error">"Помилка завантаження дописів.
 Натисни, щоб повторити."</string>
     <string name="load_posts_error_anonymous_403">"Через обмеження платформи зараз неможливо завантажити вміст.\n \n\nти можеш спробувати ще раз незабаром або підписатися, щоб отримати більш надійний досвід."</string>
@@ -224,14 +223,6 @@
     <string name="no_posts_no_lazy_mode">"Нема доступних дописів"</string>
     <string name="lazy_mode_start">"Лінивий режим розпочато %1$.1fс"</string>
     <string name="lazy_mode_stop">"Лінивий режим зупинено"</string>
-    <string name="shadowbox_no_posts">"Немає доступних публікацій для режиму Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Торкнись, щоб відкрити"</string>
-    <string name="shadowbox_open_full_viewer">"Відкрити в повній програмі перегляду"</string>
-    <string name="shadowbox_open_comments">"Відкрити коментарі"</string>
-    <string name="shadowbox_more_options">"Більше варіантів"</string>
-    <string name="shadowbox_mute">"Вимкнути звук"</string>
-    <string name="shadowbox_play_pause">"Відтворення або пауза"</string>
-    <string name="shadowbox_gallery_item_error">"Помилка завантаження цього елемента галереї"</string>
     <string name="write_comment_hint">"Твої цікаві думки тут"</string>
     <string name="comment_content_required">"Де твої цікаві думки?"</string>
     <string name="sending_comment">"Надсилання"</string>
@@ -499,8 +490,6 @@
     <string name="settings_lock_toolbar_title">"Закріпити панель інструментів"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Ковзни уверх, щоб приховати стрибок до наступної кнопки коментаря верхнього рівня"</string>
     <string name="settings_lazy_mode_interval_title">"Крок лінивого режиму"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Приховати текстові дописи та дописи без попереднього перегляду"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Режим Shadowbox пропускає кожну текстову публікацію та будь-яку іншу публікацію, яка не має попереднього зображення."</string>
     <string name="settings_font_title">"Шрифт"</string>
     <string name="settings_font_summary">"Шрифт"</string>
     <string name="settings_title_font_summary">"Заголовок"</string>

@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"ユーザー情報を解析中にエラーが発生しました"</string>
     <string name="no_system_webview_error">"システムのWebViewを起動中にエラーが発生しました"</string>
     <string name="error_loading_image_tap_to_retry">"画像をロード中にエラーが発生しました。タップでリトライします。"</string>
-    <string name="video_error_tap_to_retry">"ビデオの再生中にエラーが発生しました。タップでリトライします。"</string>
     <string name="load_posts_error">"投稿をロード中にエラーが発生しました。
 タップでリトライします。"</string>
     <string name="load_posts_error_anonymous_403">"プラットフォームの制限により、現在コンテンツを読み込むことができません。\n \n\n すぐにもう一度試すか、より信頼性の高いエクスペリエンスを購読することができます。"</string>
@@ -223,14 +222,6 @@
     <string name="no_posts_no_lazy_mode">"投稿がありません"</string>
     <string name="lazy_mode_start">"%1$.1f秒後に自動スクロールが始まります"</string>
     <string name="lazy_mode_stop">"自動スクロールを停止しました"</string>
-    <string name="shadowbox_no_posts">"シャドーボックス モードに利用できる投稿はありません"</string>
-    <string name="shadowbox_tap_to_reveal">"タップして表示します"</string>
-    <string name="shadowbox_open_full_viewer">"フルビューアで開く"</string>
-    <string name="shadowbox_open_comments">"コメントを受け付けています"</string>
-    <string name="shadowbox_more_options">"その他のオプション"</string>
-    <string name="shadowbox_mute">"ミュート"</string>
-    <string name="shadowbox_play_pause">"再生または一時停止"</string>
-    <string name="shadowbox_gallery_item_error">"このギャラリー アイテムの読み込み中にエラーが発生しました"</string>
     <string name="write_comment_hint">"面白いコメントを書いてみましょう"</string>
     <string name="comment_content_required">"コメント内容が必要です"</string>
     <string name="sending_comment">"送信中"</string>
@@ -498,8 +489,6 @@
     <string name="settings_lock_toolbar_title">"ツールバーを固定"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"次の最上位コメントへ移動ボタンを上スクロールで非表示(OFF=下スクロールで非表示)"</string>
     <string name="settings_lazy_mode_interval_title">"自動スクロール間隔"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"テキスト投稿とプレビューなしの投稿を非表示にする"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"シャドウボックス モードでは、すべてのテキスト投稿と、プレビュー画像のないその他の投稿がスキップされます。"</string>
     <string name="settings_font_title">"フォント"</string>
     <string name="settings_font_summary">"フォント"</string>
     <string name="settings_title_font_summary">"タイトル"</string>

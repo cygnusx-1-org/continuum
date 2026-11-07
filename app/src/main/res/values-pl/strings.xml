@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Wystąpił błąd podczas analizy informacji o użytkowniku"</string>
     <string name="no_system_webview_error">"Wystąpił błąd podczas otwierania WebView systemu"</string>
     <string name="error_loading_image_tap_to_retry">"Wystąpił błąd podczas ładowania obrazu. Naciśnij, aby spróbować ponownie."</string>
-    <string name="video_error_tap_to_retry">"Wystąpił błąd podczas odtwarzania wideo. Naciśnij, aby spróbować ponownie."</string>
     <string name="load_posts_error">"Błąd podczas ładowania postów.\nDotknij, aby spróbować ponownie."</string>
     <string name="load_posts_error_anonymous_403">"Ze względu na ograniczenia platformy nie można teraz załadować treści.\n \n\nMożesz wkrótce spróbować ponownie lub zasubskrybować, aby zapewnić bardziej niezawodne działanie."</string>
     <string name="load_posts_error_with_reason">"Błąd podczas ładowania postów. Powód: %1$s.\nDotknij, aby spróbować ponownie."</string>
@@ -219,14 +218,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="no_posts_no_lazy_mode">"Nie znaleziono postów"</string>
     <string name="lazy_mode_start">"Tryb lenia zaczyna się za %1$.1fs"</string>
     <string name="lazy_mode_stop">"Zatrzymano tryb lenia"</string>
-    <string name="shadowbox_no_posts">"Brak dostępnych postów w trybie Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Kliknij, aby odsłonić"</string>
-    <string name="shadowbox_open_full_viewer">"Otwórz w pełnej przeglądarce"</string>
-    <string name="shadowbox_open_comments">"Otwórz komentarze"</string>
-    <string name="shadowbox_more_options">"Więcej opcji"</string>
-    <string name="shadowbox_mute">"Wyciszenie"</string>
-    <string name="shadowbox_play_pause">"Odtwórz lub wstrzymaj"</string>
-    <string name="shadowbox_gallery_item_error">"Błąd podczas ładowania tego elementu galerii"</string>
     <string name="write_comment_hint">"Napisz swoje interesujące myśli"</string>
     <string name="comment_content_required">"Gdzie jest twoja interesująca myśl?"</string>
     <string name="sending_comment">"Wysyłam"</string>
@@ -492,8 +483,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_lock_toolbar_title">"Zablokuj pasek narzędzi"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Przesuń w górę, aby ukryć przycisk przejścia do następnego komentarza poziomu Top"</string>
     <string name="settings_lazy_mode_interval_title">"Częstotliwość trybu lenia"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ukryj posty tekstowe i posty bez podglądu"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Tryb Shadowbox pomija każdy post tekstowy i każdy inny post, który nie ma obrazu podglądu."</string>
     <string name="settings_font_title">"Czcionka"</string>
     <string name="settings_font_summary">"Czcionka"</string>
     <string name="settings_title_font_summary">"Tytuł"</string>

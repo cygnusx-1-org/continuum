@@ -126,7 +126,6 @@
     <string name="parse_user_info_error">"Lỗi khi phân tích thông tin người dùng"</string>
     <string name="no_system_webview_error">"Lỗi khi mở WebView của hệ thống"</string>
     <string name="error_loading_image_tap_to_retry">"Lỗi khi tải hình ảnh. Chạm để thử lại."</string>
-    <string name="video_error_tap_to_retry">"Lỗi khi phát video. Chạm để thử lại."</string>
     <string name="load_posts_error">"Lỗi khi tải bài đăng.\nNhấn để thử lại."</string>
     <string name="load_posts_error_anonymous_403">"Do hạn chế về nền tảng, không thể tải nội dung ngay bây giờ.\n \n\nBạn có thể thử lại ngay hoặc đăng ký để có trải nghiệm đáng tin cậy hơn."</string>
     <string name="load_posts_error_with_reason">"Lỗi tải bài viết. Lý do: %1$s.\nNhấn để thử lại."</string>
@@ -218,14 +217,6 @@
     <string name="no_posts_no_lazy_mode">"Không bài đăng nào có sẵn"</string>
     <string name="lazy_mode_start">"Chế độ lười biếng bắt đầu trong %1$.1fs"</string>
     <string name="lazy_mode_stop">"Chế độ lười biếng đã dừng"</string>
-    <string name="shadowbox_no_posts">"Không có bài đăng nào cho Chế độ Shadowbox"</string>
-    <string name="shadowbox_tap_to_reveal">"Nhấn để hiển thị"</string>
-    <string name="shadowbox_open_full_viewer">"Mở ở chế độ xem đầy đủ"</string>
-    <string name="shadowbox_open_comments">"Mở bình luận"</string>
-    <string name="shadowbox_more_options">"Tùy chọn khác"</string>
-    <string name="shadowbox_mute">"Tắt tiếng"</string>
-    <string name="shadowbox_play_pause">"Phát hoặc tạm dừng"</string>
-    <string name="shadowbox_gallery_item_error">"Lỗi khi tải mục thư viện này"</string>
     <string name="write_comment_hint">"Viết những ý nghĩ thú vị của bạn ở đây"</string>
     <string name="comment_content_required">"Những ý nghĩ thú vị của bạn đâu rồi?"</string>
     <string name="sending_comment">"Đang gửi bình luận"</string>
@@ -492,8 +483,6 @@ Nhấn để thử lại."</string>
     <string name="settings_lock_toolbar_title">"Khóa thanh công cụ"</string>
     <string name="settings_swipe_up_to_hide_jump_to_next_top_level_comment_button_title">"Vuốt lên để ẩn nút Nhảy đến bình luận cấp trên cùng tiếp theo"</string>
     <string name="settings_lazy_mode_interval_title">"Khoảng thời gian Chế độ lười biếng"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_title">"Ẩn bài viết văn bản và bài viết không có bản xem trước"</string>
-    <string name="settings_shadowbox_hide_text_and_previewless_posts_summary">"Chế độ hộp bóng bỏ qua mọi bài đăng văn bản và bất kỳ bài đăng nào khác không có hình ảnh xem trước."</string>
     <string name="settings_font_title">"Phông chữ"</string>
     <string name="settings_font_summary">"Phông chữ"</string>
     <string name="settings_title_font_summary">"Tiêu đề"</string>
