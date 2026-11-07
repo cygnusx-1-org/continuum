@@ -6,6 +6,7 @@ Unreleased
 ============
 **Changed**
 * The Shadowbox layout is now called Slide
+* Slide is a real layout: the pager sits in the feed under the screen's top bar instead of opening a separate full-screen screen. The back button leaves the feed like in any other layout, switching layouts swaps it in place, and a tap on a slide hides only the info panel. Sorting or refreshing reloads it
 
 ---
 
