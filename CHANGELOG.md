@@ -2,7 +2,7 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.27-beta.8 / 2026-11-7
 ============
 **Fixed**
 * Slide inside a screen with tabs (a subreddit's Posts and About): the tabs no longer answer sideways swipes while Slide is up, so a swipe can only change posts. Tap a tab to switch
