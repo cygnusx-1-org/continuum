@@ -900,10 +900,6 @@ public class ParsePost {
                         }
                         postGalleryItem.sourceWidth = sourceObject.optInt(JSONUtils.X_KEY);
                         postGalleryItem.sourceHeight = sourceObject.optInt(JSONUtils.Y_KEY);
-                        if (mimeType.contains("gif")) {
-                            String mp4 = sourceObject.optString(JSONUtils.MP4_KEY);
-                            postGalleryItem.mp4Url = mp4.isEmpty() ? null : mp4;
-                        }
 
                         gallery.add(postGalleryItem);
                     }

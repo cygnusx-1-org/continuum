@@ -22,18 +22,6 @@
 
         <!-- Shown when an item has no still to load, or its load failed. The row keeps the
              height the ratio reserved for it either way, so nothing in the list moves. -->
-        <!-- A gif's mp4, laid over its still while the row is the one playing. The shutter is
-             clear, so the still shows until the first frame instead of a black flash. -->
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/player_view_item_shadowbox_gallery"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:use_controller="false"
-            app:surface_type="texture_view"
-            app:resize_mode="fit"
-            app:shutter_background_color="@android:color/transparent" />
-
         <ImageView
             android:id="@+id/error_image_view_item_shadowbox_gallery"
             android:layout_width="72dp"
@@ -55,25 +43,6 @@
             android:visibility="gone"
             android:contentDescription="@null"
             app:tint="@android:color/white" />
-
-        <!-- The picture's place in the gallery, small in the top left corner. Only the vertical
-             list turns it on. -->
-        <TextView
-            android:id="@+id/index_text_view_item_shadowbox_gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_gallery_item_number"
-            android:fontFamily="?attr/font_family"
-            android:paddingStart="10dp"
-            android:paddingTop="3dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="3dp"
-            android:textColor="#B8F7FF"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
 
     </FrameLayout>
 

@@ -1857,7 +1857,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
-                intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST, true);
                 mActivity.startActivity(intent);
             }
         }
@@ -2689,7 +2688,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         commentMedia.setPostType(Post.GALLERY_TYPE);
         Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
         intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, commentMedia);
-        intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST, true);
         mActivity.startActivity(intent);
     }
 
