@@ -91,10 +91,10 @@ public class SharedPreferencesUtils {
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
     /** Card Bottom without the row of buttons under the content; swiping does the same things. */
-    public static final int POST_LAYOUT_CARD_CLEAN = 6;
-    /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Card Clean. */
+    public static final int POST_LAYOUT_MEDIA_FOCUSED = 6;
+    /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Media Focused. */
     public static boolean isCardBottom(int postLayout) {
-        return postLayout == POST_LAYOUT_CARD || postLayout == POST_LAYOUT_CARD_CLEAN;
+        return postLayout == POST_LAYOUT_CARD || postLayout == POST_LAYOUT_MEDIA_FOCUSED;
     }
 
     /** Whether {@code postLayout} draws the Card Top rows. */
@@ -292,6 +292,8 @@ public class SharedPreferencesUtils {
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
+    public static final String MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE = "media_focused_vertical_gallery_swipe";
+    public static final String MEDIA_FOCUSED_SCROLLING_GALLERY = "media_focused_scrolling_gallery";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";

@@ -987,7 +987,11 @@
     <string name="post_layout_card">Card Bottom</string>
     <string name="post_layout_compact_2">Compact Layout</string>
     <string name="post_layout_card_3">Card Top</string>
-    <string name="post_layout_card_clean">Card Clean</string>
+    <string name="post_layout_media_focused">Media Focused</string>
+    <string name="settings_media_focused_vertical_gallery_swipe_title">Swipe Up and Down Through a Gallery</string>
+    <string name="settings_media_focused_vertical_gallery_swipe_summary">In a gallery opened from the Media Focused layout, swipe up and down to change image. Swipe left to close the gallery and right to open the post and its comments</string>
+    <string name="settings_media_focused_scrolling_gallery_title">Scrolling Gallery</string>
+    <string name="settings_media_focused_scrolling_gallery_summary">A gallery opened from the Media Focused layout is one scrolling list of every image, and a tap opens an image. Swipe left to close the gallery and right to open the post and its comments</string>
 
     <string name="elapsed_time_just_now">Just Now</string>
     <string name="elapsed_time_a_minute_ago">1 Minute</string>
