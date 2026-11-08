@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.customviews
 
 import android.app.Activity
+import android.content.Context
 import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -39,7 +40,7 @@ class ViewPagerBugFixedTest {
             override fun getCount() = 3
             override fun isViewFromObject(view: View, `object`: Any) = view === `object`
             override fun instantiateItem(container: ViewGroup, position: Int): Any {
-                val page = View(activity)
+                val page = GrabbyPage(activity)
                 container.addView(page)
                 return page
             }
@@ -129,6 +130,27 @@ class ViewPagerBugFixedTest {
         pager.setVertical(true)
         swipeLeft()
         assertEquals(0, pager.currentItem)
+    }
+
+    /**
+     * What the gallery's real page does: SubsamplingScaleImageView takes every touch, asks its parents
+     * to leave it alone as soon as the finger lands, and lets go only when the finger moves sideways.
+     * Nothing but that sideways release ever reaches a pager that has been told to keep out.
+     */
+    private class GrabbyPage(context: Context) : View(context) {
+        private var startX = 0f
+
+        override fun onTouchEvent(event: MotionEvent): Boolean {
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = event.x
+                    parent.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_MOVE ->
+                    if (Math.abs(event.x - startX) > 20) parent.requestDisallowInterceptTouchEvent(false)
+            }
+            return true
+        }
     }
 
     private companion object {
