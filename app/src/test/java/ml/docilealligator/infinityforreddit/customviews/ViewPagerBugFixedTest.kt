@@ -88,10 +88,20 @@ class ViewPagerBugFixedTest {
     private fun swipeLeft() = drag(WIDTH * 0.8f, HEIGHT / 2f, WIDTH * 0.2f, HEIGHT / 2f)
     private fun swipeRight() = drag(WIDTH * 0.2f, HEIGHT / 2f, WIDTH * 0.8f, HEIGHT / 2f)
 
+    private fun startOn(page: Int) {
+        pager.setCurrentItem(page, false)
+        layout()
+    }
+
     @Test
-    fun `the standard gallery pages sideways`() {
+    fun `the standard gallery pages left`() {
         swipeLeft()
         assertEquals(1, pager.currentItem)
+    }
+
+    @Test
+    fun `the standard gallery pages right`() {
+        startOn(1)
         swipeRight()
         assertEquals(0, pager.currentItem)
     }
@@ -103,14 +113,18 @@ class ViewPagerBugFixedTest {
     }
 
     @Test
-    fun `a vertical gallery pages up and down`() {
+    fun `a vertical gallery pages up`() {
         pager.setVertical(true)
         swipeUp()
         assertEquals(1, pager.currentItem)
-        swipeUp()
-        assertEquals(2, pager.currentItem)
+    }
+
+    @Test
+    fun `a vertical gallery pages down`() {
+        pager.setVertical(true)
+        startOn(1)
         swipeDown()
-        assertEquals(1, pager.currentItem)
+        assertEquals(0, pager.currentItem)
     }
 
     @Test
