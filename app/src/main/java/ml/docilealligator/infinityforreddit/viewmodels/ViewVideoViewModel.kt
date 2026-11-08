@@ -26,7 +26,6 @@ import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils
 import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.getRandomString
 import okhttp3.OkHttpClient
-import org.apache.commons.io.FilenameUtils
 import retrofit2.Retrofit
 import javax.inject.Provider
 

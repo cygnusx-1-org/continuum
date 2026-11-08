@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.paging.PagingSource
-import com.google.gson.Gson
 import ml.docilealligator.infinityforreddit.utils.SharedGson
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +45,6 @@ import ml.docilealligator.infinityforreddit.post.AnonymousPostState
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
-import ml.docilealligator.infinityforreddit.post.PostPagingSource.PostPagingSourceError
 import ml.docilealligator.infinityforreddit.post.RecoverRemovedPost
 import ml.docilealligator.infinityforreddit.post.hidePost
 import ml.docilealligator.infinityforreddit.post.unhidePost

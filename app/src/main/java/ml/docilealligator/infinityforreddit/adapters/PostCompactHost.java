@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.adapters;
 
 import android.graphics.drawable.GradientDrawable;
 
-import ml.docilealligator.infinityforreddit.post.Post;
 
 /**
  * What the compact rows need on top of {@link PostRowHost}. Like it, every value is read when asked

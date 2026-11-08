@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.post
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
-import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
 import org.json.JSONException
 import org.json.JSONObject

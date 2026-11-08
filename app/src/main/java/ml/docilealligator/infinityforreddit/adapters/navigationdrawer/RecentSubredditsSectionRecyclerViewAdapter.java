@@ -16,7 +16,6 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerMenuGroupTitleBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerSubscribedThingBinding;
 import ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits;
-import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 /**
  * The Recents section: the last few subreddits opened, above Favorites and Subscriptions.

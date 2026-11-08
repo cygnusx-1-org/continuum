@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.subreddit;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
-import com.google.gson.Gson;
 import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import java.util.Objects;

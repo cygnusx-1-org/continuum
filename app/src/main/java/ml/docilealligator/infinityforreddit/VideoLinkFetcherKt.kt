@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
-import ml.docilealligator.infinityforreddit.apis.RedgifsAPI
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPIKt
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt
 import ml.docilealligator.infinityforreddit.apis.VReddItKt

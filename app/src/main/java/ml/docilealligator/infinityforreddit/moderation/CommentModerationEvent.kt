@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.moderation
 
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.comment.Comment
-import ml.docilealligator.infinityforreddit.post.Post
 
 sealed class CommentModerationEvent(open val comment: Comment?, open val position: Int, val toastMessageResId: Int) {
     data class Approved(override val comment: Comment, override val position: Int) : CommentModerationEvent(comment, position, R.string.approved)

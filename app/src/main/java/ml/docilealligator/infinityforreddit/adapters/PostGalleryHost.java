@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.adapters;
 
 import android.content.SharedPreferences;
 
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;

@@ -8,7 +8,6 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-import com.google.gson.Gson;
 import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import java.util.Objects;

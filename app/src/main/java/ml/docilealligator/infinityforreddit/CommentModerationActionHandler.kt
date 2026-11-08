@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit
 
 import ml.docilealligator.infinityforreddit.comment.Comment
-import ml.docilealligator.infinityforreddit.post.Post
 
 interface CommentModerationActionHandler {
     fun approveComment(comment: Comment, position: Int)

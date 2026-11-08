@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit
 
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment
-import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.SortType
 
