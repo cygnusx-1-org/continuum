@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.30 / 2026-11-8
+============
+**Fixed**
+* Swipe Up and Down Through a Gallery still did nothing on a picture, because the picture asked everything around it to stay out of its touches and the gallery honoured that. The gallery now takes an up or down drag whatever the picture asks. A zoomed picture still pans before it pages
+
+---
+
 8.3.3.9.1.29 / 2026-11-8
 ============
 **Fixed**
