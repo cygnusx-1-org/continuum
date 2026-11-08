@@ -1,41 +1,45 @@
 package ml.docilealligator.infinityforreddit.customviews
 
-import android.content.Context
+import android.app.Activity
+import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.widget.NestedScrollView
-import androidx.test.core.app.ApplicationProvider
 import androidx.viewpager.widget.PagerAdapter
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /**
  * The gallery's pager sits inside the same wrapper as on screen -- a NestedScrollView that fills the
  * viewport -- because that wrapper is what once swallowed every up-and-down drag before the pager
- * saw it, so "Swipe Up and Down Through a Gallery" paged nothing.
+ * saw it, so "Swipe Up and Down Through a Gallery" paged nothing. It has to be on a window: a pager
+ * that is not attached never lays out its pages.
  */
 @RunWith(RobolectricTestRunner::class)
 class ViewPagerBugFixedTest {
 
-    private lateinit var context: Context
     private lateinit var pager: ViewPagerBugFixed
-    private lateinit var root: FrameLayout
+
+    private val width get() = pager.width.toFloat()
+    private val height get() = pager.height.toFloat()
 
     @Before
     fun setUp() {
-        context = ApplicationProvider.getApplicationContext()
-        pager = ViewPagerBugFixed(context)
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        pager = ViewPagerBugFixed(activity)
         pager.adapter = object : PagerAdapter() {
             override fun getCount() = 3
             override fun isViewFromObject(view: View, `object`: Any) = view === `object`
             override fun instantiateItem(container: ViewGroup, position: Int): Any {
-                val page = View(context)
+                val page = View(activity)
                 container.addView(page)
                 return page
             }
@@ -44,22 +48,20 @@ class ViewPagerBugFixedTest {
                 container.removeView(`object` as View)
             }
         }
-        val frame = FrameLayout(context)
+        val frame = FrameLayout(activity)
         frame.addView(pager, FrameLayout.LayoutParams(MATCH, MATCH))
-        val scroller = NestedScrollView(context)
+        val scroller = NestedScrollView(activity)
         scroller.isFillViewport = true
         scroller.addView(frame, ViewGroup.LayoutParams(MATCH, MATCH))
-        root = FrameLayout(context)
-        root.addView(scroller, FrameLayout.LayoutParams(MATCH, MATCH))
-        layout()
+        activity.setContentView(scroller)
+        settle()
     }
 
-    private fun layout() {
-        root.measure(
-            View.MeasureSpec.makeMeasureSpec(WIDTH, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(HEIGHT, View.MeasureSpec.EXACTLY)
-        )
-        root.layout(0, 0, WIDTH, HEIGHT)
+    private fun settle() = shadowOf(Looper.getMainLooper()).idle()
+
+    private fun startOn(page: Int) {
+        pager.setCurrentItem(page, false)
+        settle()
     }
 
     /** A finger going from ([fromX], [fromY]) to ([toX], [toY]) in small steps, then lifting. */
@@ -79,19 +81,14 @@ class ViewPagerBugFixedTest {
     }
 
     private fun send(event: MotionEvent) {
-        root.dispatchTouchEvent(event)
+        (pager.parent.parent as View).dispatchTouchEvent(event)
         event.recycle()
     }
 
-    private fun swipeUp() = drag(WIDTH / 2f, HEIGHT * 0.8f, WIDTH / 2f, HEIGHT * 0.2f)
-    private fun swipeDown() = drag(WIDTH / 2f, HEIGHT * 0.2f, WIDTH / 2f, HEIGHT * 0.8f)
-    private fun swipeLeft() = drag(WIDTH * 0.8f, HEIGHT / 2f, WIDTH * 0.2f, HEIGHT / 2f)
-    private fun swipeRight() = drag(WIDTH * 0.2f, HEIGHT / 2f, WIDTH * 0.8f, HEIGHT / 2f)
-
-    private fun startOn(page: Int) {
-        pager.setCurrentItem(page, false)
-        layout()
-    }
+    private fun swipeUp() = drag(width / 2, height * 0.8f, width / 2, height * 0.2f)
+    private fun swipeDown() = drag(width / 2, height * 0.2f, width / 2, height * 0.8f)
+    private fun swipeLeft() = drag(width * 0.8f, height / 2, width * 0.2f, height / 2)
+    private fun swipeRight() = drag(width * 0.2f, height / 2, width * 0.8f, height / 2)
 
     @Test
     fun `the standard gallery pages left`() {
@@ -135,8 +132,6 @@ class ViewPagerBugFixedTest {
     }
 
     private companion object {
-        const val WIDTH = 1080
-        const val HEIGHT = 1920
         const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
     }
 }
