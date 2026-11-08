@@ -175,6 +175,26 @@ class RestoreSettingsTest {
             .putString(SharedPreferencesUtils.THEME_KEY, "7")
             .putBoolean(SharedPreferencesUtils.APP_LOCK, true)
             .commit()
+        val database = realDatabase()
+        try {
+            restore(
+                database, listOf("accounts.json" to accountsJson("alice")),
+                listOf(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                    SharedPreferencesUtils.THEME_KEY to "2",
+                )),
+            )
+
+            assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
+            assertFalse("left at its default on the device that made the backup, so on this one too",
+                defaultPreferences.contains(SharedPreferencesUtils.APP_LOCK))
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun `an older backup only adds to the settings here`() {
+        defaultPreferences.edit().putBoolean(SharedPreferencesUtils.APP_LOCK, true).commit()
 
         restore(
             SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
@@ -183,8 +203,8 @@ class RestoreSettingsTest {
         )
 
         assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
-        assertFalse("left at its default on the device that made the backup, so on this one too",
-            defaultPreferences.contains(SharedPreferencesUtils.APP_LOCK))
+        assertTrue("it names no accounts, so it cannot say what the ones here should drop",
+            defaultPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false))
     }
 
     @Test
@@ -193,21 +213,26 @@ class RestoreSettingsTest {
             .putString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "content://tablet/tree/images")
             .putLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 5L)
             .commit()
-
-        restore(
-            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
-                SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION to "content://phone/tree/images",
-                SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION to "content://phone/tree/gifs",
-                SharedPreferencesUtils.THEME_KEY to "2",
+        val database = realDatabase()
+        try {
+            restore(
+                database, listOf("accounts.json" to accountsJson("alice")),
+                listOf(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                    SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION to "content://phone/tree/images",
+                    SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION to "content://phone/tree/gifs",
+                    SharedPreferencesUtils.THEME_KEY to "2",
+                )),
             )
-        )
 
-        assertEquals("content://tablet/tree/images",
-            defaultPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, null))
-        assertFalse("a folder this device never chose is not taken from the phone",
-            defaultPreferences.contains(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION))
-        assertEquals(5L, defaultPreferences.getLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 0L))
-        assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
+            assertEquals("content://tablet/tree/images",
+                defaultPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, null))
+            assertFalse("a folder this device never chose is not taken from the phone",
+                defaultPreferences.contains(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION))
+            assertEquals(5L, defaultPreferences.getLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 0L))
+            assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
+        } finally {
+            database.close()
+        }
     }
 
     @Test

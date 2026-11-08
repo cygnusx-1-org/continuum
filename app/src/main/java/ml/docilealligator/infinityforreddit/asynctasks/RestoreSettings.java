@@ -70,10 +70,12 @@ import org.apache.commons.io.FileUtils;
 /**
  * Puts a backup zip back, preference file by preference file, table by table and font by font.
  *
- * A preference file in the backup replaces the file on this device, key for key: a setting the
- * other device left at its default is absent from the backup, and merging would keep this device's
- * own value for it, so the two devices would never match. The exceptions are the keys in
- * {@link BackupSettings#DEVICE_BOUND_KEYS}, which stay as this device has them.
+ * A backup that brought accounts is this app's own, and a preference file in it replaces the file
+ * on this device, key for key: a setting the other device left at its default is absent from the
+ * backup, and merging would keep this device's own value for it, so the two devices would never
+ * match. An older backup, Infinity's among them, holds one set of settings and names no accounts,
+ * so it only adds to what each account here has. Either way the keys in
+ * {@link BackupSettings#DEVICE_BOUND_KEYS} stay as this device has them.
  *
  * Like {@link BackupSettings} this opens the account-scoped files itself instead of taking them
  * injected: writing a backed up key through {@code AccountScopedSharedPreferences} would scope it a
@@ -177,8 +179,9 @@ public class RestoreSettings {
                         // What each file held, by the name the backup gave it.
                         Map<String, Map<String, Object>> restoredFiles = new HashMap<>();
                         // Whether the backup has an accounts.json at all, and whether accounts from
-                        // it are now the ones on this device. Infinity's has neither.
-                        boolean backupHasAccountsFile = false;
+                        // it are now the ones on this device. Infinity's has neither. Known before
+                        // the first file is read, because it decides how that file goes in.
+                        boolean backupHasAccountsFile = new File(restoreFilesDir, "database/accounts.json").exists();
                         boolean restoredAccounts = false;
 
                         for (File f : restoreFiles) {
@@ -194,7 +197,7 @@ public class RestoreSettings {
                                     continue;
                                 }
 
-                                Map<String, Object> imported = importSharedPreferencesFromFile(target, f.toString());
+                                Map<String, Object> imported = importSharedPreferencesFromFile(target, f.toString(), backupHasAccountsFile);
                                 // Read into a local first: every file must be imported even after
                                 // one has failed.
                                 result = result && imported != null;
@@ -204,7 +207,6 @@ public class RestoreSettings {
                             } else if (f.isDirectory() && f.getName().equals(BackupSettings.FONTS_DIRECTORY)) {
                                 result = restoreFonts(context, f) && result;
                             } else if (f.isDirectory() && f.getName().equals("database")) {
-                                backupHasAccountsFile = new File(f, "accounts.json").exists();
                                 // All of it or none of it. Written table by table with nothing
                                 // around it, a restore that failed part of the way through kept
                                 // whatever it had reached -- the local accounts already deleted,
@@ -603,7 +605,8 @@ public class RestoreSettings {
 
     /**
      * Reads one backed up preference file into {@code sharedPreferences} and returns what it held,
-     * or null if it could not be read.
+     * or null if it could not be read. With {@code replace} the file's own keys are cleared first;
+     * without it the backup's keys are added to them.
      *
      * Writes with commit(): a restore ends by killing the process, and apply() only promises that
      * the write reaches disk eventually.
@@ -611,7 +614,7 @@ public class RestoreSettings {
     @SuppressLint("ApplySharedPref")
     @Nullable
     private static Map<String, Object> importSharedPreferencesFromFile(SharedPreferences sharedPreferences,
-                                                                       String uriString) {
+                                                                       String uriString, boolean replace) {
         try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(uriString))) {
             Object object = input.readObject();
             if (!(object instanceof Map)) {
@@ -622,15 +625,19 @@ public class RestoreSettings {
             Map<String, Object> map = (Map<String, Object>) object;
             Map<String, ?> onThisDevice = sharedPreferences.getAll();
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
+            if (replace) {
+                editor.clear();
+            }
             for (Map.Entry<String, Object> e : map.entrySet()) {
                 // An older backup may still carry them; they are not this device's to take.
                 if (!BackupSettings.DEVICE_BOUND_KEYS.contains(e.getKey())) {
                     putValue(editor, e.getKey(), e.getValue());
                 }
             }
-            for (String deviceBoundKey : BackupSettings.DEVICE_BOUND_KEYS) {
-                putValue(editor, deviceBoundKey, onThisDevice.get(deviceBoundKey));
+            if (replace) {
+                for (String deviceBoundKey : BackupSettings.DEVICE_BOUND_KEYS) {
+                    putValue(editor, deviceBoundKey, onThisDevice.get(deviceBoundKey));
+                }
             }
             editor.commit();
 
