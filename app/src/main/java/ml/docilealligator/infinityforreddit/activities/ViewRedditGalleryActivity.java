@@ -270,6 +270,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         boolean scrollList = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_SCROLLING_LIST, false);
         showImageNumbers = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_IMAGE_NUMBERS, true);
         binding.viewPagerViewRedditGalleryActivity.setVertical(verticalSwipe);
+        binding.viewPagerViewRedditGalleryActivity.setKeepsDrag(this::isPictureZoomedIn);
         if (verticalSwipe || scrollList) {
             // An up or down drag changes image or scrolls the list, so it cannot also close the
             // gallery; a swipe left does that.
