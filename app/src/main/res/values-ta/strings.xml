@@ -474,11 +474,6 @@
     <string name="settings_post_compact_thumbnail_size">"சிறுபட அளவு"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"சிறுபடத்தை இடதில் காட்டு"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"வலதுபுறத்தில் சிறுபடத்தைக் காட்டு"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"போஸ்ட் ஃபீடில் உள்ள நெடுவரிசைகளின் எண்ணிக்கை"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"உருவப்படம்"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"நிலப்பரப்பு"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"உருவப்படம் (அவிழ்க்கப்பட்டது)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"நிலப்பரப்பு (அவிழ்க்கப்பட்டது)"</string>
     <string name="settings_swap_tap_and_long_title">"கருத்துகளில் தட்டு மற்றும் நீண்டழுத்தை பண்டமாற்று"</string>
     <string name="settings_swipe_to_go_back_title">"பின்செல்ல வலப்புறம் தேய்"</string>
     <string name="settings_swipe_to_go_back_summary">"எல்லா பக்கங்களுக்கும் செயல்படாது"</string>

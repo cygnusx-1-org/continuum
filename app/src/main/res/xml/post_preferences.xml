@@ -34,10 +34,6 @@
         app:summary="@string/settings_post_feed_top_buffer_summary"
         app:title="@string/settings_post_feed_top_buffer_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_number_of_columns_in_post_feed_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.NumberOfColumnsInPostFeedPreferenceFragment" />
-
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="hide_post_type"

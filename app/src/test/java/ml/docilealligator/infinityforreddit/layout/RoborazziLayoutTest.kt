@@ -67,7 +67,7 @@ import org.robolectric.annotation.GraphicsMode
  *
  * Cases are generated in tiers rather than as one flat cross-product: crossing every axis would be
  * ~4,000 goldens, most of them redundant. Axes that change *measurement* (width, orientation,
- * columns, font scale) are crossed against every layout; axes that only change *colour* (theme) are
+ * font scale) are crossed against every layout; axes that only change *colour* (theme) are
  * sampled at a few widths, because a palette swap cannot move a pixel boundary. See [cases].
  *
  * Infinity applies its colours per-view at runtime (CustomThemeWrapper, during adapter binding), not
@@ -87,9 +87,6 @@ import org.robolectric.annotation.GraphicsMode
 // Native graphics so view.draw() actually rasterises text (the legacy canvas only paints shapes).
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class RoborazziLayoutTest(private val case: Case) {
-
-    /** Post layout family, which is what decides the column count. See [columnsFor]. */
-    enum class Family { CARD, CARD_3, COMPACT_2, NONE }
 
     enum class Orientation { PORTRAIT, LANDSCAPE }
 
@@ -111,7 +108,6 @@ class RoborazziLayoutTest(private val case: Case) {
     data class Case(
         val layoutName: String,
         @param:LayoutRes val layoutRes: Int,
-        val family: Family,
         val swDp: Int,
         val orientation: Orientation,
         val themeLabel: String,
@@ -156,7 +152,6 @@ class RoborazziLayoutTest(private val case: Case) {
     private data class LayoutSpec(
         val name: String,
         @param:LayoutRes val res: Int,
-        val family: Family,
         val reveal: List<Int> = emptyList(),
         val recoveredFlair: Boolean = false,
         val selfThemed: Boolean = false,
@@ -178,27 +173,27 @@ class RoborazziLayoutTest(private val case: Case) {
          */
         private val FEED_LAYOUTS: List<LayoutSpec> = listOf(
             // Card (POST_LAYOUT_CARD) — one entry per post type the adapter can show.
-            LayoutSpec("card", R.layout.item_post_with_preview, Family.CARD),
-            LayoutSpec("cardText", R.layout.item_post_text, Family.CARD),
-            LayoutSpec("cardGalleryType", R.layout.item_post_gallery_type, Family.CARD),
-            LayoutSpec("cardVideo", R.layout.item_post_video_type_autoplay, Family.CARD),
-            LayoutSpec("cardVideoLegacy", R.layout.item_post_video_type_autoplay_legacy_controller, Family.CARD),
+            LayoutSpec("card", R.layout.item_post_with_preview),
+            LayoutSpec("cardText", R.layout.item_post_text),
+            LayoutSpec("cardGalleryType", R.layout.item_post_gallery_type),
+            LayoutSpec("cardVideo", R.layout.item_post_video_type_autoplay),
+            LayoutSpec("cardVideoLegacy", R.layout.item_post_video_type_autoplay_legacy_controller),
             // Card 3 (Material 3).
-            LayoutSpec("card3", R.layout.item_post_card_3_with_preview, Family.CARD_3),
-            LayoutSpec("card3Text", R.layout.item_post_card_3_text, Family.CARD_3),
-            LayoutSpec("card3GalleryType", R.layout.item_post_card_3_gallery_type, Family.CARD_3),
-            LayoutSpec("card3Video", R.layout.item_post_card_3_video_type_autoplay, Family.CARD_3),
-            LayoutSpec("card3VideoLegacy", R.layout.item_post_card_3_video_type_autoplay_legacy_controller, Family.CARD_3),
+            LayoutSpec("card3", R.layout.item_post_card_3_with_preview),
+            LayoutSpec("card3Text", R.layout.item_post_card_3_text),
+            LayoutSpec("card3GalleryType", R.layout.item_post_card_3_gallery_type),
+            LayoutSpec("card3Video", R.layout.item_post_card_3_video_type_autoplay),
+            LayoutSpec("card3VideoLegacy", R.layout.item_post_card_3_video_type_autoplay_legacy_controller),
             // Compact, both thumbnail sides.
-            LayoutSpec("compact2", R.layout.item_post_compact_2, Family.COMPACT_2),
-            LayoutSpec("compact2Right", R.layout.item_post_compact_2_right_thumbnail, Family.COMPACT_2),
+            LayoutSpec("compact2", R.layout.item_post_compact_2),
+            LayoutSpec("compact2Right", R.layout.item_post_compact_2_right_thumbnail),
             // Listings and comment rows. commentCollapsed must stay pixel-identical to comment for
             // every element they share — that pairing is the reason it is covered.
-            LayoutSpec("subreddit", R.layout.item_subreddit_listing, Family.NONE),
-            LayoutSpec("multireddit", R.layout.item_multi_reddit, Family.NONE),
-            LayoutSpec("profile", R.layout.item_user_listing, Family.NONE),
-            LayoutSpec("comment", R.layout.item_comment, Family.NONE),
-            LayoutSpec("commentCollapsed", R.layout.item_comment_fully_collapsed, Family.NONE),
+            LayoutSpec("subreddit", R.layout.item_subreddit_listing),
+            LayoutSpec("multireddit", R.layout.item_multi_reddit),
+            LayoutSpec("profile", R.layout.item_user_listing),
+            LayoutSpec("comment", R.layout.item_comment),
+            LayoutSpec("commentCollapsed", R.layout.item_comment_fully_collapsed),
         )
 
         /**
@@ -207,36 +202,36 @@ class RoborazziLayoutTest(private val case: Case) {
          */
         private val SECONDARY_LAYOUTS: List<LayoutSpec> = listOf(
             // Post detail page — one entry per post type ViewPostDetailFragment can show.
-            LayoutSpec("detailGallery", R.layout.item_post_detail_gallery, Family.NONE),
-            LayoutSpec("detailImage", R.layout.item_post_detail_image_and_gif_autoplay, Family.NONE),
-            LayoutSpec("detailLink", R.layout.item_post_detail_link, Family.NONE),
-            LayoutSpec("detailNoPreview", R.layout.item_post_detail_no_preview, Family.NONE),
-            LayoutSpec("detailText", R.layout.item_post_detail_text, Family.NONE),
-            LayoutSpec("detailVideoPreview", R.layout.item_post_detail_video_and_gif_preview, Family.NONE),
-            LayoutSpec("detailVideo", R.layout.item_post_detail_video_autoplay, Family.NONE),
-            LayoutSpec("detailVideoLegacy", R.layout.item_post_detail_video_autoplay_legacy_controller, Family.NONE),
+            LayoutSpec("detailGallery", R.layout.item_post_detail_gallery),
+            LayoutSpec("detailImage", R.layout.item_post_detail_image_and_gif_autoplay),
+            LayoutSpec("detailLink", R.layout.item_post_detail_link),
+            LayoutSpec("detailNoPreview", R.layout.item_post_detail_no_preview),
+            LayoutSpec("detailText", R.layout.item_post_detail_text),
+            LayoutSpec("detailVideoPreview", R.layout.item_post_detail_video_and_gif_preview),
+            LayoutSpec("detailVideo", R.layout.item_post_detail_video_autoplay),
+            LayoutSpec("detailVideoLegacy", R.layout.item_post_detail_video_autoplay_legacy_controller),
             // Inbox, subscriptions, nav drawer, and the smaller comment-thread rows.
-            LayoutSpec("message", R.layout.item_message, Family.NONE),
-            LayoutSpec("privateMessageReceived", R.layout.item_private_message_received, Family.NONE),
-            LayoutSpec("privateMessageSent", R.layout.item_private_message_sent, Family.NONE),
-            LayoutSpec("subscribedThing", R.layout.item_subscribed_thing, Family.NONE),
-            LayoutSpec("navDrawerAccount", R.layout.item_nav_drawer_account, Family.NONE),
-            LayoutSpec("award", R.layout.item_award, Family.NONE),
-            LayoutSpec("rule", R.layout.item_rule, Family.NONE),
-            LayoutSpec("flair", R.layout.item_flair, Family.NONE),
-            LayoutSpec("viewAllComments", R.layout.item_view_all_comments, Family.NONE),
-            LayoutSpec("loadMoreComments", R.layout.item_load_more_comments_placeholder, Family.NONE),
+            LayoutSpec("message", R.layout.item_message),
+            LayoutSpec("privateMessageReceived", R.layout.item_private_message_received),
+            LayoutSpec("privateMessageSent", R.layout.item_private_message_sent),
+            LayoutSpec("subscribedThing", R.layout.item_subscribed_thing),
+            LayoutSpec("navDrawerAccount", R.layout.item_nav_drawer_account),
+            LayoutSpec("award", R.layout.item_award),
+            LayoutSpec("rule", R.layout.item_rule),
+            LayoutSpec("flair", R.layout.item_flair),
+            LayoutSpec("viewAllComments", R.layout.item_view_all_comments),
+            LayoutSpec("loadMoreComments", R.layout.item_load_more_comments_placeholder),
             // Customize Post Filter sections. This screen used to carry hand-maintained -land and
             // -sw600dp copies of one 1200-line layout, which is how their paddings drifted apart;
             // there is one layout per section now, and these goldens are what keeps it that way.
-            LayoutSpec("postFilterAppliesTo", R.layout.item_post_filter_applies_to, Family.NONE),
-            LayoutSpec("postFilterPostTypes", R.layout.item_post_filter_post_types, Family.NONE),
-            LayoutSpec("postFilterShowOnly", R.layout.item_post_filter_show_only, Family.NONE),
-            LayoutSpec("postFilterLimits", R.layout.item_post_filter_limits, Family.NONE),
-            LayoutSpec("postFilterRulesHeader", R.layout.item_post_filter_rules_header, Family.NONE),
-            LayoutSpec("postFilterRule", R.layout.item_post_filter_rule, Family.NONE),
+            LayoutSpec("postFilterAppliesTo", R.layout.item_post_filter_applies_to),
+            LayoutSpec("postFilterPostTypes", R.layout.item_post_filter_post_types),
+            LayoutSpec("postFilterShowOnly", R.layout.item_post_filter_show_only),
+            LayoutSpec("postFilterLimits", R.layout.item_post_filter_limits),
+            LayoutSpec("postFilterRulesHeader", R.layout.item_post_filter_rules_header),
+            LayoutSpec("postFilterRule", R.layout.item_post_filter_rule),
             LayoutSpec(
-                "postFilterBlockedSubreddit", R.layout.item_post_filter_blocked_subreddit, Family.NONE
+                "postFilterBlockedSubreddit", R.layout.item_post_filter_blocked_subreddit
             ),
             // Every layout that exists in more than one resource configuration — all seven of the
             // 269 layout files, as of this writing. These are the only files where a hand-edit to
@@ -254,7 +249,6 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec(
                 "userProfileHeader",
                 R.layout.activity_view_user_detail,
-                Family.NONE,
                 // Both ship hidden in XML and are revealed once the activity binds; a golden of the
                 // unbound header cannot tell a missing view from a hidden one.
                 reveal = listOf(
@@ -265,13 +259,12 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec(
                 "subredditHeader",
                 R.layout.activity_view_subreddit_detail,
-                Family.NONE,
                 // Shipped GONE and revealed by the activity when the subreddit has a description.
                 // The subscribe chip is visible in XML already, so it needs no reveal.
                 reveal = listOf(R.id.description_text_view_view_subreddit_detail_activity),
             ),
-            LayoutSpec("multiRedditHeader", R.layout.activity_view_multi_reddit_detail, Family.NONE),
-            LayoutSpec("appBarMain", R.layout.app_bar_main, Family.NONE),
+            LayoutSpec("multiRedditHeader", R.layout.activity_view_multi_reddit_detail),
+            LayoutSpec("appBarMain", R.layout.app_bar_main),
             // fragment_view_post_detail is the one multi-variant layout deliberately NOT here. Its
             // two panes are adapter-driven lists, and this harness does not bind adapters (see
             // applyTheme); with no rows they paint nothing, so every golden came out a blank
@@ -279,7 +272,7 @@ class RoborazziLayoutTest(private val case: Case) {
             // cannot show the two-pane weights that are the only thing differing between its
             // configurations. Its ids stay covered by LayoutVariantIdParityTest and the
             // InconsistentLayoutVariantIds lint check.
-            LayoutSpec("customizeCommentFilter", R.layout.activity_customize_comment_filter, Family.NONE),
+            LayoutSpec("customizeCommentFilter", R.layout.activity_customize_comment_filter),
             // activity_lock_screen is the other multi-variant layout deliberately absent. Its
             // LottieAnimationView declares lottie_autoPlay="true", and its captures are not
             // reproducible: 11 of its 13 goldens differed between a record and the very next
@@ -304,18 +297,18 @@ class RoborazziLayoutTest(private val case: Case) {
          */
         private val MEDIA_LAYOUTS: List<LayoutSpec> = listOf(
             LayoutSpec(
-                "imageViewerBar", R.layout.activity_view_image_or_gif, Family.NONE,
+                "imageViewerBar", R.layout.activity_view_image_or_gif,
                 reveal = listOf(R.id.bottom_navigation_view_image_or_gif_activity),
                 selfThemed = true,
             ),
             LayoutSpec(
-                "imgurImageBar", R.layout.fragment_view_imgur_image, Family.NONE,
+                "imgurImageBar", R.layout.fragment_view_imgur_image,
                 reveal = listOf(R.id.bottom_navigation_view_imgur_image_fragment),
                 selfThemed = true,
             ),
             LayoutSpec(
                 // The BottomAppBar itself is visible in XML here; only the row inside it is hidden.
-                "galleryImageBar", R.layout.fragment_view_reddit_gallery_image_or_gif, Family.NONE,
+                "galleryImageBar", R.layout.fragment_view_reddit_gallery_image_or_gif,
                 reveal = listOf(R.id.bottom_app_bar_menu_view_reddit_gallery_image_or_gif_fragment),
                 selfThemed = true,
             ),
@@ -325,7 +318,7 @@ class RoborazziLayoutTest(private val case: Case) {
             // subset, because the row is weighted — a button appearing or disappearing moves every
             // other icon in it.
             LayoutSpec(
-                "videoBarActivity", R.layout.exo_playback_control_view, Family.NONE,
+                "videoBarActivity", R.layout.exo_playback_control_view,
                 reveal = listOf(
                     R.id.bottom_navigation_exo_playback_control_view,
                     R.id.mute_exo_playback_control_view,
@@ -334,7 +327,7 @@ class RoborazziLayoutTest(private val case: Case) {
                 selfThemed = true,
             ),
             LayoutSpec(
-                "videoBarGallery", R.layout.exo_playback_control_view, Family.NONE,
+                "videoBarGallery", R.layout.exo_playback_control_view,
                 reveal = listOf(
                     R.id.bottom_navigation_exo_playback_control_view,
                     R.id.mute_exo_playback_control_view,
@@ -366,7 +359,7 @@ class RoborazziLayoutTest(private val case: Case) {
          */
         private val RECOVERED_LAYOUTS: List<LayoutSpec> = listOf(
             LayoutSpec(
-                "detailTextRecovered", R.layout.item_post_detail_text, Family.NONE,
+                "detailTextRecovered", R.layout.item_post_detail_text,
                 reveal = listOf(
                     R.id.spoiler_custom_text_view_item_post_detail_text,
                     R.id.nsfw_text_view_item_post_detail_text,
@@ -375,7 +368,7 @@ class RoborazziLayoutTest(private val case: Case) {
                 ),
             ),
             LayoutSpec(
-                "detailLinkRecovered", R.layout.item_post_detail_link, Family.NONE,
+                "detailLinkRecovered", R.layout.item_post_detail_link,
                 reveal = listOf(
                     R.id.spoiler_custom_text_view_item_post_detail_link,
                     R.id.nsfw_text_view_item_post_detail_link,
@@ -384,7 +377,7 @@ class RoborazziLayoutTest(private val case: Case) {
                 ),
             ),
             LayoutSpec(
-                "commentRecovered", R.layout.item_comment, Family.NONE, recoveredFlair = true,
+                "commentRecovered", R.layout.item_comment, recoveredFlair = true,
             ),
         )
 
@@ -436,7 +429,7 @@ class RoborazziLayoutTest(private val case: Case) {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun cases(): List<Array<Any>> = buildList {
-            // Core: width x theme, portrait, at each layout's real column count.
+            // Core: width x theme, portrait, at each layout.
             addAll(tier(FEED_LAYOUTS, LIGHT_DARK, FEED_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_DARK, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             // Theme is not an axis here: these layouts hold their own colours, so light/dark/amoled
@@ -445,7 +438,7 @@ class RoborazziLayoutTest(private val case: Case) {
             // AMOLED: colour-only, so a few widths are enough to catch a palette regression.
             addAll(tier(FEED_LAYOUTS, AMOLED_ONLY, FEED_AMOLED_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, AMOLED_ONLY, SECONDARY_AMOLED_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
-            // Landscape: wide `w` against a narrow `sw`, and two columns for every feed family.
+            // Landscape: wide `w` against a narrow `sw`.
             addAll(tier(FEED_LAYOUTS, LIGHT_DARK, FEED_LANDSCAPE_WIDTHS, Orientation.LANDSCAPE, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_DARK, SECONDARY_LANDSCAPE_WIDTHS, Orientation.LANDSCAPE, FontScale.NORMAL))
             // Media viewers are the one family users routinely turn the phone for, so they get the
@@ -483,26 +476,13 @@ class RoborazziLayoutTest(private val case: Case) {
                     widths.map { swDp ->
                         arrayOf<Any>(
                             Case(
-                                spec.name, spec.res, spec.family, swDp, orientation, themeLabel,
+                                spec.name, spec.res, swDp, orientation, themeLabel,
                                 themeType, fontScale, spec.reveal, spec.recoveredFlair,
                                 thumbnailSizeDp, spec.selfThemed,
                             ),
                         )
                     }
                 }
-            }
-
-        /**
-         * Columns the app would actually lay this item out in, mirroring the pref defaults in
-         * PostFragmentBase.getNColumns (PostFragmentBase.java:466-500). CARD_3 and COMPACT_2 fall into
-         * that method's `default` branch (POST_LAYOUT_CARD_3 = 4, POST_LAYOUT_COMPACT_2 = 5), so they
-         * follow CARD. Landscape defaults every feed family to 2. Non-feed rows are always single.
-         */
-        private fun columnsFor(family: Family, orientation: Orientation, isTablet: Boolean): Int =
-            when {
-                family == Family.NONE -> 1
-                orientation == Orientation.LANDSCAPE -> 2
-                else -> if (isTablet) 2 else 1 // CARD, CARD_3, COMPACT_2
             }
 
         /**
@@ -617,7 +597,7 @@ class RoborazziLayoutTest(private val case: Case) {
     /**
      * Inflate against a real, fully-themed Activity and run a genuine layout/draw traversal so the
      * item is realised for native-graphics rendering, then apply the theme palette + placeholder
-     * content and lay it out at the width one column of this feed would actually give it.
+     * content and lay it out at the width the feed would actually give it.
      */
     private fun render(): View {
         val app = RuntimeEnvironment.getApplication()
@@ -641,14 +621,8 @@ class RoborazziLayoutTest(private val case: Case) {
         // against; every other layout sits on the theme's page background. See [Case.selfThemed].
         pageBackground = if (case.selfThemed) Color.BLACK else palette.pageBackground
 
-        // One column's worth of the display. The StaggeredGridLayoutManagerItemOffsetDecoration insets
-        // (R.dimen.staggeredLayoutManagerItemOffset, plus negative card-3 offsets) are deliberately not
-        // modelled: that decoration is a protected static nested class of PostFragmentBase and
-        // reproducing it would couple this test to ViewHolder types, which is exactly the coupling
-        // applyTheme avoids. A few dp of inset does not change what these goldens are here to catch.
-        val isTablet = activity.resources.getBoolean(R.bool.isTablet)
-        val columns = columnsFor(case.family, case.orientation, isTablet)
-        val itemWidthPx = activity.resources.displayMetrics.widthPixels / columns
+        // The feed is one column, so an item is as wide as the display.
+        val itemWidthPx = activity.resources.displayMetrics.widthPixels
 
         val view = LayoutInflater.from(activity).inflate(case.layoutRes, FrameLayout(activity), false)
         // Views the activity reveals once it binds. findViewById returns null when this
@@ -759,8 +733,7 @@ class RoborazziLayoutTest(private val case: Case) {
             }
             is Button -> if (themeColours) view.setTextColor(palette.textColor)
             is TextView -> {
-                // Relative to the item, not the display: in a 2-column feed an item is half the
-                // display wide, and a display-relative threshold would stop filling its title.
+                // Relative to the item, which is as wide as the display.
                 val minFillWidth = itemWidthPx * 0.45
                 if (view.text.isNullOrEmpty() && view.width >= minFillWidth) {
                     view.text = SAMPLE_TEXT

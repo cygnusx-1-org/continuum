@@ -478,11 +478,6 @@ Tocca per riprovare."</string>
     <string name="settings_post_compact_thumbnail_size">"Dimensioni miniatura"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Mostra miniatura a sinistra"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Mostra miniatura a destra"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Il numero di colonne nel Feed dei post"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Vista verticale"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Vista orizzontale"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Verticale (non piegato)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Orizzontale (non piegato)"</string>
     <string name="settings_swap_tap_and_long_title">"Scambia Clicca e Premi a Lungo nei Commenti"</string>
     <string name="settings_swipe_to_go_back_title">"Scorri verso destra per tornare indietro"</string>
     <string name="settings_swipe_to_go_back_summary">"Non si Applica a Tutte le Pagine"</string>

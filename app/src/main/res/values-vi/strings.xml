@@ -470,11 +470,6 @@ Nhấn để thử lại."</string>
     <string name="settings_post_compact_thumbnail_size">"Kích thước hình thu nhỏ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Hiện ảnh thu nhỏ ở bên trái"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Hiển thị hình thu nhỏ ở bên phải"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Số lượng cột trong nguồn dữ liệu bài đăng"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Dọc"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Ngang"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Dọc (mở ra)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Ngang (mở ra)"</string>
     <string name="settings_swap_tap_and_long_title">"Đổi chỗ Nhấn và Nhấn giữ trong các bình luận"</string>
     <string name="settings_swipe_to_go_back_title">"Vuối phải để quay lại"</string>
     <string name="settings_swipe_to_go_back_summary">"Không áp dụng cho tất cả trang"</string>

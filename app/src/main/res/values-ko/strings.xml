@@ -477,11 +477,6 @@
     <string name="settings_post_compact_thumbnail_size">"썸네일 크기"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"썸네일 좌측으로 표시"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"오른쪽에 썸네일 표시"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"포스트 피드의 열 수"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"초상화"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"풍경"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"세로(펼침)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"가로(펼친 상태)"</string>
     <string name="settings_swap_tap_and_long_title">"댓글에서 터치와 길게 누르는걸 변경"</string>
     <string name="settings_swipe_to_go_back_title">"오른쪽으로 밀어 돌아가기"</string>
     <string name="settings_swipe_to_go_back_summary">"모든 페이지에 적용되지않음"</string>

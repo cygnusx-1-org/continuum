@@ -477,11 +477,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_post_compact_thumbnail_size">"Dimensiunea miniaturii"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Se afișează miniatura pe partea stângă"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Afișează miniatura din dreapta"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Numărul de Coloane în Fluxul de Postări"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Peisaj"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Orientare Portret (Desfăcut)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Orientare Peisaj (Desfăcut)"</string>
     <string name="settings_swap_tap_and_long_title">"Schimbă atingerea și apăsarea lungă în comentarii"</string>
     <string name="settings_swipe_to_go_back_title">"Glisează spre drepta pentru a te întoarce"</string>
     <string name="settings_swipe_to_go_back_summary">"Nu se aplică tuturor paginilor"</string>

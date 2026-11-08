@@ -470,11 +470,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_post_compact_thumbnail_size">"Rozmiar miniatury"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Pokaż miniaturę po lewej stronie w układzie kompaktowym"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Pokaż miniaturę po prawej stronie"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Liczba kolumn w kanale postów"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Pion"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Poziom"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portret (rozłożony)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Pozioma (rozłożona)"</string>
     <string name="settings_swap_tap_and_long_title">"Zamień kliknięcie i przytrzymanie w komentarzach"</string>
     <string name="settings_swipe_to_go_back_title">"Przesuń w prawo aby wrócić"</string>
     <string name="settings_swipe_to_go_back_summary">"Nie ma zastosowania do wszystkich stron"</string>

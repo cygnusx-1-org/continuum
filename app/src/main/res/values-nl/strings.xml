@@ -473,11 +473,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_post_compact_thumbnail_size">"Miniatuurgrootte"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Miniatuur tonen aan linkerkant in compacte indeling"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatuur aan de rechterkant weergeven"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Het Aantal Kolommen in de Postfeed"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Landschap"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portret (uitgevouwen)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Liggend (uitgevouwen)"</string>
     <string name="settings_swap_tap_and_long_title">"Indrukken en ingedrukt houden omwisselen bij reacties"</string>
     <string name="settings_swipe_to_go_back_title">"Naar rechts vegen om terug te gaan"</string>
     <string name="settings_swipe_to_go_back_summary">"Werkt niet op alle pagina's"</string>

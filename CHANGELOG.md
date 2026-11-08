@@ -13,7 +13,7 @@ Unreleased
   * Settings stored as a set of strings are restored; before they were silently skipped
 
 **Removed**
-* Two unused strings left from when the backup could leave out accounts and the Client ID
+
 * The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Card Clean is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
 
 ---

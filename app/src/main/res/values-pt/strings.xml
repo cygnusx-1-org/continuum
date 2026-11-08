@@ -477,11 +477,6 @@ Toque para tentar novamente."</string>
     <string name="settings_post_compact_thumbnail_size">"Tamanho da miniatura"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Mostrar Miniatura à Esquerda"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Mostrar miniatura à direita"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Número de Colunas no Feed de Publicações"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Retrato"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Paisagem"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Retrato (desdobrado)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Paisagem (desdobrada)"</string>
     <string name="settings_swap_tap_and_long_title">"Trocar toque e toque longo nos comentários"</string>
     <string name="settings_swipe_to_go_back_title">"Deslizar para a Direita para Voltar Atrás"</string>
     <string name="settings_swipe_to_go_back_summary">"Não é Aplicado a Todas as Páginas"</string>

@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.core.view.OneShotPreDrawListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -155,7 +154,6 @@ object ScrollAnchor {
     @JvmStatic
     fun scrollTo(rv: RecyclerView, position: Int, offset: Int) {
         when (val lm = rv.layoutManager) {
-            is StaggeredGridLayoutManager -> lm.scrollToPositionWithOffset(position, offset)
             is LinearLayoutManager -> lm.scrollToPositionWithOffset(position, offset)
             else -> rv.scrollToPosition(position)
         }
