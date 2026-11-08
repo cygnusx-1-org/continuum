@@ -292,8 +292,11 @@ public class SharedPreferencesUtils {
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
-    public static final String MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE = "media_focused_vertical_gallery_swipe";
-    public static final String MEDIA_FOCUSED_SCROLLING_GALLERY = "media_focused_scrolling_gallery";
+    // The three gallery viewer options. The first two are stored under the keys they shipped with,
+    // when they were tied to one layout, so that choosing them again is not needed.
+    public static final String GALLERY_VERTICAL_SWIPE = "media_focused_vertical_gallery_swipe";
+    public static final String GALLERY_SCROLLING_LIST = "media_focused_scrolling_gallery";
+    public static final String GALLERY_IMAGE_NUMBERS = "gallery_image_numbers";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";

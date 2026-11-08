@@ -4,11 +4,15 @@
 
 Unreleased
 ============
-**Fixed**
-* Media Focused galleries with Swipe Up and Down or Scrolling Gallery on: the swipes were the wrong way round. A swipe left now goes back to the posts and a swipe right opens the post and its comments
-
 **New**
 * Scrolling Gallery: GIFs and videos play by themselves as they scroll into view (up to three at a time, muted), under the Video Autoplay and Autoplay NSFW Videos settings. A GIF Reddit published no mp4 for, or one cached before this version, stays a still until opened
+* Image Numbers, a new option: each image's number in the corner of the scrolling gallery, on by default
+
+**Changed**
+* The Swipe Up and Down Through a Gallery and Scrolling Gallery options, which 8.3.3.9.1.27 tied to the Media Focused layout, now apply to every gallery: from any layout, from a post's details and from a gallery in a comment. They are under Settings > Post > Gallery Viewer, with the values already chosen kept
+
+**Fixed**
+* With Swipe Up and Down or Scrolling Gallery on, the swipes were the wrong way round. A swipe left now goes back to the posts and a swipe right opens the post and its comments
 
 ---
 

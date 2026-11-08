@@ -94,16 +94,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
      */
     public static final String EXTRA_POST_JSON = "EPJ";
     public static final String EXTRA_GALLERY_ITEM_INDEX = "EGII";
-    /**
-     * Change image by swiping up and down instead of sideways. Then a swipe left goes back to the
-     * posts and a swipe right opens the post and its comments.
-     */
-    public static final String EXTRA_VERTICAL_SWIPE = "EVS";
-    /**
-     * Open on a scrolling list of every image rather than the pager; a tap on an image opens the
-     * pager on it, and back returns to the list. The same left and right swipes as above.
-     */
-    public static final String EXTRA_SCROLL_LIST = "ESL";
     /** How many rows of the scrolling list play their clip at once. */
     private static final int MAX_PLAYING_ROWS = 3;
     /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
@@ -132,6 +122,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     // extras, so this needs no network of its own.
     private int resumePage = -1;
     private boolean verticalSwipe;
+    // Whether each row of the scrolling list shows its place in the gallery.
+    private boolean showImageNumbers;
     private boolean showingList;
     // Whether the list may play its gifs and videos by itself, under the app's Video Autoplay settings.
     private boolean autoplayMedia;
@@ -272,8 +264,11 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         isNsfw = post.isNSFW();
 
         autoplayMedia = shouldAutoplayMedia();
-        verticalSwipe = getIntent().getBooleanExtra(EXTRA_VERTICAL_SWIPE, false);
-        boolean scrollList = getIntent().getBooleanExtra(EXTRA_SCROLL_LIST, false);
+        // Settings > Post > Gallery. With the first on, a swipe left goes back to the posts and a swipe
+        // right opens the post and its comments, as it does with the second.
+        verticalSwipe = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_VERTICAL_SWIPE, false);
+        boolean scrollList = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_SCROLLING_LIST, false);
+        showImageNumbers = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_IMAGE_NUMBERS, true);
         binding.viewPagerViewRedditGalleryActivity.setVertical(verticalSwipe);
         if (verticalSwipe || scrollList) {
             // An up or down drag changes image or scrolls the list, so it cannot also close the
@@ -359,7 +354,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
         @Override
         public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
-            holder.bind(gallery.get(position));
+            holder.bind(gallery.get(position), position);
         }
 
         @Override
@@ -391,6 +386,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             this.binding = binding;
             if (typeface != null) {
                 binding.captionTextViewItemGalleryListEntry.setTypeface(typeface);
+                binding.indexTextViewItemGalleryListEntry.setTypeface(typeface);
             }
             itemView.setOnClickListener(view -> {
                 int position = getBindingAdapterPosition();
@@ -400,8 +396,10 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             });
         }
 
-        void bind(Post.Gallery item) {
+        void bind(Post.Gallery item, int position) {
             this.item = item;
+            binding.indexTextViewItemGalleryListEntry.setText(String.valueOf(position + 1));
+            binding.indexTextViewItemGalleryListEntry.setVisibility(showImageNumbers ? View.VISIBLE : View.GONE);
             // The source's own shape reserves the row's height before the picture arrives, so the
             // list does not jump as images load.
             binding.imageViewItemGalleryListEntry.setRatio(
