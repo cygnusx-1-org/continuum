@@ -57,7 +57,7 @@ object AccountScopedKeys {
         "show_divider_in_compact_layout", "show_thumbnail_on_the_left_in_compact_layout",
         "long_press_to_hide_toolbar_in_compact_layout",
         "post_compact_layout_toolbar_hidden_by_default",
-
+        "media_focused_vertical_gallery_swipe", "media_focused_scrolling_gallery",
 
         // Interface.
         "main_activity_fab_action", "other_activities_fab_action",

@@ -28,6 +28,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
+                <!-- Every image stacked top to bottom, when the gallery is a scrolling one; a tap opens
+                     the pager on that image. -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_view_reddit_gallery_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:visibility="gone" />
+
                 <com.google.android.material.appbar.AppBarLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

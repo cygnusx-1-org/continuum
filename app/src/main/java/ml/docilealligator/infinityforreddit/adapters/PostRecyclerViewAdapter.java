@@ -756,7 +756,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
                     switch (mDefaultLinkPostLayout) {
                         case SharedPreferencesUtils.POST_LAYOUT_CARD:
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
+                        case SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED:
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
@@ -801,7 +801,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                         switch (mDefaultLinkPostLayout) {
                             case SharedPreferencesUtils.POST_LAYOUT_CARD:
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
+                            case SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED:
                                 return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
                                 return VIEW_TYPE_POST_COMPACT_2;
@@ -902,7 +902,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /**
-     * Card Clean is Card Bottom without the row of buttons under the content. The row is made
+     * Media Focused is Card Bottom without the row of buttons under the content. The row is made
      * invisible and squeezed to a strip of space, so nothing of it shows but the card keeps some
      * room under the text; every other layout gets it back at its natural height, because rows are
      * recycled.
@@ -912,7 +912,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         if (bar == null) {
             return;
         }
-        boolean clean = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN;
+        boolean clean = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED;
         int height = clean ? Math.round(8 * mScale) : ViewGroup.LayoutParams.WRAP_CONTENT;
         ViewGroup.LayoutParams params = bar.getLayoutParams();
         if (params.height != height) {
@@ -2737,7 +2737,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         switch (mPostLayout) {
             case SharedPreferencesUtils.POST_LAYOUT_CARD:
             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
-            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
+            case SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED:
                 return PostCardPreviewStyle.CARD_PRELOAD_ROWS_AHEAD;
             default:
                 return PreloadWindow.MAX_AHEAD;
@@ -3683,6 +3683,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
+                if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED) {
+                    intent.putExtra(ViewRedditGalleryActivity.EXTRA_VERTICAL_SWIPE,
+                            mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE, false));
+                    intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST,
+                            mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_SCROLLING_GALLERY, false));
+                }
                 mActivity.startActivity(intent);
             } else {
                 // Text posts have no media viewer (they can still carry a preview image). Releasing

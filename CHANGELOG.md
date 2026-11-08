@@ -4,6 +4,15 @@
 
 Unreleased
 ============
+**New**
+* Two options for galleries opened from the Media Focused layout, in Settings > Post:
+  * Swipe Up and Down Through a Gallery: change image by swiping up and down instead of sideways
+  * Scrolling Gallery: the gallery opens as one scrolling list of every image, and a tap opens an image
+  * With either on, a swipe left closes the gallery and a swipe right opens the post and its comments
+
+**Changed**
+* Card Clean is now called Media Focused
+
 **Removed**
 * Settings > Post > The Number of Columns in Post Feed. The feed is always one column, on phones, tablets, folded or not, in either orientation. The multi-column grid code behind it is gone with it
 * The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Card Clean is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
