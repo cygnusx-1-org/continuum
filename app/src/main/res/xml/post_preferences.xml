@@ -148,18 +148,24 @@
         app:title="@string/settings_post_compact_layout_toolbar_hidden_by_default_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="@string/post_layout_media_focused" />
+        app:title="@string/settings_category_gallery_viewer_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="media_focused_vertical_gallery_swipe"
-        app:summary="@string/settings_media_focused_vertical_gallery_swipe_summary"
-        app:title="@string/settings_media_focused_vertical_gallery_swipe_title" />
+        app:summary="@string/settings_gallery_vertical_swipe_summary"
+        app:title="@string/settings_gallery_vertical_swipe_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="media_focused_scrolling_gallery"
-        app:summary="@string/settings_media_focused_scrolling_gallery_summary"
-        app:title="@string/settings_media_focused_scrolling_gallery_title" />
+        app:summary="@string/settings_gallery_scrolling_list_summary"
+        app:title="@string/settings_gallery_scrolling_list_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="gallery_image_numbers"
+        app:summary="@string/settings_gallery_image_numbers_summary"
+        app:title="@string/settings_gallery_image_numbers_title" />
 
 </PreferenceScreen>
