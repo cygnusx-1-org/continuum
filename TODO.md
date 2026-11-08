@@ -1,6 +1,6 @@
 # TODO
 
-Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.27` is the current stable release, built from master with no pull request open. It rolls up everything since `8.3.3.9.1.26`, including the betas `8.3.3.9.1.27-beta.1` to `beta.9`, which were the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping).
+Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.27` is the current stable release (tag `v8.3.3.9.1.27`, published), built from master with no pull request open. It rolls up everything since `8.3.3.9.1.26`, including the betas `8.3.3.9.1.27-beta.1` to `beta.9`, which were the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping).
 
 ## Waiting on the owner
 
@@ -30,7 +30,6 @@ All of these were built, judged not good enough on the owner's phone, and taken 
 ## Release housekeeping
 
 - **Stable releases only (decided 2026-11-08).** Set `versionName` to a plain version, bump `versionCode`, give the `CHANGELOG.md` heading the same plain version, tag it with no suffix. No `-beta.N`, no pre-releases. The workflow treats a `-beta.N` suffix as a pre-release, so a plain tag is a normal release.
-- [ ] The stray tag `v8.3.3.9.1.23-beta.1` is still on the remote (a deletion was denied once). `git push origin :refs/tags/v8.3.3.9.1.23-beta.1` removes it.
 - [ ] Backups are plain zips and hold accounts, Client ID and the Giphy key; the English description says to keep the file private.
 - The bottom app bar is gone (`26-beta.20`). Kept on purpose: the `bottom_app_bar` preference file, because it also stores what the floating button does (`MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB`, `OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB`), so backup, restore and the per-account migration still handle it. In landscape and on tablets the floating button hides on scroll like in portrait.
 
