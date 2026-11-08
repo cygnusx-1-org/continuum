@@ -1,11 +1,10 @@
 package ml.docilealligator.infinityforreddit.activities
 
+import androidx.compose.runtime.getValue
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -35,7 +34,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -115,10 +113,8 @@ class CopyMultiRedditActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                enableEdgeToEdge()
-            }
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            enableEdgeToEdge()
         }
 
         val multipath = intent.getStringExtra(EXTRA_MULTIPATH) ?: ""

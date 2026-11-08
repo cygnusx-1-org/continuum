@@ -230,59 +230,44 @@ public class ViewPostDetailActivity extends BaseActivity
 
         applyCustomTheme();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutViewPostDetailActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutViewPostDetailActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                    setMargins(binding.toolbarViewPostDetailActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.viewPager2ViewPostDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    binding.searchPanelMaterialCardViewViewPostDetailActivity.setContentPadding(0, 0, 0, allInsets.bottom);
+
+                    setMargins(binding.fabViewPostDetailActivity,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            (int) Utils.convertDpToPixel(16, ViewPostDetailActivity.this) + allInsets.right,
+                            (int) Utils.convertDpToPixel(16, ViewPostDetailActivity.this) + allInsets.bottom);
+
+                    return insets;
                 }
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarViewPostDetailActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.viewPager2ViewPostDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        binding.searchPanelMaterialCardViewViewPostDetailActivity.setContentPadding(0, 0, 0, allInsets.bottom);
-
-                        setMargins(binding.fabViewPostDetailActivity,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                (int) Utils.convertDpToPixel(16, ViewPostDetailActivity.this) + allInsets.right,
-                                (int) Utils.convertDpToPixel(16, ViewPostDetailActivity.this) + allInsets.bottom);
-
-                        return insets;
-                    }
-                });
-                /*adjustToolbar(binding.toolbarViewPostDetailActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabViewPostDetailActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabViewPostDetailActivity.setLayoutParams(params);
-
-                    binding.searchPanelMaterialCardViewViewPostDetailActivity.setContentPadding(binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingStart(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingTop(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingEnd(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingBottom() + navBarHeight);
-                }*/
-            }
+            });
         }
 
         boolean swipeBetweenPosts = mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS, false);
@@ -749,54 +734,6 @@ public class ViewPostDetailActivity extends BaseActivity
         if (fragment != null) {
             fragment.toggleSaveComment(comment, position);
         }
-        /*if (comment.isSaved()) {
-            comment.setSaved(false);
-            SaveThing.unsaveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
-                @Override
-                public void success() {
-                    LocalSaved.onUnsaved(ViewPostDetailActivity.this, accountName, comment.getFullName());
-                    SavedCommentCacheNotifier.onSavedCommentChanged();
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, false);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_unsaved_success, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void failed() {
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, true);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_unsaved_failed, Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            comment.setSaved(true);
-            SaveThing.saveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
-                @Override
-                public void success() {
-                    LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
-                            accountName, comment.getFullName(), comment.getLinkId());
-                    SavedCommentCacheNotifier.onSavedCommentChanged();
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, true);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_saved_success, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void failed() {
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, false);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_saved_failed, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }*/
     }
 
     public boolean toggleSearchPanelVisibility() {

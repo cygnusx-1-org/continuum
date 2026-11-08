@@ -182,15 +182,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
 
         Resources resources = getResources();
 
-        /*if (activity.isImmersiveInterface()) {
-            binding.recyclerViewHistoryPostFragment.setPadding(0, 0, 0, activity.getNavBarHeight());
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                && mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true)) {
-            int navBarResourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-            if (navBarResourceId > 0) {
-                binding.recyclerViewHistoryPostFragment.setPadding(0, 0, 0, resources.getDimensionPixelSize(navBarResourceId));
-            }
-        }*/
 
         binding.swipeRefreshLayoutHistoryPostFragment.setEnabled(mSharedPreferences.getBoolean(SharedPreferencesUtils.PULL_TO_REFRESH, true));
         binding.swipeRefreshLayoutHistoryPostFragment.setOnRefreshListener(this::refresh);
@@ -263,32 +254,14 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                 null, mExoCreator, new PostRecyclerViewAdapter.Callback() {
             @Override
             public void typeChipClicked(int filter) {
-                    /*Intent intent = new Intent(activity, FilteredPostsActivity.class);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_NAME, username);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_POST_TYPE, postType);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_USER_WHERE, where);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_FILTER, filter);
-                    startActivity(intent);*/
             }
 
             @Override
             public void flairChipClicked(String flair) {
-                    /*Intent intent = new Intent(activity, FilteredPostsActivity.class);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_NAME, username);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_POST_TYPE, postType);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_USER_WHERE, where);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_CONTAIN_FLAIR, flair);
-                    startActivity(intent);*/
             }
 
             @Override
             public void nsfwChipClicked() {
-                    /*Intent intent = new Intent(activity, FilteredPostsActivity.class);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_NAME, username);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_POST_TYPE, postType);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_USER_WHERE, where);
-                    intent.putExtra(FilteredPostsActivity.EXTRA_FILTER, Post.NSFW_TYPE);
-                    startActivity(intent);*/
             }
 
             @Override

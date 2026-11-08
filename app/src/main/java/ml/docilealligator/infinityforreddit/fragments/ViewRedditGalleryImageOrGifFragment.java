@@ -420,7 +420,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     }
 
     private void requestPermissionAndDownload() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(activity,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -461,50 +461,28 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO :
                 DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE;
 
-        android.util.Log.d("GalleryDownload", "Media type: " + mediaType +
-                " (" + (mediaType == DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO ? "VIDEO" :
-                mediaType == DownloadMediaService.EXTRA_MEDIA_TYPE_GIF ? "GIF" : "IMAGE") + ")");
-
         String defaultSharedPrefsFile = "ml.docilealligator.infinityforreddit_preferences";
 
-        // Check for the location in both SharedPreferences - this will help identify the issue
-        String imageLoc1 = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        // The location may be stored in either of the other preferences files
         String imageLoc2 = Objects.requireNonNull(activity.getSharedPreferences(SharedPreferencesUtils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
                 .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
         String imageLoc3 = Objects.requireNonNull(activity.getSharedPreferences(defaultSharedPrefsFile, Context.MODE_PRIVATE)
                 .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
 
-        android.util.Log.d("ImgurDownload", "Image location from injected prefs: " +
-                (imageLoc1.isEmpty() ? "EMPTY" : imageLoc1));
-        android.util.Log.d("ImgurDownload", "Image location from SHARED_PREFERENCES_FILE: " +
-                (imageLoc2.isEmpty() ? "EMPTY" : imageLoc2));
-        android.util.Log.d("ImgurDownload", "Image location from default_preferences: " +
-                (imageLoc3.isEmpty() ? "EMPTY" : imageLoc3));
-
         if (isNsfw && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
             downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, ""));
-            Log.d("GalleryDownload", "Using NSFW download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
         } else {
             if (mediaType == DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO) {
                 downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, ""));
-                Log.d("GalleryDownload", "Using VIDEO download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
             } else {
                 downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
-                Log.d("GalleryDownload", "Using IMAGE download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
 
                 // If the location is empty, try the other SharedPreferences
                 if (downloadLocation == null || downloadLocation.isEmpty()) {
                     downloadLocation = imageLoc2.isEmpty() ? imageLoc3 : imageLoc2;
-                    Log.d("GalleryDownload", "Image location was empty, trying backup location: " + (downloadLocation.isEmpty() ? "EMPTY" : downloadLocation));
                 }
             }
         }
-
-
-        Log.d("GalleryDownload", "ViewRedditGalleryImageOrGifFragment.download(): " +
-                "mediaType=" + mediaType +
-                ", isNsfw=" + isNsfw +
-                ", determined downloadLocation=" + (downloadLocation == null || downloadLocation.isEmpty() ? "EMPTY" : downloadLocation));
 
         if (downloadLocation == null || downloadLocation.isEmpty()) {
             Toast.makeText(activity, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
@@ -514,7 +492,6 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         //TODO: contentEstimatedBytes
         JobInfo jobInfo = DownloadMediaService.constructJobInfo(activity, 5000000, parentPost, galleryIndex);
         if (jobInfo != null) {
-            Log.d("GalleryDownload", "ViewRedditGalleryImageOrGifFragment.download(): JobInfo created successfully.");
             ((JobScheduler) activity.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
         } else {
             Log.e("GalleryDownload", "ViewRedditGalleryImageOrGifFragment.download(): Failed to create JobInfo!");
@@ -623,15 +600,11 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
 
     private void setWallpaper() {
         if (media.mediaType != Post.Gallery.TYPE_GIF) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                SetAsWallpaperBottomSheetFragment setAsWallpaperBottomSheetFragment = new SetAsWallpaperBottomSheetFragment();
-                Bundle bundle = new Bundle();
-                bundle.putInt(SetAsWallpaperBottomSheetFragment.EXTRA_VIEW_PAGER_POSITION, activity.getCurrentPagePosition());
-                setAsWallpaperBottomSheetFragment.setArguments(bundle);
-                setAsWallpaperBottomSheetFragment.show(activity.getSupportFragmentManager(), setAsWallpaperBottomSheetFragment.getTag());
-            } else {
-                activity.setToBoth(activity.getCurrentPagePosition());
-            }
+            SetAsWallpaperBottomSheetFragment setAsWallpaperBottomSheetFragment = new SetAsWallpaperBottomSheetFragment();
+            Bundle bundle = new Bundle();
+            bundle.putInt(SetAsWallpaperBottomSheetFragment.EXTRA_VIEW_PAGER_POSITION, activity.getCurrentPagePosition());
+            setAsWallpaperBottomSheetFragment.setArguments(bundle);
+            setAsWallpaperBottomSheetFragment.show(activity.getSupportFragmentManager(), setAsWallpaperBottomSheetFragment.getTag());
         }
     }
 

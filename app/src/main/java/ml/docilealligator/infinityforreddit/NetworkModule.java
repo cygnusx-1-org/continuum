@@ -293,14 +293,6 @@ abstract class NetworkModule {
                 .build();
     }
 
-    /*@Provides
-    @Named("redgifs")
-    @Singleton
-    static Retrofit provideRedgifsRetrofit(@Named("base") Retrofit retrofit) {
-        return retrofit.newBuilder()
-                .baseUrl(APIUtils.OH_MY_DL_BASE_URI)
-                .build();
-    }*/
 
     @Provides
     @Named("imgur")

@@ -111,46 +111,44 @@ public class WikiActivity extends BaseActivity {
 
         attachSliderPanelIfApplicable();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutCommentWikiActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutCommentWikiActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(binding.toolbarCommentWikiActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    int padding16 = (int) Utils.convertDpToPixel(16, WikiActivity.this);
+
+                    binding.contentMarkdownViewCommentWikiActivity.setPadding(
+                            padding16 + allInsets.left,
+                            0,
+                            padding16 + allInsets.right,
+                            allInsets.bottom);
+
+                    return WindowInsetsCompat.CONSUMED;
                 }
-
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarCommentWikiActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        int padding16 = (int) Utils.convertDpToPixel(16, WikiActivity.this);
-
-                        binding.contentMarkdownViewCommentWikiActivity.setPadding(
-                                padding16 + allInsets.left,
-                                0,
-                                padding16 + allInsets.right,
-                                allInsets.bottom);
-
-                        return WindowInsetsCompat.CONSUMED;
-                    }
-                });
-                /*adjustToolbar(binding.toolbarCommentWikiActivity);
-                binding.contentMarkdownViewCommentWikiActivity.setPadding(binding.contentMarkdownViewCommentWikiActivity.getPaddingLeft(), 0, binding.contentMarkdownViewCommentWikiActivity.getPaddingRight(), getNavBarHeight());*/
-            }
+            });
+            /*adjustToolbar(binding.toolbarCommentWikiActivity);
+            binding.contentMarkdownViewCommentWikiActivity.setPadding(binding.contentMarkdownViewCommentWikiActivity.getPaddingLeft(), 0, binding.contentMarkdownViewCommentWikiActivity.getPaddingRight(), getNavBarHeight());*/
         }
 
         mGlide = Glide.with(this);

@@ -15,12 +15,6 @@
         app:title="@string/settings_mute_nsfw_video_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="video_player_ignore_nav_bar"
-        app:title="@string/settings_video_player_ignore_nav_bar_title"
-        app:summary="@string/settings_video_player_ignore_nav_bar_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="loop_video"
         app:title="@string/settings_loop_video_title" />

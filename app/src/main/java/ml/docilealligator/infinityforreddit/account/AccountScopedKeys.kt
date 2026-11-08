@@ -84,7 +84,7 @@ object AccountScopedKeys {
         "show_fewer_toolbar_options_threshold", "embedded_media_type",
 
         // Video
-        "mute_video", "mute_nsfw_video", "video_player_ignore_nav_bar",
+        "mute_video", "mute_nsfw_video",
         "video_player_automatic_landscape_orientation", "loop_video", "default_playback_speed",
         "reddit_video_default_resolution_no_data_saving", "video_autoplay",
         "simultaneous_autoplay_limit", "legacy_autoplay_video_controller_ui",

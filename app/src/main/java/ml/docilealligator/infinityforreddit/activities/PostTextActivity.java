@@ -614,23 +614,6 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             subredditName = binding.subredditNameTextViewPostTextActivity.getText().toString();
         }
 
-        /*Intent intent = new Intent(this, SubmitPostService.class);
-        intent.putExtra(SubmitPostService.EXTRA_ACCOUNT, selectedAccount);
-        intent.putExtra(SubmitPostService.EXTRA_SUBREDDIT_NAME, subredditName);
-        intent.putExtra(SubmitPostService.EXTRA_TITLE, binding.postTitleEditTextPostTextActivity.getText().toString());
-        intent.putExtra(SubmitPostService.EXTRA_CONTENT, binding.postTextContentEditTextPostTextActivity.getText().toString());
-        if (!uploadedImages.isEmpty()) {
-            intent.putExtra(SubmitPostService.EXTRA_IS_RICHTEXT_JSON, true);
-            intent.putExtra(SubmitPostService.EXTRA_UPLOADED_IMAGES, uploadedImages);
-        }
-
-        intent.putExtra(SubmitPostService.EXTRA_KIND, APIUtils.KIND_SELF);
-        intent.putExtra(SubmitPostService.EXTRA_FLAIR, flair);
-        intent.putExtra(SubmitPostService.EXTRA_IS_SPOILER, isSpoiler);
-        intent.putExtra(SubmitPostService.EXTRA_IS_NSFW, isNSFW);
-        intent.putExtra(SubmitPostService.EXTRA_RECEIVE_POST_REPLY_NOTIFICATIONS, binding.receivePostReplyNotificationsSwitchMaterialPostTextActivity.isChecked());
-        intent.putExtra(SubmitPostService.EXTRA_POST_TYPE, SubmitPostService.EXTRA_POST_TEXT_OR_LINK);
-        ContextCompat.startForegroundService(this, intent);*/
 
         int contentEstimatedBytes = 0;
         PersistableBundle extras = new PersistableBundle();

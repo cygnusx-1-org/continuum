@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Video %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Đăng chéo"</string>
-    <string name="give_award_activity_label">"Cho giải thưởng"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all và r/popular"</string>
     <string name="customize_post_filter_activity_label">"Tuỳ chỉnh bộ lọc bài đăng"</string>
     <string name="filtered_posts_activity_subtitle">"Bài đăng được lọc"</string>
     <string name="post_filter_preference_activity_label">"Bộ lọc bài đăng"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Bài đăng thăm dò ý kiến"</string>
     <string name="history_activity_read_posts_label">"Bài đăng đã đọc"</string>
     <string name="history_activity_subtitle">"Được lưu trữ trên thiết bị này"</string>
-    <string name="subscription_activity_label">"Đăng ký"</string>
     <string name="comment_filter_preference_activity_label">"Bộ lọc bình luận"</string>
     <string name="customize_comment_filter_activity_label">"Tùy chỉnh bộ lọc bình luận"</string>
     <string name="copy_multireddit_activity_label">"Sao chép MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Gửi tin nhắn riêng tư"</string>
     <string name="action_block_user">"Người dùng chặn"</string>
     <string name="action_select_user_flair">"Chọn tư cách người dùng"</string>
-    <string name="action_give_award">"Cho giải thưởng"</string>
     <string name="action_save_to_database">"Lưu vào cơ sở dữ liệu"</string>
     <string name="action_read_all_messages">"Đọc tất cả tin nhắn"</string>
     <string name="action_add_to_multireddit">"Thêm vào multireddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Thêm vào bộ lọc bài đăng"</string>
     <string name="action_delete_logs">"Xoá nhật ký"</string>
     <string name="action_create_github_issue">"Tạo sự cố GitHub"</string>
-    <string name="action_share_post_link">"Chia sẻ đường link bài đăng"</string>
     <string name="action_go_to_wiki">"Đi tới Wiki"</string>
     <string name="action_playback_speed">"Tốc độ phát"</string>
     <string name="action_contact_mods">"Liên hệ Quản trị viên"</string>
@@ -166,14 +161,10 @@
     <string name="user_multi_reddit">"Người dùng MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddits đã đăng ký"</string>
     <string name="history">"Lịch sử"</string>
-    <string name="no_subreddits_visited_yet">"Chưa có subreddits nào được truy cập"</string>
-    <string name="no_users_visited_yet">"Bạn chưa truy cập bất kỳ hồ sơ người dùng nào"</string>
     <string name="follow_user">"Theo dõi người dùng"</string>
     <string name="unfollow_user">"Hủy theo dõi người dùng"</string>
     <string name="save_user">"Lưu người dùng"</string>
     <string name="unsave_user">"Hủy lưu người dùng"</string>
-    <string name="subscribe_subreddit">"Đăng ký subreddit"</string>
-    <string name="unsubscribe_subreddit">"Hủy đăng ký khỏi subreddit"</string>
     <string name="add_user_follow">"Theo dõi"</string>
     <string name="add_user_save">"Lưu"</string>
     <string name="save_user_failed">"Không thể lưu người dùng"</string>
@@ -189,7 +180,6 @@
     <string name="reminders">"Lời nhắc"</string>
     <string name="settings">"Cài đặt"</string>
     <string name="subscribers_number_detail">"Người đăng ký: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Trực tuyến: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Không thể lấy thông tin subreddit"</string>
     <string name="cannot_fetch_user_info">"Không thể lấy thông tin người dùng"</string>
     <string name="cannot_fetch_sidebar">"Không thể lấy thanh bên"</string>
@@ -209,8 +199,6 @@
     <string name="follow_failed">"Theo dõi thất bại"</string>
     <string name="unfollowed">"Đã hủy theo dõi"</string>
     <string name="unfollow_failed">"Hủy theo dõi thất bại"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Tìm bất cứ thứ gì"</string>
     <string name="search_only_subreddits_hint">"Tìm kiếm subreddit"</string>
     <string name="search_only_users_hint">"Tìm kiếm người dùng"</string>
     <string name="search_subreddits_and_users_hint">"Tìm kiếm subreddits và người dùng"</string>
@@ -226,7 +214,6 @@
     <string name="send_message_subject_hint">"Chủ đề (100 kí tự tối đa)"</string>
     <string name="send_message_content_hint">"Tin nhắn"</string>
     <string name="reply_message_failed">"Không thể trả lời tin nhắn này"</string>
-    <string name="error_getting_message">"Lỗi khi nhận tin nhắn này"</string>
     <string name="message_username_required">"Này, bạn muốn gửi tin nhắn này cho ai?"</string>
     <string name="message_subject_required">"Tin nhắn của bạn nên có một chủ đề"</string>
     <string name="message_content_required">"Bạn cần phải nói với người nhận điều gì đó"</string>
@@ -326,7 +313,6 @@ Nhấn để thử lại."</string>
     <string name="sort_relevance">"Liên quan"</string>
     <string name="sort_comments">"Bình luận"</string>
     <string name="sort_activity">"Hoạt động"</string>
-    <string name="sort_confidence">"Tự tin"</string>
     <string name="sort_old">"Cũ nhất"</string>
     <string name="sort_qa">"Hỏi và trả lời (QnA)"</string>
     <string name="sort_live">"Trực tiếp"</string>
@@ -438,13 +424,10 @@ Nhấn để thử lại."</string>
     <string name="settings_immersive_interface_summary">"Không áp dụng cho tất cả trang"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Tắt giao diện đắm mình trong chế độ xoay ngang"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Tùy chỉnh các Tab trong trang chính"</string>
-    <string name="only_for_logged_in_user">"Chỉ cho người dùng đã đăng nhập"</string>
     <string name="settings_category_post_and_comment_title">"Bài đăng và bình luận"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Nút Vote ở bên phải"</string>
     <string name="settings_mute_video_title">"Tắt tiếng Video"</string>
     <string name="settings_mute_nsfw_video_title">"Tắt tiếng NSFW Video"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Bỏ qua thanh điều hướng trong trình phát video"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Ngăn trình điều khiển video có thêm lề"</string>
     <string name="settings_main_page_back_button_action">"Trang chủ nút quay lại hành động"</string>
     <string name="settings_confirm_to_exit">"Xác nhận để thoát"</string>
     <string name="settings_open_navigation_drawer">"Mở ngăn điều hướng"</string>
@@ -511,11 +494,6 @@ Nhấn để thử lại."</string>
     <string name="settings_credits_material_icons_title">"Biểu tượng Material"</string>
     <string name="settings_open_source_title">"Mã nguồn mở"</string>
     <string name="settings_open_source_summary">"Gắn sao trên Github nếu bạn thích ứng dụng này"</string>
-    <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_reddit_account_title">"Tài khoản Reddit"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Chia sẻ"</string>
     <string name="settings_share_summary">"Hãy chia sẻ ứng dụng này với người khác nếu bạn thích nó"</string>
     <string name="settings_privacy_policy_title">"Chính sách riêng tư"</string>
@@ -547,8 +525,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_reset_all_settings_title">"Đặt lại tất cả cài đặt"</string>
     <string name="restart_app_see_changes">"Khởi động lại ứng dụng để thấy các thay đổi"</string>
     <string name="app_will_restart">"Quay lại sau khi thay đổi giá trị sẽ khiến ứng dụng khởi động lại."</string>
-    <string name="settings_tab_count">"Số tab"</string>
-    <string name="settings_show_tab_names">"Hiện tên tab"</string>
     <string name="settings_enable_tabs">"Kích hoạt tab"</string>
     <string name="settings_edit_tabs_title">"Tab"</string>
     <string name="settings_edit_tabs_summary">"Thêm, xóa và sắp xếp lại các tab"</string>
@@ -561,12 +537,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="reset_name">"Đặt lại tên"</string>
     <string name="content_description_drag_to_reorder">"Kéo để sắp xếp lại"</string>
     <string name="content_description_delete">"Xóa"</string>
-    <string name="settings_tab_1_summary">"Tab 1"</string>
-    <string name="settings_tab_2_summary">"Tab 2"</string>
-    <string name="settings_tab_3_summary">"Tab 3"</string>
-    <string name="settings_tab_4_summary">"Tab số 4"</string>
-    <string name="settings_tab_5_summary">"Tab số 5"</string>
-    <string name="settings_tab_6_summary">"Tab số 6"</string>
     <string name="settings_more_tabs_summary">"Nhiều tab hơn"</string>
     <string name="settings_more_tabs_info_summary">"Các thay đổi ở đây ảnh hưởng đến danh sách phía trên"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Hiện MultiReddits yêu thích"</string>
@@ -575,8 +545,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_more_tabs_show_users_multireddits_title">"Hiển thị MultiReddits của người dùng"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Hiện subreddit yêu thích đã đăng ký"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Hiện subreddit đã đăng ký"</string>
-    <string name="settings_tab_title">"Tiêu đề"</string>
-    <string name="settings_tab_post_type">"Loại"</string>
     <string name="settings_tab_subreddit_name">"Tên subreddit (Không có tiền tố r/)"</string>
     <string name="settings_tab_multi_reddit_name">"Tên MultiReddit (/user/yourusername/m/yourmultiredditname)"</string>
     <string name="settings_tab_username">"Tên người dùng (Không có tiền tố u/)"</string>
@@ -637,8 +605,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Tôn trọng loại sắp xếp bình luận được subreddit khuyên dùng"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Loại sắp xếp bình luận sẽ không được lưu"</string>
     <string name="settings_post_filter_title">"Bộ lọc bài đăng"</string>
-    <string name="settings_subreddit_filter_category">"Ẩn subreddit"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"Trong r/popular và r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Hoạt ảnh UFO đang bắt lấy"</string>
     <string name="settings_hide_subreddit_description_title">"Ẩn mô tả subreddit"</string>
     <string name="settings_disable_image_preview_title">"Tắt xem trước hình ảnh trong chế độ tiết kiệm dữ liệu"</string>
@@ -658,9 +624,7 @@ Tự động phát video bị tắt."</string>
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Tự động ẩn bài viết đã đọc trong Subreddits"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Tự động ẩn bài viết đã đọc trong Người dùng"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Tự động ẩn bài viết đã đọc trong Tìm kiếm"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Cài đặt này không được áp dụng khi xem các bài đăng từ các tìm kiếm, người dùng cụ thể hoặc các tài khoản phụ."</string>
     <string name="settings_sort_type_title">"Loại sắp xếp"</string>
-    <string name="settings_save_sort_type_title">"Lưu loại sắp xếp"</string>
     <string name="settings_sort_category_post_feeds">"Bảng tin bài đăng"</string>
     <string name="settings_sort_category_comments">"Bình luận"</string>
     <string name="settings_save_post_sort_title">"Lưu bài viết Sắp xếp"</string>
@@ -739,8 +703,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_custom_content_font_family_title">"Họ phông chữ nội dung tùy chỉnh"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Chiều cao cố định trong thẻ"</string>
     <string name="settings_hide_text_post_content">"Ẩn nội dung bài viết"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Hiển thị ít tùy chọn thanh công cụ hơn bắt đầu từ"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Cấp độ %1$d"</string>
     <string name="settings_show_author_avatar_title">"Hiển thị Avatar tác giả"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Vô hiệu hóa hình đại diện hồ sơ"</string>
     <string name="settings_show_user_prefix_title">"Hiển thị tiền tố người dùng"</string>
@@ -778,8 +740,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_enable_api_key_overrides_title">"Kích hoạt ghi đè"</string>
     <string name="settings_enable_api_key_overrides_summary">"Sử dụng ID khách hàng, Tác nhân người dùng và URI chuyển hướng tùy chỉnh của bạn thay vì các giá trị mặc định tích hợp sẵn là RedReader"</string>
     <string name="settings_client_id_title">"Reddit API ID khách hàng"</string>
-    <string name="settings_client_id_summary">"Sử dụng ID khách hàng tùy chỉnh cho Reddit API"</string>
-    <string name="client_id_length_error">"ID khách hàng phải dài chính xác 22 ký tự."</string>
     <string name="tap_to_set_client_id">"Nhấn để đặt ID ứng dụng khách"</string>
     <string name="set_client_id_dialog_message">"Đặt Reddit API ID khách hàng hoặc tắt Bật ghi đè trong Cài đặt | Khóa API"</string>
     <string name="settings_giphy_api_key_title">"Khóa Giphy API"</string>
@@ -822,7 +782,6 @@ Tự động phát video bị tắt."</string>
     <string name="no_video_path_received">"Không có đường dẫn video nào được nhận"</string>
     <string name="cannot_handle_intent">"Không thể xử lý yêu cầu chia sẻ"</string>
     <string name="share">"Chia sẻ"</string>
-    <string name="no_email_client">"Không tìm thấy ứng dụng email nào"</string>
     <string name="no_app">"Không có ứng dụng nào"</string>
     <string name="save_comment">"Lưu"</string>
     <string name="unsave_comment">"Huỷ lưu"</string>
@@ -844,7 +803,6 @@ Tự động phát video bị tắt."</string>
     <string name="elapsed_time_months_ago">"%1$d tháng"</string>
     <string name="elapsed_time_a_year_ago">"1 năm"</string>
     <string name="elapsed_time_years_ago">"%1$d năm"</string>
-    <string name="remaining_time_passed">"Ngày xưa"</string>
     <string name="remaining_time_less_than_1_minute">"Dưới 1 phút"</string>
     <string name="remaining_time_1_minute">"1 phút"</string>
     <string name="remaining_time_in_minutes">"%1$d phút"</string>
@@ -911,7 +869,6 @@ https://play.google.com/store/"</string>
     <string name="remove_followed_multi_reddit">"Xóa khỏi MultiReddits của người dùng"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Xóa multireddit đã lưu này? Bản gốc không bị ảnh hưởng."</string>
     <string name="remove_followed_multi_reddit_success">"Đã xóa"</string>
-    <string name="add_user_title">"Theo dõi người dùng"</string>
     <string name="add_user_to_list_title">"Thêm người dùng"</string>
     <string name="follow_failed_user_suspended">"u/%1$s bị đình chỉ và không thể theo dõi"</string>
     <string name="follow_failed_user_not_found">"u/%1$s không tồn tại hoặc đã bị xóa"</string>
@@ -1153,12 +1110,9 @@ Dựa trên chủ đề Chàm Amoled"</string>
     <string name="rename">"Đổi tên"</string>
     <string name="override">"Ghi đè"</string>
     <string name="save_theme_options_title">"Lưu tùy chọn"</string>
-    <string name="save_theme_options_message">"Bạn đã tải lên chủ đề này để có thể thực hiện các thay đổi."</string>
     <string name="save_locally">"Lưu cục bộ"</string>
     <string name="save_online">"Lưu trực tuyến"</string>
-    <string name="save_online_anonymous">"Lưu trực tuyến (ẩn danh)"</string>
     <string name="save_locally_and_online">"Lưu cả cục bộ và trực tuyến"</string>
-    <string name="save_locally_and_online_anonymous">"Lưu cả cục bộ và trực tuyến (ẩn danh)"</string>
     <string name="theme_saved_locally">"Chủ đề được lưu cục bộ"</string>
     <string name="theme_name_already_taken">"Một chủ đề có tên %1$s đã tồn tại. Chọn một tên khác."</string>
     <string name="theme_saved_online">"Chủ đề được lưu trực tuyến"</string>
@@ -1203,9 +1157,7 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="notifications">"Thông báo"</string>
     <string name="messages">"Tin nhắn"</string>
     <string name="message">"Tin nhắn"</string>
-    <string name="fetch_redgifs_video_failed">"Lấy video Redgifs thất bại"</string>
     <string name="fetching_video_info_please_wait">"Đang lấy thông tin video. Vui lòng đợi."</string>
-    <string name="fetch_streamable_video_failed">"Lấy video Streamable thất bại"</string>
     <string name="error_fetching_imgur_media">"Không thể tải hình ảnh"</string>
     <string name="downloading_reddit_video">"Đang tải xuống bài video"</string>
     <string name="downloading_reddit_video_audio_track">"Đang tải xuống bài âm thanh"</string>
@@ -1236,8 +1188,6 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="set_to_home_screen">"Đặt làm màn hình chính"</string>
     <string name="set_to_lock_screen">"Đặt làm màn hình khoá"</string>
     <string name="set_to_both">"Đặt làm cả hai"</string>
-    <string name="default_font_font_preview">"Mặc định"</string>
-    <string name="load_video_in_redgifs">"Thử tải video trên Redgifs"</string>
     <string name="top_score">"%1$s điểm"</string>
     <string name="login_activity_2fa_prompt">"Xác thực 2 yếu tố: &lt;password&gt;:&lt;2FA code&gt;.\nVí dụ: yourpass:123456\nĐăng nhập Google hoặc gặp sự cố khi đăng nhập: nhấp vào nút dưới cùng bên phải."</string>
     <string name="login_activity_internet_disconnected_error">"Không có kết nối Internet"</string>
@@ -1276,7 +1226,6 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="edited_time">"Đã chỉnh sửa vào %s"</string>
     <string name="warning">"Cảnh báo"</string>
     <string name="this_is_a_nsfw_subreddit">"Đây là một subreddit NSFW."</string>
-    <string name="this_user_has_nsfw_content">"Người dùng này có NSFW nội dung"</string>
     <string name="this_post_contains_sensitive_content">"Bài đăng này chứa NSFW nội dung."</string>
     <string name="dismiss">"Bỏ qua"</string>
     <string name="leave">"Rời khỏi"</string>
@@ -1285,13 +1234,10 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="go_to_user">"Đi đến người dùng"</string>
     <string name="go_to_thing_hint">"Tên"</string>
     <string name="go_to_top">"Lên trên cùng"</string>
-    <string name="random">"Ngẫu nhiên"</string>
     <string name="random_subreddits">"Subreddits ngẫu nhiên"</string>
     <string name="random_subreddit">"Subreddit ngẫu nhiên"</string>
     <string name="random_nsfw_subreddit">"Ngẫu nhiên NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"Subreddit được đăng ký ngẫu nhiên"</string>
-    <string name="random_post">"Bài đăng ngẫu nhiên"</string>
-    <string name="random_nsfw_post">"Ngẫu nhiên NSFW Đăng"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"An toàn cho công việc không được đảm bảo. Subreddit vẫn có thể có nội dung NSFW mà không có cờ NSFW trên đó."</string>
     <string name="fetch_random_thing_failed">"Hãy thử lại sau"</string>
     <string name="select_video_quality">"Chọn chất lượng video"</string>
@@ -1398,8 +1344,6 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
         <item quantity="other">"%1$d bài đăng"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Được phép - quy tắc này không còn ẩn nó nữa"</string>
-    <string name="post_filter_blocked_allow">"Không bao giờ ẩn subreddit này"</string>
-    <string name="post_filter_blocked_undo_allow">"Ẩn lại subreddit này"</string>
     <string name="content_description_allow_blocked_subreddit">"Ngừng ẩn %1$s"</string>
     <string name="excludes_strings_hint">"Loại trừ từ khóa (key1,key2)"</string>
     <string name="comment_filter_name_hint">"Tên bộ lọc bình luận"</string>
@@ -1470,21 +1414,13 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="capture">"Chụp"</string>
     <string name="uploading_image">"Đang tải"</string>
     <string name="upload_image_success">"Tải hình ảnh thành công. Ấn vào nút hình ảnh lần nữa để thấy hình ảnh vửa tải lên."</string>
-    <string name="get_image_bitmap_failed">"Không thể lấy bitmap của hình ảnh"</string>
     <string name="upload_image_failed">"Không thể tải hình ảnh lên"</string>
     <string name="select_giphy_gif">"Chọn Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Đây là một tính năng thử nghiệm và đây là một số điều bạn cần biết:\n\n 1. Ảnh gif Giphy sẽ không được hiển thị trong trình soạn thảo văn bản và thay vào đó, một đoạn văn bản sẽ được chèn dưới dạng một khối,\n với định dạng tương tự như ![gif](XXXXX). XXXXX là id gif Giphy và không được sửa đổi.\n\n 2. Bạn chỉ có thể chèn một gif Giphy cho mỗi bình luận.\n\n 3. Để viết chỉ số trên, vui lòng sử dụng ^() và đặt văn bản vào trong dấu ngoặc đơn, thay vì chỉ\n sử dụng một ^ duy nhất. Để đơn giản, hãy nhấp vào tùy chọn chỉ số trên trong công cụ định dạng để chèn chỉ số trên.\n\n 4. Tính năng này chuyển đổi Markdown của bạn sang định dạng văn bản đa dạng thức và một số định dạng có thể bị mất trong quá trình này.\n\n 5. Ảnh gif Giphy có thể không hiển thị trên màn hình xem trước.\n\n 6. Vui lòng không thay đổi tài khoản của bạn bằng tài khoản bộ chọn trên màn hình chỉnh sửa. Bạn nên chuyển\n tài khoản của mình trong ngăn điều hướng trên màn hình chính."</string>
     <string name="search_comments">"Tìm kiếm bình luận"</string>
     <string name="please_wait_image_is_uploading">"Hình ảnh vẫn đang tải. Vui lòng đợi."</string>
-    <string name="error_fetch_trending_search">"Lấy mục tìm kiếm thịnh hành thất bại.
-Nhấn để thử lại."</string>
-    <string name="error_parse_trending_search">"Xử lý mục tìm kiếm thịnh hành thất bại.
-Nhấn để thử lại."</string>
-    <string name="no_trending_search">"Không tìm thấy mục tìm kiếm thịnh hành nào.
-Nhấn để thử lại."</string>
     <string name="error_loading_wiki">"Lỗi khi tải wiki"</string>
     <string name="no_wiki">"Subreddit này không có trang wiki"</string>
-    <string name="material_you_notification_title">"Đang áp dụng Material You"</string>
     <string name="lock_screen_text">"Chào!"</string>
     <string name="app_lock_timeout_immediately">"Ngay lập tức"</string>
     <string name="app_lock_timeout_1_min">"1 phút"</string>
@@ -1559,40 +1495,6 @@ Nhấn để thử lại."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Quyền thông báo không được cấp"</string>
     <string name="go_to_settings">"Cài đặt"</string>
-    <string name="welcome_to_redditjr">"Chào mừng bạn đến với Reddit Jr., cánh cổng dẫn bạn đến một chiều hướng hoàn toàn mới về duyệt web Reddit!"</string>
-    <string name="subscription_prompt">"Trước khi bạn đi sâu vào vô số khả năng mà ứng dụng này mang lại,\n Tôi muốn thẳng thắn và minh bạch về một thay đổi quan trọng mà tôi đã thực hiện để đảm bảo dịch vụ tốt nhất có thể cho bạn.\n \n\nTừ giờ trở đi, bạn sẽ cần đăng ký hàng tháng để truy cập Reddit API trong vòng Reddit Jr. và\n điều này là do Reddit đã bắt đầu tính phí cho quyền truy cập API kể từ ngày 1 tháng 7 năm 2023.\n \n\nTất cả các cấp đều hoạt động như nhau. Nếu bạn muốn hỗ trợ Reddit Jr., bạn có thể đăng ký cấp cao hơn.\n Phần lớn số tiền từ cấp thấp nhất sẽ chuyển đến Reddit.\n    "</string>
-    <string name="monthly">"hàng tháng"</string>
-    <string name="yearly">"hàng năm"</string>
-    <string name="weekly">"hàng tuần"</string>
-    <string name="billing_error_billing_unavailable">"Dịch vụ thanh toán không khả dụng trên thiết bị."</string>
-    <string name="billing_error_developer_error">"Nhà phát triển đã mắc một số lỗi. Không phải lỗi của bạn."</string>
-    <string name="billing_error_error">"Lỗi nghiêm trọng trong hành động API."</string>
-    <string name="billing_error_feature_not_supported">"Tính năng được yêu cầu không được Play Store hỗ trợ trên thiết bị hiện tại."</string>
-    <string name="billing_error_item_already_owned">"Giao dịch mua không thành công vì mặt hàng đã được sở hữu."</string>
-    <string name="billing_error_item_unavailable">"Sản phẩm được yêu cầu không có sẵn để mua."</string>
-    <string name="billing_error_network_error">"Đã xảy ra lỗi mạng trong quá trình hoạt động."</string>
-    <string name="billing_error_service_disconnected">"Ứng dụng không được kết nối với dịch vụ Cửa hàng Play thông qua Thư viện thanh toán Google Play."</string>
-    <string name="billing_error_service_unavailable">"Dịch vụ này hiện không khả dụng."</string>
-    <string name="billing_error_user_canceled">"Giao dịch đã bị người dùng hủy."</string>
-    <string name="subscription_plan_description_monthly">"Đồng"</string>
-    <string name="subscription_plan_description_monthly_399">"Bạc"</string>
-    <string name="subscription_plan_description_monthly_499">"Gold - Sự lựa chọn hoàn hảo!"</string>
-    <string name="subscription_plan_description_monthly_699">"Bạch kim"</string>
-    <string name="subscription_plan_description_monthly_899">"Kim cương"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Không thể xác nhận việc mua hàng"</string>
-    <string name="connect_to_billing_system_failed">"Không thể kết nối với hệ thống thanh toán"</string>
-    <string name="connecting_to_billing_system">"Đang kết nối với hệ thống thanh toán. Vui lòng chờ."</string>
-    <string name="thank_you_for_subscription">"Cảm ơn bạn đã đăng ký"</string>
-    <string name="load_subscription_options">"Tải tùy chọn đăng ký"</string>
-    <string name="acknowledging_subscription">"Xác nhận đăng ký của bạn. Vui lòng chờ."</string>
-    <string name="acknowledgement_purchase_failed_description">"Rất tiếc, đã xảy ra lỗi khi xác nhận giao dịch mua hàng của bạn. Nếu sự cố này vẫn tiếp diễn trong ba ngày, bạn sẽ tự động được hoàn lại tiền.\nĐừng lo lắng, bạn vẫn có thể tận hưởng Reddit Jr.."</string>
-    <string name="continue_to_app">"Tiếp tục ứng dụng"</string>
-    <string name="restore_subscription_purchase_details">"Bạn đã thanh toán phí đăng ký chưa?"</string>
-    <string name="restore_subscription_purchase">"Khôi phục mua đăng ký"</string>
-    <string name="important_info_title">"Vui lòng đăng nhập lại tài khoản của bạn"</string>
-    <string name="important_info">"Reddit Jr. sử dụng ID khách hàng (khóa API) từ Reddit và bạn phải đăng nhập lại để tiếp tục sử dụng ứng dụng.\n\nChỉ cần mở ngăn điều hướng và nhấp vào tiêu đề tài khoản của bạn và chọn \"Thêm tài khoản\" để đăng nhập vào Reddit bằng cùng một tài khoản một lần nữa. Nếu không, Reddit Jr. có thể không tải được bài đăng nào cả. Xin lỗi vì sự bất tiện này."</string>
-    <string name="i_understand">"tôi hiểu"</string>
     <string name="add_to_comment_filter">"Thêm vào bình luận Bộ lọc"</string>
     <string name="cannot_edit_post_with_images">"Không được phép chỉnh sửa bài viết có hình ảnh."</string>
     <string name="local">"cục bộ"</string>
@@ -1618,11 +1520,8 @@ Nhấn để thử lại."</string>
     <string name="content_description_comment_filter_add_user">"Thêm người dùng vào bộ lọc bình luận"</string>
     <string name="content_description_create_custom_theme">"Tạo chủ đề tùy chỉnh"</string>
     <string name="content_description_create_post_filter">"Tạo bộ lọc bài đăng"</string>
-    <string name="content_description_add_post_filter_usage">"Áp dụng bộ lọc bài đăng ở đâu đó"</string>
     <string name="content_description_add_post_filter_rule">"Thêm quy tắc lọc"</string>
     <string name="content_description_remove_post_filter_rule">"Xóa %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Thêm subreddit để đăng bộ lọc"</string>
-    <string name="content_description_post_filter_add_user">"Thêm người dùng để đăng bộ lọc"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Thêm người dùng hoặc subreddit để đăng bộ lọc"</string>
     <string name="content_description_change_banner">"Thay đổi biểu ngữ"</string>
     <string name="content_description_change_avatar">"Thay đổi hình đại diện"</string>
@@ -1645,7 +1544,6 @@ Nhấn để thử lại."</string>
     <string name="content_description_search">"Tìm kiếm"</string>
     <string name="content_description_go_to_subreddit">"Đi đến subreddit"</string>
     <string name="content_description_go_to_user">"Đi đến người dùng"</string>
-    <string name="content_description_random">"Ngẫu nhiên"</string>
     <string name="content_description_filter_posts">"Lọc bài đăng"</string>
     <string name="content_description_hide_read_posts">"Ẩn bài đăng đã đọc"</string>
     <string name="content_description_go_to_top">"Lên trên cùng"</string>
@@ -1663,15 +1561,6 @@ Nhấn để thử lại."</string>
     <string name="content_description_next_result">"Đi tới kết quả tiếp theo"</string>
     <string name="content_description_close_search_panel">"Đóng bảng tìm kiếm"</string>
     <string name="content_description_send_message">"Gửi tin nhắn"</string>
-    <string name="content_description_home">"Trang chủ"</string>
-    <string name="content_description_subscriptions">"Mục đã đăng kí"</string>
-    <string name="content_description_inbox">"Hộp thư"</string>
-    <string name="content_description_profile">"Trang cá nhân"</string>
-    <string name="content_description_multireddits">"Các MultiReddit"</string>
-    <string name="content_description_upvoted">"Đã thích"</string>
-    <string name="content_description_downvoted">"Không thích"</string>
-    <string name="content_description_hidden">"Ẩn"</string>
-    <string name="content_description_saved">"Lưu"</string>
     <string name="content_description_scan_qr_code">"Quét mã QR"</string>
     <string name="comment">"Bình luận"</string>
     <string name="enable_reply_notifications">"Nhận thông báo trả lời"</string>
@@ -1690,15 +1579,9 @@ Nhấn để thử lại."</string>
     <string name="download_image">"Hình ảnh tải xuống"</string>
     <string name="download_gif">"Tải xuống Gif"</string>
     <string name="download_video">"Tải xuống video"</string>
-    <string name="download_all_gallery_images">"Tải xuống tất cả hình ảnh thư viện"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"trực tiếp"</string>
-    <string name="password_cannot_be_empty">"Mật khẩu không được để trống"</string>
-    <string name="title_activity_settings">"Cài đặt"</string>
-    <string name="title_activity_login">"Đăng nhập"</string>
-    <string name="restart_app_to_apply_changes">"Nhấn vào đây để khởi động lại ứng dụng để áp dụng các thay đổi"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Subreddits bị ẩn theo mặc định đã bị xóa"</string>
     <string name="jump_to_parent_comment">"Chuyển tới phần Bình luận dành cho phụ huynh"</string>
     <string name="long_press_post_non_media_area">"Nhấn lâu vào bài đăng (Khu vực không phải phương tiện truyền thông)"</string>
     <string name="long_press_post_media">"Nhấn giữ trên phương tiện bài đăng"</string>

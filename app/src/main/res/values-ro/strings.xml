@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Video %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Postare încrucișată"</string>
-    <string name="give_award_activity_label">"Acordă un Premiu"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all și r/popular"</string>
     <string name="customize_post_filter_activity_label">"Personalizează Filtrul de Postări"</string>
     <string name="filtered_posts_activity_subtitle">"Posturi Filtrate"</string>
     <string name="post_filter_preference_activity_label">"Filtru de Postări"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Postare Sondaj"</string>
     <string name="history_activity_read_posts_label">"Postări citite"</string>
     <string name="history_activity_subtitle">"Stocat pe acest dispozitiv"</string>
-    <string name="subscription_activity_label">"Abonament"</string>
     <string name="comment_filter_preference_activity_label">"Filtru de comentarii"</string>
     <string name="customize_comment_filter_activity_label">"Personalizează filtrul de comentarii"</string>
     <string name="copy_multireddit_activity_label">"Copiere MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Trimite mesaj privat"</string>
     <string name="action_block_user">"Blocare utilizator"</string>
     <string name="action_select_user_flair">"Selectează Insigna de Utilizator"</string>
-    <string name="action_give_award">"Acordă un Premiu"</string>
     <string name="action_save_to_database">"Salvează în Baza de Date"</string>
     <string name="action_read_all_messages">"Citește Toate Mesajele"</string>
     <string name="action_add_to_multireddit">"Adaugă la MultiReddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Adaugă la Filtrul de Postări"</string>
     <string name="action_delete_logs">"Șterge Registrul"</string>
     <string name="action_create_github_issue">"Creează o problemă GitHub"</string>
-    <string name="action_share_post_link">"Partajează link postare"</string>
     <string name="action_go_to_wiki">"Mergi la Wiki"</string>
     <string name="action_playback_speed">"Viteză de Redare"</string>
     <string name="action_contact_mods">"Contactează Moderatorii"</string>
@@ -172,14 +167,10 @@ Apasă pentru reîncercare."</string>
     <string name="user_multi_reddit">"MultiReddit utilizator"</string>
     <string name="subscribed_subreddits">"Subreddit abonat"</string>
     <string name="history">"Istoric"</string>
-    <string name="no_subreddits_visited_yet">"Niciun subreddit încă vizitat"</string>
-    <string name="no_users_visited_yet">"Nu ai vizitat încă niciun profil de utilizator"</string>
     <string name="follow_user">"Urmărește utilizatorul"</string>
     <string name="unfollow_user">"Anulează urmărirea utilizatorului"</string>
     <string name="save_user">"Salvează utilizatorul"</string>
     <string name="unsave_user">"Anulează salvarea utilizatorului"</string>
-    <string name="subscribe_subreddit">"Abonează-te la subreddit"</string>
-    <string name="unsubscribe_subreddit">"Dezabonează-te de la subreddit"</string>
     <string name="add_user_follow">"Urmărire"</string>
     <string name="add_user_save">"Salvare"</string>
     <string name="save_user_failed">"Nu s-a putut salva utilizatorul"</string>
@@ -195,7 +186,6 @@ Apasă pentru reîncercare."</string>
     <string name="reminders">"Memento-uri"</string>
     <string name="settings">"Setări"</string>
     <string name="subscribers_number_detail">"Abonați: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Online: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Nu s-au găsit informații despre subreddit"</string>
     <string name="cannot_fetch_user_info">"Nu s-au găsit informații despre utilizator"</string>
     <string name="cannot_fetch_sidebar">"Nu s-a putut prelua bara laterală"</string>
@@ -215,8 +205,6 @@ Apasă pentru reîncercare."</string>
     <string name="follow_failed">"Urmărire eșuată"</string>
     <string name="unfollowed">"Urmărire anulată"</string>
     <string name="unfollow_failed">"Eșuare anulare urmărire"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Caută orice"</string>
     <string name="search_only_subreddits_hint">"Caută subreddit-uri"</string>
     <string name="search_only_users_hint">"Caută utilizatori"</string>
     <string name="search_subreddits_and_users_hint">"Caută subreddite și utilizatori"</string>
@@ -232,7 +220,6 @@ Apasă pentru reîncercare."</string>
     <string name="send_message_subject_hint">"Subiect (maxim 100 de caractere)"</string>
     <string name="send_message_content_hint">"Mesaj"</string>
     <string name="reply_message_failed">"Nu s-a putut răspunde la acest mesaj"</string>
-    <string name="error_getting_message">"Eroare la încărcarea acestui mesaj"</string>
     <string name="message_username_required">"Hei, cui dorești să trimiți acest mesaj?"</string>
     <string name="message_subject_required">"Mesajul trebuie să aibă un subiect"</string>
     <string name="message_content_required">"Mesajul trebuie să aibă conținut"</string>
@@ -333,7 +320,6 @@ Apasă pentru reîncărcare."</string>
     <string name="sort_relevance">"Relevanță"</string>
     <string name="sort_comments">"Comentarii"</string>
     <string name="sort_activity">"Activitate"</string>
-    <string name="sort_confidence">"Încredere"</string>
     <string name="sort_old">"Vechi"</string>
     <string name="sort_qa">"QA"</string>
     <string name="sort_live">"În direct"</string>
@@ -445,13 +431,10 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_immersive_interface_summary">"Nu se aplică tuturor paginilor"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Dezactivează Interfața Imersivă în Orientarea Peisaj"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Personalizează filele din pagina principală"</string>
-    <string name="only_for_logged_in_user">"Doar pentru utilizatorii conectați"</string>
     <string name="settings_category_post_and_comment_title">"Postări și comentarii"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Butoanele de vot în partea dreaptă"</string>
     <string name="settings_mute_video_title">"Oprire sunet videoclipuri"</string>
     <string name="settings_mute_nsfw_video_title">"Dezactivează NSFW Videoclipuri"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignoră bara de navigare în player-ul video"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Împiedică player-ul video din a avea margine suplimentară"</string>
     <string name="settings_main_page_back_button_action">"Acțiune Butonului Înapoi în Pagina Principală"</string>
     <string name="settings_confirm_to_exit">"Confirmare ieșire"</string>
     <string name="settings_open_navigation_drawer">"Deschide Panoul de Navigare"</string>
@@ -518,11 +501,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_credits_material_icons_title">"Pictograme Material"</string>
     <string name="settings_open_source_title">"Sursă deschisă"</string>
     <string name="settings_open_source_summary">"Dă o stea pe GitHub dacă îți place această aplicație"</string>
-    <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_reddit_account_title">"Cont Reddit"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Distribuie"</string>
     <string name="settings_share_summary">"Distribuie această aplicație altor persoane dacă te place"</string>
     <string name="settings_privacy_policy_title">"Politica de Confidențialitate"</string>
@@ -554,8 +532,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_reset_all_settings_title">"Resetează toate setările"</string>
     <string name="restart_app_see_changes">"Repornește aplicația pentru a vedea modificările"</string>
     <string name="app_will_restart">"Revenirea după modificarea unei valori va determina repornirea aplicației."</string>
-    <string name="settings_tab_count">"Număr de File"</string>
-    <string name="settings_show_tab_names">"Afișează Numele Filelor"</string>
     <string name="settings_enable_tabs">"Activează filele"</string>
     <string name="settings_edit_tabs_title">"File"</string>
     <string name="settings_edit_tabs_summary">"Adaugă, elimină și reordonează file"</string>
@@ -568,12 +544,6 @@ Apasă pentru reîncărcare."</string>
     <string name="reset_name">"Resetează numele"</string>
     <string name="content_description_drag_to_reorder">"Trage pentru a reordona"</string>
     <string name="content_description_delete">"Ștergere"</string>
-    <string name="settings_tab_1_summary">"Fila 1"</string>
-    <string name="settings_tab_2_summary">"Fila 2"</string>
-    <string name="settings_tab_3_summary">"Fila 3"</string>
-    <string name="settings_tab_4_summary">"Fila 4"</string>
-    <string name="settings_tab_5_summary">"Fila 5"</string>
-    <string name="settings_tab_6_summary">"Fila 6"</string>
     <string name="settings_more_tabs_summary">"Mai Multe File"</string>
     <string name="settings_more_tabs_info_summary">"Modificările de aici afectează lista de mai sus"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Afișează MultiReddit-urile Favorite"</string>
@@ -582,8 +552,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_more_tabs_show_users_multireddits_title">"Afișează MultiReddits ale utilizatorilor"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Afișează Subreddit-urile Abonate Favorite"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Afișează Subreddit-urile Abonate"</string>
-    <string name="settings_tab_title">"Titlu"</string>
-    <string name="settings_tab_post_type">"Tip"</string>
     <string name="settings_tab_subreddit_name">"Numele Subreddit-ului (fără prefixul r/)"</string>
     <string name="settings_tab_multi_reddit_name">"Cale MultiReddit (/user/numeutilizator/m/numelemultiredditului)"</string>
     <string name="settings_tab_username">"Nume de utilizator (fără prefixul u/)"</string>
@@ -644,8 +612,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Respectă Tipul Recomandat de Subreddit pentru Sortarea Comentariilor"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Tipul de sortare a comentariilor nu va fi salvat"</string>
     <string name="settings_post_filter_title">"Filtru de Postări"</string>
-    <string name="settings_subreddit_filter_category">"Ascunde Subreddit-urile"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"În r/popular și r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Animație de Capturare a OZN-urilor"</string>
     <string name="settings_hide_subreddit_description_title">"Ascunde Descrierea Subreddit-ului"</string>
     <string name="settings_disable_image_preview_title">"Dezactivarea Previzualizării Imaginilor în Regimul de Economisire a Datelor"</string>
@@ -665,9 +631,7 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Ascunde automat postările citite în subreddite"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Ascunde automat postările citite în utilizatori"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Ascunde automat postările citite în căutare"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Setarea nu se aplică la vizualizarea postărilor din căutări, anumiți utilizatori sau subreddite."</string>
     <string name="settings_sort_type_title">"Tip de Sortare"</string>
-    <string name="settings_save_sort_type_title">"Salvează Tipul de Sortare"</string>
     <string name="settings_sort_category_post_feeds">"Fluxuri de postări"</string>
     <string name="settings_sort_category_comments">"Comentarii"</string>
     <string name="settings_save_post_sort_title">"Salvare Postare Sortare"</string>
@@ -746,8 +710,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_custom_content_font_family_title">"Familia de Fonturi Personalizată pentru Conținut"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Înălțime Fixată în Aspect Card"</string>
     <string name="settings_hide_text_post_content">"Ascunde Conținutul Postărilor Text"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Arată mai Puține Opțiuni din Bara de Instrumente Începând cu"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Nivel %1$d"</string>
     <string name="settings_show_author_avatar_title">"Arată Avatarul Autorului"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Dezactivează animația avatarului de profil"</string>
     <string name="settings_show_user_prefix_title">"Afișează prefixul utilizatorului"</string>
@@ -785,8 +747,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_enable_api_key_overrides_title">"Activare suprascrieri"</string>
     <string name="settings_enable_api_key_overrides_summary">"Folosește ID-ul de client personalizat, Agentul de utilizator și URI-ul de redirecționare în loc de valorile implicite încorporate, care sunt RedReader"</string>
     <string name="settings_client_id_title">"Reddit API ID client"</string>
-    <string name="settings_client_id_summary">"Folosește un ID de client personalizat pentru Reddit API"</string>
-    <string name="client_id_length_error">"ID-ul clientului trebuie să aibă exact 22 de caractere."</string>
     <string name="tap_to_set_client_id">"Atinge pentru a seta ID-ul clientului"</string>
     <string name="set_client_id_dialog_message">"Setează Reddit API ID-ul clientului sau dezactivează Activarea suprascrierilor, în Setări | Chei API"</string>
     <string name="settings_giphy_api_key_title">"Cheie API Giphy"</string>
@@ -829,7 +789,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="no_video_path_received">"Nu s-a primit nicio cale spre videoclip"</string>
     <string name="cannot_handle_intent">"Nu s-a putut gestiona cererea de distribuire"</string>
     <string name="share">"Distribuire"</string>
-    <string name="no_email_client">"Nu s-a găsit niciun client de E-mail"</string>
     <string name="no_app">"Nicio aplicație disponibilă"</string>
     <string name="save_comment">"Salvează"</string>
     <string name="unsave_comment">"Scoate"</string>
@@ -851,7 +810,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="elapsed_time_months_ago">"%1$d luni"</string>
     <string name="elapsed_time_a_year_ago">"1 an"</string>
     <string name="elapsed_time_years_ago">"%1$d ani"</string>
-    <string name="remaining_time_passed">"În trecut"</string>
     <string name="remaining_time_less_than_1_minute">"Mai puțin de 1 minut"</string>
     <string name="remaining_time_1_minute">"1 minut"</string>
     <string name="remaining_time_in_minutes">"%1$d minute"</string>
@@ -918,7 +876,6 @@ https://play.google.com/store/"</string>
     <string name="remove_followed_multi_reddit">"Elimină din MultiReddits ale utilizatorilor"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Elimină acest multireddit salvat? Originalul nu este afectat."</string>
     <string name="remove_followed_multi_reddit_success">"Eliminat"</string>
-    <string name="add_user_title">"Urmărește utilizatorul"</string>
     <string name="add_user_to_list_title">"Adaugă utilizator"</string>
     <string name="follow_failed_user_suspended">"u/%1$s este suspendat și nu poate fi urmărit"</string>
     <string name="follow_failed_user_not_found">"u/%1$s nu există sau a fost șters"</string>
@@ -1160,12 +1117,9 @@ Bazat pe Tema Indigo Amoled"</string>
     <string name="rename">"Redenumește"</string>
     <string name="override">"Înlocuiește"</string>
     <string name="save_theme_options_title">"Salvare opțiuni"</string>
-    <string name="save_theme_options_message">"Ai încărcat această temă pentru a putea face modificări."</string>
     <string name="save_locally">"Salvează local"</string>
     <string name="save_online">"Salvează online"</string>
-    <string name="save_online_anonymous">"Salvează online (anonim)"</string>
     <string name="save_locally_and_online">"Salvează atât local, cât și online"</string>
-    <string name="save_locally_and_online_anonymous">"Salvează atât local, cât și online (anonim)"</string>
     <string name="theme_saved_locally">"Tema salvată local"</string>
     <string name="theme_name_already_taken">"Există deja o temă numită %1$s. Alege alt nume."</string>
     <string name="theme_saved_online">"Tema salvată online"</string>
@@ -1210,9 +1164,7 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="notifications">"Notificări"</string>
     <string name="messages">"Mesaje"</string>
     <string name="message">"Mesaj"</string>
-    <string name="fetch_redgifs_video_failed">"Obținerea videoclipului Redgifs a eșuat"</string>
     <string name="fetching_video_info_please_wait">"Se obțin informații despre video. Te rugăm să aștepți."</string>
-    <string name="fetch_streamable_video_failed">"Obținerea videoclipului Streamable a eșuat"</string>
     <string name="error_fetching_imgur_media">"Nu s-au putut încărca imaginile"</string>
     <string name="downloading_reddit_video">"Se descarcă pista video"</string>
     <string name="downloading_reddit_video_audio_track">"Se descarcă pista audio"</string>
@@ -1243,8 +1195,6 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="set_to_home_screen">"Setează pe Ecranul Principal"</string>
     <string name="set_to_lock_screen">"Setează pe Ecranul de Blocare"</string>
     <string name="set_to_both">"Setează pe Ambele"</string>
-    <string name="default_font_font_preview">"Implicit"</string>
-    <string name="load_video_in_redgifs">"Încearcă să încarci videoclipul pe Redgifs"</string>
     <string name="top_score">"%1$s pct"</string>
     <string name="login_activity_2fa_prompt">"Autentificare cu doi factori: &lt;parolă&gt;:&lt;cod 2FA&gt;.\nExemplu: yourpass:123456\nAutentificare la Google sau întâmpinare probleme de conectare: faci clic pe butonul din dreapta jos."</string>
     <string name="login_activity_internet_disconnected_error">"Fără conexiune la internet"</string>
@@ -1283,7 +1233,6 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="edited_time">"Editat pe %s"</string>
     <string name="warning">"Avertisment"</string>
     <string name="this_is_a_nsfw_subreddit">"Acesta este un subreddit NSFW."</string>
-    <string name="this_user_has_nsfw_content">"Acest utilizator are conținut NSFW"</string>
     <string name="this_post_contains_sensitive_content">"Această postare conține NSFW conținut."</string>
     <string name="dismiss">"Respinge"</string>
     <string name="leave">"Ieși"</string>
@@ -1292,13 +1241,10 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="go_to_user">"Mergi la Utilizator"</string>
     <string name="go_to_thing_hint">"Nume"</string>
     <string name="go_to_top">"Mergi la Început"</string>
-    <string name="random">"Aleatoriu"</string>
     <string name="random_subreddits">"Subreddite aleatorii"</string>
     <string name="random_subreddit">"Subreddit aleatoriu"</string>
     <string name="random_nsfw_subreddit">"Aleatoriu NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"Subreddit abonat aleatoriu"</string>
-    <string name="random_post">"Postare aleatorie"</string>
-    <string name="random_nsfw_post">"Aleatoriu NSFW Postare"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"Nu este garantată siguranța la locul de muncă. Un subreddit poate avea în continuare conținut NSFW fără marcajul NSFW pe el."</string>
     <string name="fetch_random_thing_failed">"Încearcă din nou mai târziu"</string>
     <string name="select_video_quality">"Selectează Calitatea Video"</string>
@@ -1409,8 +1355,6 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
         <item quantity="other">"%1$d de postări"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Permis — această regulă nu o mai ascunde"</string>
-    <string name="post_filter_blocked_allow">"Nu ascunde niciodată acest subreddit"</string>
-    <string name="post_filter_blocked_undo_allow">"Ascunde acest subreddit din nou"</string>
     <string name="content_description_allow_blocked_subreddit">"Nu mai ascunde %1$s"</string>
     <string name="excludes_strings_hint">"Exclude cuvinte cheie (key1,key2)"</string>
     <string name="comment_filter_name_hint">"Nume filtru comentariu"</string>
@@ -1481,21 +1425,13 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="capture">"Capturează"</string>
     <string name="uploading_image">"Se încarcă"</string>
     <string name="upload_image_success">"Imaginea a fost încărcată cu succes. Apasă din nou pe butonul de imagine pentru a vedea imaginile încărcate."</string>
-    <string name="get_image_bitmap_failed">"Nu s-a putut obține bitmap-ul imaginii"</string>
     <string name="upload_image_failed">"Nu s-a putut încărca imaginea"</string>
     <string name="select_giphy_gif">"Selectează un Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Aceasta este o caracteristică experimentală și iată câteva lucruri pe care trebuie să le știi:\n\n        1. GIF-urile Giphy nu vor fi afișate în editorul de text și, în schimb, o bucată de text va fi inserată ca bloc,\n        cu un format similar cu ![gif](XXXXX). XXXXX este ID-ul GIF-ului Giphy și nu trebuie modificat.\n\n        2. Poți insera un singur GIF Giphy pe comentariu.\n\n        3. Pentru a scrie un superscript, folosește ^() și pune textele în paranteze, în loc să folosești\n        doar un singur ^. Pentru simplitate, atinge opțiunea superscript din instrumentele de formatare pentru a insera un superscript.\n\n        4. Această caracteristică convertește Markdown-ul tău în format text îmbogățit și o parte din formatare se poate pierde în acest proces.\n\n        5. Este posibil ca GIF-urile Giphy să nu fie afișate pe ecranul de previzualizare.\n\n        6. Te rugăm să nu îți schimbi contul folosind selectorul de cont de pe ecranul de editare. Ar trebui să schimbi\n        contul din sertarul de navigare de pe ecranul principal."</string>
     <string name="search_comments">"Caută Comentariile"</string>
     <string name="please_wait_image_is_uploading">"O imagine este încă în curs de încărcare. Te rugăm să aștepți."</string>
-    <string name="error_fetch_trending_search">"Obținerea căutărilor în tendințe a eșuat.
-Apasă pentru a reîncerca."</string>
-    <string name="error_parse_trending_search">"Afișarea căutărilor în tendințe a eșuat.
-Apasă pentru a reîncerca."</string>
-    <string name="no_trending_search">"Nu s-au găsit căutări în tendințe.
-Apasă pentru a reîncerca."</string>
     <string name="error_loading_wiki">"Eroare la încărcarea wiki-ului"</string>
     <string name="no_wiki">"Acest subreddit nu are pagină wiki"</string>
-    <string name="material_you_notification_title">"Se aplică Material You"</string>
     <string name="lock_screen_text">"Mai încet!!!"</string>
     <string name="app_lock_timeout_immediately">"Imediat"</string>
     <string name="app_lock_timeout_1_min">"1 minut"</string>
@@ -1570,40 +1506,6 @@ Apasă pentru a reîncerca."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Permisiunea de notificare nu este acordată"</string>
     <string name="go_to_settings">"Setări"</string>
-    <string name="welcome_to_redditjr">"Bine ai venit la Reddit Jr., poarta ta de acces către o dimensiune cu totul nouă a navigării Reddit!"</string>
-    <string name="subscription_prompt">"Înainte de a te scufunda în nenumăratele posibilități oferite de această aplicație,\n        Vreau să fiu direct și transparent cu privire la o schimbare semnificativă pe care am implementat-o pentru a te asigura cel mai bun serviciu posibil.\n        \n\nDe acum înainte, vei avea nevoie de un abonament lunar pentru a accesa Reddit API în Reddit Jr. și\n        acest lucru se datorează faptului că Reddit a început să taxeze pentru accesul API începând cu 1 iulie 2023.\n        \n\nToate nivelurile funcționează la fel. Dacă dorești să susții Reddit Jr., te poți abona la un nivel superior.\n        Majoritatea banilor de la nivelul cel mai de jos merg la Reddit.\n    "</string>
-    <string name="monthly">"Lunar"</string>
-    <string name="yearly">"Anual"</string>
-    <string name="weekly">"Săptămânal"</string>
-    <string name="billing_error_billing_unavailable">"Serviciul de facturare nu este disponibil pe dispozitiv."</string>
-    <string name="billing_error_developer_error">"Dezvoltatorul a făcut câteva erori. Nu e vina ta."</string>
-    <string name="billing_error_error">"Eroare fatală în timpul acțiunii API."</string>
-    <string name="billing_error_feature_not_supported">"Funcția solicitată nu este acceptată de Play Store pe dispozitivul actual."</string>
-    <string name="billing_error_item_already_owned">"Achiziția nu a reușit deoarece articolul este deja deținut."</string>
-    <string name="billing_error_item_unavailable">"Produsul solicitat nu este disponibil pentru cumpărare."</string>
-    <string name="billing_error_network_error">"A apărut o eroare de rețea în timpul operațiunii."</string>
-    <string name="billing_error_service_disconnected">"Aplicația nu este conectată la serviciul Magazin Play prin Biblioteca de facturare Google Play."</string>
-    <string name="billing_error_service_unavailable">"Serviciul este momentan indisponibil."</string>
-    <string name="billing_error_user_canceled">"Tranzacția a fost anulată de utilizator."</string>
-    <string name="subscription_plan_description_monthly">"Bronz"</string>
-    <string name="subscription_plan_description_monthly_399">"Argintiu"</string>
-    <string name="subscription_plan_description_monthly_499">"Gold - Alegerea perfectă!"</string>
-    <string name="subscription_plan_description_monthly_699">"Platină"</string>
-    <string name="subscription_plan_description_monthly_899">"Diamant"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Nu se poate confirma achiziția"</string>
-    <string name="connect_to_billing_system_failed">"Nu s-a putut conecta la sistemul de facturare"</string>
-    <string name="connecting_to_billing_system">"Conectarea la sistemul de facturare. Va rugam asteptati."</string>
-    <string name="thank_you_for_subscription">"Te mulțumim pentru abonament"</string>
-    <string name="load_subscription_options">"Încarcă opțiunile de abonament"</string>
-    <string name="acknowledging_subscription">"Confirmarea abonamentului. Va rugam asteptati."</string>
-    <string name="acknowledgement_purchase_failed_description">"Hopa, a apărut o eroare la confirmarea achiziției. Dacă această problemă persistă timp de trei zile, vei primi automat o rambursare.\nNu te faci griji, te poți bucura în continuare de Reddit Jr.."</string>
-    <string name="continue_to_app">"Continuă la aplicație"</string>
-    <string name="restore_subscription_purchase_details">"Ai plătit deja pentru abonament?"</string>
-    <string name="restore_subscription_purchase">"Restabilește achiziția abonamentului"</string>
-    <string name="important_info_title">"Te rugăm să te reconectezi la contul tău"</string>
-    <string name="important_info">"Reddit Jr. folosește un ID de client (cheia API) de la Reddit și trebuie să te reconectezi pentru a continua să folosești aplicația.\n\nDeschide sertarul de navigare și faci clic pe antetul contului și selectează „Adaugă un cont” pentru a te conecta din nou folosind același contReddit. În caz contrar, este posibil ca Reddit Jr. să nu încarce postări deloc. Îmi pare rău pentru neplăcerile create."</string>
-    <string name="i_understand">"Am înțeles"</string>
     <string name="add_to_comment_filter">"Adaugă la filtru de comentarii"</string>
     <string name="cannot_edit_post_with_images">"Editarea postărilor cu imagini nu este permisă."</string>
     <string name="local">"Local"</string>
@@ -1629,11 +1531,8 @@ Apasă pentru a reîncerca."</string>
     <string name="content_description_comment_filter_add_user">"Adaugă un utilizator la filtrul de comentarii"</string>
     <string name="content_description_create_custom_theme">"Creează o temă personalizată"</string>
     <string name="content_description_create_post_filter">"Creează un filtru de postare"</string>
-    <string name="content_description_add_post_filter_usage">"Aplică filtrul de postare undeva"</string>
     <string name="content_description_add_post_filter_rule">"Adaugă o regulă de filtru"</string>
     <string name="content_description_remove_post_filter_rule">"Elimină %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Adaugă un subreddit la filtrul de postare"</string>
-    <string name="content_description_post_filter_add_user">"Adaugă un utilizator pentru a posta filtrul"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Adaugă un utilizator sau un subreddit la filtrul de postare"</string>
     <string name="content_description_change_banner">"Schimbă bannerul"</string>
     <string name="content_description_change_avatar">"Schimbă avatarul"</string>
@@ -1656,7 +1555,6 @@ Apasă pentru a reîncerca."</string>
     <string name="content_description_search">"Căutare"</string>
     <string name="content_description_go_to_subreddit">"Merge la Subreddit"</string>
     <string name="content_description_go_to_user">"Mergi la Utilizator"</string>
-    <string name="content_description_random">"Aleatoriu"</string>
     <string name="content_description_filter_posts">"Filtrează Postările"</string>
     <string name="content_description_hide_read_posts">"Ascunde Postările Citite"</string>
     <string name="content_description_go_to_top">"Mergi la Început"</string>
@@ -1674,15 +1572,6 @@ Apasă pentru a reîncerca."</string>
     <string name="content_description_next_result">"Mergi la rezultatul următor"</string>
     <string name="content_description_close_search_panel">"Închide panoul de căutare"</string>
     <string name="content_description_send_message">"Trimite mesaj"</string>
-    <string name="content_description_home">"Acasă"</string>
-    <string name="content_description_subscriptions">"Abonamente"</string>
-    <string name="content_description_inbox">"Mesaje"</string>
-    <string name="content_description_profile">"Profil"</string>
-    <string name="content_description_multireddits">"MultiReddit-uri"</string>
-    <string name="content_description_upvoted">"Upvote-uri"</string>
-    <string name="content_description_downvoted">"Downvote-uri"</string>
-    <string name="content_description_hidden">"Ascuns"</string>
-    <string name="content_description_saved">"Salvate"</string>
     <string name="content_description_scan_qr_code">"Scanează codul QR"</string>
     <string name="comment">"Comentariu"</string>
     <string name="enable_reply_notifications">"Primește notificări de răspuns"</string>
@@ -1701,15 +1590,9 @@ Apasă pentru a reîncerca."</string>
     <string name="download_image">"Descarcă imaginea"</string>
     <string name="download_gif">"Descarcă Gif"</string>
     <string name="download_video">"Descarcă videoclipul"</string>
-    <string name="download_all_gallery_images">"Descarcă toate imaginile din galerie"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Direct"</string>
-    <string name="password_cannot_be_empty">"Parola nu poate fi goală"</string>
-    <string name="title_activity_settings">"Setări"</string>
-    <string name="title_activity_login">"Conectează-te"</string>
-    <string name="restart_app_to_apply_changes">"Apasă aici pentru a reporni aplicația pentru a aplica modificările"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Subreddite ascunse implicit eliminate"</string>
     <string name="jump_to_parent_comment">"Salt la comentariul părintelui"</string>
     <string name="long_press_post_non_media_area">"Apăsare lungă pe postare (zonă non-media)"</string>
     <string name="long_press_post_media">"Apăsare lungă pe Post Media"</string>

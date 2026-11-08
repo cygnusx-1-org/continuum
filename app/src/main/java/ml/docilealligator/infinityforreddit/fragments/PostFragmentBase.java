@@ -4,14 +4,10 @@ import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_IDLE;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,13 +16,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
-import androidx.media3.common.util.UnstableApi;
 import androidx.paging.CombinedLoadStates;
 import androidx.paging.ItemSnapshotList;
 import androidx.paging.LoadState;
@@ -55,11 +48,6 @@ import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
 import ml.docilealligator.infinityforreddit.adapters.PostBaseGalleryTypeViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostCompactBaseViewHolder;
-import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardGalleryTypeViewHolder;
-import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardTextTypeViewHolder;
-import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardWithPreviewViewHolder;
-import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder;
-import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
@@ -89,7 +77,6 @@ import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeOnlyDisablePreviewInVideoAndGifPostsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePostFeedMaxResolutionEvent;
-import ml.docilealligator.infinityforreddit.events.ChangePostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePullToRefreshEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeRememberMutingOptionInPostFeedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeShowAbsoluteNumberOfVotesEvent;
@@ -1110,11 +1097,6 @@ public abstract class PostFragmentBase extends Fragment {
             getPostAdapter().setBlurSpoiler(event.needBlurSpoiler);
             refreshAdapter();
         }
-    }
-
-    @Subscribe
-    public void onChangePostLayoutEvent(ChangePostLayoutEvent event) {
-        changePostLayout(event.postLayout);
     }
 
     @Subscribe

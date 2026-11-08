@@ -1,9 +1,10 @@
 package ml.docilealligator.infinityforreddit.activities
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.widget.Toast
@@ -37,11 +38,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -143,10 +142,8 @@ class SetReminderActivity: BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                enableEdgeToEdge()
-            }
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            enableEdgeToEdge()
         }
 
         mViewModel = ViewModelProvider.create(

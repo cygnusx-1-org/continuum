@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.customviews.compose
 import android.R.attr.fontWeight
 import android.R.attr.lineHeight
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

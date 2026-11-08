@@ -77,13 +77,6 @@ public class RedditSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 notifyItemChanged(holder.getBindingAdapterPosition());
             });
         } else if (holder instanceof MenuItemViewHolder) {
-            /*int stringId = 0;
-            int drawableId = 0;
-
-            ((MenuItemViewHolder) holder).menuTextView.setText(stringId);
-            ((MenuItemViewHolder) holder).imageView.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
-            int finalStringId = stringId;
-            holder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(finalStringId));*/
         }
     }
 

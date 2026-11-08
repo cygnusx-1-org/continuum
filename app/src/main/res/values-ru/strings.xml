@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Видео %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Кросспост"</string>
-    <string name="give_award_activity_label">"Наградить"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all и r/popular"</string>
     <string name="customize_post_filter_activity_label">"Настроить фильтр постов"</string>
     <string name="filtered_posts_activity_subtitle">"Фильтрованные посты"</string>
     <string name="post_filter_preference_activity_label">"Фильтр постов"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Пост для опроса"</string>
     <string name="history_activity_read_posts_label">"Прочитанные публикации"</string>
     <string name="history_activity_subtitle">"Хранится на этом устройстве."</string>
-    <string name="subscription_activity_label">"Подписка"</string>
     <string name="comment_filter_preference_activity_label">"Фильтр комментариев"</string>
     <string name="customize_comment_filter_activity_label">"Настройка фильтра комментариев"</string>
     <string name="copy_multireddit_activity_label">"Копировать MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Отправить личное сообщение"</string>
     <string name="action_block_user">"Заблокировать пользователя"</string>
     <string name="action_select_user_flair">"Установить флейр пользователя"</string>
-    <string name="action_give_award">"Выдать награду"</string>
     <string name="action_save_to_database">"Сохранить в базе данных"</string>
     <string name="action_read_all_messages">"Прочитать все сообщения"</string>
     <string name="action_add_to_multireddit">"Добавить в MultiReddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Добавить пост в фильтр"</string>
     <string name="action_delete_logs">"Удалить журнал"</string>
     <string name="action_create_github_issue">"Создать проблему на GitHub"</string>
-    <string name="action_share_post_link">"Поделиться ссылкой на пост"</string>
     <string name="action_go_to_wiki">"Перейти к Вики"</string>
     <string name="action_playback_speed">"Скорость воспроизведения"</string>
     <string name="action_contact_mods">"Связь с модераторами"</string>
@@ -171,14 +166,10 @@
     <string name="user_multi_reddit">"Пользователь MultiReddit"</string>
     <string name="subscribed_subreddits">"Субреддиты с подпиской"</string>
     <string name="history">"История"</string>
-    <string name="no_subreddits_visited_yet">"Пока не посещались субреддиты"</string>
-    <string name="no_users_visited_yet">"Ты ещё не посетил ни одного профиля пользователя"</string>
     <string name="follow_user">"Следовать за пользователем"</string>
     <string name="unfollow_user">"Отписаться от пользователя"</string>
     <string name="save_user">"Сохранить пользователя"</string>
     <string name="unsave_user">"Удалить пользователя"</string>
-    <string name="subscribe_subreddit">"Подпишись на сабреддит"</string>
-    <string name="unsubscribe_subreddit">"Отписаться от сабреддита"</string>
     <string name="add_user_follow">"Следить"</string>
     <string name="add_user_save">"Сохранить"</string>
     <string name="save_user_failed">"Не удалось сохранить пользователя."</string>
@@ -194,7 +185,6 @@
     <string name="reminders">"Напоминания"</string>
     <string name="settings">"Настройки"</string>
     <string name="subscribers_number_detail">"Подписчики: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Онлайн: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Невозможно получить информацию о сабреддите"</string>
     <string name="cannot_fetch_user_info">"Невозможно получить информацию о пользователе"</string>
     <string name="cannot_fetch_sidebar">"Невозможно получить боковую панель"</string>
@@ -214,8 +204,6 @@
     <string name="follow_failed">"Невозможно начать следить"</string>
     <string name="unfollowed">"Ты отписался от пользователя"</string>
     <string name="unfollow_failed">"Невозможно отписаться"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Ищи что угодно"</string>
     <string name="search_only_subreddits_hint">"Искать сабреддиты"</string>
     <string name="search_only_users_hint">"Искать пользователя"</string>
     <string name="search_subreddits_and_users_hint">"Поиск по субреддитам и пользователям"</string>
@@ -231,7 +219,6 @@
     <string name="send_message_subject_hint">"Тема (до 100 знаков)"</string>
     <string name="send_message_content_hint">"Сообщение"</string>
     <string name="reply_message_failed">"Невозможно ответить на это сообщение"</string>
-    <string name="error_getting_message">"Невозможно получить сообщение"</string>
     <string name="message_username_required">"А кому ты хочешь отправить это сообщение?"</string>
     <string name="message_subject_required">"Сообщение должно содержать тему"</string>
     <string name="message_content_required">"А написать содержимое?"</string>
@@ -332,7 +319,6 @@
     <string name="sort_relevance">"Релевантное"</string>
     <string name="sort_comments">"Комментарии"</string>
     <string name="sort_activity">"Активность"</string>
-    <string name="sort_confidence">"Доверенное"</string>
     <string name="sort_old">"Старые"</string>
     <string name="sort_qa">"ЧаВО"</string>
     <string name="sort_live">"В прямом эфире"</string>
@@ -444,13 +430,10 @@
     <string name="settings_immersive_interface_summary">"Применимо не ко всем страницам"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Отключить режим погружения в альбомном режиме"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Настройка вкладок на главном экране"</string>
-    <string name="only_for_logged_in_user">"Для авторизовавшихся пользователей"</string>
     <string name="settings_category_post_and_comment_title">"Посты и комментарии"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Кнопки голосования справа"</string>
     <string name="settings_mute_video_title">"Видео без звука"</string>
     <string name="settings_mute_nsfw_video_title">"Без звука NSFW Видео"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Не использовать панель навигации в видеопроигрывателе"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Предотвращает случайные нажатия"</string>
     <string name="settings_main_page_back_button_action">"Действие кнопки возврата на главную страницу"</string>
     <string name="settings_confirm_to_exit">"Подтверждать выход"</string>
     <string name="settings_open_navigation_drawer">"Открыть панель навигации"</string>
@@ -517,11 +500,6 @@
     <string name="settings_credits_material_icons_title">"Значки Material"</string>
     <string name="settings_open_source_title">"Открытый исходный код"</string>
     <string name="settings_open_source_summary">"Оцени его на Github, если тебе нравится это приложение"</string>
-    <string name="settings_email_title">"Электронная почта"</string>
-    <string name="settings_reddit_account_title">"Аккаунт Reddit"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Сабреддит"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Поделиться"</string>
     <string name="settings_share_summary">"Поделись этим приложением с другими людьми, если оно тебе нравится"</string>
     <string name="settings_privacy_policy_title">"Политика конфиденциальности"</string>
@@ -553,8 +531,6 @@
     <string name="settings_reset_all_settings_title">"Сбросить настройки"</string>
     <string name="restart_app_see_changes">"Перезапусти приложение, чтобы увидеть изменения."</string>
     <string name="app_will_restart">"Возврат после изменения значения приведет к перезапуску приложения."</string>
-    <string name="settings_tab_count">"Количество вкладок"</string>
-    <string name="settings_show_tab_names">"Показать заголовок вкладок"</string>
     <string name="settings_enable_tabs">"Включить вкладки"</string>
     <string name="settings_edit_tabs_title">"Вкладки"</string>
     <string name="settings_edit_tabs_summary">"Добавление, удаление и изменение порядка вкладок"</string>
@@ -567,12 +543,6 @@
     <string name="reset_name">"Сбросить имя"</string>
     <string name="content_description_drag_to_reorder">"Перетащи, чтобы изменить порядок"</string>
     <string name="content_description_delete">"Удалить"</string>
-    <string name="settings_tab_1_summary">"Вкладка 1"</string>
-    <string name="settings_tab_2_summary">"Вкладка 2"</string>
-    <string name="settings_tab_3_summary">"Вкладка 3"</string>
-    <string name="settings_tab_4_summary">"Вкладка 4"</string>
-    <string name="settings_tab_5_summary">"Вкладка 5"</string>
-    <string name="settings_tab_6_summary">"Вкладка 6"</string>
     <string name="settings_more_tabs_summary">"Больше вкладок"</string>
     <string name="settings_more_tabs_info_summary">"Изменения здесь влияют на список выше"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Показывать избранные MultiReddit"</string>
@@ -581,8 +551,6 @@
     <string name="settings_more_tabs_show_users_multireddits_title">"Показать MultiReddits пользователей"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Показать избранные сабреддиты из подписок"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Показывать сабреддиты из подписок"</string>
-    <string name="settings_tab_title">"Название"</string>
-    <string name="settings_tab_post_type">"Тип"</string>
     <string name="settings_tab_subreddit_name">"Название сабреддита (без префикса r/)"</string>
     <string name="settings_tab_multi_reddit_name">"Путь MultiReddit (/user/yourusername/m/yourmultiredditname)"</string>
     <string name="settings_tab_username">"Имя пользователя (без префикса u/)"</string>
@@ -643,8 +611,6 @@
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Учитывать рекомендуемый тип сортировки сабреддита"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Тип сортировки комментариев не будет сохранен"</string>
     <string name="settings_post_filter_title">"Фильтр постов"</string>
-    <string name="settings_subreddit_filter_category">"Спрятать сабреддиты"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"В r/popular и r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Анимация захвата НЛО"</string>
     <string name="settings_hide_subreddit_description_title">"Скрыть описание сабреддитов"</string>
     <string name="settings_disable_image_preview_title">"Отключить предпросмотр изображения в режиме экономии трафика"</string>
@@ -664,9 +630,7 @@
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Автоматически скрывать чтение сообщений в сабреддитах"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Скрыть автоматическое чтение сообщений у пользователей"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Скрыть автоматическое чтение сообщений в поиске"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Этот параметр не применяется при просмотре сообщений из результатов поиска, конкретных пользователей или субреддитов."</string>
     <string name="settings_sort_type_title">"Тип сортировки"</string>
-    <string name="settings_save_sort_type_title">"Сохранить тип сортировки"</string>
     <string name="settings_sort_category_post_feeds">"Ленты публикаций"</string>
     <string name="settings_sort_category_comments">"Комментарии"</string>
     <string name="settings_save_post_sort_title">"Сохранить сортировку сообщений"</string>
@@ -745,8 +709,6 @@
     <string name="settings_custom_content_font_family_title">"Пользовательское семейство шрифтов содержания"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Фиксированная высота карточки"</string>
     <string name="settings_hide_text_post_content">"Скрыть содержание текстового поста"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Показывать меньше параметров панели инструментов, начиная с"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Уровень %1$d"</string>
     <string name="settings_show_author_avatar_title">"Показывать аватар автора"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Отключить анимацию аватара профиля"</string>
     <string name="settings_show_user_prefix_title">"Показать префикс пользователя"</string>
@@ -784,8 +746,6 @@
     <string name="settings_enable_api_key_overrides_title">"Включить переопределения"</string>
     <string name="settings_enable_api_key_overrides_summary">"Используй свой собственный идентификатор клиента, пользовательский агент и URI перенаправления вместо встроенных значений по умолчанию, которыми является RedReader."</string>
     <string name="settings_client_id_title">"Reddit API Идентификатор клиента"</string>
-    <string name="settings_client_id_summary">"Используй собственный идентификатор клиента для Reddit API"</string>
-    <string name="client_id_length_error">"Идентификатор клиента должен содержать ровно 22 символа."</string>
     <string name="tap_to_set_client_id">"Нажми, чтобы установить идентификатор клиента."</string>
     <string name="set_client_id_dialog_message">"Установи идентификатор клиента Reddit API или отключи параметр «Включить переопределения» в меню «Настройки» | Ключи API"</string>
     <string name="settings_giphy_api_key_title">"Ключ Giphy API"</string>
@@ -828,7 +788,6 @@
     <string name="no_video_path_received">"Путь к видео не получен"</string>
     <string name="cannot_handle_intent">"Невозможно обработать действие «Поделиться»"</string>
     <string name="share">"Поделиться"</string>
-    <string name="no_email_client">"Клиент электронной почты не найден"</string>
     <string name="no_app">"Приложение недоступно"</string>
     <string name="save_comment">"Сохранить"</string>
     <string name="unsave_comment">"Удалить"</string>
@@ -850,7 +809,6 @@
     <string name="elapsed_time_months_ago">"%1$d мес."</string>
     <string name="elapsed_time_a_year_ago">"1 год"</string>
     <string name="elapsed_time_years_ago">"%1$d лет"</string>
-    <string name="remaining_time_passed">"В прошлом"</string>
     <string name="remaining_time_less_than_1_minute">"Менее 1 минуты"</string>
     <string name="remaining_time_1_minute">"1 минута"</string>
     <string name="remaining_time_in_minutes">"%1$d мин."</string>
@@ -917,7 +875,6 @@ https://play.google.com/store/"</string>
     <string name="remove_followed_multi_reddit">"Удалить из MultiReddits пользователей"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Удалить этот сохраненный MultiReddit? Оригинал не затрагивается."</string>
     <string name="remove_followed_multi_reddit_success">"Удален"</string>
-    <string name="add_user_title">"Следовать за пользователем"</string>
     <string name="add_user_to_list_title">"Добавить пользователя"</string>
     <string name="follow_failed_user_suspended">"u/%1$s заблокирован и за ним нельзя следить"</string>
     <string name="follow_failed_user_not_found">"u/%1$s не существует или был удален"</string>
@@ -1159,12 +1116,9 @@ https://play.google.com/store/"</string>
     <string name="rename">"Переименовать"</string>
     <string name="override">"Переопределить"</string>
     <string name="save_theme_options_title">"Параметры сохранения"</string>
-    <string name="save_theme_options_message">"Ты загрузил эту тему, поэтому можешь вносить изменения."</string>
     <string name="save_locally">"Сохранить локально"</string>
     <string name="save_online">"Сохранить онлайн"</string>
-    <string name="save_online_anonymous">"Сохранить онлайн (анонимно)"</string>
     <string name="save_locally_and_online">"Сохраняй как локально, так и онлайн."</string>
-    <string name="save_locally_and_online_anonymous">"Сохраняй как локально, так и онлайн (анонимно)."</string>
     <string name="theme_saved_locally">"Тема сохранена локально."</string>
     <string name="theme_name_already_taken">"Тема под названием %1$s уже существует. Выбери другое имя."</string>
     <string name="theme_saved_online">"Тема сохранена онлайн"</string>
@@ -1209,9 +1163,7 @@ https://play.google.com/store/"</string>
     <string name="notifications">"Уведомления"</string>
     <string name="messages">"Сообщения"</string>
     <string name="message">"Сообщение"</string>
-    <string name="fetch_redgifs_video_failed">"Невозможно получить видео Redgifs"</string>
     <string name="fetching_video_info_please_wait">"Получение информации о видео. Пожалуйста, подожди."</string>
-    <string name="fetch_streamable_video_failed">"Невозможно загрузить потоковое видео"</string>
     <string name="error_fetching_imgur_media">"Невозможно загрузить изображения"</string>
     <string name="downloading_reddit_video">"Загрузка видео"</string>
     <string name="downloading_reddit_video_audio_track">"Загрузка аудио"</string>
@@ -1242,8 +1194,6 @@ https://play.google.com/store/"</string>
     <string name="set_to_home_screen">"Закрепить на домашнем экране"</string>
     <string name="set_to_lock_screen">"Установить на экран блокировки"</string>
     <string name="set_to_both">"Установить на оба экрана"</string>
-    <string name="default_font_font_preview">"По умолчанию"</string>
-    <string name="load_video_in_redgifs">"Попробуй загрузить видео на Redgifs"</string>
     <string name="top_score">"%1$s пойнтов"</string>
     <string name="login_activity_2fa_prompt">"2-факторная аутентификация: &lt;пароль&gt;:&lt;код 2FA&gt;.\nПример: yourpass:123456\nВойти в Google или возникли проблемы со входом: нажми нижнюю правую кнопку."</string>
     <string name="login_activity_internet_disconnected_error">"Нет подключения к Интернету"</string>
@@ -1282,7 +1232,6 @@ https://play.google.com/store/"</string>
     <string name="edited_time">"Отредактировано %s"</string>
     <string name="warning">"Предупреждение"</string>
     <string name="this_is_a_nsfw_subreddit">"Это субреддит NSFW."</string>
-    <string name="this_user_has_nsfw_content">"У этого пользователя NSFW контента"</string>
     <string name="this_post_contains_sensitive_content">"Этот пост содержит NSFW контента."</string>
     <string name="dismiss">"Отклонить"</string>
     <string name="leave">"Покинуть"</string>
@@ -1291,13 +1240,10 @@ https://play.google.com/store/"</string>
     <string name="go_to_user">"Перейти к пользователю"</string>
     <string name="go_to_thing_hint">"Имя"</string>
     <string name="go_to_top">"Наверх"</string>
-    <string name="random">"Случайно"</string>
     <string name="random_subreddits">"Случайные субреддиты"</string>
     <string name="random_subreddit">"Случайный субреддит"</string>
     <string name="random_nsfw_subreddit">"Случайный NSFW Субреддит"</string>
     <string name="random_subscribed_subreddit">"Субреддит с случайной подпиской"</string>
-    <string name="random_post">"Случайное сообщение"</string>
-    <string name="random_nsfw_post">"Случайное сообщение NSFW"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"Безопасность для работы не гарантируется. Субреддит по-прежнему может содержать контент NSFW без флага NSFW."</string>
     <string name="fetch_random_thing_failed">"Попробуй позже"</string>
     <string name="select_video_quality">"Выбрать качество видео"</string>
@@ -1410,8 +1356,6 @@ https://play.google.com/store/"</string>
         <item quantity="other">"%1$d публикации"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Разрешено — это правило больше не скрывает это."</string>
-    <string name="post_filter_blocked_allow">"Никогда не скрывай этот субреддит"</string>
-    <string name="post_filter_blocked_undo_allow">"Снова скрой этот субреддит"</string>
     <string name="content_description_allow_blocked_subreddit">"Больше не скрывать %1$s"</string>
     <string name="excludes_strings_hint">"Исключить ключевые слова (ключ1,ключ2)"</string>
     <string name="comment_filter_name_hint">"Имя фильтра комментариев"</string>
@@ -1482,21 +1426,13 @@ https://play.google.com/store/"</string>
     <string name="capture">"Захват"</string>
     <string name="uploading_image">"Загрузка"</string>
     <string name="upload_image_success">"Изображение успешно загружено. Нажми кнопку «Изображение» ещё раз, чтобы просмотреть загруженные изображения."</string>
-    <string name="get_image_bitmap_failed">"Невозможно получить растровое изображение"</string>
     <string name="upload_image_failed">"Невозможно загрузить изображение"</string>
     <string name="select_giphy_gif">"Выбери Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Это экспериментальная функция, и вот некоторые вещи, которые тебе нужно знать:\n\n 1. GIF-изображения Giphy не будут отображаться в текстовом редакторе, а вместо этого будет вставлен фрагмент текста в виде блока\n с форматом, похожим на ![gif](XXXXX). XXXXX — это идентификатор GIF-изображения Giphy, и его нельзя изменять.\n\n 2. ты можешь вставить только один GIF-изображение Giphy в каждый комментарий.\n\n 3. Чтобы написать надстрочный индекс, используй ^() и помести текст в круглые скобки, а не только\n, используя одиночный ^. Для простоты щёлкни параметр надстрочного индекса в инструментах форматирования, чтобы вставить надстрочный индекс.\n\n 4. Эта функция преобразует твой Markdown в форматированный текстовый формат, при этом часть форматирования может быть потеряна.\n\n 5. GIF-изображения Giphy могут не отображаться на экране предварительного просмотра.\n\n 6. Не меняй свою учетную запись с помощью выбор учетной записи на экране редактирования. тебе следует переключить\n свою учетную запись в панели навигации на главном экране."</string>
     <string name="search_comments">"Поиск комментариев"</string>
     <string name="please_wait_image_is_uploading">"Изображение загружается, подожди."</string>
-    <string name="error_fetch_trending_search">"Невозможно получить популярные поисковые запросы.
-Нажми, чтобы повторить попытку."</string>
-    <string name="error_parse_trending_search">"Невозможно разобрать популярные поисковые запросы.
-Нажми, чтобы повторить попытку."</string>
-    <string name="no_trending_search">"Невозможно найти популярные поисковые запросы.
-Нажми, чтобы повторить попытку."</string>
     <string name="error_loading_wiki">"Ошибка загрузки вики"</string>
     <string name="no_wiki">"У сабреддита нет вики-страницы"</string>
-    <string name="material_you_notification_title">"Применение «Material You»"</string>
     <string name="lock_screen_text">"Эй, там!!!"</string>
     <string name="app_lock_timeout_immediately">"Немедленно"</string>
     <string name="app_lock_timeout_1_min">"1 минута"</string>
@@ -1572,40 +1508,6 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Разрешение на отображение уведомлений не предоставлено"</string>
     <string name="go_to_settings">"Настройки"</string>
-    <string name="welcome_to_redditjr">"Добро пожаловать в Reddit Jr., твои ворота в совершенно новое измерение просмотра Reddit!"</string>
-    <string name="subscription_prompt">"Прежде чем ты погрузишься в бесчисленные возможности этого приложения, \n я хочу открыто и открыто рассказать о значительных изменениях, которые я внедрил, чтобы обеспечить тебе наилучший сервис. \n \n\nС этого момента тебе потребуется ежемесячная подписка для доступа к Reddit API в течение Reddit Jr. и\n это потому, что Reddit начала взимать плату за доступ к API с 1 июля 2023 года. \n \n\nВсе уровни работают одинаково. Если ты хочешь поддержать Reddit Jr., ты можешь подписаться на более высокий уровень.\n Большая часть денег с самого низкого уровня поступает на Reddit.\n    "</string>
-    <string name="monthly">"Ежемесячно"</string>
-    <string name="yearly">"Ежегодно"</string>
-    <string name="weekly">"Еженедельно"</string>
-    <string name="billing_error_billing_unavailable">"Служба выставления счетов недоступна на устройстве."</string>
-    <string name="billing_error_developer_error">"Разработчик допустил некоторые ошибки. Это не твоя вина."</string>
-    <string name="billing_error_error">"Неустранимая ошибка во время действия API."</string>
-    <string name="billing_error_feature_not_supported">"Запрошенная функция не поддерживается Play Store на текущем устройстве."</string>
-    <string name="billing_error_item_already_owned">"Не удалось совершить покупку, поскольку предмет уже принадлежит."</string>
-    <string name="billing_error_item_unavailable">"Запрошенный продукт недоступен для покупки."</string>
-    <string name="billing_error_network_error">"Во время операции произошла сетевая ошибка."</string>
-    <string name="billing_error_service_disconnected">"Приложение не подключено к сервису Play Store через платежную библиотеку Google Play."</string>
-    <string name="billing_error_service_unavailable">"В настоящее время услуга недоступна."</string>
-    <string name="billing_error_user_canceled">"Транзакция была отменена пользователем."</string>
-    <string name="subscription_plan_description_monthly">"Бронза"</string>
-    <string name="subscription_plan_description_monthly_399">"Серебро"</string>
-    <string name="subscription_plan_description_monthly_499">"Золото – идеальный выбор!"</string>
-    <string name="subscription_plan_description_monthly_699">"Платина"</string>
-    <string name="subscription_plan_description_monthly_899">"Алмаз"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Невозможно подтвердить покупку."</string>
-    <string name="connect_to_billing_system_failed">"Не удалось подключиться к биллинговой системе."</string>
-    <string name="connecting_to_billing_system">"Подключение к биллинговой системе. Пожалуйста, подожди."</string>
-    <string name="thank_you_for_subscription">"Спасибо за подписку"</string>
-    <string name="load_subscription_options">"Загрузить варианты подписки"</string>
-    <string name="acknowledging_subscription">"Подтверждение твоей подписки. Пожалуйста, подожди."</string>
-    <string name="acknowledgement_purchase_failed_description">"К сожалению, при подтверждении покупки произошла ошибка. Если проблема не исчезнет в течение трёх дней, ты автоматически получишь возврат средств.\nНе волнуйся, ты по-прежнему можешь пользоваться Reddit Jr.."</string>
-    <string name="continue_to_app">"Продолжить работу с приложением"</string>
-    <string name="restore_subscription_purchase_details">"Уже оплатили подписку?"</string>
-    <string name="restore_subscription_purchase">"Восстановление покупки подписки"</string>
-    <string name="important_info_title">"Пожалуйста, войди в свою учётную запись заново"</string>
-    <string name="important_info">"Reddit Jr. использует идентификатор клиента (ключ API) от Reddit, и тебе необходимо повторно войти в систему, чтобы продолжить использование приложения. \n\nПросто открой панель навигации, щёлкни заголовок своей учетной записи и выбери «Добавить учетную запись», чтобы снова войти в Reddit, используя ту же учетную запись. В противном случае Reddit Jr. может вообще не загружать посты. Приносим извинения за неудобства."</string>
-    <string name="i_understand">"Я понимаю"</string>
     <string name="add_to_comment_filter">"Добавить в фильтр комментариев"</string>
     <string name="cannot_edit_post_with_images">"Редактирование сообщений с изображениями запрещено."</string>
     <string name="local">"Локальный"</string>
@@ -1631,11 +1533,8 @@ https://play.google.com/store/"</string>
     <string name="content_description_comment_filter_add_user">"Добавить пользователя в фильтр комментариев"</string>
     <string name="content_description_create_custom_theme">"Создать собственную тему"</string>
     <string name="content_description_create_post_filter">"Создать фильтр сообщений"</string>
-    <string name="content_description_add_post_filter_usage">"Применить пост-фильтр куда-нибудь"</string>
     <string name="content_description_add_post_filter_rule">"Добавить правило фильтра"</string>
     <string name="content_description_remove_post_filter_rule">"Удалить %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Добавь сабреддит к фильтру сообщений"</string>
-    <string name="content_description_post_filter_add_user">"Добавить пользователя в фильтр сообщений"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Добавь пользователя или сабреддит в фильтр сообщений."</string>
     <string name="content_description_change_banner">"Изменить баннер"</string>
     <string name="content_description_change_avatar">"Сменить аватар"</string>
@@ -1658,7 +1557,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_search">"Поиск"</string>
     <string name="content_description_go_to_subreddit">"Перейти к сабреддиту"</string>
     <string name="content_description_go_to_user">"Перейти к пользователю"</string>
-    <string name="content_description_random">"Случайный"</string>
     <string name="content_description_filter_posts">"Фильтр постов"</string>
     <string name="content_description_hide_read_posts">"Скрыть прочтённые посты"</string>
     <string name="content_description_go_to_top">"Наверх"</string>
@@ -1676,15 +1574,6 @@ https://play.google.com/store/"</string>
     <string name="content_description_next_result">"Перейти к следующему результату"</string>
     <string name="content_description_close_search_panel">"Закрыть панель поиска"</string>
     <string name="content_description_send_message">"Отправить сообщение"</string>
-    <string name="content_description_home">"Главная"</string>
-    <string name="content_description_subscriptions">"Подписки"</string>
-    <string name="content_description_inbox">"Входящие"</string>
-    <string name="content_description_profile">"Профиль"</string>
-    <string name="content_description_multireddits">"MultiReddit"</string>
-    <string name="content_description_upvoted">"Голос+"</string>
-    <string name="content_description_downvoted">"Голос-"</string>
-    <string name="content_description_hidden">"Скрытые"</string>
-    <string name="content_description_saved">"Сохранено"</string>
     <string name="content_description_scan_qr_code">"Сканировать QR-код"</string>
     <string name="comment">"Комментарий"</string>
     <string name="enable_reply_notifications">"Получать уведомления об ответах"</string>
@@ -1703,15 +1592,9 @@ https://play.google.com/store/"</string>
     <string name="download_image">"Загрузить изображение"</string>
     <string name="download_gif">"Скачать GIF"</string>
     <string name="download_video">"Скачать видео"</string>
-    <string name="download_all_gallery_images">"Загрузить все изображения галереи"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Прямой"</string>
-    <string name="password_cannot_be_empty">"Пароль не может быть пустым."</string>
-    <string name="title_activity_settings">"Настройки"</string>
-    <string name="title_activity_login">"Войти"</string>
-    <string name="restart_app_to_apply_changes">"Нажми здесь, чтобы перезапустить приложение и применить изменения."</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Скрытые по умолчанию субреддиты удалены."</string>
     <string name="jump_to_parent_comment">"Перейти к родительскому комментарию"</string>
     <string name="long_press_post_non_media_area">"Длительное нажатие на публикацию (не для СМИ)"</string>
     <string name="long_press_post_media">"Долгое нажатие на медиа публикации"</string>

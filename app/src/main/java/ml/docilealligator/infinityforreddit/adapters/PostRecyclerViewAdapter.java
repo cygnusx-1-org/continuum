@@ -14,12 +14,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.SpannableStringBuilder;
-import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -43,14 +40,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.libRG.CustomTextView;
 import java.util.ArrayList;
@@ -122,10 +114,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.MultiPlayPlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
-import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
-import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
-import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
@@ -441,7 +430,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE,
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE);
             mCompactThumbnailBoxSizePx = Math.round(mCompactThumbnailSizeDp * mScale);
-            mGalleryGridCellInsetPx = resources.getDimensionPixelSize(R.dimen.staggeredLayoutManagerItemOffset) / 2;
+            mGalleryGridCellInsetPx = resources.getDimensionPixelSize(R.dimen.galleryGridItemOffset) / 2;
             mGlide = Glide.with(mActivity);
             mMaxResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
             mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
@@ -966,33 +955,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                         }
                                     }
                                 });
-                        /*mFragment.loadIcon(post.getAuthor(), false, (subredditOrUserName, iconUrl) -> {
-                            if (mActivity != null && getItemCount() > 0 && post.getAuthor().equals(subredditOrUserName)) {
-                                if (iconUrl == null || iconUrl.isEmpty()) {
-                                    mGlide.load(R.drawable.subreddit_default_icon)
-                                            .transform(new RoundedCornersTransformation(72, 0))
-                                            .into(asPost.iconGifImageView);
-                                } else {
-                                    if (mDisableProfileAvatarAnimation) {
-                                        mGlide.asBitmap().load(iconUrl)
-                                                .transform(new RoundedCornersTransformation(72, 0))
-                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                        .transform(new RoundedCornersTransformation(72, 0)))
-                                                .into(asPost.iconGifImageView);
-                                    } else {
-                                        mGlide.load(iconUrl)
-                                                .transform(new RoundedCornersTransformation(72, 0))
-                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                        .transform(new RoundedCornersTransformation(72, 0)))
-                                                .into(asPost.iconGifImageView);
-                                    }
-                                }
-
-                                if (holder.getBindingAdapterPosition() >= 0) {
-                                    post.setAuthorIconUrl(iconUrl);
-                                }
-                            }
-                        });*/
                     } else if (post.getAuthorIconUrl() != null && !post.getAuthorIconUrl().isEmpty()) {
                         if (mDisableProfileAvatarAnimation) {
                             mGlide.asBitmap().load(post.getAuthorIconUrl())
@@ -1086,28 +1048,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     }
                                 }
                             });
-                    /*mFragment.loadIcon(authorName, post.isAuthorDeleted(), (subredditOrUserName, iconUrl) -> {
-                        if (mActivity != null && getItemCount() > 0) {
-                            if (iconUrl == null || (iconUrl.isEmpty() && authorName.equals(subredditOrUserName))) {
-                                mGlide.load(R.drawable.subreddit_default_icon)
-                                        .transform(new RoundedCornersTransformation(72, 0))
-                                        .into(asPost.iconGifImageView);
-                            } else {
-                                RequestBuilder<Drawable> requestBuilder = mGlide.load(iconUrl)
-                                        .transform(new RoundedCornersTransformation(72, 0))
-                                        .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                .transform(new RoundedCornersTransformation(72, 0)));
-                                if (mDisableProfileAvatarAnimation) {
-                                    requestBuilder = requestBuilder.dontAnimate();
-                                }
-                                requestBuilder.into(asPost.iconGifImageView);
-                            }
-
-                            if (holder.getBindingAdapterPosition() >= 0) {
-                                post.setAuthorIconUrl(iconUrl);
-                            }
-                        }
-                    });*/
                 } else if (post.getAuthorIconUrl() != null && !post.getAuthorIconUrl().isEmpty()) {
                     RequestBuilder<Drawable> requestBuilder = mGlide.load(post.getAuthorIconUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -1504,27 +1444,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         asGalleryType.imageIndexTextView.setVisibility(
                                 mHideImageCountInGallery ? View.GONE : View.VISIBLE);
                     }
-                    /*if (layoutManager instanceof GridLayoutManager) {
-                        int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;
-                        ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
-                        if (asGalleryType.galleryRecyclerView.getItemDecorationCount() > 0) {
-                            RecyclerView.ItemDecoration itemDecoration = asGalleryType.galleryRecyclerView.getItemDecorationAt(0);
-                            if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
-                                ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
-                            }
-                        }
-
-                        int padding = (int) (8 * mScale);
-                        asGalleryType.galleryRecyclerView.setPadding(
-                                0, (holder instanceof PostGalleryTypeViewHolder) ? 0 : padding,
-                                padding, (holder instanceof PostGalleryTypeViewHolder) ? 0 : padding);
-                        asGalleryType.adapter.setIsGridLayout(true);
-                        asGalleryType.imageIndexTextView.setVisibility(View.GONE);
-                    } else {
-                        asGalleryType.galleryRecyclerView.setPadding(0, 0, 0, 0);
-                        asGalleryType.adapter.setIsGridLayout(false);
-                        asGalleryType.imageIndexTextView.setVisibility(View.VISIBLE);
-                    }*/
                 } else if (holder instanceof PostTextTypeViewHolder asText) {
                     if (!mHideTextPostContent && !post.isSpoiler() && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
                         asText.contentTextView.setVisibility(View.VISIBLE);
@@ -2832,6 +2751,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /** Carries a muting choice made on one video to every video bound in the list. */
+    @OptIn(markerClass = UnstableApi.class)
     public void applyMuteToVideos(RecyclerView recyclerView, boolean mute) {
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
@@ -3564,10 +3484,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     intent.putExtra(ViewVideoActivity.EXTRA_REDGIFS_ID, post.getRedgifsId());
                     intent.setData(Uri.parse(post.getVideoUrl()));
                     intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, post.getVideoDownloadUrl());
-                    /*if (post.isLoadRedgifsOrStreamableVideoSuccess()) {
-                        intent.setData(Uri.parse(post.getVideoUrl()));
-                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, post.getVideoDownloadUrl());
-                    }*/
                 } else if (post.isStreamable()) {
                     intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_STREAMABLE);
                     intent.putExtra(ViewVideoActivity.EXTRA_STREAMABLE_SHORT_CODE, post.getStreamableShortCode());

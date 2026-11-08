@@ -216,12 +216,6 @@ class CommentsStatusRecyclerViewAdapter(
         init {
             itemView.setOnClickListener {
                 onChangeToNormalThreadMode()
-                /*if (activity != null && activity is ViewPostDetailActivity) {
-                    isSingleCommentThreadMode = false
-                    mSingleCommentId = null
-                    notifyItemRemoved(0)
-                    mFragment.changeToNormalThreadMode()
-                }*/
             }
 
             typeface?.let {

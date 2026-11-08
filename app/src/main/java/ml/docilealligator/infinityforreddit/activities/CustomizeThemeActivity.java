@@ -409,35 +409,6 @@ public class CustomizeThemeActivity extends BaseActivity {
                         .setNegativeButton(R.string.cancel, null)
                         .show();
             } else {
-                /*// This custom theme is from the server but not uploaded by the current user, or it is local
-                final int[] option = {0};
-                new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
-                        .setTitle(R.string.save_theme_options_title)
-                        //.setMessage(R.string.save_theme_options_message)
-                        .setSingleChoiceItems(R.array.save_theme_options_anonymous_included, 0, (dialog, which) -> option[0] = which)
-                        .setPositiveButton(R.string.ok, (dialogInterface, which) -> {
-                            switch (option[0]) {
-                                case 0:
-                                    saveThemeLocally(customTheme);
-                                    break;
-                                case 1:
-                                    saveThemeOnline(customTheme, false);
-                                    break;
-                                case 2:
-                                    saveThemeOnline(customTheme, true);
-                                    break;
-                                case 3:
-                                    saveThemeLocally(customTheme);
-                                    saveThemeOnline(customTheme, false);
-                                    break;
-                                case 4:
-                                    saveThemeLocally(customTheme);
-                                    saveThemeOnline(customTheme, true);
-                                    break;
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, null)
-                        .show();*/
                 saveThemeLocally(customTheme);
             }
 

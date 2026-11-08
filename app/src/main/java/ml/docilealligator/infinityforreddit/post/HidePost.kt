@@ -1,12 +1,7 @@
 package ml.docilealligator.infinityforreddit.post
 
-import ml.docilealligator.infinityforreddit.apis.RedditAPI
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
-import ml.docilealligator.infinityforreddit.post.HidePost.HidePostListener
 import ml.docilealligator.infinityforreddit.utils.APIUtils
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 
 suspend fun hidePost(

@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
@@ -280,9 +279,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
     private static List<String[]> findInstalledBrowsers(Context context) {
         PackageManager pm = context.getPackageManager();
-        int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                ? PackageManager.MATCH_ALL
-                : PackageManager.GET_DISABLED_COMPONENTS;
+        int flags = PackageManager.MATCH_ALL;
         List<ResolveInfo> resolved = pm.queryIntentActivities(
                 new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com")), flags);
         List<String[]> browsers = new ArrayList<>();

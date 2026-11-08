@@ -173,15 +173,6 @@ public class ViewVideoActivity extends AppCompatActivity
     public static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
-    /*private static final String IS_MUTE_STATE = "IMS";
-    private static final String VIDEO_DOWNLOAD_URL_STATE = "VDUS";
-    private static final String VIDEO_URI_STATE = "VUS";
-    private static final String VIDEO_TYPE_STATE = "VTS";
-    private static final String SUBREDDIT_NAME_STATE = "SNS";
-    private static final String ID_STATE=  "IS";
-    private static final String PLAYBACK_SPEED_STATE = "PSS";
-    private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";*/
-
     @Nullable
     public Typeface typeface;
 
@@ -194,20 +185,7 @@ public class ViewVideoActivity extends AppCompatActivity
     private DataSource.Factory dataSourceFactory;
     private Player.Listener playerListener;
 
-    /*private String videoDownloadUrl;
-    private String videoFileName;
-    private String videoFallbackDirectUrl;
-    private String subredditName;
-    private String id;
-    private boolean wasPlaying;
-    private boolean isDownloading = false;
-    private boolean isMute = false;
-    private boolean isNSFW;*/
     //private long resumePosition = -1;
-    /*private int videoType;
-    private boolean isDataSavingMode;
-    private int dataSavingModeDefaultResolution;
-    private int nonDataSavingModeDefaultResolution;*/
     //private boolean setDefaultResolutionAlready = false;
     @Nullable
     private Integer originalOrientation;
@@ -394,7 +372,6 @@ public class ViewVideoActivity extends AppCompatActivity
         binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
         binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
 
-
         LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
         // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
         // edge dead-zone so a swipe from the very edge isn't treated as a scrub.
@@ -484,7 +461,6 @@ public class ViewVideoActivity extends AppCompatActivity
             overridePendingTransition(0, slide);
         });
 
-
         if (savedInstanceState == null) {
             if (!getResources().getBoolean(R.bool.isTablet)
                     && mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
@@ -568,10 +544,6 @@ public class ViewVideoActivity extends AppCompatActivity
             player.addListener(new Player.Listener() {
                 @Override
                 public void onVideoSizeChanged(VideoSize videoSize) {
-                    Log.d(ROTATION_TAG, "onVideoSizeChanged: width=" + videoSize.width
-                            + " height=" + videoSize.height
-                            + " unappliedRotationDegrees=" + videoSize.unappliedRotationDegrees
-                            + " currentRotation=" + currentRotation);
                     if (videoSize.width > 0 && videoSize.height > 0) {
                         originalVideoWidth = videoSize.width;
                         originalVideoHeight = videoSize.height;
@@ -631,20 +603,17 @@ public class ViewVideoActivity extends AppCompatActivity
         // If subredditName is null and we have a post object, get it from the post
         if (viewVideoViewModel.getSubredditName() == null && post != null) {
             viewVideoViewModel.setSubredditName(post.getSubredditName());
-            Log.d("ViewVideoActivity", "Got subredditName from post: " + viewVideoViewModel.getSubredditName());
         }
 
         // If id is null and we have a post object, get it from the post
         if (viewVideoViewModel.getId() == null && post != null) {
             viewVideoViewModel.setId(post.getId());
-            Log.d("ViewVideoActivity", "Got id from post: " + viewVideoViewModel.getId());
         }
 
         // If this is a Tumblr post, ensure videoType is VIDEO_TYPE_DIRECT
         // This handles cases where the calling intent might not set EXTRA_VIDEO_TYPE appropriately for Tumblr MP4s.
-        if (post != null && post.isTumblr()) { // Assuming post.isTumblr() method exists
+        if (post != null && post.isTumblr()) {
             if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_DIRECT) {
-                Log.d("ViewVideoActivity", "Tumblr post detected. Overriding videoType to DIRECT. Original type: " + viewVideoViewModel.getVideoType());
                 viewVideoViewModel.setVideoType(VIDEO_TYPE_DIRECT);
             }
         }
@@ -966,7 +935,6 @@ public class ViewVideoActivity extends AppCompatActivity
                 }
             }
         });
-
 
         viewVideoViewModel.getErrorResId().observe(this, messageRes -> {
             if (messageRes == null) {
@@ -1322,23 +1290,6 @@ public class ViewVideoActivity extends AppCompatActivity
         binding.getNestedScrollView().setScrollEnabled(enabled);
     }
 
-    /*@OptIn(markerClass = UnstableApi.class)
-    private void loadFallbackVideo(Bundle savedInstanceState) {
-        if (videoFallbackDirectUrl != null) {
-            MediaItem mediaItem = player.getCurrentMediaItem();
-
-            if (mediaItem == null || (mediaItem.localConfiguration != null && !videoFallbackDirectUrl.equals(mediaItem.localConfiguration.uri.toString()))) {
-                videoType = VIDEO_TYPE_DIRECT;
-                videoDownloadUrl = videoFallbackDirectUrl;
-                mVideoUri = Uri.parse(videoFallbackDirectUrl);
-                videoFileName = videoFileName == null ? FilenameUtils.getName(videoDownloadUrl) : videoFileName;
-                player.prepare();
-                player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(mVideoUri)));
-                preparePlayer(savedInstanceState);
-            }
-        }
-    }*/
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_video_activity, menu);
@@ -1501,7 +1452,7 @@ public class ViewVideoActivity extends AppCompatActivity
     }
 
     private void requestPermissionAndDownload() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1685,23 +1636,6 @@ public class ViewVideoActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
         outState.putInt("currentRotation", currentRotation);
     }
-
-    /*@Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(IS_MUTE_STATE, isMute);
-        outState.putInt(VIDEO_TYPE_STATE, videoType);
-
-        if (mVideoUri != null) {
-            outState.putString(VIDEO_URI_STATE, mVideoUri.toString());
-            outState.putString(VIDEO_DOWNLOAD_URL_STATE, videoDownloadUrl);
-            outState.putString(SUBREDDIT_NAME_STATE, subredditName);
-            outState.putString(ID_STATE, id);
-        }
-
-        outState.putInt(PLAYBACK_SPEED_STATE, playbackSpeed);
-        outState.putBoolean(SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE, setDefaultResolutionAlready);
-    }*/
 
     @Override
     public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {

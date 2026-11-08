@@ -39,13 +39,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class PostPagingSource extends ListenableFuturePagingSource<String, Post> {
-    /*public static final int TYPE_FRONT_PAGE = 0;
-    public static final int TYPE_SUBREDDIT = 1;
-    public static final int TYPE_USER = 2;
-    public static final int TYPE_SEARCH = 3;
-    public static final int TYPE_MULTI_REDDIT = 4;
-    public static final int TYPE_ANONYMOUS_FRONT_PAGE = 5;
-    public static final int TYPE_ANONYMOUS_MULTIREDDIT = 6;*/
 
     public static final String USER_WHERE_SUBMITTED = "submitted";
     public static final String USER_WHERE_UPVOTED = "upvoted";

@@ -167,7 +167,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
             }
             decorView.setSystemUiVisibility(systemVisibilityToolbarExpanded);
             window.setNavigationBarColor(customTheme.navBarColor);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else {
             if (isLightStatusbar) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                 systemVisibilityToolbarExpanded = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -194,122 +194,93 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                     SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK_SENSITIVITY, "0.1"));
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (immersiveInterface) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-                }
-
-                if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true)) {
-                    ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView(), new OnApplyWindowInsetsListener() {
-                        @Override
-                        public @NonNull WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                            Insets inset = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
-                            v.setBackgroundColor(customTheme.colorPrimary);
-                            v.setPadding(inset.left, inset.top, inset.right, 0);
-                            return insets;
-                        }
-                    });
-                }
-
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, !mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true));
-
-                        topSystemBarHeight = allInsets.top;
-
-                        int padding16 = (int) Utils.convertDpToPixel(16, CustomThemePreviewActivity.this);
-
-                        setMargins(binding.fabThemePreviewActivity,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                allInsets.bottom);
-
-                        binding.toolbarLinearLayoutThemePreviewActivity.setPadding(
-                                padding16 + allInsets.left,
-                                binding.toolbar.getPaddingTop(),
-                                padding16 + allInsets.right,
-                                binding.toolbar.getPaddingBottom());
-
-                        binding.viewPagerThemePreviewActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-
-                        setMargins(binding.toolbar,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.tabLayoutThemePreviewActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        return WindowInsetsCompat.CONSUMED;
-                    }
-                });
-                /*adjustToolbar(binding.toolbar);
-
-                Resources resources = getResources();
-                int navBarResourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-                if (navBarResourceId > 0) {
-                    int navBarHeight = resources.getDimensionPixelSize(navBarResourceId);
-                    if (navBarHeight > 0) {
-                        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabThemePreviewActivity.getLayoutParams();
-                        params.bottomMargin = navBarHeight;
-                        binding.fabThemePreviewActivity.setLayoutParams(params);
-                    }
-                }*/
-            }
-
-            if (changeStatusBarIconColor) {
-                binding.appbarLayoutThemePreviewActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
-                    @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
-                        if (state == State.COLLAPSED) {
-                            decorView.setSystemUiVisibility(systemVisibilityToolbarCollapsed);
-                            binding.tabLayoutThemePreviewActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutThemePreviewActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            decorView.setSystemUiVisibility(systemVisibilityToolbarExpanded);
-                            binding.tabLayoutThemePreviewActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutThemePreviewActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
-                    }
-                });
+        if (immersiveInterface) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
             } else {
-                binding.appbarLayoutThemePreviewActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            }
+
+            if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true)) {
+                ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView(), new OnApplyWindowInsetsListener() {
                     @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
-                        if (state == State.COLLAPSED) {
-                            binding.tabLayoutThemePreviewActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutThemePreviewActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            binding.tabLayoutThemePreviewActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutThemePreviewActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
+                    public @NonNull WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                        Insets inset = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                        v.setBackgroundColor(customTheme.colorPrimary);
+                        v.setPadding(inset.left, inset.top, inset.right, 0);
+                        return insets;
                     }
                 });
             }
-        } else {
+
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, !mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true));
+
+                    topSystemBarHeight = allInsets.top;
+
+                    int padding16 = (int) Utils.convertDpToPixel(16, CustomThemePreviewActivity.this);
+
+                    setMargins(binding.fabThemePreviewActivity,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            allInsets.bottom);
+
+                    binding.toolbarLinearLayoutThemePreviewActivity.setPadding(
+                            padding16 + allInsets.left,
+                            binding.toolbar.getPaddingTop(),
+                            padding16 + allInsets.right,
+                            binding.toolbar.getPaddingBottom());
+
+                    binding.viewPagerThemePreviewActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+
+                    setMargins(binding.toolbar,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.tabLayoutThemePreviewActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    return WindowInsetsCompat.CONSUMED;
+                }
+            });
+        }
+
+        if (changeStatusBarIconColor) {
             binding.appbarLayoutThemePreviewActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
                 @Override
-                public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                    if (state == State.EXPANDED) {
-                        binding.tabLayoutThemePreviewActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                        binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                        binding.tabLayoutThemePreviewActivity.setBackgroundColor(expandedTabBackgroundColor);
-                    } else if (state == State.COLLAPSED) {
+                public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
+                    if (state == State.COLLAPSED) {
+                        decorView.setSystemUiVisibility(systemVisibilityToolbarCollapsed);
                         binding.tabLayoutThemePreviewActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                         binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                         binding.tabLayoutThemePreviewActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        decorView.setSystemUiVisibility(systemVisibilityToolbarExpanded);
+                        binding.tabLayoutThemePreviewActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutThemePreviewActivity.setBackgroundColor(expandedTabBackgroundColor);
+                    }
+                }
+            });
+        } else {
+            binding.appbarLayoutThemePreviewActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+                @Override
+                public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
+                    if (state == State.COLLAPSED) {
+                        binding.tabLayoutThemePreviewActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
+                        binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
+                        binding.tabLayoutThemePreviewActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        binding.tabLayoutThemePreviewActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutThemePreviewActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutThemePreviewActivity.setBackgroundColor(expandedTabBackgroundColor);
                     }
                 }
             });
@@ -403,14 +374,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         }
     }
 
-    /*private int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
-    }*/
 
     protected void applyAppBarLayoutAndToolbarTheme(AppBarLayout appBarLayout, Toolbar toolbar) {
         appBarLayout.setBackgroundColor(customTheme.colorPrimary);
@@ -433,20 +396,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         }
     }
 
-    /*private void adjustToolbar(Toolbar toolbar) {
-        int statusBarResourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarResourceId > 0) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) toolbar.getLayoutParams();
-            int statusBarHeight = getResources().getDimensionPixelSize(statusBarResourceId);
-            params.topMargin = statusBarHeight;
-            toolbar.setLayoutParams(params);
-            TypedValue tv = new TypedValue();
-            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-                ((ViewGroup.MarginLayoutParams) binding.linearLayoutBottomAppBarThemePreviewActivity.getLayoutParams()).setMargins(0,
-                        TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics()) + statusBarHeight, 0, 0);
-            }
-        }
-    }*/
 
     protected void applyTabLayoutTheme(TabLayout tabLayout) {
         int toolbarAndTabBackgroundColor = customTheme.colorPrimary;

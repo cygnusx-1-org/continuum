@@ -291,7 +291,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                 window.setNavigationBarColor(Color.TRANSPARENT);
                 window.setStatusBarColor(Color.TRANSPARENT);
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else {
             if (isLightStatusbar) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                 systemVisibilityToolbarExpanded = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -611,9 +611,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
      * is not set, leaving the device to manage the refresh rate as usual.
      */
     private void applyPreferredRefreshRate(Window window, SharedPreferences sharedPreferences) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
         boolean enabled = sharedPreferences.getBoolean(SharedPreferencesUtils.FORCE_MAX_REFRESH_RATE_KEY, false);
 
         Display display;
@@ -809,14 +806,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         });
     }
 
-    /*protected void adjustToolbar(Toolbar toolbar) {
-        int statusBarResourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarResourceId > 0) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) toolbar.getLayoutParams();
-            params.topMargin = getResources().getDimensionPixelSize(statusBarResourceId);
-            toolbar.setLayoutParams(params);
-        }
-    }*/
 
     protected void addOnOffsetChangedListener(AppBarLayout appBarLayout) {
         View decorView = getWindow().getDecorView();

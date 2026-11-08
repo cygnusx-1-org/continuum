@@ -6,7 +6,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage
 
 @Dao
 interface CommentDraftDao {

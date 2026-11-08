@@ -342,10 +342,6 @@ final class PlaybackInfoCache extends RecyclerView.AdapterDataObserver {
         : container.getCacheManager().getKeyForOrder(position);
   }
 
-  //@Nullable private Integer getOrder(Object key) {
-  //  return container.getCacheManager() == null ? null
-  //      : container.getCacheManager().getOrderForKey(key);
-  //}
 
   @NonNull
   PlaybackInfo getPlaybackInfo(int position) {

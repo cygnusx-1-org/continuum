@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Video %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Crosspost"</string>
-    <string name="give_award_activity_label">"Dát ocenění"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all a r/popular"</string>
     <string name="customize_post_filter_activity_label">"Přizpůsobit filtr příspěvků"</string>
     <string name="filtered_posts_activity_subtitle">"Filtrované příspěvky"</string>
     <string name="post_filter_preference_activity_label">"Filtr příspěvků"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Hlasování"</string>
     <string name="history_activity_read_posts_label">"Přečtené příspěvky"</string>
     <string name="history_activity_subtitle">"Uloženo v tomto zařízení"</string>
-    <string name="subscription_activity_label">"Předplatné"</string>
     <string name="comment_filter_preference_activity_label">"Filtr komentářů"</string>
     <string name="customize_comment_filter_activity_label">"Přizpůsobení filtru komentářů"</string>
     <string name="copy_multireddit_activity_label">"Kopírovat MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Poslat soukromou zprávu"</string>
     <string name="action_block_user">"Zablokovat uživatele"</string>
     <string name="action_select_user_flair">"Vybrat uživatelský štítek"</string>
-    <string name="action_give_award">"Dát ocenění"</string>
     <string name="action_save_to_database">"Uložit do databáze"</string>
     <string name="action_read_all_messages">"Přečíst všechny zprávy"</string>
     <string name="action_add_to_multireddit">"Přidat do multiredditu"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Přidat do filtru příspěvků"</string>
     <string name="action_delete_logs">"Smazat protokol"</string>
     <string name="action_create_github_issue">"Vytvořit problém na GitHubu"</string>
-    <string name="action_share_post_link">"Sdílet odkaz příspěvku"</string>
     <string name="action_go_to_wiki">"Jít na wiki"</string>
     <string name="action_playback_speed">"Rychlost přehrávání"</string>
     <string name="action_contact_mods">"Kontaktovat moderátory"</string>
@@ -172,14 +167,10 @@
     <string name="user_multi_reddit">"Uživatelský MultiReddit"</string>
     <string name="subscribed_subreddits">"Odebírané subreddity"</string>
     <string name="history">"Historie"</string>
-    <string name="no_subreddits_visited_yet">"Dosud nebyly navštíveny žádné subreddity"</string>
-    <string name="no_users_visited_yet">"Zatím jsi nenavštívil žádné uživatelské profily"</string>
     <string name="follow_user">"Sledovat uživatele"</string>
     <string name="unfollow_user">"Přestat sledovat uživatele"</string>
     <string name="save_user">"Uložit uživatele"</string>
     <string name="unsave_user">"Zrušit uložení uživatele"</string>
-    <string name="subscribe_subreddit">"Odebírat subreddit"</string>
-    <string name="unsubscribe_subreddit">"Odhlásit odběr subredditu"</string>
     <string name="add_user_follow">"Sledovat"</string>
     <string name="add_user_save">"Uložit"</string>
     <string name="save_user_failed">"Uživatele nelze uložit"</string>
@@ -195,7 +186,6 @@
     <string name="reminders">"Připomenutí"</string>
     <string name="settings">"Nastavení"</string>
     <string name="subscribers_number_detail">"Odběratelů: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Online: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Nepodařilo se získat informace o subredditu"</string>
     <string name="cannot_fetch_user_info">"Nepodařilo se získat informace o uživateli"</string>
     <string name="cannot_fetch_sidebar">"Nepodařilo se získat postranní menu"</string>
@@ -215,8 +205,6 @@
     <string name="follow_failed">"Sledování selhalo"</string>
     <string name="unfollowed">"Sledování zrušeno"</string>
     <string name="unfollow_failed">"Rušení sledování selhalo"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Hledat cokoli"</string>
     <string name="search_only_subreddits_hint">"Hledat subreddity"</string>
     <string name="search_only_users_hint">"Hledat uživatele"</string>
     <string name="search_subreddits_and_users_hint">"Prohledej subreddity a uživatele"</string>
@@ -232,7 +220,6 @@
     <string name="send_message_subject_hint">"Předmět (max 100 znaků)"</string>
     <string name="send_message_content_hint">"Zpráva"</string>
     <string name="reply_message_failed">"Na tuto zprávu nelze odpovědět"</string>
-    <string name="error_getting_message">"Chyba při získávání zprávy"</string>
     <string name="message_username_required">"Hej, komu chceš poslat tuhle zprávu?"</string>
     <string name="message_subject_required">"Tvoje zpráva by měla obsahovat předmět"</string>
     <string name="message_content_required">"Musíš příjemci něco říct"</string>
@@ -333,7 +320,6 @@
     <string name="sort_relevance">"Relevance"</string>
     <string name="sort_comments">"Komentáře"</string>
     <string name="sort_activity">"Aktivita"</string>
-    <string name="sort_confidence">"Přesvědčení"</string>
     <string name="sort_old">"Staré"</string>
     <string name="sort_qa">"QA"</string>
     <string name="sort_live">"Živě"</string>
@@ -445,13 +431,10 @@
     <string name="settings_immersive_interface_summary">"Nevztahuje se na všechny stránky"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Zakázat pohlcující rozhraní v režimu na šířku"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Přizpůsobit karty na hlavní stránce"</string>
-    <string name="only_for_logged_in_user">"Pouze pro přihlášeného uživatele"</string>
     <string name="settings_category_post_and_comment_title">"Příspěvek a komentář"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Hlasovací tlačítka napravo"</string>
     <string name="settings_mute_video_title">"Ztlumit videa"</string>
     <string name="settings_mute_nsfw_video_title">"Ztlumit NSFW videa"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignorovat navigační lištu v přehrávači videí"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Zabránit ovládání videa mít dodatečný okraj"</string>
     <string name="settings_main_page_back_button_action">"Akce tlačítka zpět na hlavní stránce"</string>
     <string name="settings_confirm_to_exit">"Potvrdit pro odchod"</string>
     <string name="settings_open_navigation_drawer">"Otevřít navigační panel"</string>
@@ -518,11 +501,6 @@
     <string name="settings_credits_material_icons_title">"Material Icons"</string>
     <string name="settings_open_source_title">"Open Source"</string>
     <string name="settings_open_source_summary">"Pokud máš rádi tuto aplikaci, dej jí hvězdičku na GitHubu"</string>
-    <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_reddit_account_title">"Reddit účet"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Sdílet"</string>
     <string name="settings_share_summary">"Pokud máš rádi tuto aplikaci, sdílej ji s ostatními lidmi"</string>
     <string name="settings_privacy_policy_title">"Ochrana údajů"</string>
@@ -554,8 +532,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_reset_all_settings_title">"Obnovit všechna nastavení"</string>
     <string name="restart_app_see_changes">"Restartuj aplikaci pro zobrazení změn"</string>
     <string name="app_will_restart">"Návrat zpět po změně hodnoty způsobí restart aplikace."</string>
-    <string name="settings_tab_count">"Počet karet"</string>
-    <string name="settings_show_tab_names">"Zobrazit názvy karet"</string>
     <string name="settings_enable_tabs">"Povolit karty"</string>
     <string name="settings_edit_tabs_title">"Záložky"</string>
     <string name="settings_edit_tabs_summary">"Přidat, odebrat a změnit pořadí karet"</string>
@@ -568,12 +544,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="reset_name">"Resetovat jméno"</string>
     <string name="content_description_drag_to_reorder">"Přetažením změníš pořadí"</string>
     <string name="content_description_delete">"Odstranit"</string>
-    <string name="settings_tab_1_summary">"Karta 1"</string>
-    <string name="settings_tab_2_summary">"Karta 2"</string>
-    <string name="settings_tab_3_summary">"Karta 3"</string>
-    <string name="settings_tab_4_summary">"Karta číslo 4"</string>
-    <string name="settings_tab_5_summary">"Karta číslo 5"</string>
-    <string name="settings_tab_6_summary">"Karta číslo 6"</string>
     <string name="settings_more_tabs_summary">"Více karet"</string>
     <string name="settings_more_tabs_info_summary">"Změny zde ovlivní seznam výše"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Zobrazit oblíbené multireddity"</string>
@@ -582,8 +552,6 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_more_tabs_show_users_multireddits_title">"Zobrazit MultiReddits uživatelů"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Zobrazit oblíbené odebírané subreddity"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Zobrazit odebírané subreddity"</string>
-    <string name="settings_tab_title">"Název"</string>
-    <string name="settings_tab_post_type">"Typ"</string>
     <string name="settings_tab_subreddit_name">"Název subredditu (bez předpony r/)"</string>
     <string name="settings_tab_multi_reddit_name">"Název multiredditu (/user/tvojejméno/m/názevmultiredditu)"</string>
     <string name="settings_tab_username">"Uživatelské jméno (bez předpony u/)"</string>
@@ -644,8 +612,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Respektovat doporučené řazení komentářů subredditu"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Typ řazení komentářů nebude uložen"</string>
     <string name="settings_post_filter_title">"Filtr příspěvků"</string>
-    <string name="settings_subreddit_filter_category">"Skrýt subreddity"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"V r/popular a r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Animace chycení UFO"</string>
     <string name="settings_hide_subreddit_description_title">"Skrýt popis subredditu"</string>
     <string name="settings_disable_image_preview_title">"Skrýt náhled obrázků v režimu úspory dat"</string>
@@ -665,9 +631,7 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Automaticky skrýt přečtené příspěvky v Subreddits"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Automaticky skrýt přečtené příspěvky v Uživatelích"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Automaticky skrýt přečtené příspěvky ve vyhledávání"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Toto nastavení se nepoužije při prohlížení příspěvků z vyhledávání, konkrétních uživatelů nebo subredditů."</string>
     <string name="settings_sort_type_title">"Typ řazení"</string>
-    <string name="settings_save_sort_type_title">"Uložit typ řazení"</string>
     <string name="settings_sort_category_post_feeds">"Kanály příspěvků"</string>
     <string name="settings_sort_category_comments">"Komentáře"</string>
     <string name="settings_save_post_sort_title">"Uložit příspěvek Řadit"</string>
@@ -746,8 +710,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_custom_content_font_family_title">"Vlastní rodina obsahových písem"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Pevná výška karty"</string>
     <string name="settings_hide_text_post_content">"Skrýt obsah textového příspěvku"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Zobrazit méně možností na liště nástrojů"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Úroveň %1$d"</string>
     <string name="settings_show_author_avatar_title">"Zobrazit avatar autora"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Zakázat animaci avatara profilu"</string>
     <string name="settings_show_user_prefix_title">"Zobrazit předponu uživatele"</string>
@@ -785,8 +747,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_enable_api_key_overrides_title">"Povolit přepisy"</string>
     <string name="settings_enable_api_key_overrides_summary">"Použij své vlastní ID klienta, User Agent a URI přesměrování namísto vestavěných výchozích hodnot, kterými jsou RedReader"</string>
     <string name="settings_client_id_title">"Reddit API ID klienta"</string>
-    <string name="settings_client_id_summary">"Použij vlastní ID klienta pro Reddit API"</string>
-    <string name="client_id_length_error">"ID klienta musí mít přesně 22 znaků."</string>
     <string name="tap_to_set_client_id">"Klepnutím nastavíš ID klienta"</string>
     <string name="set_client_id_dialog_message">"Nastav Reddit API ID klienta nebo vypni možnost Povolit přepisy v Nastavení | Klíče API"</string>
     <string name="settings_giphy_api_key_title">"Klíč Giphy API"</string>
@@ -829,7 +789,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="no_video_path_received">"Neobdržena žádná cesta videa"</string>
     <string name="cannot_handle_intent">"Nelze zpracovat požadavek na sdílení"</string>
     <string name="share">"Sdílet"</string>
-    <string name="no_email_client">"Nenalezen žádný e-mailový klient"</string>
     <string name="no_app">"Není dostupná žádná aplikace"</string>
     <string name="save_comment">"Uložit"</string>
     <string name="unsave_comment">"Neukládat"</string>
@@ -851,7 +810,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="elapsed_time_months_ago">"%1$d měsíců"</string>
     <string name="elapsed_time_a_year_ago">"1 rok"</string>
     <string name="elapsed_time_years_ago">"%1$d let"</string>
-    <string name="remaining_time_passed">"V minulosti"</string>
     <string name="remaining_time_less_than_1_minute">"Méně než 1 minuta"</string>
     <string name="remaining_time_1_minute">"1 minuta"</string>
     <string name="remaining_time_in_minutes">"%1$d minut"</string>
@@ -917,7 +875,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="remove_followed_multi_reddit">"Odebrat z MultiReddits uživatelů"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Odstranit tento uložený multireddit? Originál není ovlivněn."</string>
     <string name="remove_followed_multi_reddit_success">"Odebráno"</string>
-    <string name="add_user_title">"Sledovat uživatele"</string>
     <string name="add_user_to_list_title">"Přidat uživatele"</string>
     <string name="follow_failed_user_suspended">"u/%1$s je pozastaveno a nelze jej sledovat"</string>
     <string name="follow_failed_user_not_found">"u/%1$s neexistuje nebo byl smazán"</string>
@@ -1159,12 +1116,9 @@ Založené na amoled indigovém motivu"</string>
     <string name="rename">"Přejmenovat"</string>
     <string name="override">"Nahradit"</string>
     <string name="save_theme_options_title">"Možnosti uložení"</string>
-    <string name="save_theme_options_message">"Tento motiv jsi nahrál, abys mohl provádět změny."</string>
     <string name="save_locally">"Uložit lokálně"</string>
     <string name="save_online">"Uložit online"</string>
-    <string name="save_online_anonymous">"Uložit online (anonymně)"</string>
     <string name="save_locally_and_online">"Ulož lokálně i online"</string>
-    <string name="save_locally_and_online_anonymous">"Uložit lokálně i online (anonymně)"</string>
     <string name="theme_saved_locally">"Motiv uložen místně"</string>
     <string name="theme_name_already_taken">"Motiv s názvem %1$s již existuje. Vyber jiné jméno."</string>
     <string name="theme_saved_online">"Motiv uložen online"</string>
@@ -1209,9 +1163,7 @@ Chodí popředu."</string>
     <string name="notifications">"Oznámení"</string>
     <string name="messages">"Zprávy"</string>
     <string name="message">"Zpráva"</string>
-    <string name="fetch_redgifs_video_failed">"Získávání Redgifs videa selhalo"</string>
     <string name="fetching_video_info_please_wait">"Získávání informací o videu. Čekej prosím."</string>
-    <string name="fetch_streamable_video_failed">"Nepodařilo se získat Streamable video"</string>
     <string name="error_fetching_imgur_media">"Nelze načíst obrázky"</string>
     <string name="downloading_reddit_video">"Stahování videa"</string>
     <string name="downloading_reddit_video_audio_track">"Stahování zvuku"</string>
@@ -1242,8 +1194,6 @@ Chodí popředu."</string>
     <string name="set_to_home_screen">"Nastavit na plochu"</string>
     <string name="set_to_lock_screen">"Nastavit na zamykací obrazovku"</string>
     <string name="set_to_both">"Nastavit na oboje"</string>
-    <string name="default_font_font_preview">"Výchozí"</string>
-    <string name="load_video_in_redgifs">"Zkusit načíst video na Redgifs"</string>
     <string name="top_score">"%1$s bodů"</string>
     <string name="login_activity_2fa_prompt">"Dvoufaktorová autentizace: &lt;heslo&gt;:&lt;2FA kód&gt;.\nPříklad: yourpass:123456\nPřihlášení Google nebo potíže s přihlášením: klikni na tlačítko vpravo dole."</string>
     <string name="login_activity_internet_disconnected_error">"Žádné připojení k internetu"</string>
@@ -1282,7 +1232,6 @@ Chodí popředu."</string>
     <string name="edited_time">"Upraveno %s"</string>
     <string name="warning">"Varování"</string>
     <string name="this_is_a_nsfw_subreddit">"Toto je NSFW subreddit."</string>
-    <string name="this_user_has_nsfw_content">"Tento uživatel má obsah NSFW"</string>
     <string name="this_post_contains_sensitive_content">"Tento příspěvek obsahuje obsah NSFW."</string>
     <string name="dismiss">"Zavřít"</string>
     <string name="leave">"Opustit"</string>
@@ -1291,13 +1240,10 @@ Chodí popředu."</string>
     <string name="go_to_user">"Navštívit uživatele"</string>
     <string name="go_to_thing_hint">"Název"</string>
     <string name="go_to_top">"Zpět nahoru"</string>
-    <string name="random">"Náhodný"</string>
     <string name="random_subreddits">"Náhodné subreddity"</string>
     <string name="random_subreddit">"Náhodný Subreddit"</string>
     <string name="random_nsfw_subreddit">"Náhodně NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"Náhodný odběr Subreddit"</string>
-    <string name="random_post">"Náhodný příspěvek"</string>
-    <string name="random_nsfw_post">"Náhodný příspěvek NSFW"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"Bezpečná práce není zaručena. Subreddit může mít stále obsah NSFW bez příznaku NSFW."</string>
     <string name="fetch_random_thing_failed">"Zkus to znovu později"</string>
     <string name="select_video_quality">"Vybrat kvalitu videa"</string>
@@ -1410,8 +1356,6 @@ Chodí popředu."</string>
         <item quantity="other">"%1$d příspěvků"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Povoleno – toto pravidlo jej již neskrývá"</string>
-    <string name="post_filter_blocked_allow">"Nikdy neschovávej tento subreddit"</string>
-    <string name="post_filter_blocked_undo_allow">"Tento subreddit znovu skryj"</string>
     <string name="content_description_allow_blocked_subreddit">"Přestat skrývat %1$s"</string>
     <string name="excludes_strings_hint">"Vyloučit klíčová slova (klíč1,klíč2)"</string>
     <string name="comment_filter_name_hint">"Název filtru komentářů"</string>
@@ -1482,21 +1426,13 @@ Chodí popředu."</string>
     <string name="capture">"Zachytit"</string>
     <string name="uploading_image">"Nahrávání"</string>
     <string name="upload_image_success">"Obrázek úspěšně nahrán. Klikni znovu na tlačítko obrázku pro zobrazení nahraných obrázků."</string>
-    <string name="get_image_bitmap_failed">"Nepodařilo se získat bitmapu obrázku"</string>
     <string name="upload_image_failed">"Nepodařilo se nahrát obrázek"</string>
     <string name="select_giphy_gif">"Vyber giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Toto je experimentální funkce a zde je několik věcí, které potřebuješ vědět:\n\n        1. Giphy gify se nebudou zobrazovat v textovém editoru a místo toho se vloží kus textu jako blok,\n        s formátem podobným ![gif](XXXXX). XXXXX je gif id Giphy a nemělo by se měnit.\n\n        2. Do každého komentáře můžeš vložit pouze jeden gif Giphy.\n\n        3. Chceš-li napsat horní index, použij ^() a vlož texty do závorek, nikoli pouze\n        pomocí jediného ^. Pro zjednodušení klepni na možnost horní index v nástrojích pro formátování a vlož horní index.\n\n        4. Tato funkce převede tvoji markdown do formátu RTF a některé formátování může být ztraceno.\n\n        5. Giphy gify se nemusí zobrazovat na obrazovce náhledu.\n\n        6. Neměň prosím svůj účet pomocí nástroje Account Chooser na obrazovce úprav. Účet bys měl přepnout\n        svůj účet v navigační zásuvce na hlavní obrazovce."</string>
     <string name="search_comments">"Hledat komentáře"</string>
     <string name="please_wait_image_is_uploading">"Obrázek se stále nahrává. Čekej prosím."</string>
-    <string name="error_fetch_trending_search">"Získávání trendů selhalo.
-Ťukni pro opakování."</string>
-    <string name="error_parse_trending_search">"Parsování trendů selhalo.
-Ťukni pro opakování."</string>
-    <string name="no_trending_search">"Nenalezena žádná trendy vyhledávání.
-Ťukni pro opakování."</string>
     <string name="error_loading_wiki">"Chyba při načítání wiki"</string>
     <string name="no_wiki">"Tento subreddit nemá žádnou wiki stránku"</string>
-    <string name="material_you_notification_title">"Aplikování Material You"</string>
     <string name="lock_screen_text">"Dávej pozor!!!"</string>
     <string name="app_lock_timeout_immediately">"Ihned"</string>
     <string name="app_lock_timeout_1_min">"1 minuta"</string>
@@ -1572,40 +1508,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Oprávnění k oznámením neuděleno"</string>
     <string name="go_to_settings">"Nastavení"</string>
-    <string name="welcome_to_redditjr">"Vítej v Reddit Jr., tvojí bráně do zcela nové dimenze Reddit prohlížení!"</string>
-    <string name="subscription_prompt">"Než se ponoříš do bezpočtu možností, které tato aplikace nabízí,\n        Chci být upřímný a transparentní ohledně významné změny, kterou jsem zavedl, abych tobě zajistil nejlepší možné služby.\n        \n\nOd této chvíle budeš potřebovat měsíční předplatné pro přístup k Reddit API v rámci Reddit Jr. a\n        je to proto, že Reddit začalo účtovat za API přístup od 1. července 2023.\n        \n\nVšechny vrstvy fungují stejně. Pokud chceš podpořit Reddit Jr., můžeš se přihlásit k odběru vyšší úrovně.\n        Většina peněz z nejnižší úrovně jde do Reddit.\n    "</string>
-    <string name="monthly">"Měsíčně"</string>
-    <string name="yearly">"ročně"</string>
-    <string name="weekly">"týdně"</string>
-    <string name="billing_error_billing_unavailable">"Fakturační služba není na zařízení dostupná."</string>
-    <string name="billing_error_developer_error">"Vývojář udělal nějaké chyby. Není to tvoje chyba."</string>
-    <string name="billing_error_error">"Závažná chyba během akce API."</string>
-    <string name="billing_error_feature_not_supported">"Požadovaná funkce není podporována Obchodem Play na aktuálním zařízení."</string>
-    <string name="billing_error_item_already_owned">"Nákup se nezdařil, protože položka je již ve vlastnictví."</string>
-    <string name="billing_error_item_unavailable">"Požadovaný produkt není možné zakoupit."</string>
-    <string name="billing_error_network_error">"Během operace došlo k chybě sítě."</string>
-    <string name="billing_error_service_disconnected">"Aplikace není připojena ke službě Obchod Play prostřednictvím knihovny fakturace Google Play."</string>
-    <string name="billing_error_service_unavailable">"Služba je momentálně nedostupná."</string>
-    <string name="billing_error_user_canceled">"Transakce byla zrušena uživatelem."</string>
-    <string name="subscription_plan_description_monthly">"Bronz"</string>
-    <string name="subscription_plan_description_monthly_399">"Stříbrná"</string>
-    <string name="subscription_plan_description_monthly_499">"Gold – perfektní volba!"</string>
-    <string name="subscription_plan_description_monthly_699">"Platina"</string>
-    <string name="subscription_plan_description_monthly_899">"Diamant"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Nelze potvrdit nákup"</string>
-    <string name="connect_to_billing_system_failed">"Připojení k fakturačnímu systému se nezdařilo"</string>
-    <string name="connecting_to_billing_system">"Připojení k fakturačnímu systému. Čekej prosím."</string>
-    <string name="thank_you_for_subscription">"Děkujeme za tvoje předplatné"</string>
-    <string name="load_subscription_options">"Načíst možnosti předplatného"</string>
-    <string name="acknowledging_subscription">"Potvrzuji tvoje předplatné. Čekej prosím."</string>
-    <string name="acknowledgement_purchase_failed_description">"Jejda, při potvrzování nákupu došlo k chybě. Pokud tento problém přetrvává po dobu tří dnů, peníze ti budou automaticky vráceny.\nNeboj se, Reddit Jr. si stále můžeš užívat."</string>
-    <string name="continue_to_app">"Pokračuj do aplikace"</string>
-    <string name="restore_subscription_purchase_details">"Už jsi zaplatil předplatné?"</string>
-    <string name="restore_subscription_purchase">"Obnovit nákup předplatného"</string>
-    <string name="important_info_title">"Přihlas se prosím znovu ke svému účtu"</string>
-    <string name="important_info">"Reddit Jr. používá ID klienta (klíč API) z Reddit a pro pokračování v používání aplikace se musíš znovu přihlásit.\n\nStačí otevřít navigační vysouvací panel a kliknout na záhlaví svého účtu a vybrat \"Přidat účet\" pro přihlášení k Reddit znovu pomocí stejného účtu. Jinak Reddit Jr. nemusí vůbec načíst příspěvky. Omlouváme se za nepříjemnosti."</string>
-    <string name="i_understand">"Rozumím"</string>
     <string name="add_to_comment_filter">"Přidat do filtru komentářů"</string>
     <string name="cannot_edit_post_with_images">"Úprava příspěvků s obrázky není povolena."</string>
     <string name="local">"Místní"</string>
@@ -1631,11 +1533,8 @@ Klepnutím to zkusíš znova."</string>
     <string name="content_description_comment_filter_add_user">"Přidat uživatele do filtru komentářů"</string>
     <string name="content_description_create_custom_theme">"Vytvoř vlastní motiv"</string>
     <string name="content_description_create_post_filter">"Vytvořit filtr příspěvků"</string>
-    <string name="content_description_add_post_filter_usage">"Někde použij post filtr"</string>
     <string name="content_description_add_post_filter_rule">"Přidat pravidlo filtru"</string>
     <string name="content_description_remove_post_filter_rule">"Odebrat %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Přidej subreddit do filtru příspěvků"</string>
-    <string name="content_description_post_filter_add_user">"Přidat uživatele do filtru příspěvků"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Přidej uživatele nebo subreddit do filtru příspěvků"</string>
     <string name="content_description_change_banner">"Změna banneru"</string>
     <string name="content_description_change_avatar">"Změnit avatar"</string>
@@ -1658,7 +1557,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="content_description_search">"Hledat"</string>
     <string name="content_description_go_to_subreddit">"Navštívit subreddit"</string>
     <string name="content_description_go_to_user">"Navštívit uživatele"</string>
-    <string name="content_description_random">"Náhodné"</string>
     <string name="content_description_filter_posts">"Filtrovat příspěvky"</string>
     <string name="content_description_hide_read_posts">"Skrýt přečtené příspěvky"</string>
     <string name="content_description_go_to_top">"Zpět nahoru"</string>
@@ -1676,15 +1574,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="content_description_next_result">"Přejít na další výsledek"</string>
     <string name="content_description_close_search_panel">"Zavři vyhledávací panel"</string>
     <string name="content_description_send_message">"Odeslat zprávu"</string>
-    <string name="content_description_home">"Domů"</string>
-    <string name="content_description_subscriptions">"Odběry"</string>
-    <string name="content_description_inbox">"Pošta"</string>
-    <string name="content_description_profile">"Profil"</string>
-    <string name="content_description_multireddits">"MultiReddity"</string>
-    <string name="content_description_upvoted">"Hlasováno pro"</string>
-    <string name="content_description_downvoted">"Hlasováno proti"</string>
-    <string name="content_description_hidden">"Skryté"</string>
-    <string name="content_description_saved">"Uložené"</string>
     <string name="content_description_scan_qr_code">"Naskenuj QR kód"</string>
     <string name="comment">"Komentář"</string>
     <string name="enable_reply_notifications">"Příjem oznámení o odpovědi"</string>
@@ -1703,15 +1592,9 @@ Klepnutím to zkusíš znova."</string>
     <string name="download_image">"Stáhnout obrázek"</string>
     <string name="download_gif">"Stáhnout Gif"</string>
     <string name="download_video">"Stáhnout video"</string>
-    <string name="download_all_gallery_images">"Stáhnout všechny obrázky galerie"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Přímý"</string>
-    <string name="password_cannot_be_empty">"Heslo nemůže být prázdné"</string>
-    <string name="title_activity_settings">"Nastavení"</string>
-    <string name="title_activity_login">"Přihlas se"</string>
-    <string name="restart_app_to_apply_changes">"Stisknutím tohoto tlačítka restartuješ aplikaci, abys použil změny"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Subreddits skryté ve výchozím nastavení odstraněny"</string>
     <string name="jump_to_parent_comment">"Přejít na komentář rodiče"</string>
     <string name="long_press_post_non_media_area">"Dlouhé stisknutí příspěvku mimo média"</string>
     <string name="long_press_post_media">"Dlouhé stisknutí médií příspěvku"</string>

@@ -141,15 +141,10 @@ public class LoginActivity extends BaseActivity {
         binding.webviewLoginActivity.getSettings().setJavaScriptEnabled(true);
 
         String userAgent = binding.webviewLoginActivity.getSettings().getUserAgentString();
-        Log.d("LoginActivity", "Default WebView user agent: " + userAgent);
         String chromeUserAgent = userAgent
                 .replace("; wv)", ")")
                 .replace("Version/4.0 ", "");
         binding.webviewLoginActivity.getSettings().setUserAgentString(chromeUserAgent);
-        Log.d("LoginActivity", "Overridden WebView user agent: " + chromeUserAgent);
-        Log.d("LoginActivity", "App user agent (APIUtils.USER_AGENT, unused by WebView): " + APIUtils.USER_AGENT);
-
-        Log.d("LoginActivity", "OAuth redirect URI: " + APIUtils.REDIRECT_URI);
 
         Uri baseUri = Uri.parse(APIUtils.OAUTH_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
@@ -179,7 +174,7 @@ public class LoginActivity extends BaseActivity {
         CookieManager.getInstance().removeAllCookies(aBoolean -> {
         });
 
-        binding.webviewLoginActivity.addJavascriptInterface(new JsRequestLogger(), "AndroidLogger");
+        binding.webviewLoginActivity.addJavascriptInterface(new LoginJsBridge(), "AndroidBridge");
 
         // Hide Reddit's cookie consent wrapper before any page script runs. It can appear
         // behind the login form and steal focus from inputs. Inject at document-start so the
@@ -317,7 +312,6 @@ public class LoginActivity extends BaseActivity {
                     "(function() {" +
                     "  document.addEventListener('submit', function(e) {" +
                     "    if (e.submitter && e.submitter.name === 'authorize') {" +
-                    "      AndroidLogger.log('rewriting authorize from [' + e.submitter.value + '] to [Allow]');" +
                     "      e.submitter.value = 'Allow';" +
                     "    }" +
                     "  }, true);" +
@@ -332,7 +326,7 @@ public class LoginActivity extends BaseActivity {
                     "    if (location.host.indexOf('reddit.com') === -1) return;" +
                     "    var t = (document.body ? document.body.innerText : '').trim();" +
                     "    if (t.length > 0 && t.charAt(0) === '{') {" +
-                    "      AndroidLogger.onPossibleErrorPage(t);" +
+                    "      AndroidBridge.onPossibleErrorPage(t);" +
                     "    }" +
                     "  } catch (e) {}" +
                     "})();",
@@ -389,12 +383,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     // Non-static so onPossibleErrorPage can finish the activity / show a toast on the UI thread.
-    private class JsRequestLogger {
-        @JavascriptInterface
-        public void log(String message) {
-            Log.d("LoginActivity", "[JS] " + message);
-        }
-
+    private class LoginJsBridge {
         // Called from the WebView when a loaded reddit page's text starts with '{'. Confirm it's a
         // bare-JSON error page and, if so, surface a clear message instead of leaving "{}" on screen.
         @JavascriptInterface
