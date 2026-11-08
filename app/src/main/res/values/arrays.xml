@@ -279,17 +279,6 @@
         <item>yyyy.M.d hh:mm a</item>
     </string-array>
 
-    <string-array name="settings_number_of_columns_in_post_feed">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-    </string-array>
-
     <string-array name="settings_main_page_tab_count">
         <item>1</item>
         <item>2</item>

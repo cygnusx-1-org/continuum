@@ -477,11 +477,6 @@
     <string name="settings_post_compact_thumbnail_size">"缩略图尺寸"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"紧凑布局中在左侧显示缩略图"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"在右侧显示缩略图"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"帖子列表页面的列数"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"竖屏"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"横屏"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"竖屏（未折叠）"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"横屏（未折叠）"</string>
     <string name="settings_swap_tap_and_long_title">"在评论中交换点击和长按功能"</string>
     <string name="settings_swipe_to_go_back_title">"向右滑动返回"</string>
     <string name="settings_swipe_to_go_back_summary">"不应用到所有页面"</string>

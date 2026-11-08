@@ -58,10 +58,6 @@ object AccountScopedKeys {
         "long_press_to_hide_toolbar_in_compact_layout",
         "post_compact_layout_toolbar_hidden_by_default",
 
-        // Number of columns in the post feed
-        "number_of_columns_in_post_feed_portrait", "number_of_columns_in_post_feed_landscape",
-        "number_of_columns_in_post_feed_portrait_unfolded",
-        "number_of_columns_in_post_feed_landscape_unfolded",
 
         // Interface.
         "main_activity_fab_action", "other_activities_fab_action",

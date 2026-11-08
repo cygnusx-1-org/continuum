@@ -477,11 +477,6 @@
     <string name="settings_post_compact_thumbnail_size">"Розмір мініатюри"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Показувати мініатюру ліворуч"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Показати мініатюру праворуч"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Кількість стовпців у стрічці дописів"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Портретна"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Альбомна"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Портрет (Не згорнуто)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Альбом (Не згорнуто)"</string>
     <string name="settings_swap_tap_and_long_title">"Поміняти натиснення і довге натиснення по коментарях"</string>
     <string name="settings_swipe_to_go_back_title">"Ковзни вправо, щоб вернутися назад"</string>
     <string name="settings_swipe_to_go_back_summary">"Не застосовується до всіх сторінок"</string>

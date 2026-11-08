@@ -468,11 +468,6 @@
     <string name="settings_post_compact_thumbnail_size">"Veličina sličice"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Prikaži sličicu na lijevoj strani u Kompaktnom rasporedu"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Prikaži sličicu s desne strane"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Broj stupaca u feed-u objava"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portret"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Pejzaž"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portret (rasklopljen)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Pejzaž (rasklopljen)"</string>
     <string name="settings_swap_tap_and_long_title">"Zamijeni kratki i dugi dodir u komentarima"</string>
     <string name="settings_swipe_to_go_back_title">"Prelazak prstom u desno za natrag"</string>
     <string name="settings_swipe_to_go_back_summary">"Ne primjenjuje se na sve stranice"</string>

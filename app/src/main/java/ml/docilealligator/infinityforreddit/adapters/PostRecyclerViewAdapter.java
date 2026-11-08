@@ -293,9 +293,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     // The same column in pixels, as laid out. Not itemWidth times the density: that is rounded to
     // a whole dp, and a box a pixel off the view's is a decode at the wrong size.
     private int itemWidthPx;
-    // Whether the feed is in more than one column, where its decoration cancels Card Top's own
-    // margins (PostFragmentBase.StaggeredGridLayoutManagerItemOffsetDecoration).
-    private boolean multiColumn;
 
     // postHistorySharedPreferences will be null when being used in HistoryPostFragment.
     public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -2285,15 +2282,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      *
      * {@code itemWidthPx} is the item as laid out, which is the whole card in the card-1 layout.
      * Card 2 draws inside a card with a 16dp margin on each side, resolved to pixels the way a
-     * layout resolves it. Card 3's item is the card itself, inset by those margins too -- except in
-     * a multi-column feed, whose decoration cancels them, leaving the item the card's width. Zero
+     * layout resolves it. Card 3's item is the card itself, inset by those margins too. Zero
      * until the feed has been laid out once, which is the signal to leave the size to the view.
      */
     private int cardPreviewWidthPx() {
         if (itemWidthPx <= 0) {
             return 0;
         }
-        boolean inset = SharedPreferencesUtils.isCardTop(mPostLayout) && !multiColumn;
+        boolean inset = SharedPreferencesUtils.isCardTop(mPostLayout);
         return Math.max(0, itemWidthPx - (inset ? 2 * Math.round(16 * mScale) : 0));
     }
 
@@ -3700,14 +3696,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         this.canPlayVideo = canPlayVideo;
     }
 
-    /**
-     * The feed's column in dp, the pixels an item is laid out across within it, and whether there is
-     * more than one column.
-     */
-    public void provideItemWidth(int widthDp, int widthPx, boolean multiColumn) {
+    /** The feed's width in dp, and the pixels an item is laid out across within it. */
+    public void provideItemWidth(int widthDp, int widthPx) {
         itemWidth = widthDp;
         itemWidthPx = widthPx;
-        this.multiColumn = multiColumn;
     }
 
 

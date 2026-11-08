@@ -476,11 +476,6 @@
     <string name="settings_post_compact_thumbnail_size">"Размер миниатюры"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Показывать миниатюры слева"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Показать миниатюру справа"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Количество столбцов в ленте постов"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Портрет"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Альбом"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Портрет (развёрнутый)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Альбом (развёрнутый)"</string>
     <string name="settings_swap_tap_and_long_title">"Поменять местами касание и долгое нажатие в комментариях"</string>
     <string name="settings_swipe_to_go_back_title">"Провести вправо для возврата"</string>
     <string name="settings_swipe_to_go_back_summary">"Не применяется ко всем страницам"</string>

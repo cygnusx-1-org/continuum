@@ -472,11 +472,6 @@
     <string name="settings_post_compact_thumbnail_size">"थंबनेल आकार"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"संक्षिप्त विन्यास में थम्बनेल बाईं तरफ दिखाएं "</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"दाईं ओर थंबनेल दिखाएँ"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"पोस्ट फीड में स्तम्भों की संख्या "</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"ऊर्ध्वाधर"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">" क्षैतिज "</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"पोर्ट्रेट (खुला)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"लैंडस्केप (खुला)"</string>
     <string name="settings_swap_tap_and_long_title">"टिप्पणियों के  लिए टैप एवं लॉंग प्रैस की अदला बदली करें "</string>
     <string name="settings_swipe_to_go_back_title">"वापस जाने के लिए दाईं ओर स्वाइप करें "</string>
     <string name="settings_swipe_to_go_back_summary">"सभी पृष्ठों पर लागू नहीं होता "</string>

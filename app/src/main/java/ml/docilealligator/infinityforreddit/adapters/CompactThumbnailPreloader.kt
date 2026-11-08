@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -278,25 +277,14 @@ class CompactThumbnailPreloader(
         val metrics = recyclerView.resources.displayMetrics
         val height = recyclerView.height.takeIf { it > 0 } ?: metrics.heightPixels
         val shortestRow = box + (16 * metrics.density).toInt()
-        val columns = (recyclerView.layoutManager as? StaggeredGridLayoutManager)?.spanCount ?: 1
         val rows = ceil(height.toDouble() / shortestRow).toInt()
-        return min(PREWARM_MAX_POSTS, ceil(rows * columns * PREWARM_FILTER_ALLOWANCE).toInt())
+        return min(PREWARM_MAX_POSTS, ceil(rows * PREWARM_FILTER_ALLOWANCE).toInt())
     }
 
-    /** First and last visible adapter positions, across every column of a staggered grid. */
+    /** First and last visible adapter positions. */
     private fun visiblePositions(): Pair<Int, Int>? {
-        val range = when (val layoutManager = recyclerView.layoutManager) {
-            is LinearLayoutManager ->
-                layoutManager.findFirstVisibleItemPosition() to layoutManager.findLastVisibleItemPosition()
-            is StaggeredGridLayoutManager -> {
-                val first = layoutManager.findFirstVisibleItemPositions(IntArray(layoutManager.spanCount))
-                    .filter { it != RecyclerView.NO_POSITION }.minOrNull() ?: return null
-                val last = layoutManager.findLastVisibleItemPositions(IntArray(layoutManager.spanCount))
-                    .filter { it != RecyclerView.NO_POSITION }.maxOrNull() ?: return null
-                first to last
-            }
-            else -> return null
-        }
+        val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return null
+        val range = layoutManager.findFirstVisibleItemPosition() to layoutManager.findLastVisibleItemPosition()
         return range.takeIf { it.first != RecyclerView.NO_POSITION && it.second != RecyclerView.NO_POSITION }
     }
 

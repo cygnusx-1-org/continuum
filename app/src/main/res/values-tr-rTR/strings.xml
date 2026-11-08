@@ -478,11 +478,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_post_compact_thumbnail_size">"Küçük resim boyutu"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Küçük Resmi Solda Göster"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Sağdaki Küçük Resmi Göster"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Gönderi Akışındaki Sütun Sayısı"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portre"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Manzara"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portre (Katlanmamış)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Manzara (Katlanmamış)"</string>
     <string name="settings_swap_tap_and_long_title">"Yorumlarda Dokunmayı ve Uzun Dokunmayı Değiştirme"</string>
     <string name="settings_swipe_to_go_back_title">"Geri Dönmek İçin Sağa Kaydır"</string>
     <string name="settings_swipe_to_go_back_summary">"Tüm Sayfalara Uygulanamaz"</string>

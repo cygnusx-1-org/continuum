@@ -30,7 +30,6 @@ import androidx.paging.ItemSnapshotList;
 import androidx.paging.LoadState;
 import androidx.paging.PagingData;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
@@ -70,7 +69,6 @@ import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubsc
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePostHistorySettingsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
@@ -909,18 +907,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             });
         }
 
-        int nColumns = getNColumns(resources);
-        if (nColumns == 1) {
-            mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
-            binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
-            applyPostFeedTopBuffer(binding.recyclerViewPostFragment);
-        } else {
-            mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
-            binding.recyclerViewPostFragment.setLayoutManager(mStaggeredGridLayoutManager);
-            StaggeredGridLayoutManagerItemOffsetDecoration itemDecoration =
-                    new StaggeredGridLayoutManagerItemOffsetDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, nColumns);
-            binding.recyclerViewPostFragment.addItemDecoration(itemDecoration);
-        }
+        mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
+        binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
+        applyPostFeedTopBuffer(binding.recyclerViewPostFragment);
 
         if (resumePending) {
             restoreAnchorWhenLoaded(resumeState.anchorFullname, resumeState.anchorPosition,
@@ -1082,7 +1071,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             }
         }
 
-        if (nColumns == 1 && mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false)) {
+        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false)) {
             swipeActionEnabled = true;
             touchHelper.attachToRecyclerView(binding.recyclerViewPostFragment, 1);
         }
@@ -2016,46 +2005,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             }
         }
 
-        int previousPosition = -1;
-        if (mLinearLayoutManager != null) {
-            previousPosition = mLinearLayoutManager.findFirstVisibleItemPosition();
-        } else if (mStaggeredGridLayoutManager != null) {
-            int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
-            previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
-        }
-        int nColumns = getNColumns(getResources());
-        if (nColumns == 1) {
-            mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
-            // Every decoration, not just the first: a one-column feed can carry the top buffer as
-            // well as the grid offset it is leaving behind.
-            while (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
-                binding.recyclerViewPostFragment.removeItemDecorationAt(0);
-            }
-            binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
-            applyPostFeedTopBuffer(binding.recyclerViewPostFragment);
-            mStaggeredGridLayoutManager = null;
-        } else {
-            mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
-            while (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
-                binding.recyclerViewPostFragment.removeItemDecorationAt(0);
-            }
-            binding.recyclerViewPostFragment.setLayoutManager(mStaggeredGridLayoutManager);
-            StaggeredGridLayoutManagerItemOffsetDecoration itemDecoration =
-                    new StaggeredGridLayoutManagerItemOffsetDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, nColumns);
-            binding.recyclerViewPostFragment.addItemDecoration(itemDecoration);
-            mLinearLayoutManager = null;
-        }
-        syncSwipeActions(binding.recyclerViewPostFragment, nColumns);
-
-        if (previousPosition > 0) {
-            binding.recyclerViewPostFragment.scrollToPosition(previousPosition);
-        }
-
         if (mAdapter != null) {
             mAdapter.setPostLayout(this.postLayout);
-            // The columns may have changed with the layout, and the list's width has not, so its
-            // layout listener will not be the one to say so.
-            provideItemWidth(mAdapter);
             refreshAdapter();
         }
     }
@@ -2144,12 +2095,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         } else {
             return false;
         }
-    }
-
-    @Subscribe
-    public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
-        // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
-        changePostLayout(postLayout, true);
     }
 
     @Subscribe
@@ -2271,13 +2216,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     protected void refreshAdapter() {
-        int previousPosition = -1;
-        if (mLinearLayoutManager != null) {
-            previousPosition = mLinearLayoutManager.findFirstVisibleItemPosition();
-        } else if (mStaggeredGridLayoutManager != null) {
-            int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
-            previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
-        }
+        int previousPosition = mLinearLayoutManager == null
+                ? -1 : mLinearLayoutManager.findFirstVisibleItemPosition();
 
         RecyclerView.LayoutManager layoutManager = binding.recyclerViewPostFragment.getLayoutManager();
         binding.recyclerViewPostFragment.setAdapter(null);
@@ -2296,11 +2236,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void goBackToTop() {
         if (mLinearLayoutManager != null) {
             mLinearLayoutManager.scrollToPositionWithOffset(0, 0);
-            if (isInLazyMode) {
-                lazyModeRunnable.resetOldPosition();
-            }
-        } else if (mStaggeredGridLayoutManager != null) {
-            mStaggeredGridLayoutManager.scrollToPositionWithOffset(0, 0);
             if (isInLazyMode) {
                 lazyModeRunnable.resetOldPosition();
             }

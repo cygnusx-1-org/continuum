@@ -476,11 +476,6 @@
     <string name="settings_post_compact_thumbnail_size">"サムネイルのサイズ"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"コンパクトレイアウトでサムネイルを左側に表示"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"右側にサムネイルを表示"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"投稿フィードの表示列数"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"縦画面時"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"横画面時"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"ポートレート (展開した状態)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"風景 (展開)"</string>
     <string name="settings_swap_tap_and_long_title">"コメントでタップと長押しの操作を入れ替え"</string>
     <string name="settings_swipe_to_go_back_title">"右スワイプで前の画面に戻る"</string>
     <string name="settings_swipe_to_go_back_summary">"一部のページでは動作しません"</string>

@@ -5,6 +5,7 @@
 Unreleased
 ============
 **Removed**
+* Settings > Post > The Number of Columns in Post Feed. The feed is always one column, on phones, tablets, folded or not, in either orientation. The multi-column grid code behind it is gone with it
 * The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Card Clean is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
 
 ---

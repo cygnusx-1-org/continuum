@@ -115,10 +115,6 @@ public class SharedPreferencesUtils {
     public static final String POST_COMPACT_THUMBNAIL_SIZE = "post_compact_thumbnail_size";
     /** Matches @dimen/post_compact_thumbnail_size, which is what the compact layouts inflate with. */
     public static final String POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE = "112";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT = "number_of_columns_in_post_feed_portrait";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE = "number_of_columns_in_post_feed_landscape";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED = "number_of_columns_in_post_feed_portrait_unfolded";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED = "number_of_columns_in_post_feed_landscape_unfolded";
     public static final String SWIPE_RIGHT_TO_GO_BACK = "swipe_to_go_back_from_post_detail";
     public static final String SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA = "swipe_vertically_to_go_back_from_media";
     public static final String MUTE_VIDEO = "mute_video";
