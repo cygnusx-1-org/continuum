@@ -1688,8 +1688,6 @@ Az alap az indigó amoled téma"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Közvetlen"</string>
-    <string name="settings_backup_accounts_client_id_title">"Biztonsági mentési fiókok és ügyfél-azonosító"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Tartalmazza a felhasználói fiókokat és az ügyfél-azonosítót a biztonsági mentési fájlban (ajánlott)"</string>
     <string name="password_cannot_be_empty">"A jelszó nem lehet üres"</string>
     <string name="title_activity_settings">"Beállítások"</string>
     <string name="title_activity_login">"Bejelentkezés"</string>

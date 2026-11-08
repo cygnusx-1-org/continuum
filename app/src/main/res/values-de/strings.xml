@@ -1704,8 +1704,6 @@ Keine Sorge, du kannst Reddit Jr. trotzdem genießen."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Direkt"</string>
-    <string name="settings_backup_accounts_client_id_title">"Sicherungskonten und Client-ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Benutzerkonten und Client-ID in die Sicherungsdatei aufnehmen (empfohlen)"</string>
     <string name="password_cannot_be_empty">"Passwort darf nicht leer sein"</string>
     <string name="title_activity_settings">"Einstellungen"</string>
     <string name="title_activity_login">"Anmelden"</string>

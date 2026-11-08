@@ -1684,8 +1684,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Izravno"</string>
-    <string name="settings_backup_accounts_client_id_title">"Sigurnosni računi i ID klijenta"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Uključi korisničke račune i ID klijenta u datoteku sigurnosne kopije (preporučeno)"</string>
     <string name="password_cannot_be_empty">"Lozinka ne može biti prazna"</string>
     <string name="title_activity_settings">"Postavke"</string>
     <string name="title_activity_login">"Prijavi se"</string>

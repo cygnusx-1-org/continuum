@@ -1678,8 +1678,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"toos ah"</string>
-    <string name="settings_backup_accounts_client_id_title">"Xisaabaadka Kaabta iyo Aqoonsiga Macmiilka"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Ku dar koontooyinka isticmaalaha iyo aqoonsiga macmiilka faylka kaydka ah (lagu taliyay)"</string>
     <string name="password_cannot_be_empty">"Password ma noqon karo madhan"</string>
     <string name="title_activity_settings">"Dejimaha"</string>
     <string name="title_activity_login">"Soo gal"</string>
