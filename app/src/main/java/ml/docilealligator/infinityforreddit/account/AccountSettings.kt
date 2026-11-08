@@ -171,6 +171,28 @@ object AccountSettings {
     }
 
     /**
+     * Every setting the app has, which is what "Reset all settings" means: [reset] for anonymous and
+     * for each account the database holds, then what belongs to no account -- the default file as a
+     * whole, global keys and API keys included, and the proxy.
+     *
+     * Left alone on purpose: the custom themes, which have a delete of their own; the security
+     * settings, which are changed on a screen that asks for the device lock; and the caches and where
+     * each feed was scrolled to, which are state rather than settings.
+     *
+     * Blocking. Call it off the main thread.
+     */
+    @SuppressLint("ApplySharedPref")
+    @JvmStatic
+    fun resetAll(context: Context, redditDataRoomDatabase: RedditDataRoomDatabase) {
+        reset(context, redditDataRoomDatabase, Account.ANONYMOUS_ACCOUNT)
+        for (account in redditDataRoomDatabase.accountDao().getAllAccounts()) {
+            reset(context, redditDataRoomDatabase, account.accountName)
+        }
+        open(context, AccountScopedKeys.DEFAULT_PREFERENCES).edit().clear().commit()
+        open(context, SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE).edit().clear().commit()
+    }
+
+    /**
      * [reset] narrowed to the one file [fileName] names, which has to be one of [SCOPED_FILES].
      *
      * Backs the per-account delete actions, which offer one kind of setting on its own: someone who

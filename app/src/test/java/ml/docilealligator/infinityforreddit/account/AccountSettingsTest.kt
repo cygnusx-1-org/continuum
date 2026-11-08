@@ -297,4 +297,32 @@ class AccountSettingsTest {
         assertEquals("a user really called anonymous is a different account",
             "5", defaultPreferences.getString(key("anonymous", SharedPreferencesUtils.THEME_KEY), null))
     }
+
+    @Test
+    fun `a reset of everything takes every account's settings and the ones that belong to none`() {
+        database.accountDao().insert(Account("alice", null, null, null, null, null, 0, true, false))
+        database.postFilterDao().insertAll(listOf(postFilter("alice's", "alice")))
+        defaultPreferences.edit()
+            .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")
+            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "1")
+            .putString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "content://somewhere")
+            .putString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, "abc")
+            .commit()
+        sortType.edit().putString(key("alice", "sort_type_best_post"), "top").commit()
+        mainPageTabs.edit().putString(key("alice", SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER), "x").commit()
+        val proxy = file(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE)
+        proxy.edit().putString(SharedPreferencesUtils.PROXY_HOSTNAME, "10.0.0.1").commit()
+        val security = file(SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE)
+        security.edit().putBoolean(SharedPreferencesUtils.APP_LOCK, true).commit()
+
+        AccountSettings.resetAll(context, database)
+
+        assertTrue("the default file is empty", defaultPreferences.all.isEmpty())
+        assertTrue(sortType.all.isEmpty())
+        assertTrue(mainPageTabs.all.isEmpty())
+        assertTrue(proxy.all.isEmpty())
+        assertTrue(database.postFilterDao().getAllPostFilters("alice").isEmpty())
+        assertTrue("the security settings have their own screen",
+            security.getBoolean(SharedPreferencesUtils.APP_LOCK, false))
+    }
 }

@@ -2,6 +2,13 @@
 
 ---
 
+Unreleased
+============
+**Fixed**
+* Reset All Settings now resets every setting: each account's settings, main page tabs and filters, anonymous's too, and the settings that belong to no account. Before it cleared only the main settings, the main page tabs and the NSFW and spoiler file, and left the sort orders, layouts, navigation drawer, post history, bottom button and the rest as they were. It asks first what it will reset, and restarts the app when done. Custom themes and the security settings are left alone
+
+---
+
 8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
 **New**

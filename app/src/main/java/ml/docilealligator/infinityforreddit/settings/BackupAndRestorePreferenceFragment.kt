@@ -16,11 +16,13 @@ import javax.inject.Named
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.account.AccountSettings
 import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllThemes
 import ml.docilealligator.infinityforreddit.asynctasks.RestoreSettings
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent
+import ml.docilealligator.infinityforreddit.utils.AppRestartHelper
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import org.greenrobot.eventbus.EventBus
 
@@ -42,10 +44,6 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
 
     @Inject
     lateinit var mRedditDataRoomDatabase: RedditDataRoomDatabase
-
-    @Inject
-    @Named("default")
-    lateinit var mSharedPreferences: SharedPreferences
 
     @Inject
     @Named("current_account")
@@ -128,14 +126,17 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
             ?.setOnPreferenceClickListener {
                 MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
                     .setTitle(R.string.are_you_sure)
+                    .setMessage(R.string.reset_all_settings_confirmation)
                     .setPositiveButton(R.string.yes) { _, _ ->
-                        mSharedPreferences.edit().clear().apply()
-                        mainActivityTabsSharedPreferences.edit().clear().apply()
-                        nsfwAndBlurringSharedPreferences.edit().clear().apply()
-
-                        Toast.makeText(mActivity, R.string.reset_all_settings_success,
-                            Toast.LENGTH_SHORT).show()
-                        EventBus.getDefault().post(RecreateActivityEvent())
+                        val context = mActivity.applicationContext
+                        executor.execute {
+                            AccountSettings.resetAll(context, mRedditDataRoomDatabase)
+                            handler.post {
+                                Toast.makeText(context, R.string.reset_all_settings_success,
+                                    Toast.LENGTH_SHORT).show()
+                                AppRestartHelper.triggerAppRestart(context)
+                            }
+                        }
                     }
                     .setNegativeButton(R.string.no, null)
                     .show()
