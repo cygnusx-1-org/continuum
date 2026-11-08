@@ -88,7 +88,6 @@ public class SharedPreferencesUtils {
     public static final String POST_LAYOUT_SEARCH_POST = "post_layout_search_post";
     public static final String HISTORY_POST_LAYOUT_READ_POST = "history_post_layout_read_post";
     public static final int POST_LAYOUT_CARD = 0;
-    public static final int POST_LAYOUT_GALLERY = 2;
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
     /** Card Bottom without the row of buttons under the content; swiping does the same things. */
@@ -120,8 +119,6 @@ public class SharedPreferencesUtils {
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE = "number_of_columns_in_post_feed_landscape";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED = "number_of_columns_in_post_feed_portrait_unfolded";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED = "number_of_columns_in_post_feed_landscape_unfolded";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT = "number_of_columns_in_post_feed_portrait_gallery_layout";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT = "number_of_columns_in_post_feed_landscape_gallery_layout";
     public static final String SWIPE_RIGHT_TO_GO_BACK = "swipe_to_go_back_from_post_detail";
     public static final String SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA = "swipe_vertically_to_go_back_from_media";
     public static final String MUTE_VIDEO = "mute_video";
@@ -292,8 +289,6 @@ public class SharedPreferencesUtils {
     public static final String SUBREDDIT_DEFAULT_SORT_TIME = "subreddit_default_sort_time";
     public static final String USER_DEFAULT_SORT_TYPE = "user_default_sort_type";
     public static final String USER_DEFAULT_SORT_TIME = "user_default_sort_time";
-    public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
-    public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String HIDE_NSFW_BADGE = "hide_nsfw_badge";
     public static final String COLLAPSE_STICKIED_POSTS = "collapse_stickied_posts";

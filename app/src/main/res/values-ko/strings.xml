@@ -677,10 +677,6 @@
     <string name="settings_subreddit_default_sort_time_title">"하위 레딧 기본 정렬 시간"</string>
     <string name="settings_user_default_sort_type_title">"사용자 기본 정렬 유형"</string>
     <string name="settings_user_default_sort_time_title">"사용자 기본 정렬 시간"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"갤러리 레이아웃에 미디어를 표시하려면 클릭하세요."</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"갤러리 레이아웃에서 탭 전환 및 길게 누르기: 탭하면 미디어가 열리고 길게 누르면 게시물과 댓글이 열립니다."</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"미디어 게시물만"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"갤러리 레이아웃에서는 이미지, GIF, 동영상, 갤러리 게시물만 표시합니다. 텍스트, 설문조사, 링크 게시물이 숨겨집니다."</string>
     <string name="settings_hide_post_type">"포스트 유형 숨기기"</string>
     <string name="settings_post_type_triangle_indicator">"포스트 유형 삼각형 표시기"</string>
     <string name="settings_post_type_triangle_indicator_summary">"텍스트 배지 대신 컴팩트 레이아웃의 썸네일에 게시물 유형을 색상이 있는 삼각형으로 표시합니다."</string>
@@ -842,7 +838,6 @@
     <string name="favorites">"즐겨찾기"</string>
     <string name="all">"모두"</string>
     <string name="link_post_layout_auto">"자동"</string>
-    <string name="post_layout_gallery">"갤러리 레이아웃"</string>
     <string name="elapsed_time_just_now">"방금"</string>
     <string name="elapsed_time_a_minute_ago">"1분"</string>
     <string name="elapsed_time_minutes_ago">"%1$d분"</string>

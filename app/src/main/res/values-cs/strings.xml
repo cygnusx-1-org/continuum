@@ -684,10 +684,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_subreddit_default_sort_time_title">"Výchozí čas řazení subredditů"</string>
     <string name="settings_user_default_sort_type_title">"Výchozí typ řazení uživatelů"</string>
     <string name="settings_user_default_sort_time_title">"Výchozí čas řazení uživatelů"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Klikni pro zobrazení médií v rozložení galerie"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Vyměnit klepnutí a dlouhé stisknutí v rozložení galerie: klepnutí otevře média, dlouhé stisknutí otevře příspěvek a jeho komentáře"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Pouze mediální příspěvky"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"V rozložení galerie zobrazit pouze obrázky, GIF, videa a příspěvky galerie. Textové, anketní a odkazové příspěvky jsou skryté"</string>
     <string name="settings_hide_post_type">"Skrýt typ příspěvků"</string>
     <string name="settings_post_type_triangle_indicator">"Trojúhelníkový indikátor typu příspěvku"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Zobrazit typ příspěvku jako barevný trojúhelník na miniatuře v kompaktním rozložení místo textového odznaku"</string>
@@ -849,7 +845,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="favorites">"Oblíbené"</string>
     <string name="all">"Vše"</string>
     <string name="link_post_layout_auto">"Automaticky"</string>
-    <string name="post_layout_gallery">"Rozložení galerie"</string>
     <string name="elapsed_time_just_now">"Právě teď"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuta"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minut"</string>

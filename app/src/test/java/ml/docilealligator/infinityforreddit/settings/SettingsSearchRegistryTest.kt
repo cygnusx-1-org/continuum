@@ -86,20 +86,6 @@ class SettingsSearchRegistryTest {
         assertEquals("immersive_interface", item.key)
     }
 
-    /** Two rows on this screen are titled "Portrait"; only the heading tells them apart. */
-    @Test
-    fun qualifiesBreadcrumbsWithTheirCategory() {
-        val portrait = items.filter {
-            it.title == context.getString(R.string.settings_number_of_columns_in_post_feed_portrait_title)
-        }
-
-        assertEquals(2, portrait.size)
-        assertEquals("breadcrumbs must distinguish them", 2, portrait.map { it.breadcrumb }.toSet().size)
-        assertTrue(
-            portrait.any { it.breadcrumb.endsWith(context.getString(R.string.post_layout_gallery)) }
-        )
-    }
-
     @Test
     fun buildsNestedBreadcrumbs() {
         val item = itemTitled(R.string.settings_credits_material_icons_title)

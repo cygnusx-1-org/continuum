@@ -90,15 +90,6 @@ public class PostViewModel extends ViewModel {
      * automatic setting so that switching the setting off does not bring back posts they hid by hand.
      */
     private boolean hideReadPostsRequested;
-    /**
-     * Whether the feed is currently showing media posts only -- the gallery layout's "Media Posts
-     * Only" setting, which the fragment re-applies whenever the layout it is showing changes
-     * (issue #377). Not part of {@link PostFilter}: it is a property of the layout on screen, not
-     * of the feed, and it must not follow the user into the card layouts.
-     */
-    private final MutableLiveData<Boolean> mediaOnlyValue = new MutableLiveData<>(false);
-    private final HideReadPostsAndMediaOnlyLiveData hideReadPostsAndMediaOnlyLiveData =
-            new HideReadPostsAndMediaOnlyLiveData(hideReadPostsValue, mediaOnlyValue);
 
     private final LiveData<PagingData<Post>> posts;
     private final LiveData<PagingData<Post>> filteredPosts;
@@ -348,18 +339,17 @@ public class PostViewModel extends ViewModel {
     }
 
     /**
-     * The feed as the fragment sees it: {@link #posts} with the two filters that belong to the
-     * screen rather than to the listing layered on top -- read posts, once the user has hidden
-     * them, and non-media posts, while the gallery layout is showing media only.
+     * The feed as the fragment sees it: {@link #posts} with the filter that belongs to the screen
+     * rather than to the listing layered on top -- read posts, once the user has hidden them.
      *
-     * <p>Both filter the cached paging stream on the way out instead of being handed to the paging
-     * source, so toggling either one re-filters what is already loaded rather than refetching the
-     * feed. {@link PostFilter}, by contrast, is applied while parsing the response, which is why a
-     * change to it costs a whole new fetch.
+     * <p>It filters the cached paging stream on the way out instead of being handed to the paging
+     * source, so toggling it re-filters what is already loaded rather than refetching the feed.
+     * {@link PostFilter}, by contrast, is applied while parsing the response, which is why a change
+     * to it costs a whole new fetch.
      */
     private LiveData<PagingData<Post>> buildFilteredPosts() {
-        return PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsAndMediaOnlyLiveData,
-                hideReadPostsAndMediaOnly -> Transformations.map(
+        return PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                hideReadPosts -> Transformations.map(
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor, this::isPostVisible))), ViewModelKt.getViewModelScope(this));
@@ -373,7 +363,9 @@ public class PostViewModel extends ViewModel {
     public void setPostHiddenInFeed(String fullName, boolean hidden) {
         boolean changed = hidden ? hiddenInFeed.add(fullName) : hiddenInFeed.remove(fullName);
         if (changed) {
-            hideReadPostsAndMediaOnlyLiveData.refilter();
+            // Re-emitting the current value rebuilds the filtered stream once, which is the safe
+            // single-rebuild case (issue #321).
+            hideReadPostsValue.setValue(hideReadPostsValue.getValue());
         }
     }
 
@@ -384,7 +376,7 @@ public class PostViewModel extends ViewModel {
         if (Boolean.TRUE.equals(hideReadPostsValue.getValue()) && post.isRead() && !isPinnedHere(post)) {
             return false;
         }
-        return !Boolean.TRUE.equals(mediaOnlyValue.getValue()) || post.isMediaPost();
+        return true;
     }
 
     /**
@@ -423,36 +415,6 @@ public class PostViewModel extends ViewModel {
         return filteredPosts;
     }
 
-    /**
-     * Show only media posts, or stop doing so. Called by the fragment with the gallery layout's
-     * "Media Posts Only" setting when the feed is first bound and again whenever the post layout
-     * changes, so leaving the gallery layout brings the text, poll and link posts straight back.
-     *
-     * <p>Only an actual change is posted. Re-posting the current value would make the switchMap
-     * tear down and rebuild the filter pipeline while the previous collection is still cancelling,
-     * and the two collectors then race over the cached post stream and crash paging with a
-     * ConcurrentModificationException -- the same trap {@link #hideReadPosts()} guards against
-     * (issue #321).
-     */
-    public void setMediaOnly(boolean mediaOnly) {
-        if (mediaOnly != Boolean.TRUE.equals(mediaOnlyValue.getValue())) {
-            mediaOnlyValue.setValue(mediaOnly);
-            PostPagingSource currentSource = pagingSource;
-            if (currentSource != null) {
-                currentSource.setMediaOnly(mediaOnly);
-                if (mediaOnly) {
-                    // Turning it on can leave nothing on screen: the pages already loaded were
-                    // fetched without it and may hold no media at all, and a feed presenting nothing
-                    // never asks Paging for more (see PostPagingSource#loadFuture). Reload so those
-                    // pages are fetched again by a source that now knows to keep going until it has
-                    // something to show. Only on the way on -- turning it off can only add posts
-                    // back, and those are already cached.
-                    currentSource.invalidate();
-                }
-            }
-        }
-    }
-
     @Nullable
     public String getSearchQuery() {
         return searchQuery;
@@ -484,27 +446,12 @@ public class PostViewModel extends ViewModel {
     }
 
     /**
-     * Brings both feed filters up to date at once: media-only as the fragment passes it, and
-     * Settings > Post History > Hide Read Posts Automatically re-read. The fragment calls this
-     * whenever either setting changes: MainActivity outlives a settings change, so its feeds would
-     * otherwise keep the hide-read value they were built with, and a refresh would go on showing
-     * read posts until the app was restarted (issue #442).
-     *
-     * <p>Both in one emission: coming back from Settings with both changed would otherwise rebuild
-     * the filter pipeline twice back to back, the second while the first collection is still
-     * cancelling -- the race behind issue #321.
+     * Brings the feed filter up to date: Settings > Post History > Hide Read Posts Automatically
+     * re-read. The fragment calls this whenever that setting changes: MainActivity outlives a
+     * settings change, so its feeds would otherwise keep the hide-read value they were built with,
+     * and a refresh would go on showing read posts until the app was restarted (issue #442).
      */
-    public void applyFeedFilters(boolean mediaOnly) {
-        hideReadPostsAndMediaOnlyLiveData.hold();
-        try {
-            setMediaOnly(mediaOnly);
-            updateHideReadPosts();
-        } finally {
-            hideReadPostsAndMediaOnlyLiveData.release();
-        }
-    }
-
-    private void updateHideReadPosts() {
+    public void updateHideReadPosts() {
         boolean hide = hideReadPostsRequested || isHideReadPostsAutomaticallyOn();
         // Only an actual change is posted. Re-setting the same value makes the switchMap tear down and
         // rebuild the filter pipeline while the previous collection is still cancelling; the two
@@ -579,9 +526,6 @@ public class PostViewModel extends ViewModel {
                         name, postType, sortType, postFilter, userWhere, searchQuery, savedSearchCache, readPostsList);
                 break;
         }
-        // Pagination only: the source never drops a post for this, it just refuses to stop on a page
-        // the feed would show nothing from. See PostPagingSource#loadFuture.
-        paging3PagingSource.setMediaOnly(Boolean.TRUE.equals(mediaOnlyValue.getValue()));
         // Not consumed here. Setting up the feed builds a source and then immediately invalidates
         // it -- the sort/filter LiveData settles a moment after the first one is made -- so a
         // request spent on creation would be spent on a source that never serves a load. The source
@@ -909,56 +853,6 @@ public class PostViewModel extends ViewModel {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         postHistorySharedPreferences, name, postType, sortType, postFilter, userWhere, readPostsList, loader);
-            }
-        }
-    }
-
-    /**
-     * The two feed-level filter flags as one trigger, so the filtered stream is rebuilt once when
-     * either changes rather than being wired to whichever one happened to be added first.
-     *
-     * <p>Emits only on a real change. A MediatorLiveData dispatches every source when it becomes
-     * active, so without this an ordinary combine would fire twice on the first observer and
-     * rebuild the pipeline twice back to back -- the rebuild race behind issue #321.
-     */
-    private static class HideReadPostsAndMediaOnlyLiveData extends MediatorLiveData<Pair<Boolean, Boolean>> {
-        private final LiveData<Boolean> hideReadPostsValue;
-        private final LiveData<Boolean> mediaOnlyValue;
-        // While held, a change to either flag waits for release(), which emits once for both.
-        private boolean held;
-
-        HideReadPostsAndMediaOnlyLiveData(LiveData<Boolean> hideReadPostsValue, LiveData<Boolean> mediaOnlyValue) {
-            this.hideReadPostsValue = hideReadPostsValue;
-            this.mediaOnlyValue = mediaOnlyValue;
-            addSource(hideReadPostsValue, hideReadPosts -> update());
-            addSource(mediaOnlyValue, mediaOnly -> update());
-        }
-
-        void hold() {
-            held = true;
-        }
-
-        void release() {
-            held = false;
-            update();
-        }
-
-        /**
-         * Rebuilds the filtered stream although neither flag changed, for a filter that reads
-         * something else. Still a single emission, so it is the safe one-rebuild case.
-         */
-        void refilter() {
-            setValue(Pair.create(hideReadPostsValue.getValue(), mediaOnlyValue.getValue()));
-        }
-
-        private void update() {
-            if (held) {
-                return;
-            }
-            Pair<Boolean, Boolean> hideReadPostsAndMediaOnly =
-                    Pair.create(hideReadPostsValue.getValue(), mediaOnlyValue.getValue());
-            if (!hideReadPostsAndMediaOnly.equals(getValue())) {
-                setValue(hideReadPostsAndMediaOnly);
             }
         }
     }

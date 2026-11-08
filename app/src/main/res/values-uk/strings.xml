@@ -684,10 +684,6 @@
     <string name="settings_subreddit_default_sort_time_title">"Типовий час сортування сабредиту"</string>
     <string name="settings_user_default_sort_type_title">"Типовий тип сортування користувача"</string>
     <string name="settings_user_default_sort_time_title">"Типовий час сортування користувача"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Клацнути, щоб показати медія у вигляді галереї"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Поміняти торкання й довге натискання в макеті галереї: торкання відкриває медіа, довге натискання відкриває допис і коментарі"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Лише публікації ЗМІ"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"У макеті галереї показувати лише зображення, GIF, відео та публікації галереї. Текст, опитування та публікації з посиланнями приховано"</string>
     <string name="settings_hide_post_type">"Ховати тип дописів"</string>
     <string name="settings_post_type_triangle_indicator">"Трикутний індикатор типу допису"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Показати тип публікації у вигляді кольорового трикутника на мініатюрі в компактному форматі замість текстового значка"</string>
@@ -849,7 +845,6 @@
     <string name="favorites">"Відібрані"</string>
     <string name="all">"Усе"</string>
     <string name="link_post_layout_auto">"Авто"</string>
-    <string name="post_layout_gallery">"Вигляд галереї"</string>
     <string name="elapsed_time_just_now">"Тільки що"</string>
     <string name="elapsed_time_a_minute_ago">"1 хвилина"</string>
     <string name="elapsed_time_minutes_ago">"%1$d хвилин"</string>

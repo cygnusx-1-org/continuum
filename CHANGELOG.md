@@ -2,6 +2,13 @@
 
 ---
 
+Unreleased
+============
+**Removed**
+* The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Card Clean is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
+
+---
+
 8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
 **New**

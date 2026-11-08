@@ -684,10 +684,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_subreddit_default_sort_time_title">"Standard Sortierzeit für Subreddits"</string>
     <string name="settings_user_default_sort_type_title">"Standard Art der Sortierung für Benutzer"</string>
     <string name="settings_user_default_sort_time_title">"Standard Sortierzeit für Benutzer"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Antippen, um die Medien in der Galerie-Ansicht anzuzeigen"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Tippen und langes Drücken im Galerie-Layout tauschen: Tippen öffnet die Medien, langes Drücken den Beitrag und seine Kommentare"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Nur Medienbeiträge"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Im Galerielayout werden nur Bilder, GIF, Videos und Galeriebeiträge angezeigt. Text-, Umfrage- und Linkbeiträge werden ausgeblendet"</string>
     <string name="settings_hide_post_type">"Beitragsart verstecken"</string>
     <string name="settings_post_type_triangle_indicator">"Dreiecksanzeige für den Beitragstyp"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Zeigt den Beitragstyp als farbiges Dreieck auf der Miniaturansicht im kompakten Layout anstelle eines Textabzeichens an"</string>
@@ -849,7 +845,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="favorites">"Favoriten"</string>
     <string name="all">"Alles"</string>
     <string name="link_post_layout_auto">"Automatisch"</string>
-    <string name="post_layout_gallery">"Galerie-Ansicht"</string>
     <string name="elapsed_time_just_now">"Gerade eben"</string>
     <string name="elapsed_time_a_minute_ago">"1 Minute"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Minuten"</string>
