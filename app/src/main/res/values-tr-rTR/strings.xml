@@ -1705,8 +1705,6 @@ Tekrar denemek için dokun."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Doğrudan"</string>
-    <string name="settings_backup_accounts_client_id_title">"Yedekleme Hesapları ve Müşteri Kimliği"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Yedekleme dosyasına kullanıcı hesaplarını ve İstemci Kimliğini ekleyin (önerilir)"</string>
     <string name="password_cannot_be_empty">"Şifre boş olamaz"</string>
     <string name="title_activity_settings">"Ayarlar"</string>
     <string name="title_activity_login">"Oturum aç"</string>

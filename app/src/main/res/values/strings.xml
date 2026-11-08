@@ -2006,8 +2006,6 @@
     <string name="proxy_socks">SOCKS</string>
     <string name="proxy_direct">Direct</string>
 
-    <string name="settings_backup_accounts_client_id_title">Backup Accounts and Client ID</string>
-    <string name="settings_backup_accounts_client_id_summary">Include user accounts and Client ID in the backup file (recommended)</string>
 
     <string name="password_cannot_be_empty">Password cannot be empty</string>
 

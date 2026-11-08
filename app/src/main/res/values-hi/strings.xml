@@ -1695,8 +1695,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"डायरेक्ट"</string>
-    <string name="settings_backup_accounts_client_id_title">"बैकअप खाते और क्लाइंट आईडी"</string>
-    <string name="settings_backup_accounts_client_id_summary">"बैकअप फ़ाइल में उपयोगकर्ता खाते और क्लाइंट आईडी शामिल करें (अनुशंसित)"</string>
     <string name="password_cannot_be_empty">"पासवर्ड खाली नहीं हो सकता"</string>
     <string name="title_activity_settings">"सेटिंग"</string>
     <string name="title_activity_login">"साइन इन करें"</string>

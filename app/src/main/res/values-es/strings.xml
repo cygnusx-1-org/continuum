@@ -1709,8 +1709,6 @@ Toque para volver a intentarlo."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Directo"</string>
-    <string name="settings_backup_accounts_client_id_title">"Cuentas de respaldo e ID de cliente"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Incluir cuentas de usuario e ID de cliente en el archivo de copia de seguridad (recomendado)"</string>
     <string name="password_cannot_be_empty">"La contraseña no puede estar vacía"</string>
     <string name="title_activity_settings">"Ajustes"</string>
     <string name="title_activity_login">"Iniciar sesión"</string>

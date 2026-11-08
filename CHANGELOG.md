@@ -4,7 +4,16 @@
 
 Unreleased
 ============
+**Fixed**
+* Backup and restore now carry every setting between devices, phone to tablet and back:
+  * Restoring one of this app's backups replaces a settings file key for key. A setting the backup device left at its default now goes back to its default on this device too; before, this device kept whatever it had. Older backups (Infinity's among them), which name no accounts, still only add to what is here
+  * The Security settings (app lock, secure mode, authentication for the account section) are in the backup
+  * Custom fonts are in the backup, so a font set to Custom still shows after a restore on another device
+  * Download folders and the update-check and app-lock timestamps stay as the device has them. A folder chosen on one device is a permission only that device has, so restored onto another it pointed nowhere and downloads failed without saying why
+  * Settings stored as a set of strings are restored; before they were silently skipped
+
 **Removed**
+* Two unused strings left from when the backup could leave out accounts and the Client ID
 * The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Card Clean is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
 
 ---

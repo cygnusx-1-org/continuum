@@ -1710,8 +1710,6 @@ Apasă pentru a reîncerca."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Direct"</string>
-    <string name="settings_backup_accounts_client_id_title">"Conturi de rezervă și ID client"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Include conturile de utilizator și ID-ul clientului în fișierul de rezervă (recomandat)"</string>
     <string name="password_cannot_be_empty">"Parola nu poate fi goală"</string>
     <string name="title_activity_settings">"Setări"</string>
     <string name="title_activity_login">"Conectează-te"</string>

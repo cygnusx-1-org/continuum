@@ -1712,8 +1712,6 @@ https://play.google.com/store/"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Прямий"</string>
-    <string name="settings_backup_accounts_client_id_title">"Резервні облікові записи та ідентифікатор клієнта"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Включити облікові записи користувачів та ідентифікатор клієнта у файл резервної копії (рекомендовано)"</string>
     <string name="password_cannot_be_empty">"Пароль не може бути порожнім"</string>
     <string name="title_activity_settings">"Налаштування"</string>
     <string name="title_activity_login">"Увійти"</string>

@@ -1703,8 +1703,6 @@ Kliknij by spróbować ponownie."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Bezpośrednie"</string>
-    <string name="settings_backup_accounts_client_id_title">"Konta kopii zapasowych i identyfikator klienta"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Dołącz konta użytkowników i identyfikator klienta do pliku kopii zapasowej (zalecane)"</string>
     <string name="password_cannot_be_empty">"Hasło nie może być puste"</string>
     <string name="title_activity_settings">"Ustawienia"</string>
     <string name="title_activity_login">"Zaloguj się"</string>

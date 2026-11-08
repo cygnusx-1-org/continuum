@@ -1701,8 +1701,6 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Direct"</string>
-    <string name="settings_backup_accounts_client_id_title">"Back-upaccounts en klant-ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Gebruikersaccounts en client-ID opnemen in het back-upbestand (aanbevolen)"</string>
     <string name="password_cannot_be_empty">"Wachtwoord mag niet leeg zijn"</string>
     <string name="title_activity_settings">"Instellingen"</string>
     <string name="title_activity_login">"Aanmelden"</string>

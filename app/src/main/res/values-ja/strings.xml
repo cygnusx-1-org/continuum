@@ -1698,8 +1698,6 @@ https://play.google.com/store/"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"ダイレクト"</string>
-    <string name="settings_backup_accounts_client_id_title">"バックアップ アカウントとクライアント ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"バックアップ ファイルにユーザー アカウントとクライアント ID を含める (推奨)"</string>
     <string name="password_cannot_be_empty">"パスワードを空にすることはできません"</string>
     <string name="title_activity_settings">"設定"</string>
     <string name="title_activity_login">"サインイン"</string>

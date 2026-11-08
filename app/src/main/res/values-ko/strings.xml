@@ -1691,8 +1691,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"다이렉트"</string>
-    <string name="settings_backup_accounts_client_id_title">"백업 계정 및 클라이언트 ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"백업 파일에 사용자 계정 및 클라이언트 ID 포함(권장)"</string>
     <string name="password_cannot_be_empty">"비밀번호는 비워둘 수 없습니다."</string>
     <string name="title_activity_settings">"설정"</string>
     <string name="title_activity_login">"로그인"</string>
