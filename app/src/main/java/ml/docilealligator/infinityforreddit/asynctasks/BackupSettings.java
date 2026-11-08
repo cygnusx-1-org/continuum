@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
-import com.google.gson.Gson;
 import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,10 +21,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
@@ -54,7 +57,11 @@ import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
 
 /**
- * Writes every preference file and database table to an encrypted zip.
+ * Writes every preference file, database table and custom font to a zip.
+ *
+ * What it leaves out is on purpose: the files that only bookkeep (the internal migration flags, the
+ * cookies, the random-subreddit cache, the signed-in account, which {@code accounts.json} carries),
+ * and the keys in {@link #DEVICE_BOUND_KEYS}, which mean nothing on any other device.
  *
  * The account-scoped files are opened here rather than taken injected. The injected ones are
  * {@code AccountScopedSharedPreferences}, whose {@code getAll()} answers for the current account
@@ -66,6 +73,24 @@ public class BackupSettings {
 
     /** Suffix every preference file in a backup carries; the name before it is the file's own. */
     static final String PREFERENCES_FILE_SUFFIX = ".txt";
+
+    /** The directory of a backup that holds the custom font files. */
+    static final String FONTS_DIRECTORY = "fonts";
+
+    /**
+     * Settings that only mean something on the device that wrote them, so a backup does not carry
+     * them and a restore leaves this device's own alone: a download folder is a permission this
+     * device was granted on one folder of its own storage, and the two times are bookkeeping about
+     * this device's last run. Restored onto another device the folders would point where nothing may
+     * be written, and downloads would fail without saying why.
+     */
+    static final Set<String> DEVICE_BOUND_KEYS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION,
+            SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION,
+            SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION,
+            SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION,
+            SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME,
+            SharedPreferencesUtils.LAST_FOREGROUND_TIME)));
 
     public static void backupSettings(Context context, Executor executor, Handler handler,
                                     ContentResolver contentResolver, Uri destinationDirUri,
@@ -87,6 +112,7 @@ public class BackupSettings {
             SharedPreferences navigationDrawerSharedPreferences = rawFile(context, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
             SharedPreferences bottomAppBarSharedPreferences = rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE);
             SharedPreferences userTagsSharedPreferences = rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE);
+            SharedPreferences securitySharedPreferences = rawFile(context, SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE);
 
             File cacheDir = Utils.getCacheDir(context);
             if (cacheDir == null) {
@@ -108,11 +134,7 @@ public class BackupSettings {
             File databaseDirFile = new File(backupDir + "/database");
             databaseDirFile.mkdirs();
 
-            // Handle default shared preferences (potentially excluding client ID)
-            Map<String, ?> defaultPrefsMap = defaultSharedPreferences.getAll();
-            Map<String, Object> filteredDefaultPrefsMap = new HashMap<>(defaultPrefsMap); // Create a mutable copy
-
-            boolean res = saveMapToFile(filteredDefaultPrefsMap, backupDir, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE);
+            boolean res = saveMapToFile(defaultSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE);
 
             SharedPreferences defaultPrefsPrivate = rawFile(context, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE);
             boolean resPrivate = saveMapToFile(defaultPrefsPrivate.getAll(), backupDir, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private");
@@ -132,6 +154,8 @@ public class BackupSettings {
             boolean res12 = saveMapToFile(postHistorySharedPreferences.getAll(), backupDir, SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE);
             boolean res13 = saveMapToFile(navigationDrawerSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
             boolean res31 = saveMapToFile(userTagsSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE);
+            boolean res33 = saveMapToFile(securitySharedPreferences.getAll(), backupDir, SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE);
+            boolean res34 = saveFonts(context, backupDir);
 
             boolean res14 = saveTable(redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT), databaseDirFile.getAbsolutePath(), "/anonymous_subscribed_subreddits.json");
 
@@ -181,7 +205,7 @@ public class BackupSettings {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
                         && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25
-                        && res27 && res28 && res30 && res31 && res32 && zipRes && resPrivate;
+                        && res27 && res28 && res30 && res31 && res32 && res33 && res34 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {
@@ -201,12 +225,36 @@ public class BackupSettings {
     }
 
     private static boolean saveMapToFile(Map<String, ?> mapToSave, String backupDir, String fileName) {
+        Map<String, Object> portable = new HashMap<>(mapToSave);
+        portable.keySet().removeAll(DEVICE_BOUND_KEYS);
         try (ObjectOutputStream output = new ObjectOutputStream(
                 new FileOutputStream(backupDir + "/" + fileName + PREFERENCES_FILE_SUFFIX))) {
-            output.writeObject(mapToSave);
+            output.writeObject(portable);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * The custom font files into the backup. A font setting set to Custom names a file in this
+     * app's own storage, so without the file it falls back to the default font on any device that
+     * does not have it.
+     */
+    private static boolean saveFonts(Context context, String backupDir) {
+        File fontsDirectory = context.getExternalFilesDir(FONTS_DIRECTORY);
+        File[] fonts = fontsDirectory == null ? null : fontsDirectory.listFiles(File::isFile);
+        if (fonts == null || fonts.length == 0) {
+            return true;
+        }
+        try {
+            for (File font : fonts) {
+                FileUtils.copyFile(font, new File(backupDir + "/" + FONTS_DIRECTORY, font.getName()));
+            }
+            return true;
+        } catch (IOException e) {
+            Log.e("BackupSettings", "saveFonts failed", e);
             return false;
         }
     }
