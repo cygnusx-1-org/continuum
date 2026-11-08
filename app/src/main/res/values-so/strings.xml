@@ -467,11 +467,6 @@
     <string name="settings_post_compact_thumbnail_size">"cabbirka sawirka thumbnail"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Muuji thumbnail dhinaca bidix"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Muuji thumbnail dhinaca midig"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Tirada Tiirarka ku jira Quudinta Boostada"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Sawirka"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Muuqaalka muuqaalka"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Sawirka"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"muuqaal muuqaal ah (la furay)"</string>
     <string name="settings_swap_tap_and_long_title">"Taabo Isku Bedel ah oo Riix dheer xagga faallooyinka"</string>
     <string name="settings_swipe_to_go_back_title">"Ku dhufo midig si aad dib ugu noqoto"</string>
     <string name="settings_swipe_to_go_back_summary">"kuma khusayso boggaga oo dhan"</string>
@@ -667,10 +662,6 @@
     <string name="settings_subreddit_default_sort_time_title">"Subreddit Kala soocida ugu talagalka ah"</string>
     <string name="settings_user_default_sort_type_title">"Nooca Isticmaalaha ee Kala soocida"</string>
     <string name="settings_user_default_sort_time_title">"Wakhtiga Kala-duwanaanta Isticmaalaha"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Guji si aad u muujiso Warbaahinta gudaha Layout-ga Gallery"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Ku beddel taabo oo tabo dheer oo qaabaynta gallery: taabadu waxay furaysaa warbaahinta, saxaafad dheer ayaa furaysa boostada iyo faallooyinkeeda"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Soo dhejinta warbaahinta Kaliya"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Nashqadaynta gallery, muuji sawirka kaliya, GIF, muuqaal iyo qoraalada gallery. Qoraalada, ra'yi ururinta iyo qoraalada isku xirka waa qarsoon yihiin"</string>
     <string name="settings_hide_post_type">"Qari Nooca Boosta"</string>
     <string name="settings_post_type_triangle_indicator">"Tusiyaha Nooca Saddex-xagalka ah ee"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Tus nooca boostada oo ah saddex xagal midab leh oo ku yaal thumbnail qaabayn is haysta halkii aad ka ahaan lahayd calaamad qoraal ah"</string>
@@ -832,7 +823,6 @@
     <string name="favorites">"Xulashada"</string>
     <string name="all">"Dhammaan"</string>
     <string name="link_post_layout_auto">"Si toos ah"</string>
-    <string name="post_layout_gallery">"Qaabka sawirka"</string>
     <string name="elapsed_time_just_now">"hadda"</string>
     <string name="elapsed_time_a_minute_ago">"1 daqiiqo"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Daqiiqado"</string>
@@ -1688,8 +1678,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"toos ah"</string>
-    <string name="settings_backup_accounts_client_id_title">"Xisaabaadka Kaabta iyo Aqoonsiga Macmiilka"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Ku dar koontooyinka isticmaalaha iyo aqoonsiga macmiilka faylka kaydka ah (lagu taliyay)"</string>
     <string name="password_cannot_be_empty">"Password ma noqon karo madhan"</string>
     <string name="title_activity_settings">"Dejimaha"</string>
     <string name="title_activity_login">"Soo gal"</string>

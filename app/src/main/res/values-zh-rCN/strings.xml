@@ -477,11 +477,6 @@
     <string name="settings_post_compact_thumbnail_size">"缩略图尺寸"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"紧凑布局中在左侧显示缩略图"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"在右侧显示缩略图"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"帖子列表页面的列数"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"竖屏"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"横屏"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"竖屏（未折叠）"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"横屏（未折叠）"</string>
     <string name="settings_swap_tap_and_long_title">"在评论中交换点击和长按功能"</string>
     <string name="settings_swipe_to_go_back_title">"向右滑动返回"</string>
     <string name="settings_swipe_to_go_back_summary">"不应用到所有页面"</string>
@@ -684,10 +679,6 @@ Reddit 视频分辨率较低。
     <string name="settings_subreddit_default_sort_time_title">"版块默认排序时间"</string>
     <string name="settings_user_default_sort_type_title">"用户默认排序类型"</string>
     <string name="settings_user_default_sort_time_title">"用户默认排序时间"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"点击在相册布局中显示媒体"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"在画廊布局中交换点击和长按：点击打开媒体，长按打开帖子及其评论"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"仅限媒体帖子"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"在图库布局中，仅显示图像、GIF、视频和图库帖子。文本、投票和链接帖子被隐藏"</string>
     <string name="settings_hide_post_type">"隐藏帖子类型"</string>
     <string name="settings_post_type_triangle_indicator">"帖子类型三角指示器"</string>
     <string name="settings_post_type_triangle_indicator_summary">"将帖子类型显示为紧凑布局缩略图上的彩色三角形，而不是文本徽章"</string>
@@ -849,7 +840,6 @@ Reddit 视频分辨率较低。
     <string name="favorites">"收藏"</string>
     <string name="all">"全站"</string>
     <string name="link_post_layout_auto">"自动"</string>
-    <string name="post_layout_gallery">"相册布局"</string>
     <string name="elapsed_time_just_now">"刚刚"</string>
     <string name="elapsed_time_a_minute_ago">"1 分钟前"</string>
     <string name="elapsed_time_minutes_ago">"%1$d 分钟前"</string>
@@ -1709,8 +1699,6 @@ Reddit 视频分辨率较低。
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"直接"</string>
-    <string name="settings_backup_accounts_client_id_title">"备份帐户和客户端 ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"在备份文件中包含用户帐户和客户端 ID（推荐）"</string>
     <string name="password_cannot_be_empty">"密码不能为空"</string>
     <string name="title_activity_settings">"设置"</string>
     <string name="title_activity_login">"登录"</string>

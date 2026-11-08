@@ -88,14 +88,13 @@ public class SharedPreferencesUtils {
     public static final String POST_LAYOUT_SEARCH_POST = "post_layout_search_post";
     public static final String HISTORY_POST_LAYOUT_READ_POST = "history_post_layout_read_post";
     public static final int POST_LAYOUT_CARD = 0;
-    public static final int POST_LAYOUT_GALLERY = 2;
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
     /** Card Bottom without the row of buttons under the content; swiping does the same things. */
-    public static final int POST_LAYOUT_CARD_CLEAN = 6;
-    /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Card Clean. */
+    public static final int POST_LAYOUT_MEDIA_FOCUSED = 6;
+    /** Whether {@code postLayout} draws the Card Bottom rows: Card Bottom itself, and Media Focused. */
     public static boolean isCardBottom(int postLayout) {
-        return postLayout == POST_LAYOUT_CARD || postLayout == POST_LAYOUT_CARD_CLEAN;
+        return postLayout == POST_LAYOUT_CARD || postLayout == POST_LAYOUT_MEDIA_FOCUSED;
     }
 
     /** Whether {@code postLayout} draws the Card Top rows. */
@@ -116,12 +115,6 @@ public class SharedPreferencesUtils {
     public static final String POST_COMPACT_THUMBNAIL_SIZE = "post_compact_thumbnail_size";
     /** Matches @dimen/post_compact_thumbnail_size, which is what the compact layouts inflate with. */
     public static final String POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE = "112";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT = "number_of_columns_in_post_feed_portrait";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE = "number_of_columns_in_post_feed_landscape";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED = "number_of_columns_in_post_feed_portrait_unfolded";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED = "number_of_columns_in_post_feed_landscape_unfolded";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT = "number_of_columns_in_post_feed_portrait_gallery_layout";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT = "number_of_columns_in_post_feed_landscape_gallery_layout";
     public static final String SWIPE_RIGHT_TO_GO_BACK = "swipe_to_go_back_from_post_detail";
     public static final String SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA = "swipe_vertically_to_go_back_from_media";
     public static final String MUTE_VIDEO = "mute_video";
@@ -292,8 +285,6 @@ public class SharedPreferencesUtils {
     public static final String SUBREDDIT_DEFAULT_SORT_TIME = "subreddit_default_sort_time";
     public static final String USER_DEFAULT_SORT_TYPE = "user_default_sort_type";
     public static final String USER_DEFAULT_SORT_TIME = "user_default_sort_time";
-    public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
-    public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String HIDE_NSFW_BADGE = "hide_nsfw_badge";
     public static final String COLLAPSE_STICKIED_POSTS = "collapse_stickied_posts";
@@ -301,6 +292,8 @@ public class SharedPreferencesUtils {
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
+    public static final String MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE = "media_focused_vertical_gallery_swipe";
+    public static final String MEDIA_FOCUSED_SCROLLING_GALLERY = "media_focused_scrolling_gallery";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";

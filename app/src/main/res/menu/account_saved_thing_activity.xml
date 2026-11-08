@@ -41,14 +41,11 @@
                     android:id="@+id/action_post_layout_card_top"
                     android:title="@string/post_layout_card_3" />
                 <item
-                    android:id="@+id/action_post_layout_card_clean"
-                    android:title="@string/post_layout_card_clean" />
+                    android:id="@+id/action_post_layout_media_focused"
+                    android:title="@string/post_layout_media_focused" />
                 <item
                     android:id="@+id/action_post_layout_compact"
                     android:title="@string/post_layout_compact_2" />
-                <item
-                    android:id="@+id/action_post_layout_gallery"
-                    android:title="@string/post_layout_gallery" />
             </group>
         </menu>
     </item>

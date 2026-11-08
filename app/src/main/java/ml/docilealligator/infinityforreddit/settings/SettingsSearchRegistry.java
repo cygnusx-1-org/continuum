@@ -60,8 +60,6 @@ public class SettingsSearchRegistry {
         m.put(FontPreferenceFragment.class, R.xml.font_preferences);
         m.put(NavigationDrawerPreferenceFragment.class, R.xml.navigation_drawer_preferences);
         m.put(PostPreferenceFragment.class, R.xml.post_preferences);
-        m.put(NumberOfColumnsInPostFeedPreferenceFragment.class,
-                R.xml.number_of_columns_in_post_feed_preferences);
         m.put(PostDetailsPreferenceFragment.class, R.xml.post_details_preferences);
         m.put(CommentPreferenceFragment.class, R.xml.comment_preferences);
         m.put(ThemePreferenceFragment.class, R.xml.theme_preferences);

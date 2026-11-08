@@ -478,11 +478,6 @@ Tocca per riprovare."</string>
     <string name="settings_post_compact_thumbnail_size">"Dimensioni miniatura"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Mostra miniatura a sinistra"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Mostra miniatura a destra"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Il numero di colonne nel Feed dei post"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Vista verticale"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Vista orizzontale"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Verticale (non piegato)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Orizzontale (non piegato)"</string>
     <string name="settings_swap_tap_and_long_title">"Scambia Clicca e Premi a Lungo nei Commenti"</string>
     <string name="settings_swipe_to_go_back_title">"Scorri verso destra per tornare indietro"</string>
     <string name="settings_swipe_to_go_back_summary">"Non si Applica a Tutte le Pagine"</string>
@@ -685,10 +680,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_subreddit_default_sort_time_title">"Tempo di ordinamento predefinito Subreddit"</string>
     <string name="settings_user_default_sort_type_title">"Tipo di ordinamento predefinito Utente"</string>
     <string name="settings_user_default_sort_time_title">"Tempo di ordinamento predefinito Utente"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Clicca per mostrare i media nel layout a galleria"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Scambia tocco e pressione prolungata nel layout della galleria: tocco apre il contenuto multimediale, pressione lunga apre il post e i relativi commenti"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Solo post multimediali"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Nel layout della galleria, mostra solo immagini, GIF, video e post della galleria. I post di testo, sondaggi e collegamenti sono nascosti"</string>
     <string name="settings_hide_post_type">"Nascondi tipo di post"</string>
     <string name="settings_post_type_triangle_indicator">"Indicatore triangolare del tipo di post"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Mostra il tipo di post come un triangolo colorato sulla miniatura in layout compatto invece di un badge di testo"</string>
@@ -850,7 +841,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="favorites">"Preferiti"</string>
     <string name="all">"Tutti"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Layout a galleria"</string>
     <string name="elapsed_time_just_now">"Giusto ora"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuto"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minuti"</string>
@@ -1714,8 +1704,6 @@ Non preoccupatevi, potete ancora godervi Reddit Jr.."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Diretto"</string>
-    <string name="settings_backup_accounts_client_id_title">"Account di backup e ID cliente"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Includere account utente e ID cliente nel file di backup (consigliato)"</string>
     <string name="password_cannot_be_empty">"La password non può essere vuota"</string>
     <string name="title_activity_settings">"Impostazioni"</string>
     <string name="title_activity_login">"Accedi"</string>

@@ -470,11 +470,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_post_compact_thumbnail_size">"Rozmiar miniatury"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Pokaż miniaturę po lewej stronie w układzie kompaktowym"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Pokaż miniaturę po prawej stronie"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Liczba kolumn w kanale postów"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Pion"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Poziom"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portret (rozłożony)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Pozioma (rozłożona)"</string>
     <string name="settings_swap_tap_and_long_title">"Zamień kliknięcie i przytrzymanie w komentarzach"</string>
     <string name="settings_swipe_to_go_back_title">"Przesuń w prawo aby wrócić"</string>
     <string name="settings_swipe_to_go_back_summary">"Nie ma zastosowania do wszystkich stron"</string>
@@ -677,10 +672,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_subreddit_default_sort_time_title">"Domyślny typ sortowania czasu subredditów"</string>
     <string name="settings_user_default_sort_type_title">"Domyślny typ sortowania użytkowników"</string>
     <string name="settings_user_default_sort_time_title">"Domyślny typ sortowania czasu użytkowników"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Kliknij by pokazać media w układzie galerii"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Zamień dotknięcie i długie naciśnięcie w układzie galerii: dotknięcie otwiera multimedia, długie naciśnięcie otwiera post i komentarze"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Tylko posty multimedialne"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"W układzie galerii wyświetlaj tylko obrazy, GIF, wideo i posty z galerii. Posty tekstowe, ankiety i linki są ukryte"</string>
     <string name="settings_hide_post_type">"Ukryj typ posta"</string>
     <string name="settings_post_type_triangle_indicator">"Trójkątny wskaźnik typu posta"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Pokaż typ postu jako kolorowy trójkąt na miniaturze w układzie kompaktowym zamiast plakietki tekstowej"</string>
@@ -842,7 +833,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="favorites">"Ulubione"</string>
     <string name="all">"Wszystkie"</string>
     <string name="link_post_layout_auto">"Automatycznie"</string>
-    <string name="post_layout_gallery">"Layout galerii"</string>
     <string name="elapsed_time_just_now">"Właśnie teraz"</string>
     <string name="elapsed_time_a_minute_ago">"Minutę temu"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minut temu"</string>
@@ -1708,8 +1698,6 @@ Kliknij by spróbować ponownie."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Bezpośrednie"</string>
-    <string name="settings_backup_accounts_client_id_title">"Konta kopii zapasowych i identyfikator klienta"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Dołącz konta użytkowników i identyfikator klienta do pliku kopii zapasowej (zalecane)"</string>
     <string name="password_cannot_be_empty">"Hasło nie może być puste"</string>
     <string name="title_activity_settings">"Ustawienia"</string>
     <string name="title_activity_login">"Zaloguj się"</string>

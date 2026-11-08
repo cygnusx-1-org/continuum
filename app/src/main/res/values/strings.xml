@@ -541,11 +541,6 @@
     <string name="settings_post_compact_thumbnail_size">Thumbnail size</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">Show Thumbnail on the Left</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">Show Thumbnail on the Right</string>
-    <string name="settings_number_of_columns_in_post_feed_title">The Number of Columns in Post Feed</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">Portrait</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">Landscape</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">Portrait (Unfolded)</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">Landscape (Unfolded)</string>
     <string name="settings_swap_tap_and_long_title">Swap Tap and Long Press in Comments</string>
     <string name="settings_swipe_to_go_back_title">Swipe Right to Go Back</string>
     <string name="settings_swipe_to_go_back_summary">Does Not Apply to All Pages</string>
@@ -781,10 +776,6 @@
     <string name="settings_subreddit_default_sort_time_title">Subreddit Default Sort Time</string>
     <string name="settings_user_default_sort_type_title">User Default Sort Type</string>
     <string name="settings_user_default_sort_time_title">User Default Sort Time</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">Click to Show Media in Gallery Layout</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">Swap tap and long press in gallery layout: tap opens the media, long press opens the post and its comments</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">Media Posts Only</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">In gallery layout, show only image, GIF, video and gallery posts. Text, poll and link posts are hidden</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
     <string name="settings_post_type_card_border_title">Post Type Card Border</string>
     <string name="settings_post_type_card_border_summary">A thin line across the top of each post in Card Bottom and Card Top, in the post type\'s color, blending into the NSFW color on NSFW posts</string>
@@ -995,9 +986,12 @@
     <string name="link_post_layout_auto">Auto</string>
     <string name="post_layout_card">Card Bottom</string>
     <string name="post_layout_compact_2">Compact Layout</string>
-    <string name="post_layout_gallery">Gallery Layout</string>
     <string name="post_layout_card_3">Card Top</string>
-    <string name="post_layout_card_clean">Card Clean</string>
+    <string name="post_layout_media_focused">Media Focused</string>
+    <string name="settings_media_focused_vertical_gallery_swipe_title">Swipe Up and Down Through a Gallery</string>
+    <string name="settings_media_focused_vertical_gallery_swipe_summary">In a gallery opened from the Media Focused layout, swipe up and down to change image. Swipe left to close the gallery and right to open the post and its comments</string>
+    <string name="settings_media_focused_scrolling_gallery_title">Scrolling Gallery</string>
+    <string name="settings_media_focused_scrolling_gallery_summary">A gallery opened from the Media Focused layout is one scrolling list of every image, and a tap opens an image. Swipe left to close the gallery and right to open the post and its comments</string>
 
     <string name="elapsed_time_just_now">Just Now</string>
     <string name="elapsed_time_a_minute_ago">1 Minute</string>
@@ -2012,8 +2006,6 @@
     <string name="proxy_socks">SOCKS</string>
     <string name="proxy_direct">Direct</string>
 
-    <string name="settings_backup_accounts_client_id_title">Backup Accounts and Client ID</string>
-    <string name="settings_backup_accounts_client_id_summary">Include user accounts and Client ID in the backup file (recommended)</string>
 
     <string name="password_cannot_be_empty">Password cannot be empty</string>
 

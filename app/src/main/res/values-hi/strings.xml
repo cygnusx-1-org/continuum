@@ -472,11 +472,6 @@
     <string name="settings_post_compact_thumbnail_size">"थंबनेल आकार"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"संक्षिप्त विन्यास में थम्बनेल बाईं तरफ दिखाएं "</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"दाईं ओर थंबनेल दिखाएँ"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"पोस्ट फीड में स्तम्भों की संख्या "</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"ऊर्ध्वाधर"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">" क्षैतिज "</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"पोर्ट्रेट (खुला)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"लैंडस्केप (खुला)"</string>
     <string name="settings_swap_tap_and_long_title">"टिप्पणियों के  लिए टैप एवं लॉंग प्रैस की अदला बदली करें "</string>
     <string name="settings_swipe_to_go_back_title">"वापस जाने के लिए दाईं ओर स्वाइप करें "</string>
     <string name="settings_swipe_to_go_back_summary">"सभी पृष्ठों पर लागू नहीं होता "</string>
@@ -675,10 +670,6 @@
     <string name="settings_subreddit_default_sort_time_title">"सब्रेडिट डिफ़ॉल्ट सॉर्ट समय"</string>
     <string name="settings_user_default_sort_type_title">"उपयोगकर्ता डिफ़ॉल्ट सॉर्ट प्रकार"</string>
     <string name="settings_user_default_sort_time_title">"उपयोगकर्ता डिफ़ॉल्ट सॉर्ट समय"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"गैलरी लेआउट में मीडिया दिखाने के लिए क्लिक करें"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"गैलरी लेआउट में स्वैप टैप और लॉन्ग प्रेस: टैप मीडिया खोलता है, लॉन्ग प्रेस पोस्ट और उसकी टिप्पणियों को खोलता है"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"केवल मीडिया पोस्ट"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"गैलरी लेआउट में, केवल छवि, GIF, वीडियो और गैलरी पोस्ट दिखाएं। टेक्स्ट, पोल और लिंक पोस्ट छिपे हुए हैं"</string>
     <string name="settings_hide_post_type">"पोस्ट प्रकार छिपाएँ"</string>
     <string name="settings_post_type_triangle_indicator">"पोस्ट प्रकार त्रिभुज संकेतक"</string>
     <string name="settings_post_type_triangle_indicator_summary">"पोस्ट प्रकार को टेक्स्ट बैज के बजाय कॉम्पैक्ट लेआउट में थंबनेल पर रंगीन त्रिकोण के रूप में दिखाएं"</string>
@@ -840,7 +831,6 @@
     <string name="favorites">"पसंदीदा "</string>
     <string name="all">"सभी "</string>
     <string name="link_post_layout_auto">"ऑटो"</string>
-    <string name="post_layout_gallery">"गैलरी लेआउट"</string>
     <string name="elapsed_time_just_now">"अभी अभी "</string>
     <string name="elapsed_time_a_minute_ago">"1 मिनट "</string>
     <string name="elapsed_time_minutes_ago">"%1$d मिनट "</string>
@@ -1700,8 +1690,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"डायरेक्ट"</string>
-    <string name="settings_backup_accounts_client_id_title">"बैकअप खाते और क्लाइंट आईडी"</string>
-    <string name="settings_backup_accounts_client_id_summary">"बैकअप फ़ाइल में उपयोगकर्ता खाते और क्लाइंट आईडी शामिल करें (अनुशंसित)"</string>
     <string name="password_cannot_be_empty">"पासवर्ड खाली नहीं हो सकता"</string>
     <string name="title_activity_settings">"सेटिंग"</string>
     <string name="title_activity_login">"साइन इन करें"</string>
