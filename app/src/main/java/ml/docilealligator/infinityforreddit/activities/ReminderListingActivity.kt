@@ -1,5 +1,7 @@
 package ml.docilealligator.infinityforreddit.activities
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences

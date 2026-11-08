@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.customviews.compose
 
+import androidx.compose.runtime.getValue
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
