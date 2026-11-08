@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Vídeo %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Publicación cruzada"</string>
-    <string name="give_award_activity_label">"Premiar"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all y r/popular"</string>
     <string name="customize_post_filter_activity_label">"Personalizar filtro de publicaciones"</string>
     <string name="filtered_posts_activity_subtitle">"Publicaciones filtradas"</string>
     <string name="post_filter_preference_activity_label">"Filtro de publicaciones"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Publicación de encuesta"</string>
     <string name="history_activity_read_posts_label">"Publicaciones leídas"</string>
     <string name="history_activity_subtitle">"Almacenado en este dispositivo"</string>
-    <string name="subscription_activity_label">"Suscripción"</string>
     <string name="comment_filter_preference_activity_label">"Filtro de comentarios"</string>
     <string name="customize_comment_filter_activity_label">"Personalizar filtro de comentarios"</string>
     <string name="copy_multireddit_activity_label">"Copiar MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Enviar mensaje privado"</string>
     <string name="action_block_user">"Bloquear Usuario"</string>
     <string name="action_select_user_flair">"Seleccione categoría de usuario"</string>
-    <string name="action_give_award">"Premiar"</string>
     <string name="action_save_to_database">"Guardar a la base de datos"</string>
     <string name="action_read_all_messages">"Leer todos los mensajes"</string>
     <string name="action_add_to_multireddit">"Añadir a multireddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Añadir al filtro de publicaciones"</string>
     <string name="action_delete_logs">"Eliminar registros"</string>
     <string name="action_create_github_issue">"Crear problema de GitHub"</string>
-    <string name="action_share_post_link">"Compartir enlace de publicación"</string>
     <string name="action_go_to_wiki">"Ir a la Wiki"</string>
     <string name="action_playback_speed">"Velocidad de reproducción"</string>
     <string name="action_contact_mods">"Contactar moderadores"</string>
@@ -172,14 +167,10 @@ Toca para reintentar."</string>
     <string name="user_multi_reddit">"Usuario MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddits suscritos a"</string>
     <string name="history">"Historial"</string>
-    <string name="no_subreddits_visited_yet">"Aún no se han visitado subreddits"</string>
-    <string name="no_users_visited_yet">"Aún no has visitado ningún perfil de usuario"</string>
     <string name="follow_user">"Seguir usuario"</string>
     <string name="unfollow_user">"Dejar de seguir al usuario"</string>
     <string name="save_user">"Guardar usuario"</string>
     <string name="unsave_user">"Anular guardar usuario"</string>
-    <string name="subscribe_subreddit">"Suscríbete al subreddit"</string>
-    <string name="unsubscribe_subreddit">"Cancelar suscripción al subreddit"</string>
     <string name="add_user_follow">"Seguir"</string>
     <string name="add_user_save">"Guardar"</string>
     <string name="save_user_failed">"No se pudo guardar el usuario"</string>
@@ -195,7 +186,6 @@ Toca para reintentar."</string>
     <string name="reminders">"Recordatorios"</string>
     <string name="settings">"Ajustes"</string>
     <string name="subscribers_number_detail">"Suscriptores: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"En línea: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"No fue posible obtener información del subreddit"</string>
     <string name="cannot_fetch_user_info">"No fue posible obtener información del usuario"</string>
     <string name="cannot_fetch_sidebar">"No fue posible obtener la barra lateral"</string>
@@ -215,8 +205,6 @@ Toca para reintentar."</string>
     <string name="follow_failed">"No fue posible seguir"</string>
     <string name="unfollowed">"Dejó de Seguir"</string>
     <string name="unfollow_failed">"Error al dejar de seguir"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Busca cualquier cosa"</string>
     <string name="search_only_subreddits_hint">"Buscar subreddits"</string>
     <string name="search_only_users_hint">"Buscar usuarios"</string>
     <string name="search_subreddits_and_users_hint">"Buscar subreddits y usuarios"</string>
@@ -232,7 +220,6 @@ Toca para reintentar."</string>
     <string name="send_message_subject_hint">"Asunto (máx. 100 caracteres)"</string>
     <string name="send_message_content_hint">"Mensaje"</string>
     <string name="reply_message_failed">"Error al responder el mensaje"</string>
-    <string name="error_getting_message">"Error al obtener el mensaje"</string>
     <string name="message_username_required">"¿A quien quieres enviar este mensaje?"</string>
     <string name="message_subject_required">"Tu mensaje requiere un asunto"</string>
     <string name="message_content_required">"Tu mensaje requiere contenido"</string>
@@ -333,7 +320,6 @@ Toca para reintentar."</string>
     <string name="sort_relevance">"Relevante"</string>
     <string name="sort_comments">"Comentarios"</string>
     <string name="sort_activity">"Actividad"</string>
-    <string name="sort_confidence">"Confianza"</string>
     <string name="sort_old">"Viejo"</string>
     <string name="sort_qa">"QA"</string>
     <string name="sort_live">"En directo"</string>
@@ -445,7 +431,6 @@ Toca para reintentar."</string>
     <string name="settings_immersive_interface_summary">"No aplica a todas las páginas"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Desactivar la interfaz inmersiva en el modo horizontal"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Personalizar las pestañas de la página principal"</string>
-    <string name="only_for_logged_in_user">"Solo para usuarios registrados"</string>
     <string name="settings_category_post_and_comment_title">"Publicar y comentar"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Botones de voto del lado derecho"</string>
     <string name="settings_mute_video_title">"Silenciar vídeos"</string>
@@ -518,11 +503,6 @@ Toca para reintentar."</string>
     <string name="settings_credits_material_icons_title">"Material Icons"</string>
     <string name="settings_open_source_title">"Código Abierto"</string>
     <string name="settings_open_source_summary">"Dale una Estrella en GitHub si te gusta la app"</string>
-    <string name="settings_email_title">"Correo electrónico"</string>
-    <string name="settings_reddit_account_title">"Cuenta de Reddit"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Compartir"</string>
     <string name="settings_share_summary">"Si te gusta esta aplicación ¡Compártela!"</string>
     <string name="settings_privacy_policy_title">"Política de privacidad"</string>
@@ -554,8 +534,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="settings_reset_all_settings_title">"Restablecer todas la configuraciones"</string>
     <string name="restart_app_see_changes">"Reinicie la app para ver cambios"</string>
     <string name="app_will_restart">"Volver atrás después de cambiar un valor hará que la aplicación se reinicie."</string>
-    <string name="settings_tab_count">"Número de pestañas"</string>
-    <string name="settings_show_tab_names">"Mostrar nombres de las pestañas"</string>
     <string name="settings_enable_tabs">"Habilitar pestañas"</string>
     <string name="settings_edit_tabs_title">"Pestañas"</string>
     <string name="settings_edit_tabs_summary">"Agregar, eliminar y reordenar pestañas"</string>
@@ -568,12 +546,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="reset_name">"Restablecer nombre"</string>
     <string name="content_description_drag_to_reorder">"Arrastrar para reordenar"</string>
     <string name="content_description_delete">"Borrar"</string>
-    <string name="settings_tab_1_summary">"Pestaña 1"</string>
-    <string name="settings_tab_2_summary">"Pestaña 2"</string>
-    <string name="settings_tab_3_summary">"Pestaña 3"</string>
-    <string name="settings_tab_4_summary">"Pestaña 4"</string>
-    <string name="settings_tab_5_summary">"Pestaña 5"</string>
-    <string name="settings_tab_6_summary">"Pestaña 6"</string>
     <string name="settings_more_tabs_summary">"Más pestañas"</string>
     <string name="settings_more_tabs_info_summary">"Los cambios aquí afectan a la lista de arriba"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Mostrar multireddits favoritos"</string>
@@ -582,8 +554,6 @@ De lo contrario, cambia el nombre antes de habilitar Material You."</string>
     <string name="settings_more_tabs_show_users_multireddits_title">"Mostrar MultiReddits de usuarios"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Mostrar subreddits favoritos"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Mostrar subreddits suscritos"</string>
-    <string name="settings_tab_title">"Título"</string>
-    <string name="settings_tab_post_type">"Tipo"</string>
     <string name="settings_tab_subreddit_name">"Nombre del subreddit (sin el prefijo r/)"</string>
     <string name="settings_tab_multi_reddit_name">"Nombre del multireddit (/user/tu-nombre-de-usuario/m/nombre-del-multireddit)"</string>
     <string name="settings_tab_username">"Nombre de usuario (sin el prefijo u/)"</string>
@@ -644,8 +614,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Respetar el orden de comentarios recomendado por el subreddit"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"La ordenación de los comentarios no se guardará"</string>
     <string name="settings_post_filter_title">"Filtro de publicación"</string>
-    <string name="settings_subreddit_filter_category">"Ocultar subreddits"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"En r/popular y r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Animación de abducción OVNI"</string>
     <string name="settings_hide_subreddit_description_title">"Ocultar descripción del subreddit"</string>
     <string name="settings_disable_image_preview_title">"Deshabilitar vista previa de imagen en modo ahorro de datos"</string>
@@ -665,9 +633,7 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Ocultar publicaciones leídas automáticamente en subreddits"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Ocultar publicaciones leídas automáticamente en usuarios"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Ocultar publicaciones leídas automáticamente en la búsqueda"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"La configuración no se aplica al ver publicaciones de búsquedas, usuarios específicos o subreddits."</string>
     <string name="settings_sort_type_title">"Orden de publicaciones"</string>
-    <string name="settings_save_sort_type_title">"Guardar ordenación"</string>
     <string name="settings_sort_category_post_feeds">"Feeds de publicaciones"</string>
     <string name="settings_sort_category_comments">"Comentarios"</string>
     <string name="settings_save_post_sort_title">"Guardar clasificación de publicaciones"</string>
@@ -746,8 +712,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_custom_content_font_family_title">"Familia de fuente del contenido personalizada"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Altura fija en tarjeta"</string>
     <string name="settings_hide_text_post_content">"Ocultar contenido de publicación de texto"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Mostrar menos opciones de la barra de herramientas a partir de"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Nivel %1$d"</string>
     <string name="settings_show_author_avatar_title">"Mostrar avatar del autor"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Desactivar animación de avatar de perfil"</string>
     <string name="settings_show_user_prefix_title">"Mostrar prefijo de usuario"</string>
@@ -785,8 +749,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_enable_api_key_overrides_title">"Habilitar anulaciones"</string>
     <string name="settings_enable_api_key_overrides_summary">"Utilice su ID de cliente, agente de usuario y URI de redireccionamiento personalizados en lugar de los valores predeterminados integrados, que son RedReader"</string>
     <string name="settings_client_id_title">"Reddit API ID de cliente"</string>
-    <string name="settings_client_id_summary">"Utilice una ID de cliente personalizada para Reddit API"</string>
-    <string name="client_id_length_error">"El ID del cliente debe tener exactamente 22 caracteres."</string>
     <string name="tap_to_set_client_id">"Toque para configurar el ID del cliente"</string>
     <string name="set_client_id_dialog_message">"Configura el ID de cliente de la API de Reddit, o desactiva Habilitar anulaciones, en Ajustes | Claves de API"</string>
     <string name="settings_giphy_api_key_title">"Clave de la API de Giphy"</string>
@@ -829,7 +791,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="no_video_path_received">"No se recibió una dirección de vídeo"</string>
     <string name="cannot_handle_intent">"No fue posible compartir"</string>
     <string name="share">"Compartir"</string>
-    <string name="no_email_client">"No se encontró un cliente de Email"</string>
     <string name="no_app">"No hay aplicación disponible"</string>
     <string name="save_comment">"Guardar"</string>
     <string name="unsave_comment">"No guardar"</string>
@@ -851,7 +812,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="elapsed_time_months_ago">"Hace %1$d meses"</string>
     <string name="elapsed_time_a_year_ago">"Hace 1 año"</string>
     <string name="elapsed_time_years_ago">"Hace %1$d años"</string>
-    <string name="remaining_time_passed">"En el pasado"</string>
     <string name="remaining_time_less_than_1_minute">"Menos de 1 minuto"</string>
     <string name="remaining_time_1_minute">"Hace 1 Minuto"</string>
     <string name="remaining_time_in_minutes">"Hace %1$d minutos"</string>
@@ -917,7 +877,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="remove_followed_multi_reddit">"Eliminar de MultiReddits de usuarios"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"¿Eliminar este multireddit guardado? El original no se ve afectado."</string>
     <string name="remove_followed_multi_reddit_success">"Eliminado"</string>
-    <string name="add_user_title">"Seguir usuario"</string>
     <string name="add_user_to_list_title">"Agregar usuario"</string>
     <string name="follow_failed_user_suspended">"u/%1$s está suspendido y no se puede seguir"</string>
     <string name="follow_failed_user_not_found">"u/%1$s no existe o fue eliminado"</string>
@@ -1159,12 +1118,9 @@ Basado en Tema Índigo AMOLED"</string>
     <string name="rename">"Renombrar"</string>
     <string name="override">"Sobrescribir"</string>
     <string name="save_theme_options_title">"Opciones de guardado"</string>
-    <string name="save_theme_options_message">"Subiste este tema para que puedas realizar cambios."</string>
     <string name="save_locally">"Guardar localmente"</string>
     <string name="save_online">"Guardar en línea"</string>
-    <string name="save_online_anonymous">"Guardar en línea (anónimamente)"</string>
     <string name="save_locally_and_online">"Guardar tanto localmente como online"</string>
-    <string name="save_locally_and_online_anonymous">"Guardar tanto localmente como online (anónimamente)"</string>
     <string name="theme_saved_locally">"Tema guardado localmente"</string>
     <string name="theme_name_already_taken">"Ya existe un tema llamado %1$s. Elige otro nombre."</string>
     <string name="theme_saved_online">"Tema guardado en línea"</string>
@@ -1209,9 +1165,7 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="notifications">"Notificaciones"</string>
     <string name="messages">"Mensajes"</string>
     <string name="message">"Mensaje"</string>
-    <string name="fetch_redgifs_video_failed">"No fue posible obtener el vídeo de Redgifs"</string>
     <string name="fetching_video_info_please_wait">"Obteniendo información del vídeo. Por favor espera."</string>
-    <string name="fetch_streamable_video_failed">"No fue posible obtener el vídeo de Streamable"</string>
     <string name="error_fetching_imgur_media">"No fue posible cargar las imágenes"</string>
     <string name="downloading_reddit_video">"Descargando pista de vídeo"</string>
     <string name="downloading_reddit_video_audio_track">"Descargando pista de audio"</string>
@@ -1242,8 +1196,6 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="set_to_home_screen">"Establecer como pantalla principal"</string>
     <string name="set_to_lock_screen">"Establecer como pantalla de bloqueo"</string>
     <string name="set_to_both">"Establecer ambos"</string>
-    <string name="default_font_font_preview">"Por defecto"</string>
-    <string name="load_video_in_redgifs">"Intentar cargando el vídeo en Redgifs"</string>
     <string name="top_score">"%1$s puntos"</string>
     <string name="login_activity_2fa_prompt">"Autenticación de 2 factores: &lt;contraseña&gt;:&lt;código 2FA&gt;.\nEjemplo: sucontraseña:123456\nInicio de sesión de Google o si tiene problemas para iniciar sesión: haga clic en el botón inferior derecho."</string>
     <string name="login_activity_internet_disconnected_error">"Sin conexión a Internet"</string>
@@ -1282,7 +1234,6 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="edited_time">"Editado el %s"</string>
     <string name="warning">"Precaución"</string>
     <string name="this_is_a_nsfw_subreddit">"Este es un subreddit NSFW."</string>
-    <string name="this_user_has_nsfw_content">"Este usuario tiene contenido NSFW"</string>
     <string name="this_post_contains_sensitive_content">"Esta publicación contiene contenido NSFW."</string>
     <string name="dismiss">"Descartar"</string>
     <string name="leave">"Salir"</string>
@@ -1291,13 +1242,10 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="go_to_user">"Ir al usuario"</string>
     <string name="go_to_thing_hint">"Nombre"</string>
     <string name="go_to_top">"Ir al principio"</string>
-    <string name="random">"Aleatorio"</string>
     <string name="random_subreddits">"Subreddits aleatorios"</string>
     <string name="random_subreddit">"Subreddit aleatorio"</string>
     <string name="random_nsfw_subreddit">"Aleatorio NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"Subreddit de suscripción aleatoria"</string>
-    <string name="random_post">"Publicación aleatoria"</string>
-    <string name="random_nsfw_post">"Aleatorio NSFW Publicación"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"No se garantiza la seguridad para el trabajo. Un subreddit aún puede tener contenido NSFW sin la bandera NSFW."</string>
     <string name="fetch_random_thing_failed">"Intente de nuevo después"</string>
     <string name="select_video_quality">"Seleccione calidad del video"</string>
@@ -1408,8 +1356,6 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
         <item quantity="other">"%1$d publicaciones"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Permitido: esta regla ya no lo oculta"</string>
-    <string name="post_filter_blocked_allow">"Nunca ocultes este subreddit"</string>
-    <string name="post_filter_blocked_undo_allow">"Ocultar este subreddit nuevamente"</string>
     <string name="content_description_allow_blocked_subreddit">"Dejar de ocultar %1$s"</string>
     <string name="excludes_strings_hint">"Excluir palabras clave (clave1, clave2)"</string>
     <string name="comment_filter_name_hint">"Nombre del filtro de comentarios"</string>
@@ -1480,21 +1426,13 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="capture">"Capturar"</string>
     <string name="uploading_image">"Subiendo"</string>
     <string name="upload_image_success">"Imagen subida correctamente. Haga clic en el botón de imagen nuevamente para ver las imágenes cargadas."</string>
-    <string name="get_image_bitmap_failed">"No es posible obtener el mapa de bits de la imagen"</string>
     <string name="upload_image_failed">"No es posible subir la imagen"</string>
     <string name="select_giphy_gif">"Seleccione un Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Esta es una característica experimental y aquí hay algunas cosas que necesita saber:\n\n 1. Los gifs Giphy no se mostrarán en el editor de texto y, en su lugar, se insertará un fragmento de texto como un bloque,\n con un formato similar a ![gif](XXXXX). XXXXX es el ID del gif de Giphy y no debe modificarse.\n\n 2. Solo puedes insertar un gif de Giphy por comentario.\n\n 3. Para escribir un superíndice, usa ^() y coloca los textos entre paréntesis, en lugar de solo\n usar un solo ^. Para simplificar, haga clic en la opción de superíndice en las herramientas de formato para insertar un superíndice.\n\n 4. Esta función convierte su descuento a formato de texto enriquecido y es posible que se pierda parte del formato en el proceso.\n\n 5. Es posible que los gifs Giphy no se muestren en la pantalla de vista previa.\n\n 6. No cambie su cuenta usando el selector de cuenta en la pantalla de edición. Debes cambiar\n tu cuenta en el cajón de navegación de la pantalla principal."</string>
     <string name="search_comments">"Buscar comentarios"</string>
     <string name="please_wait_image_is_uploading">"Aún se está cargando una imagen. Espere por favor."</string>
-    <string name="error_fetch_trending_search">"Falló la obtención de las búsquedas de tendencias.
-Toque para volver a intentarlo."</string>
-    <string name="error_parse_trending_search">"Falló el análisis de las búsquedas de tendencias.
-Toque para volver a intentarlo."</string>
-    <string name="no_trending_search">"No se encontraron búsquedas de tendencias.
-Toque para volver a intentarlo."</string>
     <string name="error_loading_wiki">"Error al cargar la wiki"</string>
     <string name="no_wiki">"Este subreddit no tiene página de wiki"</string>
-    <string name="material_you_notification_title">"Aplicando Material You"</string>
     <string name="lock_screen_text">"¡¡¡Vaya!!!"</string>
     <string name="app_lock_timeout_immediately">"Inmediatamente"</string>
     <string name="app_lock_timeout_1_min">"1 minuto"</string>
@@ -1569,40 +1507,6 @@ Toque para volver a intentarlo."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"No se concede el permiso de notificación"</string>
     <string name="go_to_settings">"Ajustes"</string>
-    <string name="welcome_to_redditjr">"¡Bienvenido a Reddit Jr., tu puerta de entrada a una dimensión completamente nueva de navegación Reddit!"</string>
-    <string name="subscription_prompt">"Antes de sumergirte en las innumerables posibilidades que ofrece esta aplicación,\n quiero ser sincero y transparente sobre un cambio significativo que he implementado para garantizar el mejor servicio posible para ti.\n \n\nDe ahora en adelante, necesitarás una suscripción mensual para acceder a Reddit API dentro de Reddit Jr. y\n esto se debe a que Reddit ha comenzado a cobrar por el acceso de API desde el 1 de julio de 2023.\n \n\nTodos los niveles funcionan igual. Si desea apoyar a Reddit Jr., puede suscribirse a un nivel superior.\n La mayor parte del dinero del nivel más bajo se destina a Reddit.\n    "</string>
-    <string name="monthly">"Mensual"</string>
-    <string name="yearly">"Anual"</string>
-    <string name="weekly">"Semanal"</string>
-    <string name="billing_error_billing_unavailable">"El servicio de facturación no está disponible en el dispositivo."</string>
-    <string name="billing_error_developer_error">"El desarrollador cometió algunos errores. No es tu culpa."</string>
-    <string name="billing_error_error">"Error fatal durante la acción API."</string>
-    <string name="billing_error_feature_not_supported">"La función solicitada no es compatible con Play Store en el dispositivo actual."</string>
-    <string name="billing_error_item_already_owned">"La compra falló porque el artículo ya es de propiedad."</string>
-    <string name="billing_error_item_unavailable">"El producto solicitado no está disponible para su compra."</string>
-    <string name="billing_error_network_error">"Se produjo un error de red durante la operación."</string>
-    <string name="billing_error_service_disconnected">"La aplicación no está conectada al servicio Play Store a través de la biblioteca de facturación de Google Play."</string>
-    <string name="billing_error_service_unavailable">"El servicio no está disponible actualmente."</string>
-    <string name="billing_error_user_canceled">"La transacción fue cancelada por el usuario."</string>
-    <string name="subscription_plan_description_monthly">"Bronce"</string>
-    <string name="subscription_plan_description_monthly_399">"Plata"</string>
-    <string name="subscription_plan_description_monthly_499">"Oro: ¡la elección perfecta!"</string>
-    <string name="subscription_plan_description_monthly_699">"Platino"</string>
-    <string name="subscription_plan_description_monthly_899">"Diamante"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"No se puede reconocer la compra"</string>
-    <string name="connect_to_billing_system_failed">"No se pudo conectar al sistema de facturación"</string>
-    <string name="connecting_to_billing_system">"Conectándose al sistema de facturación. Espere por favor."</string>
-    <string name="thank_you_for_subscription">"Gracias por tu suscripción."</string>
-    <string name="load_subscription_options">"Cargar opciones de suscripción"</string>
-    <string name="acknowledging_subscription">"Confirmando su suscripción. Espere por favor."</string>
-    <string name="acknowledgement_purchase_failed_description">"Ups, hubo un error al reconocer tu compra. Si este problema persiste durante tres días, recibirás un reembolso automáticamente.\nNo te preocupes, aún puedes disfrutar de Reddit Jr.."</string>
-    <string name="continue_to_app">"Continuar a la aplicación"</string>
-    <string name="restore_subscription_purchase_details">"¿Ya pagaste la suscripción?"</string>
-    <string name="restore_subscription_purchase">"Restaurar compra de suscripción"</string>
-    <string name="important_info_title">"Vuelva a iniciar sesión en su cuenta"</string>
-    <string name="important_info">"Reddit Jr. usa una ID de cliente (API clave) de Reddit y debe volver a iniciar sesión para continuar usando la aplicación. \n\nSimplemente abra el cajón de navegación, haga clic en el encabezado de su cuenta y seleccione \"Agregar una cuenta\" para iniciar sesión en Reddit usando la misma cuenta nuevamente. De lo contrario, es posible que Reddit Jr. no cargue ninguna publicación. Lo siento por los inconvenientes ocasionados."</string>
-    <string name="i_understand">"Entiendo"</string>
     <string name="add_to_comment_filter">"Añadir al filtro de comentarios"</string>
     <string name="cannot_edit_post_with_images">"No se permite editar publicaciones con imágenes."</string>
     <string name="local">"Locales"</string>
@@ -1628,11 +1532,8 @@ Toque para volver a intentarlo."</string>
     <string name="content_description_comment_filter_add_user">"Agregar un usuario al filtro de comentarios"</string>
     <string name="content_description_create_custom_theme">"Crear tema personalizado"</string>
     <string name="content_description_create_post_filter">"Crear filtro de publicaciones"</string>
-    <string name="content_description_add_post_filter_usage">"Aplicar filtro de publicación en algún lugar"</string>
     <string name="content_description_add_post_filter_rule">"Agregar regla de filtro"</string>
     <string name="content_description_remove_post_filter_rule">"Eliminar %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Agregar un subreddit al filtro de publicaciones"</string>
-    <string name="content_description_post_filter_add_user">"Agregar un usuario al filtro de publicaciones"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Agregar un usuario o subreddit al filtro de publicaciones"</string>
     <string name="content_description_change_banner">"Cambiar banner"</string>
     <string name="content_description_change_avatar">"Cambiar avatar"</string>
@@ -1655,7 +1556,6 @@ Toque para volver a intentarlo."</string>
     <string name="content_description_search">"Buscar"</string>
     <string name="content_description_go_to_subreddit">"Ir al subreddit"</string>
     <string name="content_description_go_to_user">"Ir al usuario"</string>
-    <string name="content_description_random">"Aleatorio"</string>
     <string name="content_description_filter_posts">"Filtrar posts"</string>
     <string name="content_description_hide_read_posts">"Ocultar posts leídos"</string>
     <string name="content_description_go_to_top">"Ir al principio"</string>
@@ -1673,15 +1573,6 @@ Toque para volver a intentarlo."</string>
     <string name="content_description_next_result">"Ir al siguiente resultado"</string>
     <string name="content_description_close_search_panel">"Cerrar panel de búsqueda"</string>
     <string name="content_description_send_message">"Enviar mensaje"</string>
-    <string name="content_description_home">"Inicio"</string>
-    <string name="content_description_subscriptions">"Suscripciones"</string>
-    <string name="content_description_inbox">"Bandeja de entrada"</string>
-    <string name="content_description_profile">"Perfil de usuario"</string>
-    <string name="content_description_multireddits">"MultiReddits"</string>
-    <string name="content_description_upvoted">"Votado a favor"</string>
-    <string name="content_description_downvoted">"Votado en contra"</string>
-    <string name="content_description_hidden">"Oculto"</string>
-    <string name="content_description_saved">"Guardado"</string>
     <string name="content_description_scan_qr_code">"Escanear código QR"</string>
     <string name="comment">"Comentario"</string>
     <string name="enable_reply_notifications">"Recibir notificaciones de respuesta"</string>
@@ -1700,15 +1591,9 @@ Toque para volver a intentarlo."</string>
     <string name="download_image">"Descargar imagen"</string>
     <string name="download_gif">"Descargar Gif"</string>
     <string name="download_video">"Descargar Vídeo"</string>
-    <string name="download_all_gallery_images">"Descargar todas las imágenes de la galería"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Directo"</string>
-    <string name="password_cannot_be_empty">"La contraseña no puede estar vacía"</string>
-    <string name="title_activity_settings">"Ajustes"</string>
-    <string name="title_activity_login">"Iniciar sesión"</string>
-    <string name="restart_app_to_apply_changes">"Presione aquí para reiniciar la aplicación y aplicar los cambios."</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Subreddits ocultos por defecto eliminados"</string>
     <string name="jump_to_parent_comment">"Saltar al comentario de los padres"</string>
     <string name="long_press_post_non_media_area">"Pulsación larga en la publicación (área no multimedia)"</string>
     <string name="long_press_post_media">"Mantenga presionado el medio de publicación"</string>

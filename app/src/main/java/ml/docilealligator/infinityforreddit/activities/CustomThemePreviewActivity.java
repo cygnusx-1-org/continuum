@@ -251,18 +251,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                         return WindowInsetsCompat.CONSUMED;
                     }
                 });
-                /*adjustToolbar(binding.toolbar);
-
-                Resources resources = getResources();
-                int navBarResourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-                if (navBarResourceId > 0) {
-                    int navBarHeight = resources.getDimensionPixelSize(navBarResourceId);
-                    if (navBarHeight > 0) {
-                        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabThemePreviewActivity.getLayoutParams();
-                        params.bottomMargin = navBarHeight;
-                        binding.fabThemePreviewActivity.setLayoutParams(params);
-                    }
-                }*/
             }
 
             if (changeStatusBarIconColor) {
@@ -403,14 +391,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         }
     }
 
-    /*private int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
-    }*/
 
     protected void applyAppBarLayoutAndToolbarTheme(AppBarLayout appBarLayout, Toolbar toolbar) {
         appBarLayout.setBackgroundColor(customTheme.colorPrimary);
@@ -433,20 +413,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         }
     }
 
-    /*private void adjustToolbar(Toolbar toolbar) {
-        int statusBarResourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarResourceId > 0) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) toolbar.getLayoutParams();
-            int statusBarHeight = getResources().getDimensionPixelSize(statusBarResourceId);
-            params.topMargin = statusBarHeight;
-            toolbar.setLayoutParams(params);
-            TypedValue tv = new TypedValue();
-            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-                ((ViewGroup.MarginLayoutParams) binding.linearLayoutBottomAppBarThemePreviewActivity.getLayoutParams()).setMargins(0,
-                        TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics()) + statusBarHeight, 0, 0);
-            }
-        }
-    }*/
 
     protected void applyTabLayoutTheme(TabLayout tabLayout) {
         int toolbarAndTabBackgroundColor = customTheme.colorPrimary;

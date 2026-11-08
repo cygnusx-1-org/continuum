@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Video %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Çapraz gönderi"</string>
-    <string name="give_award_activity_label">"Ödül Ver"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all ve r/popular"</string>
     <string name="customize_post_filter_activity_label">"Gönderi Filtresini Özelleştir"</string>
     <string name="filtered_posts_activity_subtitle">"Filtrelenen Gönderiler"</string>
     <string name="post_filter_preference_activity_label">"Gönderi Filtresi"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Anket Gönderisi"</string>
     <string name="history_activity_read_posts_label">"Okunan Gönderiler"</string>
     <string name="history_activity_subtitle">"Bu cihazda depolandı"</string>
-    <string name="subscription_activity_label">"Abonelik"</string>
     <string name="comment_filter_preference_activity_label">"Yorum Filtresi"</string>
     <string name="customize_comment_filter_activity_label">"Yorum Filtresini Özelleştir"</string>
     <string name="copy_multireddit_activity_label">"Çoklu Reddit'i Kopyala"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Özel Mesaj Gönder"</string>
     <string name="action_block_user">"Kullanıcıyı Engelle"</string>
     <string name="action_select_user_flair">"Kullanıcı Rozetini Seç"</string>
-    <string name="action_give_award">"Ödül Ver"</string>
     <string name="action_save_to_database">"Veritabanına Kaydet"</string>
     <string name="action_read_all_messages">"Tümünü Okundu Olarak İşaretle"</string>
     <string name="action_add_to_multireddit">"MultiReddit'e Ekle"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Gönderi Filtresine Ekle"</string>
     <string name="action_delete_logs">"Seyir Defterini Sil"</string>
     <string name="action_create_github_issue">"GitHub Konusu Oluştur"</string>
-    <string name="action_share_post_link">"Gönderi Bağlantısını Paylaş"</string>
     <string name="action_go_to_wiki">"Wiki'ye git"</string>
     <string name="action_playback_speed">"Oynatma Hızı"</string>
     <string name="action_contact_mods">"İletişim Modları"</string>
@@ -173,14 +168,10 @@ Tekrar denemek için tıklayın."</string>
     <string name="user_multi_reddit">"Kullanıcı Çoklu Reddit"</string>
     <string name="subscribed_subreddits">"Abone Olunan Alt Dizinler"</string>
     <string name="history">"Geçmiş"</string>
-    <string name="no_subreddits_visited_yet">"Henüz alt dizin ziyaret edilmedi"</string>
-    <string name="no_users_visited_yet">"Henüz herhangi bir kullanıcı profilini ziyaret etmedin"</string>
     <string name="follow_user">"Kullanıcıyı takip et"</string>
     <string name="unfollow_user">"Kullanıcıyı takip etmeyi bırak"</string>
     <string name="save_user">"Kullanıcıyı kaydet"</string>
     <string name="unsave_user">"Kullanıcı kaydını iptal et"</string>
-    <string name="subscribe_subreddit">"Alt dizine abone olun"</string>
-    <string name="unsubscribe_subreddit">"Alt dizin aboneliğinden çık"</string>
     <string name="add_user_follow">"Takip et"</string>
     <string name="add_user_save">"Kaydet"</string>
     <string name="save_user_failed">"Kullanıcı kaydedilemedi"</string>
@@ -196,7 +187,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="reminders">"Hatırlatıcılar"</string>
     <string name="settings">"Ayarlar"</string>
     <string name="subscribers_number_detail">"Aboneler: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Çevrimiçi: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Subreddit bilgisi getirilemiyor"</string>
     <string name="cannot_fetch_user_info">"Kullanıcı bilgisi getirilemiyor"</string>
     <string name="cannot_fetch_sidebar">"Hakkındakiler getirilemiyor"</string>
@@ -216,8 +206,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="follow_failed">"Takip edilemedi"</string>
     <string name="unfollowed">"Takip bırakıldı"</string>
     <string name="unfollow_failed">"Takip bırakılamadı"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Bir şey arayın"</string>
     <string name="search_only_subreddits_hint">"Subreddit'leri ara"</string>
     <string name="search_only_users_hint">"Kullanıcıları ara"</string>
     <string name="search_subreddits_and_users_hint">"Alt dizinlerde ve kullanıcılarda arama yapın"</string>
@@ -233,7 +221,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="send_message_subject_hint">"Konu (maks 100 karakter)"</string>
     <string name="send_message_content_hint">"Mesaj"</string>
     <string name="reply_message_failed">"Bu mesaja yanıt verilemedi"</string>
-    <string name="error_getting_message">"Bu mesaj alınırken hata oluştu"</string>
     <string name="message_username_required">"Hey, bu mesajı kime göndermek istiyorsun?"</string>
     <string name="message_subject_required">"Mesajınızın bir konusu olmalıdır"</string>
     <string name="message_content_required">"Alıcıya bir şey söylemelisin"</string>
@@ -334,7 +321,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="sort_relevance">"Alaka düzeyi"</string>
     <string name="sort_comments">"Yorumlar"</string>
     <string name="sort_activity">"Etkinlik"</string>
-    <string name="sort_confidence">"İtimat"</string>
     <string name="sort_old">"Eski"</string>
     <string name="sort_qa">"QA"</string>
     <string name="sort_live">"Canlı"</string>
@@ -446,7 +432,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_immersive_interface_summary">"Tüm Sayfalara Uygulanamaz"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Manzara Modunda Sürükleyici Arayüzü Devre Dışı Bırak"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Ana Sayfadaki Sekmeleri Özelleştir"</string>
-    <string name="only_for_logged_in_user">"Sadece Oturum Açmış Kullanıcılar için"</string>
     <string name="settings_category_post_and_comment_title">"Gönderi ve Yorum"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Oy Düğmeleri Sağda"</string>
     <string name="settings_mute_video_title">"Videoları Sessize Al"</string>
@@ -519,11 +504,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_credits_material_icons_title">"Materyal Simgeleri"</string>
     <string name="settings_open_source_title">"Açık Kaynak"</string>
     <string name="settings_open_source_summary">"Bu uygulamayı beğendiyseniz Github'da yıldız verin"</string>
-    <string name="settings_email_title">"E-posta"</string>
-    <string name="settings_reddit_account_title">"Reddit Hesabı"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Paylaş"</string>
     <string name="settings_share_summary">"Bu uygulamayı beğendiyseniz başkalarıyla paylaşın"</string>
     <string name="settings_privacy_policy_title">"Gizlilik Politikası"</string>
@@ -551,8 +531,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_reset_all_settings_title">"Tüm Ayarları Sıfırla"</string>
     <string name="restart_app_see_changes">"Değişiklikleri görmek için uygulamayı yeniden başlatın"</string>
     <string name="app_will_restart">"Bir değeri değiştirdikten sonra geri dönmek uygulamanın yeniden başlatılmasına neden olacaktır."</string>
-    <string name="settings_tab_count">"Sekme Sayısı"</string>
-    <string name="settings_show_tab_names">"Sekme Adlarını Göster"</string>
     <string name="settings_enable_tabs">"Sekmeleri Etkinleştir"</string>
     <string name="settings_edit_tabs_title">"Sekmeler"</string>
     <string name="settings_edit_tabs_summary">"Sekmeleri ekleme, kaldırma ve yeniden sıralama"</string>
@@ -565,12 +543,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="reset_name">"Adı sıfırla"</string>
     <string name="content_description_drag_to_reorder">"Yeniden sıralamak için sürükleyin"</string>
     <string name="content_description_delete">"Sil"</string>
-    <string name="settings_tab_1_summary">"Sekme 1"</string>
-    <string name="settings_tab_2_summary">"Sekme 2"</string>
-    <string name="settings_tab_3_summary">"Sekme 3"</string>
-    <string name="settings_tab_4_summary">"Sekme 4"</string>
-    <string name="settings_tab_5_summary">"Sekme 5"</string>
-    <string name="settings_tab_6_summary">"Sekme 6"</string>
     <string name="settings_more_tabs_summary">"Daha Fazla Sekme"</string>
     <string name="settings_more_tabs_info_summary">"Buradaki değişiklikler yukarıdaki listeyi etkiler"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Favori MultiRedditleri Göster"</string>
@@ -579,8 +551,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_more_tabs_show_users_multireddits_title">"Kullanıcıların MultiReddits’lerini Göster"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Favori Subreddit Aboneliklerini Göster"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Subreddit Aboneliklerini Göster"</string>
-    <string name="settings_tab_title">"Başlık"</string>
-    <string name="settings_tab_post_type">"Tür"</string>
     <string name="settings_tab_subreddit_name">"Subreddit Adı (r/ öneksiz)"</string>
     <string name="settings_tab_multi_reddit_name">"MultiReddit Adı (/user/kullanıcıadın/m/multiredditadın) (sadece küçük harfler)"</string>
     <string name="settings_tab_username">"Kullanıcı adı (u/ öneksiz)"</string>
@@ -641,8 +611,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"İlgili Subreddit Önerilen Yorum Sıralaması Türü"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Yorum sıralaması türü kaydedilmez"</string>
     <string name="settings_post_filter_title">"Gönderi Filtresi"</string>
-    <string name="settings_subreddit_filter_category">"Subreddit'leri Gizle"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"r/popular ve r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"UFO Yakalama Animasyonu"</string>
     <string name="settings_hide_subreddit_description_title">"Subreddit Açıklamasını Gizle"</string>
     <string name="settings_disable_image_preview_title">"Veri Tasarrufu Modunda Görüntüleri Önizlemeyi Devre Dışı Bırak"</string>
@@ -662,9 +630,7 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Alt Dizinlerde Okunan Gönderileri Otomatik Olarak Gizle"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Kullanıcılarda Okunan Gönderileri Otomatik Olarak Gizle"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Aramada Gönderileri Otomatik Olarak Okunmasını Gizle"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Aramalardan, belirli kullanıcılardan veya alt dizinlerden gelen gönderiler görüntülenirken bu ayar uygulanmaz."</string>
     <string name="settings_sort_type_title">"Sıralama Türü"</string>
-    <string name="settings_save_sort_type_title">"Sıralama Türünü Kaydet"</string>
     <string name="settings_sort_category_post_feeds">"Gönderi akışları"</string>
     <string name="settings_sort_category_comments">"Yorumlar"</string>
     <string name="settings_save_post_sort_title">"Gönderiyi Kaydet Sırala"</string>
@@ -743,8 +709,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_custom_content_font_family_title">"Özel İçerik Yazı Tipi Ailesi"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Karttaki Sabit Yükseklik"</string>
     <string name="settings_hide_text_post_content">"Metin Gönderisi İçeriğini Gizle"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Daha Az Araç Çubuğu Seçeneği Göster"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"Seviye %1$d"</string>
     <string name="settings_show_author_avatar_title">"Yazar Avatarını Göster"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Profil avatar animasyonunu devre dışı bırak"</string>
     <string name="settings_show_user_prefix_title">"Kullanıcı Önekini Göster"</string>
@@ -782,8 +746,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_enable_api_key_overrides_title">"Geçersiz Kılmaları Etkinleştir"</string>
     <string name="settings_enable_api_key_overrides_summary">"RedReader olan yerleşik varsayılanlar yerine özel İstemci Kimliğinizi, Kullanıcı Aracınızı ve Yönlendirme URI'nizi kullanın"</string>
     <string name="settings_client_id_title">"Reddit API İstemci Kimliği"</string>
-    <string name="settings_client_id_summary">"Reddit API için özel bir İstemci Kimliği kullanın"</string>
-    <string name="client_id_length_error">"İstemci Kimliği tam olarak 22 karakter uzunluğunda olmalıdır."</string>
     <string name="tap_to_set_client_id">"İstemci Kimliğini ayarlamak için dokunun"</string>
     <string name="set_client_id_dialog_message">"Reddit API İstemci Kimliğini ayarla veya Geçersiz Kılmaları Etkinleştir seçeneğini kapat: Ayarlar | API anahtarları"</string>
     <string name="settings_giphy_api_key_title">"Giphy API anahtarı"</string>
@@ -826,7 +788,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="no_video_path_received">"Hiç video yolu alınmadı"</string>
     <string name="cannot_handle_intent">"Paylaşım isteği yerine getirilemedi"</string>
     <string name="share">"Paylaş"</string>
-    <string name="no_email_client">"E-posta alıcısı bulunamadı"</string>
     <string name="no_app">"Hiç kullanılabilir uygulama yok"</string>
     <string name="save_comment">"Kaydet"</string>
     <string name="unsave_comment">"Kaydetme"</string>
@@ -848,7 +809,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="elapsed_time_months_ago">"%1$d Ay"</string>
     <string name="elapsed_time_a_year_ago">"1 Yıl"</string>
     <string name="elapsed_time_years_ago">"%1$d Yıl"</string>
-    <string name="remaining_time_passed">"Geçmişte"</string>
     <string name="remaining_time_less_than_1_minute">"1 dakikadan az"</string>
     <string name="remaining_time_1_minute">"1 Dakika"</string>
     <string name="remaining_time_in_minutes">"%1$d Dakika"</string>
@@ -915,7 +875,6 @@ https://play.google.com/store/"</string>
     <string name="remove_followed_multi_reddit">"Kullanıcıların MultiReddit’lerinden kaldır"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Bu kayıtlı çoklu reddit kaldırılsın mı? Orijinal etkilenmez."</string>
     <string name="remove_followed_multi_reddit_success">"Kaldırıldı"</string>
-    <string name="add_user_title">"Kullanıcıyı takip et"</string>
     <string name="add_user_to_list_title">"Kullanıcı ekle"</string>
     <string name="follow_failed_user_suspended">"u/%1$s askıya alındı ve takip edilemiyor"</string>
     <string name="follow_failed_user_not_found">"u/%1$s mevcut değil veya silindi"</string>
@@ -1157,12 +1116,9 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="rename">"Yeniden Adlandır"</string>
     <string name="override">"Geçersizleştir"</string>
     <string name="save_theme_options_title">"Kaydetme seçenekleri"</string>
-    <string name="save_theme_options_message">"Bu temayı değişiklik yapabilmek için sen yükledin."</string>
     <string name="save_locally">"Yerel olarak kaydet"</string>
     <string name="save_online">"Çevrimiçi kaydet"</string>
-    <string name="save_online_anonymous">"Çevrimiçi kaydet (anonim olarak)"</string>
     <string name="save_locally_and_online">"Hem yerel hem de çevrimiçi tasarruf edin"</string>
-    <string name="save_locally_and_online_anonymous">"Hem yerel hem de çevrimiçi olarak kaydedin (anonim olarak)"</string>
     <string name="theme_saved_locally">"Tema yerel olarak kaydedildi"</string>
     <string name="theme_name_already_taken">"%1$s adlı bir tema zaten mevcut. Başka bir ad seçin."</string>
     <string name="theme_saved_online">"Tema çevrimiçi olarak kaydedildi"</string>
@@ -1206,9 +1162,7 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="notifications">"Bildirimler"</string>
     <string name="messages">"Mesajlar"</string>
     <string name="message">"Mesaj"</string>
-    <string name="fetch_redgifs_video_failed">"Redgifs video'su alınamadı"</string>
     <string name="fetching_video_info_please_wait">"Video bilgisi alınıyor. Lütfen bekleyin."</string>
-    <string name="fetch_streamable_video_failed">"Video akışı getirilemedi"</string>
     <string name="error_fetching_imgur_media">"Görüntüler yüklenemedi"</string>
     <string name="downloading_reddit_video">"Video Parçası İndiriliyor"</string>
     <string name="downloading_reddit_video_audio_track">"Ses Parçası İndiriliyor"</string>
@@ -1239,8 +1193,6 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="set_to_home_screen">"Ana Ekrana Ayarla"</string>
     <string name="set_to_lock_screen">"Kilit Ekranına Ayarla"</string>
     <string name="set_to_both">"İkisine de Ayarla"</string>
-    <string name="default_font_font_preview">"Varsayılan"</string>
-    <string name="load_video_in_redgifs">"Videoyu Redgifs'e yüklemeyi deneyin"</string>
     <string name="top_score">"%1$s puan"</string>
     <string name="login_activity_2fa_prompt">"2 faktörlü kimlik doğrulama: &lt;şifre&gt;:&lt;2FA kodu&gt;.\nÖrnek: yourpass:123456\nGoogle girişi veya giriş yaparken sorun: sağ alttaki düğmeye dokun."</string>
     <string name="login_activity_internet_disconnected_error">"İnternet Bağlantısı Yok"</string>
@@ -1279,7 +1231,6 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="edited_time">"%s tarihinde düzenlendi"</string>
     <string name="warning">"Uyarı"</string>
     <string name="this_is_a_nsfw_subreddit">"Bu bir NSFW alt dizisidir."</string>
-    <string name="this_user_has_nsfw_content">"Bu kullanıcı NSFW içeriğe sahip"</string>
     <string name="this_post_contains_sensitive_content">"Bu gönderi NSFW içerik içeriyor."</string>
     <string name="dismiss">"Reddet"</string>
     <string name="leave">"Ayrıl"</string>
@@ -1288,13 +1239,10 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="go_to_user">"Kullanıcıya Git"</string>
     <string name="go_to_thing_hint">"İsim"</string>
     <string name="go_to_top">"Başa Dön"</string>
-    <string name="random">"Rastgele"</string>
     <string name="random_subreddits">"Rastgele Alt Dizinler"</string>
     <string name="random_subreddit">"Rastgele Alt Dizin"</string>
     <string name="random_nsfw_subreddit">"Rastgele NSFW Alt Dizin"</string>
     <string name="random_subscribed_subreddit">"Rastgele Abone Olunan Alt Dizin"</string>
-    <string name="random_post">"Rastgele Gönderi"</string>
-    <string name="random_nsfw_post">"Rastgele NSFW Gönderi"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"İş güvenliği garanti edilmez. Bir alt dizin, üzerinde NSFW bayrağı olmadan da NSFW içeriğe sahip olabilir."</string>
     <string name="fetch_random_thing_failed">"Daha sonra tekrar deneyin"</string>
     <string name="select_video_quality">"Video Kalitesini Seç"</string>
@@ -1403,8 +1351,6 @@ Amoled Tema Şablonu Oluştur"</string>
         <item quantity="other">"%1$d gönderi"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"İzin verildi — bu kural artık onu gizlemiyor"</string>
-    <string name="post_filter_blocked_allow">"Bu alt dizini asla gizleme"</string>
-    <string name="post_filter_blocked_undo_allow">"Bu alt dizini tekrar gizle"</string>
     <string name="content_description_allow_blocked_subreddit">"%1$s gizlemeyi bırak"</string>
     <string name="excludes_strings_hint">"Anahtar kelimeleri hariç tut (anahtar1,anahtar2)"</string>
     <string name="comment_filter_name_hint">"Yorum Filtresi Adı"</string>
@@ -1475,21 +1421,13 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="capture">"Bir Fotoğraf Çek"</string>
     <string name="uploading_image">"Yükleniyor"</string>
     <string name="upload_image_success">"Fotoğraf başarıyla yüklendi. Yüklenen fotoğrafları görmek için fotoğraf düğmesine tekrar tıklayın."</string>
-    <string name="get_image_bitmap_failed">"Fotoğrafın bitmap'i alınamıyor"</string>
     <string name="upload_image_failed">"Fotoğraf yüklenemiyor"</string>
     <string name="select_giphy_gif">"Bir Giphy Seçin GIF"</string>
     <string name="select_giphy_gif_explanation">"Bu deneysel bir özelliktir ve bilmen gereken bazı şeyler şunlardır:\n\n 1. Giphy gif’leri metin düzenleyicide gösterilmeyecek ve bunun yerine, ![gif](XXXXX) benzeri bir formatta,\n bir metin parçası blok olarak eklenecek. XXXXX Giphy gif kimliğidir ve değiştirilmemelidir.\n\n 2. Yorum başına yalnızca bir Giphy gif ekleyebilirsin.\n\n 3. Üst simge yazmak için tek bir ^ kullanmak yerine ^() kullan ve metinleri parantez içine al.\n Kolaylık olsun diye, üst simge eklemek için biçimlendirme araçlarındaki üst simge seçeneğine dokun.\n\n 4. Bu özellik Markdown’ını zengin metin biçimine dönüştürür ve bu sırada bazı biçimlendirmeler kaybolabilir.\n\n 5. Giphy gif’leri önizleme ekranında gösterilmeyebilir.\n\n 6. Düzenleme ekranındaki hesap seçiciyi kullanarak hesabını değiştirme. Hesabını\n ana ekrandaki gezinme çekmecesinden değiştir."</string>
     <string name="search_comments">"Yorumları Ara"</string>
     <string name="please_wait_image_is_uploading">"Hâlâ bir fotoğraf yükleniyor. Lütfen bekleyin."</string>
-    <string name="error_fetch_trending_search">"Trend aramalar getirilemedi.
-Tekrar denemek için tıklayın."</string>
-    <string name="error_parse_trending_search">"Trend aramalar ayrıştırılamadı.
-Tekrar denemek için tıklayın."</string>
-    <string name="no_trending_search">"Trend aramalar bulunamadı.
-Tekrar denemek için tıklayın."</string>
     <string name="error_loading_wiki">"Viki yüklenirken hata oluştu"</string>
     <string name="no_wiki">"Bu subreddit'in viki sayfası yok"</string>
-    <string name="material_you_notification_title">"Material You'yu Yap"</string>
     <string name="lock_screen_text">"Vay canına!!!"</string>
     <string name="app_lock_timeout_immediately">"Hemen"</string>
     <string name="app_lock_timeout_1_min">"1 dakika"</string>
@@ -1565,40 +1503,6 @@ Tekrar denemek için dokun."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Bildirim izni verilmemiştir"</string>
     <string name="go_to_settings">"Ayarlar"</string>
-    <string name="welcome_to_redditjr">"Reddit’e açılan kapın Reddit Jr.’a hoş geldin!"</string>
-    <string name="subscription_prompt">"Bu uygulamanın sunduğu sayısız olasılığa dalmadan önce,\n sana mümkün olan en iyi hizmeti sağlamak için uyguladığım önemli bir değişiklik konusunda açık ve şeffaf olmak istiyorum.\n \n\nŞu andan itibaren Reddit Jr. içinde Reddit API’ye erişmek için aylık bir aboneliğe ihtiyacın olacak;\n bunun nedeni Reddit’in 1 Temmuz 2023’ten beri API erişimi için ücret almasıdır.\n \n\nTüm kademeler aynı şekilde çalışır. Reddit Jr.’u desteklemek istersen daha yüksek bir kademeye abone olabilirsin.\n En düşük kademeden gelen paranın büyük kısmı Reddit’e gider.\n    "</string>
-    <string name="monthly">"Aylık"</string>
-    <string name="yearly">"Yıllık"</string>
-    <string name="weekly">"Haftalık"</string>
-    <string name="billing_error_billing_unavailable">"Faturalandırma hizmeti bu cihazda kullanılamıyor."</string>
-    <string name="billing_error_developer_error">"Geliştirici bazı hatalar yapmış. Senlik bir durum yok."</string>
-    <string name="billing_error_error">"API alınırken büyük bir hata oluştu."</string>
-    <string name="billing_error_feature_not_supported">"İstenilen özellik bu cihazdaki Play Store tarafından desteklenmiyor."</string>
-    <string name="billing_error_item_already_owned">"Öğeye zaten sahip olduğunuzdan satın alma işlemi başarısız oldu."</string>
-    <string name="billing_error_item_unavailable">"İstenilen ürün satın alınamıyor."</string>
-    <string name="billing_error_network_error">"İşlem sırasında bir ağ hatası oluştu."</string>
-    <string name="billing_error_service_disconnected">"Uygulama Google Play Billing Library ile Play Store hizmetine bağlı değil."</string>
-    <string name="billing_error_service_unavailable">"Hizmet şu anda kullanılamıyor."</string>
-    <string name="billing_error_user_canceled">"İşlem kullanıcı tarafından iptal edildi."</string>
-    <string name="subscription_plan_description_monthly">"Bronz"</string>
-    <string name="subscription_plan_description_monthly_399">"Gümüş"</string>
-    <string name="subscription_plan_description_monthly_499">"Altın - Harika Seçim!"</string>
-    <string name="subscription_plan_description_monthly_699">"Platinyum"</string>
-    <string name="subscription_plan_description_monthly_899">"Elmas"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Satın alma işlemi onaylanamıyor"</string>
-    <string name="connect_to_billing_system_failed">"Billing sistemine bağlanılamadı"</string>
-    <string name="connecting_to_billing_system">"Billing sistemine bağlanılıyor. Lütfen bekleyin."</string>
-    <string name="thank_you_for_subscription">"Abone olduğun için sağ ol reis"</string>
-    <string name="load_subscription_options">"Abonelik seçeneklerini yükle"</string>
-    <string name="acknowledging_subscription">"Aboneliğin onaylanıyor. Lütfen bekle."</string>
-    <string name="acknowledgement_purchase_failed_description">"Hay aksi! Satın alma işlemin onaylanırken bir hata oluştu. Bu sorun üç gün boyunca devam ederse otomatik olarak paran iade edilecek.\nEndişelenme, Reddit Jr.’un keyfini çıkarmaya devam edebilirsin."</string>
-    <string name="continue_to_app">"Uygulamaya devam et"</string>
-    <string name="restore_subscription_purchase_details">"Abonelik için ödeme yaptın mı?"</string>
-    <string name="restore_subscription_purchase">"Satın alınan aboneliği geri yükle"</string>
-    <string name="important_info_title">"Lütfen hesabınıza yeniden giriş yapın"</string>
-    <string name="important_info">"Reddit Jr., Reddit'den bir Müşteri Kimliği (API anahtarı) kullanır ve uygulamayı kullanmaya devam etmek için yeniden giriş yapmanız gerekir.\n\n Aynı hesabı kullanarak Reddit'de tekrar oturum açmak için gezinme çekmecesini açın ve hesap başlığınıza tıklayın ve \"Hesap ekle\"yi seçin. Aksi halde Reddit Jr. gönderileri hiç yüklemeyebilir. Rahatsızlıktan dolayı özür dileriz."</string>
-    <string name="i_understand">"Anlıyorum"</string>
     <string name="add_to_comment_filter">"Yoruma Ekle Filtre"</string>
     <string name="cannot_edit_post_with_images">"Resimli gönderilerin düzenlenmesine izin verilmiyor."</string>
     <string name="local">"Yerel"</string>
@@ -1624,11 +1528,8 @@ Tekrar denemek için dokun."</string>
     <string name="content_description_comment_filter_add_user">"Yorum filtresine kullanıcı ekleyin"</string>
     <string name="content_description_create_custom_theme">"Özel tema oluştur"</string>
     <string name="content_description_create_post_filter">"Gönderi filtresi oluştur"</string>
-    <string name="content_description_add_post_filter_usage">"Bir yere gönderi filtresini uygula"</string>
     <string name="content_description_add_post_filter_rule">"Filtre kuralı ekle"</string>
     <string name="content_description_remove_post_filter_rule">"Kaldır %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Gönderi filtresine bir alt düzenleme ekleyin"</string>
-    <string name="content_description_post_filter_add_user">"Gönderi filtresine bir kullanıcı ekleyin"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Gönderi filtresine bir kullanıcı veya alt düzenleme ekleyin"</string>
     <string name="content_description_change_banner">"Başlığı değiştir"</string>
     <string name="content_description_change_avatar">"Avatarı değiştir"</string>
@@ -1651,7 +1552,6 @@ Tekrar denemek için dokun."</string>
     <string name="content_description_search">"Arama"</string>
     <string name="content_description_go_to_subreddit">"Subreddit'e Git"</string>
     <string name="content_description_go_to_user">"Kullanıcıya Git"</string>
-    <string name="content_description_random">"Rastgele"</string>
     <string name="content_description_filter_posts">"Gönderileri Filtrele"</string>
     <string name="content_description_hide_read_posts">"Görüntülenmiş Gönderileri Gizle"</string>
     <string name="content_description_go_to_top">"Başa Dön"</string>
@@ -1669,15 +1569,6 @@ Tekrar denemek için dokun."</string>
     <string name="content_description_next_result">"Sonraki sonuca git"</string>
     <string name="content_description_close_search_panel">"Arama panelini kapat"</string>
     <string name="content_description_send_message">"Mesaj gönder"</string>
-    <string name="content_description_home">"Ana sayfa"</string>
-    <string name="content_description_subscriptions">"Abonelikler"</string>
-    <string name="content_description_inbox">"Gelen Kutusu"</string>
-    <string name="content_description_profile">"Profil"</string>
-    <string name="content_description_multireddits">"MultiRedditler"</string>
-    <string name="content_description_upvoted">"Olumlu Oylananlar"</string>
-    <string name="content_description_downvoted">"Olumsuz Oylananlar"</string>
-    <string name="content_description_hidden">"Gizlenenler"</string>
-    <string name="content_description_saved">"Kaydedilenler"</string>
     <string name="content_description_scan_qr_code">"QR kodunu tarayın"</string>
     <string name="comment">"Yorum"</string>
     <string name="enable_reply_notifications">"Yanıt bildirimlerini alın"</string>
@@ -1696,15 +1587,9 @@ Tekrar denemek için dokun."</string>
     <string name="download_image">"Resmi İndir"</string>
     <string name="download_gif">"Gif İndir"</string>
     <string name="download_video">"Videoyu İndir"</string>
-    <string name="download_all_gallery_images">"Tüm Galeri Resimlerini İndirin"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Doğrudan"</string>
-    <string name="password_cannot_be_empty">"Şifre boş olamaz"</string>
-    <string name="title_activity_settings">"Ayarlar"</string>
-    <string name="title_activity_login">"Oturum aç"</string>
-    <string name="restart_app_to_apply_changes">"Değişiklikleri uygulamak üzere uygulamayı yeniden başlatmak için buraya basın"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Varsayılan olarak gizlenen alt dizinler kaldırıldı"</string>
     <string name="jump_to_parent_comment">"Ana Yoruma Geç"</string>
     <string name="long_press_post_non_media_area">"Gönderiye Uzun Basma (Medya Dışı Alan)"</string>
     <string name="long_press_post_media">"Gönderi Medyasına Uzun Basma"</string>

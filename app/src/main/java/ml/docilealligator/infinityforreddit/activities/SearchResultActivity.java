@@ -236,14 +236,6 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                         return insets;
                     }
                 });
-                /*adjustToolbar(binding.toolbarSearchResultActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabSearchResultActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabSearchResultActivity.setLayoutParams(params);
-                }*/
             }
         }
 

@@ -182,14 +182,6 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     }
                 });
 
-                /*adjustToolbar(binding.toolbarFilteredPostsActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabFilteredThingActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabFilteredThingActivity.setLayoutParams(params);
-                }*/
             }
         }
 

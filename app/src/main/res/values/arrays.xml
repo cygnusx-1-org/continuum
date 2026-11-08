@@ -203,28 +203,7 @@
         <item>Custom</item>
     </string-array>
 
-    <string-array name="settings_tab_post_type">
-        <item>@string/home</item>
-        <item>@string/popular</item>
-        <item>@string/all</item>
-        <item>@string/subreddit</item>
-        <item>@string/multi_reddit</item>
-        <item>@string/user</item>
-        <item>@string/upvoted</item>
-        <item>@string/downvoted</item>
-        <item>@string/hidden</item>
-        <item>@string/saved_posts</item>
-        <item>@string/saved_comments</item>
-    </string-array>
 
-    <string-array name="settings_tab_post_type_anonymous">
-        <item>@string/home</item>
-        <item>@string/popular</item>
-        <item>@string/all</item>
-        <item>@string/subreddit</item>
-        <item>@string/multi_reddit</item>
-        <item>@string/user</item>
-    </string-array>
 
     <string-array name="settings_time_format">
         <!-- 2020/01/23 23:45 -->
@@ -279,14 +258,6 @@
         <item>yyyy.M.d hh:mm a</item>
     </string-array>
 
-    <string-array name="settings_main_page_tab_count">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
 
     <!-- How far a full swipe travels, as a fraction of the row's width. A surface's slots divide
          it evenly whatever is bound to them, so at 0.3 a post reaches its four every 7.5% of the
@@ -715,13 +686,6 @@
         <item>@string/save_locally_and_online</item>
     </string-array>
 
-    <string-array name="save_theme_options_anonymous_included">
-        <item>@string/save_locally</item>
-        <item>@string/save_online</item>
-        <item>@string/save_online_anonymous</item>
-        <item>@string/save_locally_and_online</item>
-        <item>@string/save_locally_and_online_anonymous</item>
-    </string-array>
 
     <!-- 0-15 are the combinations from before comment faces and keep their meaning; each one
          added since is 16 plus a mask of emote 1, GIF 2, image 4, comment face 8. See

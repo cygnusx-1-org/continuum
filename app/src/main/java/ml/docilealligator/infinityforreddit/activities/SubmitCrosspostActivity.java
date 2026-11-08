@@ -727,23 +727,6 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 subredditName = binding.subredditNameTextViewSubmitCrosspostActivity.getText().toString();
             }
 
-            /*Intent intent = new Intent(this, SubmitPostService.class);
-            intent.putExtra(SubmitPostService.EXTRA_ACCOUNT, selectedAccount);
-            intent.putExtra(SubmitPostService.EXTRA_SUBREDDIT_NAME, subredditName);
-            intent.putExtra(SubmitPostService.EXTRA_TITLE, binding.postTitleEditTextSubmitCrosspostActivity.getText().toString());
-            if (post.isCrosspost()) {
-                intent.putExtra(SubmitPostService.EXTRA_CONTENT, "t3_" + post.getCrosspostParentId());
-            } else {
-                intent.putExtra(SubmitPostService.EXTRA_CONTENT, post.getFullName());
-            }
-            intent.putExtra(SubmitPostService.EXTRA_KIND, APIUtils.KIND_CROSSPOST);
-            intent.putExtra(SubmitPostService.EXTRA_FLAIR, flair);
-            intent.putExtra(SubmitPostService.EXTRA_IS_SPOILER, isSpoiler);
-            intent.putExtra(SubmitPostService.EXTRA_IS_NSFW, isNSFW);
-            intent.putExtra(SubmitPostService.EXTRA_RECEIVE_POST_REPLY_NOTIFICATIONS,
-                    binding.receivePostReplyNotificationsSwitchMaterialSubmitCrosspostActivity.isChecked());
-            intent.putExtra(SubmitPostService.EXTRA_POST_TYPE, SubmitPostService.EXTRA_POST_TYPE_CROSSPOST);
-            ContextCompat.startForegroundService(this, intent);*/
 
 
             PersistableBundle extras = new PersistableBundle();

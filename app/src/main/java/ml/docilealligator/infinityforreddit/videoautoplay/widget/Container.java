@@ -932,12 +932,6 @@ public class Container extends RecyclerView {
 
     /* No default constructors. Using this class from xml will result in error. */
 
-    // public Behavior() {
-    // }
-    //
-    // public Behavior(Context context, AttributeSet attrs) {
-    //   super(context, attrs);
-    // }
 
     public Behavior(@NonNull CoordinatorLayout.Behavior<Container> delegate) {
       this.delegate = checkNotNull(delegate, "Behavior is null.");

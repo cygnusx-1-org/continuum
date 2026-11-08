@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"视频 %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"跨版转发"</string>
-    <string name="give_award_activity_label">"给予奖励"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all 和 r/popular 版块"</string>
     <string name="customize_post_filter_activity_label">"自定义帖子过滤器"</string>
     <string name="filtered_posts_activity_subtitle">"过滤的帖子"</string>
     <string name="post_filter_preference_activity_label">"帖子过滤器"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"投票帖"</string>
     <string name="history_activity_read_posts_label">"已读帖子"</string>
     <string name="history_activity_subtitle">"存储在此设备上"</string>
-    <string name="subscription_activity_label">"订阅"</string>
     <string name="comment_filter_preference_activity_label">"评论过滤器"</string>
     <string name="customize_comment_filter_activity_label">"自定义评论过滤器"</string>
     <string name="copy_multireddit_activity_label">"复制多reddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"发送私信"</string>
     <string name="action_block_user">"屏蔽用户"</string>
     <string name="action_select_user_flair">"选择用户头衔"</string>
-    <string name="action_give_award">"给予奖励"</string>
     <string name="action_save_to_database">"保存到数据库"</string>
     <string name="action_read_all_messages">"标记所有消息为已读"</string>
     <string name="action_add_to_multireddit">"添加到 MultiReddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"添加到帖子过滤器"</string>
     <string name="action_delete_logs">"删除日志"</string>
     <string name="action_create_github_issue">"创建 Github Issue"</string>
-    <string name="action_share_post_link">"分享帖子链接"</string>
     <string name="action_go_to_wiki">"前往 Wiki"</string>
     <string name="action_playback_speed">"播放速度"</string>
     <string name="action_contact_mods">"联系管理员"</string>
@@ -172,14 +167,10 @@
     <string name="user_multi_reddit">"用户多reddit"</string>
     <string name="subscribed_subreddits">"订阅的 Reddit 子版块"</string>
     <string name="history">"历史"</string>
-    <string name="no_subreddits_visited_yet">"尚未访问 subreddits"</string>
-    <string name="no_users_visited_yet">"您还没有访问过任何用户个人资料"</string>
     <string name="follow_user">"关注用户"</string>
     <string name="unfollow_user">"取消关注用户"</string>
     <string name="save_user">"保存用户"</string>
     <string name="unsave_user">"取消保存用户"</string>
-    <string name="subscribe_subreddit">"订阅 subreddit"</string>
-    <string name="unsubscribe_subreddit">"取消订阅 subreddit"</string>
     <string name="add_user_follow">"关注"</string>
     <string name="add_user_save">"保存"</string>
     <string name="save_user_failed">"无法保存用户"</string>
@@ -195,7 +186,6 @@
     <string name="reminders">"提醒"</string>
     <string name="settings">"设置"</string>
     <string name="subscribers_number_detail">"关注者：%1$,d"</string>
-    <string name="online_subscribers_number_detail">"在线：%1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"无法获取版块信息"</string>
     <string name="cannot_fetch_user_info">"无法获取用户信息"</string>
     <string name="cannot_fetch_sidebar">"无法获取侧边栏"</string>
@@ -215,8 +205,6 @@
     <string name="follow_failed">"关注失败"</string>
     <string name="unfollowed">"已取消关注"</string>
     <string name="unfollow_failed">"取消关注失败"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"搜索您要找的"</string>
     <string name="search_only_subreddits_hint">"搜索版块"</string>
     <string name="search_only_users_hint">"搜索用户"</string>
     <string name="search_subreddits_and_users_hint">"搜索 subreddits 和用户"</string>
@@ -232,7 +220,6 @@
     <string name="send_message_subject_hint">"主题（限 100 字符）"</string>
     <string name="send_message_content_hint">"消息"</string>
     <string name="reply_message_failed">"无法回复此消息"</string>
-    <string name="error_getting_message">"获取此消息错误"</string>
     <string name="message_username_required">"嗨，您想给谁发消息？"</string>
     <string name="message_subject_required">"您的消息应该有主题"</string>
     <string name="message_content_required">"您应该告诉对方具体的内容"</string>
@@ -333,7 +320,6 @@
     <string name="sort_relevance">"相关"</string>
     <string name="sort_comments">"评论"</string>
     <string name="sort_activity">"活跃"</string>
-    <string name="sort_confidence">"推荐"</string>
     <string name="sort_old">"旧帖"</string>
     <string name="sort_qa">"问答"</string>
     <string name="sort_live">"实时"</string>
@@ -445,7 +431,6 @@
     <string name="settings_immersive_interface_summary">"不应用到所有页面"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"在横屏模式下禁用沉浸式界面"</string>
     <string name="settings_customize_tabs_in_main_page_title">"自定义主界面标签页"</string>
-    <string name="only_for_logged_in_user">"仅登录用户可用"</string>
     <string name="settings_category_post_and_comment_title">"帖子和评论"</string>
     <string name="settings_vote_buttons_on_the_right_title">"顶踩按钮放置在右侧"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
@@ -518,11 +503,6 @@
     <string name="settings_credits_material_icons_title">"Material 图标"</string>
     <string name="settings_open_source_title">"开源"</string>
     <string name="settings_open_source_summary">"如果您喜欢此应用，请在 Github 上 Star"</string>
-    <string name="settings_email_title">"电子邮件"</string>
-    <string name="settings_reddit_account_title">"Reddit 帐户"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"版块"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"分享"</string>
     <string name="settings_share_summary">"如果您喜欢此应用，可以分享给其他人"</string>
     <string name="settings_privacy_policy_title">"隐私政策"</string>
@@ -554,8 +534,6 @@
     <string name="settings_reset_all_settings_title">"重置所有设置"</string>
     <string name="restart_app_see_changes">"重新启动应用以查看更改"</string>
     <string name="app_will_restart">"更改值后返回将导致应用程序重新启动。"</string>
-    <string name="settings_tab_count">"标签页数量"</string>
-    <string name="settings_show_tab_names">"显示标签页名称"</string>
     <string name="settings_enable_tabs">"启用选项卡"</string>
     <string name="settings_edit_tabs_title">"标签"</string>
     <string name="settings_edit_tabs_summary">"添加、删除和重新排序选项卡"</string>
@@ -568,12 +546,6 @@
     <string name="reset_name">"重置名称"</string>
     <string name="content_description_drag_to_reorder">"拖动重新排序"</string>
     <string name="content_description_delete">"删除"</string>
-    <string name="settings_tab_1_summary">"标签页 1"</string>
-    <string name="settings_tab_2_summary">"标签页 2"</string>
-    <string name="settings_tab_3_summary">"标签页 3"</string>
-    <string name="settings_tab_4_summary">"选项卡 4"</string>
-    <string name="settings_tab_5_summary">"选项卡 5"</string>
-    <string name="settings_tab_6_summary">"选项卡 6"</string>
     <string name="settings_more_tabs_summary">"更多标签页"</string>
     <string name="settings_more_tabs_info_summary">"此处的更改会影响上面的列表"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"显示收藏的 MultiReddit"</string>
@@ -582,8 +554,6 @@
     <string name="settings_more_tabs_show_users_multireddits_title">"显示用户的 MultiReddits"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"显示收藏的订阅版块"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"显示已订阅版块"</string>
-    <string name="settings_tab_title">"标题"</string>
-    <string name="settings_tab_post_type">"类型"</string>
     <string name="settings_tab_subreddit_name">"版块名称（不带 r/ 前缀）"</string>
     <string name="settings_tab_multi_reddit_name">"MultiReddit 名称（/user/您的用户名/m/您的MultiReddit名称）"</string>
     <string name="settings_tab_username">"用户名（不带 u/ 前缀）"</string>
@@ -644,8 +614,6 @@ Reddit 视频分辨率较低。
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"首选版块推荐的评论排序类型"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"评论排序类型将不会被保存"</string>
     <string name="settings_post_filter_title">"帖子过滤器"</string>
-    <string name="settings_subreddit_filter_category">"隐藏版块"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"在 r/all 和 r/popular 版块"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"开屏 UFO 动画"</string>
     <string name="settings_hide_subreddit_description_title">"隐藏版块描述"</string>
     <string name="settings_disable_image_preview_title">"省流模式下禁用图像预览"</string>
@@ -665,9 +633,7 @@ Reddit 视频分辨率较低。
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"在 Reddit 子版块中自动隐藏已读帖子"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"自动隐藏用户中已读帖子"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"在搜索中自动隐藏已读帖子"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"查看搜索、特定用户或 Reddit 子版块中的帖子时，不会应用该设置。"</string>
     <string name="settings_sort_type_title">"排序类型"</string>
-    <string name="settings_save_sort_type_title">"保存排序类型"</string>
     <string name="settings_sort_category_post_feeds">"帖子信息流"</string>
     <string name="settings_sort_category_comments">"评论"</string>
     <string name="settings_save_post_sort_title">"保存后排序"</string>
@@ -746,8 +712,6 @@ Reddit 视频分辨率较低。
     <string name="settings_custom_content_font_family_title">"自定义正文字体"</string>
     <string name="settings_fixed_height_preview_in_card_title">"卡片固定高度"</string>
     <string name="settings_hide_text_post_content">"隐藏文字帖内容"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"自何处开始显示更少的工具栏选项"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">"层级 %1$d"</string>
     <string name="settings_show_author_avatar_title">"显示作者头像"</string>
     <string name="settings_disable_profile_avatar_animation_title">"禁用个人资料头像动画"</string>
     <string name="settings_show_user_prefix_title">"显示用户前缀"</string>
@@ -785,8 +749,6 @@ Reddit 视频分辨率较低。
     <string name="settings_enable_api_key_overrides_title">"启用覆盖"</string>
     <string name="settings_enable_api_key_overrides_summary">"使用自定义客户端 ID、用户代理和重定向 URI，而不是内置默认值（即 RedReader）"</string>
     <string name="settings_client_id_title">"Reddit API 客户端 ID"</string>
-    <string name="settings_client_id_summary">"对 Reddit API 使用自定义客户端 ID"</string>
-    <string name="client_id_length_error">"客户端 ID 的长度必须恰好为 22 个字符。"</string>
     <string name="tap_to_set_client_id">"点击设置客户端 ID"</string>
     <string name="set_client_id_dialog_message">"请在 设置 | API 密钥 中设置 Reddit API 客户端 ID，或关闭“启用覆盖”"</string>
     <string name="settings_giphy_api_key_title">"Giphy API 密钥"</string>
@@ -829,7 +791,6 @@ Reddit 视频分辨率较低。
     <string name="no_video_path_received">"未收到视频路径"</string>
     <string name="cannot_handle_intent">"无法处理分享请求"</string>
     <string name="share">"分享"</string>
-    <string name="no_email_client">"未找到电子邮件客户端"</string>
     <string name="no_app">"无可用的应用"</string>
     <string name="save_comment">"保存"</string>
     <string name="unsave_comment">"取消保存"</string>
@@ -851,7 +812,6 @@ Reddit 视频分辨率较低。
     <string name="elapsed_time_months_ago">"%1$d 个月前"</string>
     <string name="elapsed_time_a_year_ago">"1 年前"</string>
     <string name="elapsed_time_years_ago">"%1$d 年前"</string>
-    <string name="remaining_time_passed">"过去"</string>
     <string name="remaining_time_less_than_1_minute">"不到1分钟"</string>
     <string name="remaining_time_1_minute">"1 分钟前"</string>
     <string name="remaining_time_in_minutes">"%1$d 分钟前"</string>
@@ -917,7 +877,6 @@ Reddit 视频分辨率较低。
     <string name="remove_followed_multi_reddit">"从用户的 MultiReddits 中移除"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"删除这个已保存的 multireddit？原版不受影响。"</string>
     <string name="remove_followed_multi_reddit_success">"已删除"</string>
-    <string name="add_user_title">"关注用户"</string>
     <string name="add_user_to_list_title">"添加用户"</string>
     <string name="follow_failed_user_suspended">"u/%1$s已暂停，无法关注"</string>
     <string name="follow_failed_user_not_found">"u/%1$s不存在或已被删除"</string>
@@ -1156,12 +1115,9 @@ Reddit 视频分辨率较低。
     <string name="rename">"重命名"</string>
     <string name="override">"覆盖"</string>
     <string name="save_theme_options_title">"保存选项"</string>
-    <string name="save_theme_options_message">"您已上传此主题，以便您可以进行更改。"</string>
     <string name="save_locally">"保存到本地"</string>
     <string name="save_online">"在线保存"</string>
-    <string name="save_online_anonymous">"在线保存（匿名）"</string>
     <string name="save_locally_and_online">"本地和在线保存"</string>
-    <string name="save_locally_and_online_anonymous">"本地和在线保存（匿名）"</string>
     <string name="theme_saved_locally">"主题保存在本地"</string>
     <string name="theme_name_already_taken">"名为 %1$s 的主题已存在。选择另一个名称。"</string>
     <string name="theme_saved_online">"主题在线保存"</string>
@@ -1206,9 +1162,7 @@ Reddit 视频分辨率较低。
     <string name="notifications">"通知"</string>
     <string name="messages">"消息"</string>
     <string name="message">"消息"</string>
-    <string name="fetch_redgifs_video_failed">"获取 Redgifs 视频失败"</string>
     <string name="fetching_video_info_please_wait">"正在获取视频信息。请稍候。"</string>
-    <string name="fetch_streamable_video_failed">"获取流式传输视频失败"</string>
     <string name="error_fetching_imgur_media">"无法加载图像"</string>
     <string name="downloading_reddit_video">"下载视频轨"</string>
     <string name="downloading_reddit_video_audio_track">"下载音频轨"</string>
@@ -1239,8 +1193,6 @@ Reddit 视频分辨率较低。
     <string name="set_to_home_screen">"设置到主屏幕"</string>
     <string name="set_to_lock_screen">"设置到锁定屏幕"</string>
     <string name="set_to_both">"设置到主屏幕和锁定屏幕"</string>
-    <string name="default_font_font_preview">"默认字体"</string>
-    <string name="load_video_in_redgifs">"尝试加载 Redgifs 上的视频"</string>
     <string name="top_score">"%1$s 分"</string>
     <string name="login_activity_2fa_prompt">"2 步验证：&lt;密码&gt;:&lt;2FA 代码&gt;。\n示例：yourpass:123456\nGoogle 登录或登录时遇到问题：点击右下角按钮。"</string>
     <string name="login_activity_internet_disconnected_error">"无互联网连接"</string>
@@ -1279,7 +1231,6 @@ Reddit 视频分辨率较低。
     <string name="edited_time">"编辑于 %s"</string>
     <string name="warning">"警告"</string>
     <string name="this_is_a_nsfw_subreddit">"这是一个 NSFW Reddit 子版块。"</string>
-    <string name="this_user_has_nsfw_content">"该用户有 NSFW 内容"</string>
     <string name="this_post_contains_sensitive_content">"该帖子包含NSFW内容。"</string>
     <string name="dismiss">"忽略"</string>
     <string name="leave">"离开"</string>
@@ -1288,13 +1239,10 @@ Reddit 视频分辨率较低。
     <string name="go_to_user">"查看用户"</string>
     <string name="go_to_thing_hint">"名称"</string>
     <string name="go_to_top">"前往顶部"</string>
-    <string name="random">"随机"</string>
     <string name="random_subreddits">"随机子版块"</string>
     <string name="random_subreddit">"随机 Reddit 子版块"</string>
     <string name="random_nsfw_subreddit">"随机 NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"随机订阅的 Reddit 子版块"</string>
-    <string name="random_post">"随机帖子"</string>
-    <string name="random_nsfw_post">"随机 NSFW 帖子"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"无法保证工作安全。 Reddit 子版块仍然可以包含 NSFW 内容，而不带有 NSFW 标志。"</string>
     <string name="fetch_random_thing_failed">"请稍后重试"</string>
     <string name="select_video_quality">"选择视频质量"</string>
@@ -1401,8 +1349,6 @@ Reddit 视频分辨率较低。
         <item quantity="other">"%1$d 个帖子"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"允许 — 此规则不再隐藏它"</string>
-    <string name="post_filter_blocked_allow">"永远不要隐藏这个 Reddit 子版块"</string>
-    <string name="post_filter_blocked_undo_allow">"再次隐藏此 subreddit"</string>
     <string name="content_description_allow_blocked_subreddit">"不再隐藏 %1$s"</string>
     <string name="excludes_strings_hint">"排除关键字(key1,key2)"</string>
     <string name="comment_filter_name_hint">"评论过滤器名称"</string>
@@ -1473,21 +1419,13 @@ Reddit 视频分辨率较低。
     <string name="capture">"拍摄"</string>
     <string name="uploading_image">"正在上传"</string>
     <string name="upload_image_success">"上传图片成功。再次点击图片按钮查看已上传的图片。"</string>
-    <string name="get_image_bitmap_failed">"无法获取图片位图"</string>
     <string name="upload_image_failed">"无法上传图片"</string>
     <string name="select_giphy_gif">"选择 Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"这是一个实验性功能，您需要了解以下几点：\n\n 1. Giphy gif 不会在文本编辑器中显示，而是以块的形式插入一段文本，\n 格式类似于 ![gif](XXXXX)。 XXXXX 为 Giphy gif id，不可修改。\n\n 2. 每条评论只能插入一张 Giphy gif。\n\n 3. 写上标时，请使用 ^()，并将文字放在括号内，而不是仅使用单个 ^ \n。为简单起见，请单击格式工具中的上标选项插入上标。\n\n 4. 此功能会将您的 Markdown 转换为富文本格式，在此过程中某些格式可能会丢失。\n\n 5. Giphy gif 可能不会显示在预览屏幕上。\n\n 6. 请不要使用该帐户更改您的帐户编辑屏幕上的选择器。您应该在主屏幕的导航抽屉中切换\n您的帐户。"</string>
     <string name="search_comments">"搜索评论"</string>
     <string name="please_wait_image_is_uploading">"仍有图片正在上传。请稍候。"</string>
-    <string name="error_fetch_trending_search">"获取热搜失败。
-点击以重试。"</string>
-    <string name="error_parse_trending_search">"解析热搜失败。
-点击以重试。"</string>
-    <string name="no_trending_search">"未找到热搜。
-点击以重试。"</string>
     <string name="error_loading_wiki">"加载 Wiki 错误"</string>
     <string name="no_wiki">"此版块没有 Wiki 页面"</string>
-    <string name="material_you_notification_title">"应用 Material You"</string>
     <string name="lock_screen_text">"哦嘿！"</string>
     <string name="app_lock_timeout_immediately">"立刻"</string>
     <string name="app_lock_timeout_1_min">"1 分"</string>
@@ -1563,41 +1501,6 @@ Reddit 视频分辨率较低。
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"未授予通知权限"</string>
     <string name="go_to_settings">"设置"</string>
-    <string name="welcome_to_redditjr">"欢迎使用 Reddit Jr.，浏览 Reddit 社区的全新方式！"</string>
-    <string name="subscription_prompt">"在您深入了解此应用程序提供的无数可能性之前，\n我想坦率且透明地说明我所实施的一项重大更改，以确保为您提供最好的服务。\n\n\n从现在开始，您将需要每月订阅才能在Reddit Jr.内访问RedditAPI而\n这是因为Reddit自2023年7月1日起开始对API访问收费。\n\n\n所有级别的工作方式相同。如果您想支持Reddit Jr.，您可以订阅更高的级别。\n最低级别的大部分资金都会流向Reddit。\n    "</string>
-    <string name="monthly">"每月"</string>
-    <string name="yearly">"每年"</string>
-    <string name="weekly">"每周"</string>
-    <string name="billing_error_billing_unavailable">"此设备的支付服务不可用。"</string>
-    <string name="billing_error_developer_error">"这是开发者导致的错误。不是您的。"</string>
-    <string name="billing_error_error">"API 操作时发生了致命错误。"</string>
-    <string name="billing_error_feature_not_supported">"当前设备上的 Play 商店不支持所请求的功能。"</string>
-    <string name="billing_error_item_already_owned">"因为已拥有此物品，付款失败。"</string>
-    <string name="billing_error_item_unavailable">"请求的产品目前无法付款。"</string>
-    <string name="billing_error_network_error">"操作时发生了网络错误。"</string>
-    <string name="billing_error_service_disconnected">"此应用未通过 Google Play 结算库连接到 Play 商店服务。"</string>
-    <string name="billing_error_service_unavailable">"服务当前不可用。"</string>
-    <string name="billing_error_user_canceled">"交易已被用户取消。"</string>
-    <string name="subscription_plan_description_monthly">"青铜"</string>
-    <string name="subscription_plan_description_monthly_399">"白银"</string>
-    <string name="subscription_plan_description_monthly_499">"黄金"</string>
-    <string name="subscription_plan_description_monthly_699">"白金"</string>
-    <string name="subscription_plan_description_monthly_899">"钻石"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"无法确认购买"</string>
-    <string name="connect_to_billing_system_failed">"连接支付系统失败"</string>
-    <string name="connecting_to_billing_system">"正在连接支付系统。请稍候。"</string>
-    <string name="thank_you_for_subscription">"感谢您的订阅"</string>
-    <string name="load_subscription_options">"加载订阅选项"</string>
-    <string name="acknowledging_subscription">"正在确认您的订阅。请稍候。"</string>
-    <string name="acknowledgement_purchase_failed_description">"糟糕，确认您的购买时出错。如果此问题持续三天，您将自动获得退款。
-别担心，您仍然可以使用 IReddit Jr.。"</string>
-    <string name="continue_to_app">"继续前往应用"</string>
-    <string name="restore_subscription_purchase_details">"已经付费订阅了？"</string>
-    <string name="restore_subscription_purchase">"恢复订阅购买"</string>
-    <string name="important_info_title">"请重新登录您的帐户"</string>
-    <string name="important_info">"Reddit Jr. 使用 Reddit 中的客户端 ID（API 密钥），您必须重新登录才能继续使用该应用程序。\n\n只需打开导航抽屉并单击您的帐户标题，然后选择“添加帐户”即可使用同一帐户再次登录Reddit。否则，Reddit Jr.可能根本无法加载帖子。带来不便敬请谅解。"</string>
-    <string name="i_understand">"我明白了"</string>
     <string name="add_to_comment_filter">"添加到评论过滤器"</string>
     <string name="cannot_edit_post_with_images">"不允许编辑带有图像的帖子。"</string>
     <string name="local">"本地"</string>
@@ -1623,11 +1526,8 @@ Reddit 视频分辨率较低。
     <string name="content_description_comment_filter_add_user">"添加用户到评论过滤器"</string>
     <string name="content_description_create_custom_theme">"创建自定义主题"</string>
     <string name="content_description_create_post_filter">"创建后置过滤器"</string>
-    <string name="content_description_add_post_filter_usage">"将后置过滤器应用于某处"</string>
     <string name="content_description_add_post_filter_rule">"添加过滤规则"</string>
     <string name="content_description_remove_post_filter_rule">"删除 %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"将子reddit添加到后置过滤器"</string>
-    <string name="content_description_post_filter_add_user">"将用户添加到后置过滤器"</string>
     <string name="content_description_post_filter_add_subreddit_user">"将用户或 subreddit 添加到帖子过滤器"</string>
     <string name="content_description_change_banner">"更改横幅"</string>
     <string name="content_description_change_avatar">"更换头像"</string>
@@ -1650,7 +1550,6 @@ Reddit 视频分辨率较低。
     <string name="content_description_search">"搜索"</string>
     <string name="content_description_go_to_subreddit">"前往版块"</string>
     <string name="content_description_go_to_user">"查看用户"</string>
-    <string name="content_description_random">"随机"</string>
     <string name="content_description_filter_posts">"过滤帖子"</string>
     <string name="content_description_hide_read_posts">"隐藏已读帖子"</string>
     <string name="content_description_go_to_top">"前往顶部"</string>
@@ -1668,15 +1567,6 @@ Reddit 视频分辨率较低。
     <string name="content_description_next_result">"转到下一个结果"</string>
     <string name="content_description_close_search_panel">"关闭搜索面板"</string>
     <string name="content_description_send_message">"发送消息"</string>
-    <string name="content_description_home">"首页"</string>
-    <string name="content_description_subscriptions">"订阅"</string>
-    <string name="content_description_inbox">"收件箱"</string>
-    <string name="content_description_profile">"档案"</string>
-    <string name="content_description_multireddits">"MultiReddit"</string>
-    <string name="content_description_upvoted">"顶过"</string>
-    <string name="content_description_downvoted">"踩过"</string>
-    <string name="content_description_hidden">"已隐藏"</string>
-    <string name="content_description_saved">"已保存"</string>
     <string name="content_description_scan_qr_code">"扫描二维码"</string>
     <string name="comment">"评论"</string>
     <string name="enable_reply_notifications">"接收回复通知"</string>
@@ -1695,15 +1585,9 @@ Reddit 视频分辨率较低。
     <string name="download_image">"下载图片"</string>
     <string name="download_gif">"下载 GIF"</string>
     <string name="download_video">"下载视频"</string>
-    <string name="download_all_gallery_images">"下载所有画廊图片"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"直接"</string>
-    <string name="password_cannot_be_empty">"密码不能为空"</string>
-    <string name="title_activity_settings">"设置"</string>
-    <string name="title_activity_login">"登录"</string>
-    <string name="restart_app_to_apply_changes">"按此处重新启动应用程序以应用更改"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"默认隐藏的 Reddit 子版块已删除"</string>
     <string name="jump_to_parent_comment">"跳转至家长评论"</string>
     <string name="long_press_post_non_media_area">"长按发帖（非媒体区）"</string>
     <string name="long_press_post_media">"长按帖子媒体"</string>

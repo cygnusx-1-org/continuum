@@ -173,14 +173,6 @@ public class ViewVideoActivity extends AppCompatActivity
     public static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
-    /*private static final String IS_MUTE_STATE = "IMS";
-    private static final String VIDEO_DOWNLOAD_URL_STATE = "VDUS";
-    private static final String VIDEO_URI_STATE = "VUS";
-    private static final String VIDEO_TYPE_STATE = "VTS";
-    private static final String SUBREDDIT_NAME_STATE = "SNS";
-    private static final String ID_STATE=  "IS";
-    private static final String PLAYBACK_SPEED_STATE = "PSS";
-    private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";*/
 
     @Nullable
     public Typeface typeface;
@@ -194,20 +186,7 @@ public class ViewVideoActivity extends AppCompatActivity
     private DataSource.Factory dataSourceFactory;
     private Player.Listener playerListener;
 
-    /*private String videoDownloadUrl;
-    private String videoFileName;
-    private String videoFallbackDirectUrl;
-    private String subredditName;
-    private String id;
-    private boolean wasPlaying;
-    private boolean isDownloading = false;
-    private boolean isMute = false;
-    private boolean isNSFW;*/
     //private long resumePosition = -1;
-    /*private int videoType;
-    private boolean isDataSavingMode;
-    private int dataSavingModeDefaultResolution;
-    private int nonDataSavingModeDefaultResolution;*/
     //private boolean setDefaultResolutionAlready = false;
     @Nullable
     private Integer originalOrientation;
@@ -1322,22 +1301,6 @@ public class ViewVideoActivity extends AppCompatActivity
         binding.getNestedScrollView().setScrollEnabled(enabled);
     }
 
-    /*@OptIn(markerClass = UnstableApi.class)
-    private void loadFallbackVideo(Bundle savedInstanceState) {
-        if (videoFallbackDirectUrl != null) {
-            MediaItem mediaItem = player.getCurrentMediaItem();
-
-            if (mediaItem == null || (mediaItem.localConfiguration != null && !videoFallbackDirectUrl.equals(mediaItem.localConfiguration.uri.toString()))) {
-                videoType = VIDEO_TYPE_DIRECT;
-                videoDownloadUrl = videoFallbackDirectUrl;
-                mVideoUri = Uri.parse(videoFallbackDirectUrl);
-                videoFileName = videoFileName == null ? FilenameUtils.getName(videoDownloadUrl) : videoFileName;
-                player.prepare();
-                player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(mVideoUri)));
-                preparePlayer(savedInstanceState);
-            }
-        }
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -1686,22 +1649,6 @@ public class ViewVideoActivity extends AppCompatActivity
         outState.putInt("currentRotation", currentRotation);
     }
 
-    /*@Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(IS_MUTE_STATE, isMute);
-        outState.putInt(VIDEO_TYPE_STATE, videoType);
-
-        if (mVideoUri != null) {
-            outState.putString(VIDEO_URI_STATE, mVideoUri.toString());
-            outState.putString(VIDEO_DOWNLOAD_URL_STATE, videoDownloadUrl);
-            outState.putString(SUBREDDIT_NAME_STATE, subredditName);
-            outState.putString(ID_STATE, id);
-        }
-
-        outState.putInt(PLAYBACK_SPEED_STATE, playbackSpeed);
-        outState.putBoolean(SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE, setDefaultResolutionAlready);
-    }*/
 
     @Override
     public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {

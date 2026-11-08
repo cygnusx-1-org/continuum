@@ -32,8 +32,6 @@
     <string name="view_reddit_gallery_activity_gif_label">"GIF %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"Βίντεο %1$d/%2$d"</string>
     <string name="submit_crosspost_activity_label">"Αναδημοσίευση"</string>
-    <string name="give_award_activity_label">"Δώσε Βραβείο"</string>
-    <string name="subreddit_filter_popular_and_all_activity_label">"r/all και r/popular"</string>
     <string name="customize_post_filter_activity_label">"Παραμετροποίηση Φίλτρου Ανάρτησης"</string>
     <string name="filtered_posts_activity_subtitle">"Φιλτραρισμένες Αναρτήσεις"</string>
     <string name="post_filter_preference_activity_label">"Φίλτρο Ανάρτησης"</string>
@@ -45,7 +43,6 @@
     <string name="post_poll_activity_label">"Ανάρτηση Δημοσκόπησης"</string>
     <string name="history_activity_read_posts_label">"Αναγνωσμένες αναρτήσεις"</string>
     <string name="history_activity_subtitle">"Αποθηκευμένο σε αυτήν τη συσκευή"</string>
-    <string name="subscription_activity_label">"Συνδρομή"</string>
     <string name="comment_filter_preference_activity_label">"Φίλτρο σχολίων"</string>
     <string name="customize_comment_filter_activity_label">"Προσαρμογή φίλτρου σχολίων"</string>
     <string name="copy_multireddit_activity_label">"Αντιγραφή MultiReddit"</string>
@@ -86,7 +83,6 @@
     <string name="action_send_private_message">"Αποστολή προσωπικού μηνύματος"</string>
     <string name="action_block_user">"Αποκλεισμός Χρήστη"</string>
     <string name="action_select_user_flair">"Επιλογή Σήμανση Χρήστη"</string>
-    <string name="action_give_award">"Δώσε Βραβείο"</string>
     <string name="action_save_to_database">"Αποθήκευση στη Βάση Δεδομένων"</string>
     <string name="action_read_all_messages">"Ανάγνωση Όλων των Μηνυμάτων"</string>
     <string name="action_add_to_multireddit">"Προσθήκη στο MultiReddit"</string>
@@ -96,7 +92,6 @@
     <string name="action_add_to_post_filter">"Φίλτρο Προσθήκη στην Ανάρτηση"</string>
     <string name="action_delete_logs">"Διαγραφή Logs"</string>
     <string name="action_create_github_issue">"Δημιουργία GitHub Issue"</string>
-    <string name="action_share_post_link">"Κοινοποίηση Συνδέσμου Ανάρτησης"</string>
     <string name="action_go_to_wiki">"Πήγαινε στο Wiki"</string>
     <string name="action_playback_speed">"Ταχύτητα Αναπαραγωγής"</string>
     <string name="action_contact_mods">"Επικοινωνία με Συντονιστές"</string>
@@ -166,14 +161,10 @@
     <string name="user_multi_reddit">"Χρήστης MultiReddit"</string>
     <string name="subscribed_subreddits">"Εγγεγραμμένα Subreddits"</string>
     <string name="history">"Ιστορικό"</string>
-    <string name="no_subreddits_visited_yet">"Δεν έχεις επισκεφθεί ακόμη subreddits"</string>
-    <string name="no_users_visited_yet">"Δεν έχεις επισκεφτεί ακόμα κανένα προφίλ χρήστη"</string>
     <string name="follow_user">"Ακολούθησε τον χρήστη"</string>
     <string name="unfollow_user">"Κατάργηση παρακολούθησης χρήστη"</string>
     <string name="save_user">"Αποθήκευση χρήστη"</string>
     <string name="unsave_user">"Κατάργηση αποθήκευσης χρήστη"</string>
-    <string name="subscribe_subreddit">"Γράψου στο subreddit"</string>
-    <string name="unsubscribe_subreddit">"Κατάργησε την εγγραφή σου από το subreddit"</string>
     <string name="add_user_follow">"Ακολούθηση"</string>
     <string name="add_user_save">"Αποθήκευση"</string>
     <string name="save_user_failed">"Δεν ήταν δυνατή η αποθήκευση του χρήστη"</string>
@@ -189,7 +180,6 @@
     <string name="reminders">"Υπενθυμίσεις"</string>
     <string name="settings">"Ρυθμίσεις"</string>
     <string name="subscribers_number_detail">"Εγγραφές: %1$,d"</string>
-    <string name="online_subscribers_number_detail">"Ενεργοί: %1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"Δεν είναι δυνατή η ανάκτηση πληροφοριών του subreddit"</string>
     <string name="cannot_fetch_user_info">"Δεν είναι δυνατή η ανάκτηση πληροφοριών χρήστη"</string>
     <string name="cannot_fetch_sidebar">"Δεν είναι δυνατή η ανάκτηση της πλευρικής μπάρας"</string>
@@ -209,8 +199,6 @@
     <string name="follow_failed">"Η παρακολούθηση απέτυχε"</string>
     <string name="unfollowed">"Καταργήθηκε η παρακολούθηση"</string>
     <string name="unfollow_failed">"Η κατάργηση παρακολούθησης απέτυχε"</string>
-    <string name="app_label">"Reddit Jr."</string>
-    <string name="search_hint">"Αναζήτηση"</string>
     <string name="search_only_subreddits_hint">"Αναζήτηση subreddits"</string>
     <string name="search_only_users_hint">"Αναζήτηση χρηστών"</string>
     <string name="search_subreddits_and_users_hint">"Αναζήτηση subreddits και χρηστών"</string>
@@ -226,7 +214,6 @@
     <string name="send_message_subject_hint">"Θέμα ( Μέχρι 100 χαρακτήρες)"</string>
     <string name="send_message_content_hint">"Μήνυμα"</string>
     <string name="reply_message_failed">"Αποτυχία αποστολής μηνύματος"</string>
-    <string name="error_getting_message">"Αποτυχία λήψης μηνύματος"</string>
     <string name="message_username_required">"Σε ποιόν θέλεις να στείλεις αυτό το μήνυμα;"</string>
     <string name="message_subject_required">"Το μήνυμα πρέπει να έχει θέμα"</string>
     <string name="message_content_required">"Πρέπει να πείς στο παραλήπτη κάτι"</string>
@@ -326,7 +313,6 @@
     <string name="sort_relevance">"Σχετικότητα"</string>
     <string name="sort_comments">"Σχόλια"</string>
     <string name="sort_activity">"Δραστηριότητα"</string>
-    <string name="sort_confidence">"Αυτοπεποίθηση"</string>
     <string name="sort_old">"Παλαιότητα"</string>
     <string name="sort_qa">"QA"</string>
     <string name="sort_live">"Ζωντανά"</string>
@@ -438,7 +424,6 @@
     <string name="settings_immersive_interface_summary">"Δεν Εφαρμόζεται στη Σελίδα Όλα"</string>
     <string name="settings_disable_immersive_interface_in_landscape_mode">"Απενεργοποίηση Καθολικής Διεπαφής"</string>
     <string name="settings_customize_tabs_in_main_page_title">"Παραμετροποίηση Καρτελών στην Κύρια Σελίδα"</string>
-    <string name="only_for_logged_in_user">"Μόνο για Συνδεδεμένο Χρήστη"</string>
     <string name="settings_category_post_and_comment_title">"Ανάρτηση και Σχόλια"</string>
     <string name="settings_vote_buttons_on_the_right_title">"Κουμπιά Ψήφου στα Δεξιά"</string>
     <string name="settings_mute_video_title">"Σίγαση βίντεο"</string>
@@ -511,11 +496,6 @@
     <string name="settings_credits_material_icons_title">"Εικονίδια Material"</string>
     <string name="settings_open_source_title">"Ανοιχτού Κώδικα"</string>
     <string name="settings_open_source_summary">"Βάλε το στα αγαπημένα στο GitHub αν σου αρέσει η εφαρμογή"</string>
-    <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_reddit_account_title">"Λογαριασμός Reddit"</string>
-    <string name="settings_reddit_account_summary">"u/edgan"</string>
-    <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Κοινοποίηση"</string>
     <string name="settings_share_summary">"Κοινοποίησε την εφαρμογή για να τη χαρούν κι άλλα άτομα"</string>
     <string name="settings_privacy_policy_title">"Πολιτική Απορρήτου"</string>
@@ -547,8 +527,6 @@
     <string name="settings_reset_all_settings_title">"Επαναφορά Όλων των Ρυθμίσεων"</string>
     <string name="restart_app_see_changes">"Επανεκκίνησε την εφαρμογή για να δεις τις αλλαγές"</string>
     <string name="app_will_restart">"Αν επιστρέψεις μετά την αλλαγή μιας τιμής, θα γίνει επανεκκίνηση της εφαρμογής."</string>
-    <string name="settings_tab_count">"Αριθμός Καρτελών"</string>
-    <string name="settings_show_tab_names">"Εμφάνιση Ονομάτων Καρτελών"</string>
     <string name="settings_enable_tabs">"Ενεργοποίηση καρτελών"</string>
     <string name="settings_edit_tabs_title">"Καρτέλες"</string>
     <string name="settings_edit_tabs_summary">"Προσθήκη, αφαίρεση και αναδιάταξη καρτελών"</string>
@@ -561,12 +539,6 @@
     <string name="reset_name">"Επαναφορά ονόματος"</string>
     <string name="content_description_drag_to_reorder">"Σύρε για αναδιάταξη"</string>
     <string name="content_description_delete">"Διαγραφή"</string>
-    <string name="settings_tab_1_summary">"Καρτέλα 1"</string>
-    <string name="settings_tab_2_summary">"Καρτέλα 2"</string>
-    <string name="settings_tab_3_summary">"Καρτέλα 3"</string>
-    <string name="settings_tab_4_summary">"Καρτέλα 4"</string>
-    <string name="settings_tab_5_summary">"Καρτέλα 5"</string>
-    <string name="settings_tab_6_summary">"Καρτέλα 6"</string>
     <string name="settings_more_tabs_summary">"Περισσότερες Καρτέλες"</string>
     <string name="settings_more_tabs_info_summary">"Οι αλλαγές εδώ επηρεάζουν την παραπάνω λίστα"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"Εμφάνιση Αγαπημένων MultiReddits"</string>
@@ -575,8 +547,6 @@
     <string name="settings_more_tabs_show_users_multireddits_title">"Εμφάνιση MultiReddits χρηστών"</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">"Εμφάνιση Αγαπημένων Εγγεγραμμένων Subreddits"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"Εμφάνιση Subreddits που έχεις Εγγραφεί"</string>
-    <string name="settings_tab_title">"Τίτλος"</string>
-    <string name="settings_tab_post_type">"Τύπος"</string>
     <string name="settings_tab_subreddit_name">"Όνομα Subreddit (Χωρίς πρόθεμα r/)"</string>
     <string name="settings_tab_multi_reddit_name">"MultiReddit Path (/user/yourusername/m/yourmultiredditname) (μόνο πεζοί χαρακτήρες)"</string>
     <string name="settings_tab_username">"Όνομα χρήστη (χωρίς πρόθεμα u/)"</string>
@@ -637,8 +607,6 @@
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">"Σεβασμός του Προτεινόμενου Τύπου Ταξινόμησης Σχολίων του Subreddit"</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">"Ο τύπος ταξινόμησης των σχολίων δεν θα αποθηκεύεται"</string>
     <string name="settings_post_filter_title">"Φίλτρο Αναρτήσης"</string>
-    <string name="settings_subreddit_filter_category">"Απόκρυψη Subreddits"</string>
-    <string name="settings_subreddit_filter_popular_and_all">"Στα r/popular και r/all"</string>
     <string name="settings_credits_ufo_capturing_animation_title">"Εφέ Σύλληψης UFO"</string>
     <string name="settings_hide_subreddit_description_title">"Απόκρυψη Περιγραφής Subreddit"</string>
     <string name="settings_disable_image_preview_title">"Απενεργοποίηση Προεπισκόπησης Εικόνας στην Λειτουργία Εξοικονόμησης Δεδομένων"</string>
@@ -658,9 +626,7 @@
     <string name="settings_hide_read_posts_automatically_in_subreddits_title">"Αυτόματη απόκρυψη αναγνωσμένων αναρτήσεων στα Subreddits"</string>
     <string name="settings_hide_read_posts_automatically_in_users_title">"Αυτόματη απόκρυψη αναγνωσμένων αναρτήσεων στους χρήστες"</string>
     <string name="settings_hide_read_posts_automatically_in_search_title">"Απόκρυψη αναγνωσμένων αναρτήσεων αυτόματα στην Αναζήτηση"</string>
-    <string name="settings_hide_read_posts_automatically_summary">"Η ρύθμιση δεν εφαρμόζεται κατά την προβολή αναρτήσεων από αναζητήσεις, συγκεκριμένους χρήστες ή subreddits."</string>
     <string name="settings_sort_type_title">"Τύπος Ταξινόμησης"</string>
-    <string name="settings_save_sort_type_title">"Αποθήκευση Τύπου Ταξινόμησης"</string>
     <string name="settings_sort_category_post_feeds">"Ροές αναρτήσεων"</string>
     <string name="settings_sort_category_comments">"Σχόλια"</string>
     <string name="settings_save_post_sort_title">"Αποθήκευση Ταξινόμησης αναρτήσεων"</string>
@@ -739,8 +705,6 @@
     <string name="settings_custom_content_font_family_title">"Προσαρμοσμένη Γραμματοσειρά Περιεχομένου"</string>
     <string name="settings_fixed_height_preview_in_card_title">"Σταθερό Ύψος στην Κάρτα"</string>
     <string name="settings_hide_text_post_content">"Απόκρυψη Περιεχομένου Κειμένου Ανάρτησης"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_title">"Εμφάνιση Λιγότερων Επιλογών Γραμμής Εργαλείων Ξεκινώντας από"</string>
-    <string name="settings_show_fewer_toolbar_options_threshold_summary">Επίπεδο %1$d</string>
     <string name="settings_show_author_avatar_title">"Εμφάνιση Άβαταρ Συντάκτη"</string>
     <string name="settings_disable_profile_avatar_animation_title">"Απενεργοποίηση κινούμενης εικόνας avatar προφίλ"</string>
     <string name="settings_show_user_prefix_title">"Εμφάνιση προθέματος χρήστη"</string>
@@ -778,8 +742,6 @@
     <string name="settings_enable_api_key_overrides_title">"Ενεργοποίηση παρακάμψεων"</string>
     <string name="settings_enable_api_key_overrides_summary">"Χρησιμοποίησε το προσαρμοσμένο αναγνωριστικό πελάτη, τον παράγοντα χρήστη και το URI ανακατεύθυνσης αντί για τις ενσωματωμένες προεπιλογές, που είναι το RedReader"</string>
     <string name="settings_client_id_title">"Reddit API Αναγνωριστικό πελάτη"</string>
-    <string name="settings_client_id_summary">"Χρησιμοποίησε ένα προσαρμοσμένο αναγνωριστικό πελάτη για το Reddit API"</string>
-    <string name="client_id_length_error">"Το αναγνωριστικό πελάτη πρέπει να αποτελείται από ακριβώς 22 χαρακτήρες."</string>
     <string name="tap_to_set_client_id">"Πάτα για να ορίσεις το Client ID"</string>
     <string name="set_client_id_dialog_message">"Όρισε το αναγνωριστικό πελάτη Reddit API ή απενεργοποίησε το Enable Overrides στις Ρυθμίσεις | Κλειδιά API"</string>
     <string name="settings_giphy_api_key_title">"Κλειδί Giphy API"</string>
@@ -822,7 +784,6 @@
     <string name="no_video_path_received">"Δε βρέθηκε διαδρομή βίντεο"</string>
     <string name="cannot_handle_intent">"Αδυναμία διαχείρισης αιτήματος κοινοποίησης"</string>
     <string name="share">"Κοινοποίηση"</string>
-    <string name="no_email_client">"Δε βρέθηκε πάροχος Email"</string>
     <string name="no_app">"Δεν υπάρχει διαθέσιμη εφαρμογή"</string>
     <string name="save_comment">"Αποθήκευση"</string>
     <string name="unsave_comment">"Μη Αποθήκευση"</string>
@@ -844,7 +805,6 @@
     <string name="elapsed_time_months_ago">"%1$d Μήνες"</string>
     <string name="elapsed_time_a_year_ago">"1 Χρόνος"</string>
     <string name="elapsed_time_years_ago">"%1$d Χρόνια"</string>
-    <string name="remaining_time_passed">"Στο παρελθόν"</string>
     <string name="remaining_time_less_than_1_minute">"Λιγότερο από 1 λεπτό"</string>
     <string name="remaining_time_1_minute">"1 Λεπτό"</string>
     <string name="remaining_time_in_minutes">"%1$d Λεπτά"</string>
@@ -910,7 +870,6 @@
     <string name="remove_followed_multi_reddit">"Κατάργηση από τα MultiReddits χρηστών"</string>
     <string name="remove_followed_multi_reddit_dialog_message">"Κατάργηση αυτού του αποθηκευμένου multireddit; Το πρωτότυπο δεν επηρεάζεται."</string>
     <string name="remove_followed_multi_reddit_success">"Καταργήθηκε"</string>
-    <string name="add_user_title">"Ακολούθησε τον χρήστη"</string>
     <string name="add_user_to_list_title">"Προσθήκη χρήστη"</string>
     <string name="follow_failed_user_suspended">"Το u/%1$s έχει τεθεί σε αναστολή και δεν μπορεί να ακολουθηθεί"</string>
     <string name="follow_failed_user_not_found">"Το u/%1$s δεν υπάρχει ή διαγράφηκε"</string>
@@ -1152,12 +1111,9 @@
     <string name="rename">"Μετονομασία"</string>
     <string name="override">"Παράκαμψη"</string>
     <string name="save_theme_options_title">"Αποθήκευση επιλογών"</string>
-    <string name="save_theme_options_message">"Ανεβάσατε αυτό το θέμα για να μπορείς να κάνεις αλλαγές."</string>
     <string name="save_locally">"Αποθήκευση τοπικά"</string>
     <string name="save_online">"Αποθήκευση online"</string>
-    <string name="save_online_anonymous">"Αποθήκευση online (ανώνυμα)"</string>
     <string name="save_locally_and_online">"Αποθήκευση τόσο τοπικά όσο και διαδικτυακά"</string>
-    <string name="save_locally_and_online_anonymous">"Αποθήκευση τόσο τοπικά όσο και διαδικτυακά (ανώνυμα)"</string>
     <string name="theme_saved_locally">"Το θέμα αποθηκεύτηκε τοπικά"</string>
     <string name="theme_name_already_taken">"Υπάρχει ήδη ένα θέμα που ονομάζεται %1$s. Επίλεξε άλλο όνομα."</string>
     <string name="theme_saved_online">"Το θέμα αποθηκεύτηκε στο διαδίκτυο"</string>
@@ -1202,9 +1158,7 @@
     <string name="notifications">"Ειδοποιήσεις"</string>
     <string name="messages">"Μηνύματα"</string>
     <string name="message">"Μήνυμα"</string>
-    <string name="fetch_redgifs_video_failed">"Η ανάκτηση του βίντεο Redgifs απέτυχε"</string>
     <string name="fetching_video_info_please_wait">"Ανάκτηση πληροφοριών βίντεο. Παρακαλώ περίμενε."</string>
-    <string name="fetch_streamable_video_failed">"Η ανάκτηση του βίντεο Streamable απέτυχε"</string>
     <string name="error_fetching_imgur_media">"Αδυναμία φόρτωσης εικόνων"</string>
     <string name="downloading_reddit_video">"Γίνεται Λήψη Κομματιού Βίντεο"</string>
     <string name="downloading_reddit_video_audio_track">"Γίνεται Λήψη Κομματιού Ήχου"</string>
@@ -1235,8 +1189,6 @@
     <string name="set_to_home_screen">"Ρύθμιση στην Αρχική Οθόνη"</string>
     <string name="set_to_lock_screen">"Ρύθμιση στην Οθόνη Κλειδώματος"</string>
     <string name="set_to_both">"Ρύθμιση και στα δύο"</string>
-    <string name="default_font_font_preview">"Προεπιλογή"</string>
-    <string name="load_video_in_redgifs">"Προσπάθεια φόρτωσης βίντεο στο Redgifs"</string>
     <string name="top_score">"%1$s βθμ"</string>
     <string name="login_activity_2fa_prompt">"Έλεγχος ταυτότητας 2 παραγόντων: &lt;κωδικός πρόσβασης&gt;:&lt;2FA code&gt;.\nΠαράδειγμα: yourpass:123456\nΣύνδεση Google ή πρόβλημα σύνδεσης: κάνε κλικ στο κουμπί κάτω δεξιά."</string>
     <string name="login_activity_internet_disconnected_error">"Χωρίς σύνδεση στο Διαδίκτυο"</string>
@@ -1275,7 +1227,6 @@
     <string name="edited_time">"Επεξεργάστηκε στις %s"</string>
     <string name="warning">"Προειδοποίηση"</string>
     <string name="this_is_a_nsfw_subreddit">"Αυτή είναι μια υποδιαίρεση NSFW."</string>
-    <string name="this_user_has_nsfw_content">"Αυτός ο χρήστης έχει NSFW περιεχόμενο"</string>
     <string name="this_post_contains_sensitive_content">"Αυτή η ανάρτηση περιέχει NSFW περιεχόμενο."</string>
     <string name="dismiss">"Απόρριψη"</string>
     <string name="leave">"Αποχώρηση"</string>
@@ -1284,13 +1235,10 @@
     <string name="go_to_user">"Πήγαινε στον Χρήστη"</string>
     <string name="go_to_thing_hint">"Όνομα"</string>
     <string name="go_to_top">"Άλμα προς τα Πάνω"</string>
-    <string name="random">"Τυχαίο"</string>
     <string name="random_subreddits">"Τυχαίες υποεπιλογές"</string>
     <string name="random_subreddit">"Τυχαία υποκατηγορία"</string>
     <string name="random_nsfw_subreddit">"Τυχαία NSFW Subreddit"</string>
     <string name="random_subscribed_subreddit">"Τυχαία εγγεγραμμένη Subreddit"</string>
-    <string name="random_post">"Τυχαία ανάρτηση"</string>
-    <string name="random_nsfw_post">"Τυχαία NSFW Δημοσίευση"</string>
     <string name="random_subreddit_sfw_not_guaranteed">"Δεν είναι εγγυημένη η ασφάλεια για εργασία. Ένα subreddit μπορεί ακόμα να έχει περιεχόμενο NSFW χωρίς τη σημαία NSFW σε αυτό."</string>
     <string name="fetch_random_thing_failed">"Προσπάθησε ξανά αργότερα"</string>
     <string name="select_video_quality">"Επιλογή Ποιότητας Βίντεο"</string>
@@ -1399,8 +1347,6 @@
         <item quantity="other">"%1$d αναρτήσεις"</item>
     </plurals>
     <string name="post_filter_blocked_excepted">"Επιτρέπεται — αυτός ο κανόνας δεν το κρύβει πλέον"</string>
-    <string name="post_filter_blocked_allow">"Μην κρύβεις ποτέ αυτό το subreddit"</string>
-    <string name="post_filter_blocked_undo_allow">"Απόκρυψη αυτής της δευτερεύουσας ενότητας ξανά"</string>
     <string name="content_description_allow_blocked_subreddit">"Να μην αποκρύπτεται πλέον το %1$s"</string>
     <string name="excludes_strings_hint">"Εξαίρεση λέξεων-κλειδιών (κλειδί1,κλειδί2)"</string>
     <string name="comment_filter_name_hint">"Όνομα φίλτρου σχολίων"</string>
@@ -1471,21 +1417,13 @@
     <string name="capture">"Καταγραφή"</string>
     <string name="uploading_image">"Μεταμόρφωση"</string>
     <string name="upload_image_success">"Μεταμόρφωση εικόνας με επιτυχία. Κάνε κλικ στο κουμπί εικόνας ξανά για να δεις τις ανεβασμένες εικόνες."</string>
-    <string name="get_image_bitmap_failed">"Αδυναμία απόκτησης bitmap της εικόνας"</string>
     <string name="upload_image_failed">"Αδυναμία μεταμόρφωσης της εικόνας"</string>
     <string name="select_giphy_gif">"Επίλεξε ένα Giphy GIF"</string>
     <string name="select_giphy_gif_explanation">"Αυτή είναι μια πειραματική λειτουργία και εδώ είναι μερικά πράγματα που πρέπει να γνωρίζεις:\n\n        1. Τα Giphy gif δεν θα εμφανίζονται στο πρόγραμμα επεξεργασίας κειμένου και, αντί αυτού, ένα κομμάτι κειμένου θα εισαχθεί ως μπλοκ,\n        με μορφή παρόμοια με ![gif](XXXXX). Το XXXXX είναι το Giphy gif id και δεν πρέπει να τροποποιηθεί.\n\n        2. Μπορείς να εισάγεις μόνο ένα Giphy gif ανά σχόλιο.\n\n        3. Για να γράψεις έναν εκθέτη, χρησιμοποίησε το ^() και τοποθέτησε τα κείμενα μέσα στην παρένθεση, αντί μόνο\n        χρησιμοποιώντας ένα μόνο ^. Για απλότητα, κάνε κλικ στην επιλογή εκθέτη στα εργαλεία μορφοποίησης για να εισάγεις έναν εκθέτη.\n\n        4. Αυτή η δυνατότητα μετατρέπει το Markdown σε μορφή εμπλουτισμένου κειμένου και κάποια μορφοποίηση ενδέχεται να χαθεί κατά τη διαδικασία.\n\n        5. Τα Giphy gif ενδέχεται να μην εμφανίζονται στην οθόνη προεπισκόπησης.\n\n        6. Μην αλλάξεις τον λογαριασμό σου χρησιμοποιώντας τον επιλογέα λογαριασμού στην οθόνη επεξεργασίας. Θα πρέπει να αλλάξεις\n        τον λογαριασμό σου στο συρτάρι πλοήγησης στην κύρια οθόνη."</string>
     <string name="search_comments">"Αναζήτηση Σχολίων"</string>
     <string name="please_wait_image_is_uploading">"Μια εικόνα μεταμορφώνεται ακόμα. Παρακαλώ περίμενε."</string>
-    <string name="error_fetch_trending_search">"Η ανάκτηση αναζητήσεων σε τάση απέτυχε.
-Άγγιξε για επανάληψη."</string>
-    <string name="error_parse_trending_search">"Η γέννηση αναζητήσεων σε τάση απέτυχε.
-Άγγιξε για επανάληψη."</string>
-    <string name="no_trending_search">"Δε βρέθηκαν αναζητήσεις σε τάση.
-Άγγιξε για επανάληψη."</string>
     <string name="error_loading_wiki">"Αδυναμία φόρτωσης wiki"</string>
     <string name="no_wiki">"Αυτό το subreddit δεν έχει σελίδα wiki"</string>
-    <string name="material_you_notification_title">"Εφαρμόζεται το Material You"</string>
     <string name="lock_screen_text">"Μισό λεπτό!!!"</string>
     <string name="app_lock_timeout_immediately">"Αμέσως"</string>
     <string name="app_lock_timeout_1_min">"1 λεπτό"</string>
@@ -1561,41 +1499,6 @@
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Δεν χορηγήθηκε άδεια για ειδοποιήσεις"</string>
     <string name="go_to_settings">"Ρυθμίσεις"</string>
-    <string name="welcome_to_redditjr">"Καλώς ήρθες στο Reddit Jr., η πύλη σου για μια νέα διάσταση περιήγησης στο Reddit!"</string>
-    <string name="subscription_prompt">"Πριν βουτήξεις στις αμέτρητες δυνατότητες που προσφέρει αυτή η εφαρμογή,\n        Θέλω να είμαι εκ των προτέρων και διαφανής σχετικά με μια σημαντική αλλαγή που έχω εφαρμόσει για να εξασφαλίσω την καλύτερη δυνατή εξυπηρέτηση για εσάς.\n        \n\nΑπό εδώ και στο εξής, θα χρειάζεσαι μια μηνιαία συνδρομή για να αποκτήσεις πρόσβαση στο Reddit API εντός Reddit Jr. και\n        Αυτό συμβαίνει επειδή το Reddit έχει αρχίσει να χρεώνει για πρόσβαση API από την 1η Ιουλίου 2023.\n        \n\nΌλες οι βαθμίδες λειτουργούν το ίδιο. Εάν θέλεις να υποστηρίξεις το Reddit Jr., μπορείς να εγγραφείς σε υψηλότερο επίπεδο.\n        Τα περισσότερα χρήματα από το χαμηλότερο επίπεδο πηγαίνουν στο Reddit.\n    "</string>
-    <string name="monthly">"Μηνιαία"</string>
-    <string name="yearly">"Ετήσια"</string>
-    <string name="weekly">"Εβδομαδιαία"</string>
-    <string name="billing_error_billing_unavailable">"Η υπηρεσία χρέωσης δεν υποστηρίζεται στη συσκευή"</string>
-    <string name="billing_error_developer_error">"Ο δημιουργός έκανε κάποια λάθη. Δεν είναι δικό σου λάθος."</string>
-    <string name="billing_error_error">"Μοιραίο σφάλμα κατά την ενέργεια API."</string>
-    <string name="billing_error_feature_not_supported">"Η αιτούμενη δυνατότητα δεν υποστηρίζεται από το Play Store στην τρέχουσα συσκευή."</string>
-    <string name="billing_error_item_already_owned">"Η αγορά απέτυχε επειδή το αντικείμενο έχει ήδη αγοραστεί."</string>
-    <string name="billing_error_item_unavailable">"Το αιτούμενο προϊόν δεν είναι διαθέσιμο για αγορά."</string>
-    <string name="billing_error_network_error">"Προέκυψε σφάλμα δικτύου κατά την διαδικασία."</string>
-    <string name="billing_error_service_disconnected">"Η εφαρμογή δεν είναι συνδεδεμένη στην υπηρεσία Play Store μέσω της Βιβλιοθήκης Google Play Billing."</string>
-    <string name="billing_error_service_unavailable">"Η υπηρεσία δεν είναι διάθεση για την ώρα."</string>
-    <string name="billing_error_user_canceled">"Η συναλλαγή ακυρώθηκε από τον χρήστη"</string>
-    <string name="subscription_plan_description_monthly">"Χάλκινο"</string>
-    <string name="subscription_plan_description_monthly_399">"Ασημένιο"</string>
-    <string name="subscription_plan_description_monthly_499">"Χρυσό - Τέλεια Επιλογή!"</string>
-    <string name="subscription_plan_description_monthly_699">"Πλατινένιο"</string>
-    <string name="subscription_plan_description_monthly_899">"Διαμάντι"</string>
-    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
-    <string name="acknowledge_purchase_failed">"Δεν είναι δυνατή η αναγνώριση χρέωσης"</string>
-    <string name="connect_to_billing_system_failed">"Αποτυχία σύνδεσης στο σύστημα χρέωσης"</string>
-    <string name="connecting_to_billing_system">"Σύνδεση στο σύστημα χρέωσης. Παρακαλώ περίμενε."</string>
-    <string name="thank_you_for_subscription">"Ευχαριστούμε για τη συνδρομή σου"</string>
-    <string name="load_subscription_options">"Φόρτωση επιλογών συνδρομής"</string>
-    <string name="acknowledging_subscription">"Αναγνώριση της συνδρομής σου. Παρακαλώ περίμενε."</string>
-    <string name="acknowledgement_purchase_failed_description">"Ουψ, υπήρξε ένα σφάλμα κατά την αναγνώριση της αγοράς σου. Αν το πρόβλημα παραμένει για 3 μέρες, θα λάβεις αυτόματα επιστροφή χρημάτων.
-Μην ανησυχείς, μπορείς και πάλι να απολαμβάνεις το Reddit Jr.. "</string>
-    <string name="continue_to_app">"Συνέχεια στην εφαρμογή"</string>
-    <string name="restore_subscription_purchase_details">"Πληρώσατε ήδη για τη συνδρομή;"</string>
-    <string name="restore_subscription_purchase">"Επαναφορά αγοράς συνδρομής"</string>
-    <string name="important_info_title">"Συνδέσου ξανά στο λογαριασμό σου"</string>
-    <string name="important_info">"Το Reddit Jr. χρησιμοποιεί ένα Client ID(API κλειδί) από το Reddit και πρέπει να συνδεθείς ξανά για να συνεχίσεις να χρησιμοποιείς την εφαρμογή.\n\nΑπλώς άνοιξε το συρτάρι πλοήγησης και κάνε κλικ στην κεφαλίδα του λογαριασμού σου και επίλεξε \"Προσθήκη λογαριασμού\" για να συνδεθείς στο Reddit χρησιμοποιώντας ξανά τον ίδιο λογαριασμό. Διαφορετικά, το Reddit Jr. ενδέχεται να μην φορτώνει καθόλου αναρτήσεις. Συγγνώμη για την ταλαιπωρία."</string>
-    <string name="i_understand">"Καταλαβαίνω"</string>
     <string name="add_to_comment_filter">"Φίλτρο Προσθήκη στο Σχόλιο"</string>
     <string name="cannot_edit_post_with_images">"Δεν επιτρέπεται η επεξεργασία αναρτήσεων με εικόνες."</string>
     <string name="local">"Τοπικό"</string>
@@ -1621,11 +1524,8 @@
     <string name="content_description_comment_filter_add_user">"Προσθήκη χρήστη στο φίλτρο σχολίων"</string>
     <string name="content_description_create_custom_theme">"Δημιούργησε προσαρμοσμένο θέμα"</string>
     <string name="content_description_create_post_filter">"Δημιουργία φίλτρου ανάρτησης"</string>
-    <string name="content_description_add_post_filter_usage">"Εφάρμοσε το φίλτρο ανάρτησης κάπου"</string>
     <string name="content_description_add_post_filter_rule">"Προσθήκη κανόνα φίλτρου"</string>
     <string name="content_description_remove_post_filter_rule">"Αφαίρεση %1$s"</string>
-    <string name="content_description_post_filter_add_subreddit">"Πρόσθεσε ένα subreddit στο φίλτρο ανάρτησης"</string>
-    <string name="content_description_post_filter_add_user">"Προσθήκη χρήστη για ανάρτηση φίλτρου"</string>
     <string name="content_description_post_filter_add_subreddit_user">"Προσθήκη χρήστη ή subreddit στο φίλτρο ανάρτησης"</string>
     <string name="content_description_change_banner">"Αλλαγή banner"</string>
     <string name="content_description_change_avatar">"Αλλαγή avatar"</string>
@@ -1648,7 +1548,6 @@
     <string name="content_description_search">"Αναζήτηση"</string>
     <string name="content_description_go_to_subreddit">"Πήγαινε στο Subreddit"</string>
     <string name="content_description_go_to_user">"Πήγαινε στον Χρήστη"</string>
-    <string name="content_description_random">"Τυχαία"</string>
     <string name="content_description_filter_posts">"Φίλτρο Αναρτήσεων"</string>
     <string name="content_description_hide_read_posts">"Απόκρυψη Αναγνωσμένων Αναρτήσεων"</string>
     <string name="content_description_go_to_top">"Άλμα προς τα Πάνω"</string>
@@ -1666,15 +1565,6 @@
     <string name="content_description_next_result">"Μετάβαση στο επόμενο αποτέλεσμα"</string>
     <string name="content_description_close_search_panel">"Κλείσιμο του πίνακα αναζήτησης"</string>
     <string name="content_description_send_message">"Αποστολή μηνύματος"</string>
-    <string name="content_description_home">"Αρχική"</string>
-    <string name="content_description_subscriptions">"Εγγραφές"</string>
-    <string name="content_description_inbox">"Εισερχόμενα"</string>
-    <string name="content_description_profile">"Προφίλ"</string>
-    <string name="content_description_multireddits">"MultiReddit"</string>
-    <string name="content_description_upvoted">"Ψηφίστηκε"</string>
-    <string name="content_description_downvoted">"Καταψηφίστηκε"</string>
-    <string name="content_description_hidden">"Κρύφτηκε"</string>
-    <string name="content_description_saved">"Αποθηκεύτηκε"</string>
     <string name="content_description_scan_qr_code">"Σάρωση κωδικού QR"</string>
     <string name="comment">"Σχόλιο"</string>
     <string name="enable_reply_notifications">"Λάβε ειδοποιήσεις απάντησης"</string>
@@ -1693,15 +1583,9 @@
     <string name="download_image">"Λήψη εικόνας"</string>
     <string name="download_gif">"Λήψη Gif"</string>
     <string name="download_video">"Λήψη βίντεο"</string>
-    <string name="download_all_gallery_images">"Λήψη όλων των εικόνων συλλογής"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Απευθείας"</string>
-    <string name="password_cannot_be_empty">"Ο κωδικός πρόσβασης δεν μπορεί να είναι κενός"</string>
-    <string name="title_activity_settings">"Ρυθμίσεις"</string>
-    <string name="title_activity_login">"Συνδέσου"</string>
-    <string name="restart_app_to_apply_changes">"Πάτα εδώ για επανεκκίνηση της εφαρμογής για εφαρμογή αλλαγών"</string>
-    <string name="subreddits_hidden_by_default_removed_message">"Τα Subreddits που ήταν κρυμμένα από προεπιλογή καταργήθηκαν"</string>
     <string name="jump_to_parent_comment">"Μετάβαση στο Σχόλιο γονέα"</string>
     <string name="long_press_post_non_media_area">"Παρατεταμένο πάτημα στη δημοσίευση (περιοχή μη πολυμέσων)"</string>
     <string name="long_press_post_media">"Παρατεταμένο πάτημα στα πολυμέσα της ανάρτησης"</string>

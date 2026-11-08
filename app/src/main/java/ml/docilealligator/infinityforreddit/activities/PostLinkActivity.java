@@ -646,19 +646,6 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 subredditName = binding.subredditNameTextViewPostLinkActivity.getText().toString();
             }
 
-            /*Intent intent = new Intent(this, SubmitPostService.class);
-            intent.putExtra(SubmitPostService.EXTRA_ACCOUNT, selectedAccount);
-            intent.putExtra(SubmitPostService.EXTRA_SUBREDDIT_NAME, subredditName);
-            intent.putExtra(SubmitPostService.EXTRA_TITLE, binding.postTitleEditTextPostLinkActivity.getText().toString());
-            intent.putExtra(SubmitPostService.EXTRA_CONTENT, binding.postContentEditTextPostLinkActivity.getText().toString());
-            intent.putExtra(SubmitPostService.EXTRA_URL, binding.postLinkEditTextPostLinkActivity.getText().toString());
-            intent.putExtra(SubmitPostService.EXTRA_KIND, APIUtils.KIND_LINK);
-            intent.putExtra(SubmitPostService.EXTRA_FLAIR, flair);
-            intent.putExtra(SubmitPostService.EXTRA_IS_SPOILER, isSpoiler);
-            intent.putExtra(SubmitPostService.EXTRA_IS_NSFW, isNSFW);
-            intent.putExtra(SubmitPostService.EXTRA_RECEIVE_POST_REPLY_NOTIFICATIONS, binding.receivePostReplyNotificationsSwitchMaterialPostLinkActivity.isChecked());
-            intent.putExtra(SubmitPostService.EXTRA_POST_TYPE, SubmitPostService.EXTRA_POST_TEXT_OR_LINK);
-            ContextCompat.startForegroundService(this, intent);*/
 
             int contentEstimatedBytes = 0;
             PersistableBundle extras = new PersistableBundle();

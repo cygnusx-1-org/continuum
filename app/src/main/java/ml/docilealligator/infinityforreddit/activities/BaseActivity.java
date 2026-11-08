@@ -809,14 +809,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         });
     }
 
-    /*protected void adjustToolbar(Toolbar toolbar) {
-        int statusBarResourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarResourceId > 0) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) toolbar.getLayoutParams();
-            params.topMargin = getResources().getDimensionPixelSize(statusBarResourceId);
-            toolbar.setLayoutParams(params);
-        }
-    }*/
 
     protected void addOnOffsetChangedListener(AppBarLayout appBarLayout) {
         View decorView = getWindow().getDecorView();

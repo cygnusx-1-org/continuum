@@ -161,14 +161,6 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
                     }
                 });
 
-                /*adjustToolbar(binding.toolbarInboxActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabInboxActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabInboxActivity.setLayoutParams(params);
-                }*/
             }
         }
 

@@ -408,17 +408,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 });
 
             } else {
-                /*ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                            @NonNull
-                            @Override
-                            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                                Insets inset = Utils.getInsets(insets, false);
-
-                                setMargins(binding.drawerLayout, inset.left, inset.top, inset.right, inset.bottom);
-                                return insets;
-                            }
-                });*/
                 binding.drawerLayout.setStatusBarBackgroundColor(mCustomThemeWrapper.getColorPrimaryDark());
             }
         }
@@ -1229,19 +1218,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             mFetchUserInfoSuccess = false;
                         }
                     });
-            /*FetchMyInfo.fetchAccountInfo(mOauthRetrofit, mRedditDataRoomDatabase, mAccessToken,
-                    new FetchMyInfo.FetchMyInfoListener() {
-                        @Override
-                        public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma) {
-                            mAccountName = name;
-                            mFetchUserInfoSuccess = true;
-                        }
-
-                        @Override
-                        public void onFetchMyInfoFailed(boolean parseFailed) {
-                            mFetchUserInfoSuccess = false;
-                        }
-                    });*/
         }
     }
 

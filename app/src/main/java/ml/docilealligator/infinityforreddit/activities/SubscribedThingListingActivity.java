@@ -211,15 +211,6 @@ public class SubscribedThingListingActivity extends BaseActivity
                     }
                 });
 
-                /*adjustToolbar(binding.toolbarSubscribedThingListingActivity);
-
-                int navBarHeight = getNavBarHeight();
-
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabSubscribedThingListingActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabSubscribedThingListingActivity.setLayoutParams(params);
-                }*/
             }
         }
 

@@ -104,12 +104,6 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
                         return WindowInsetsCompat.CONSUMED;
                     }
                 });
-                /*adjustToolbar(binding.toolbarSubscribedSubredditsMultiselectionActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    binding.recyclerViewSubscribedSubscribedSubredditsMultiselectionActivity.setPadding(0, 0, 0, navBarHeight);
-                }*/
             }
         }
 

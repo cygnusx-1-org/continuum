@@ -635,20 +635,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     markwon.setMarkdown(binding.descriptionTextViewViewUserDetailActivity, description);
                 }
 
-                /*if (userData.isNSFW()) {
-                    if (nsfwWarningBuilder == null
-                            && !mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.NSFW_BASE), false)) {
-                        nsfwWarningBuilder = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
-                                .setTitle(R.string.warning)
-                                .setMessage(R.string.this_user_has_nsfw_content)
-                                .setPositiveButton(R.string.leave, (dialogInterface, i)
-                                        -> {
-                                    finish();
-                                })
-                                .setNegativeButton(R.string.dismiss, null);
-                        nsfwWarningBuilder.show();
-                    }
-                }*/
             } else {
                 if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                     // Only for unfollowing deleted users in the anonymous mode

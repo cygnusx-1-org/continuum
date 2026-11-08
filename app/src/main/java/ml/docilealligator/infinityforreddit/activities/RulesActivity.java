@@ -110,12 +110,6 @@ public class RulesActivity extends BaseActivity {
                     }
                 });
 
-                /*adjustToolbar(binding.toolbarRulesActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    binding.recyclerViewRulesActivity.setPadding(0, 0, 0, navBarHeight);
-                }*/
             }
         }
 

@@ -269,19 +269,6 @@ public class ViewPostDetailActivity extends BaseActivity
                         return insets;
                     }
                 });
-                /*adjustToolbar(binding.toolbarViewPostDetailActivity);
-
-                int navBarHeight = getNavBarHeight();
-                if (navBarHeight > 0) {
-                    CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.fabViewPostDetailActivity.getLayoutParams();
-                    params.bottomMargin += navBarHeight;
-                    binding.fabViewPostDetailActivity.setLayoutParams(params);
-
-                    binding.searchPanelMaterialCardViewViewPostDetailActivity.setContentPadding(binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingStart(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingTop(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingEnd(),
-                            binding.searchPanelMaterialCardViewViewPostDetailActivity.getPaddingBottom() + navBarHeight);
-                }*/
             }
         }
 
@@ -749,54 +736,6 @@ public class ViewPostDetailActivity extends BaseActivity
         if (fragment != null) {
             fragment.toggleSaveComment(comment, position);
         }
-        /*if (comment.isSaved()) {
-            comment.setSaved(false);
-            SaveThing.unsaveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
-                @Override
-                public void success() {
-                    LocalSaved.onUnsaved(ViewPostDetailActivity.this, accountName, comment.getFullName());
-                    SavedCommentCacheNotifier.onSavedCommentChanged();
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, false);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_unsaved_success, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void failed() {
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, true);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_unsaved_failed, Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            comment.setSaved(true);
-            SaveThing.saveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
-                @Override
-                public void success() {
-                    LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
-                            accountName, comment.getFullName(), comment.getLinkId());
-                    SavedCommentCacheNotifier.onSavedCommentChanged();
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, true);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_saved_success, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void failed() {
-                    ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-                    if (fragment != null) {
-                        fragment.saveComment(position, false);
-                    }
-                    Toast.makeText(ViewPostDetailActivity.this, R.string.comment_saved_failed, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }*/
     }
 
     public boolean toggleSearchPanelVisibility() {

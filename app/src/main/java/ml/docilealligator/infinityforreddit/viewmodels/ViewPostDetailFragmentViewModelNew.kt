@@ -531,13 +531,6 @@ class ViewPostDetailFragmentViewModelNew(
         // handled and the bodies never come back.
         resetCommentRecovery()
 
-        /*fetchCommentJob?.cancel()
-        fetchCommentJob = viewModelScope.launch {
-
-
-
-            fetchCommentJob = null
-        }*/
 
         _uiState.value = _uiState.value.copy(
             isInitialLoading = true,
