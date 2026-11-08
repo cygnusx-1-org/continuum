@@ -46,6 +46,19 @@ public class ViewPagerBugFixed extends ViewPager {
         this.keepsDrag = keepsDrag;
     }
 
+    /**
+     * A page that takes every touch -- the gallery's image view does, to pan and zoom -- asks its
+     * parents to leave it alone the moment the finger lands, and lets go only for a sideways drag.
+     * That is the wrong axis for a vertical pager, which would then never see an up or down drag, so
+     * it does not honour the request; {@link #setKeepsDrag} is how a page keeps a drag it needs.
+     */
+    @Override
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        if (!vertical) {
+            super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        }
+    }
+
     @Override
     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
         if (vertical) {
