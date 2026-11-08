@@ -77,7 +77,6 @@ import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeOnlyDisablePreviewInVideoAndGifPostsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePostFeedMaxResolutionEvent;
-import ml.docilealligator.infinityforreddit.events.ChangePostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePullToRefreshEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeRememberMutingOptionInPostFeedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeShowAbsoluteNumberOfVotesEvent;
@@ -1098,11 +1097,6 @@ public abstract class PostFragmentBase extends Fragment {
             getPostAdapter().setBlurSpoiler(event.needBlurSpoiler);
             refreshAdapter();
         }
-    }
-
-    @Subscribe
-    public void onChangePostLayoutEvent(ChangePostLayoutEvent event) {
-        changePostLayout(event.postLayout);
     }
 
     @Subscribe

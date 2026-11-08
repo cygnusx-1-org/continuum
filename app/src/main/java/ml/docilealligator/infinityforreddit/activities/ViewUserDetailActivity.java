@@ -82,7 +82,6 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewUserDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
-import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
@@ -1527,11 +1526,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Subscribe
     public void onChangeNSFWEvent(ChangeNSFWEvent changeNSFWEvent) {
         sectionsPagerAdapter.changeNSFW(changeNSFWEvent.nsfw);
-    }
-
-    @Subscribe
-    public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
-        finish();
     }
 
     /** The header and the menu both show the tag, so both are redrawn; the tabs redraw themselves. */

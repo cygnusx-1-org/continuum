@@ -30,17 +30,13 @@ public class APIUtils {
     public static final String API_UPLOAD_MEDIA_URI = "https://reddit-uploaded-media.s3-accelerate.amazonaws.com";
     public static final String API_UPLOAD_VIDEO_URI = "https://reddit-uploaded-video.s3-accelerate.amazonaws.com";
     public static final String REDGIFS_API_BASE_URI = "https://api.redgifs.com";
-    public static final String OH_MY_DL_BASE_URI = "https://ohmydl.com";
     public static final String IMGUR_API_BASE_URI = "https://api.imgur.com/3/";
     public static final String STREAMABLE_API_BASE_URI = "https://api.streamable.com";
     public static final String SERVER_API_BASE_URI = "http://127.0.0.1";
     public static final String ARCTIC_SHIFT_API_BASE_URI = "https://arctic-shift.photon-reddit.com/";
 
     public static final String CLIENT_ID_KEY = "client_id";
-    public static final String CLIENT_SECRET_KEY = "client_secret";
     public static final String IMGUR_CLIENT_ID = "Client-ID cc671794e0ab397";
-    public static final String REDGIFS_CLIENT_ID = "1828d0bcc93-15ac-bde6-0005-d2ecbe8daab3";
-    public static final String REDGIFS_CLIENT_SECRET = "TJBlw7jRXW65NAGgFBtgZHu97WlzRXHYybK81sZ9dLM=";
     public static final String RESPONSE_TYPE_KEY = "response_type";
     public static final String RESPONSE_TYPE = "code";
     public static final String STATE_KEY = "state";
@@ -72,15 +68,11 @@ public class APIUtils {
 
     public static final String GRANT_TYPE_KEY = "grant_type";
     public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
-    public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
     // Application-only ("userless") OAuth grant for installed apps. Used for anonymous browsing
     // now that Reddit has shut down the unauthenticated www.reddit.com/*.json endpoints.
-    public static final String GRANT_TYPE_INSTALLED_CLIENT = "https://oauth.reddit.com/grants/installed_client";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
-    public static final String DEVICE_ID_KEY = "device_id";
     // Privacy-respecting sentinel accepted by Reddit in place of a unique per-device id.
-    public static final String DEVICE_ID_DO_NOT_TRACK = "DO_NOT_TRACK_THIS_DEVICE";
 
     public static final String DIR_KEY = "dir";
     public static final String ID_KEY = "id";
@@ -220,7 +212,6 @@ public class APIUtils {
     public static final String HOW_YES = "yes";
     public static final String HOW_NO = "no";
 
-    public static final String PLATFORM_KEY = "platform";
 
     public static Map<String, String> getHttpBasicAuthHeader(Context context) {
         // Ensure we use the application context to avoid potential lifecycle issues with the passed context
@@ -311,7 +302,6 @@ public class APIUtils {
     }
 
     // Application-only (anonymous/userless) Reddit OAuth token management
-    public static final AtomicReference<ApplicationOnlyToken> ANONYMOUS_TOKEN = new AtomicReference<>(new ApplicationOnlyToken("", 0));
 
     public static class ApplicationOnlyToken {
         @NonNull public final String token;

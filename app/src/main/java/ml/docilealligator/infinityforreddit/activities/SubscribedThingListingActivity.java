@@ -63,7 +63,6 @@ import ml.docilealligator.infinityforreddit.asynctasks.InsertSubscribedThings;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySubscribedThingListingBinding;
-import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.FollowedMultiRedditListingFragment;
@@ -1011,11 +1010,6 @@ public class SubscribedThingListingActivity extends BaseActivity
 
     @Subscribe
     public void onAccountSwitchEvent(SwitchAccountEvent event) {
-        finish();
-    }
-
-    @Subscribe
-    public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
         finish();
     }
 

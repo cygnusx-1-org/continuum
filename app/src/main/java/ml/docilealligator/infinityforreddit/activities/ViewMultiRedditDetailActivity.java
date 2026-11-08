@@ -49,7 +49,6 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.SortTypeBottomS
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewMultiRedditDetailBinding;
-import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.FragmentCommunicator;
@@ -978,11 +977,6 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         if (!hideFab) {
             fab.hide();
         }
-    }
-
-    @Subscribe
-    public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
-        finish();
     }
 
     @Subscribe

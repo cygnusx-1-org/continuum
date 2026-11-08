@@ -25,9 +25,6 @@ public class SharedPreferencesUtils {
     public static final String BEST_ROCKET_ICON_KEY = "best_rocket_icon";
     public static final String MATERIAL_ICONS_KEY = "material_icons";
     public static final String OPEN_SOURCE_KEY = "open_source";
-    public static final String RATE_KEY = "rate";
-    public static final String EMAIL_KEY = "email";
-    public static final String REDDIT_ACCOUNT_KEY = "reddit_account";
     public static final String SUBREDDIT_KEY = "subreddit";
     public static final String SHARE_KEY = "share";
     public static final String PRIVACY_POLICY_KEY = "privacy_policy";
@@ -77,7 +74,6 @@ public class SharedPreferencesUtils {
     public static final String SORT_TIME_USER_COMMENT = "sort_time_user_comment";
     public static final String SORT_TYPE_SEARCH_SUBREDDIT = "sort_type_search_subreddit";
     public static final String SORT_TYPE_SEARCH_USER = "sort_type_search_user";
-    public static final String SORT_TYPE_POST_COMMENT = "sort_type_post_comment";
     public static final String SORT_TYPE_SUBREDDIT_COMMENT_BASE = "sort_type_subreddit_comment_";
 
     public static final String POST_LAYOUT_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_layout";
@@ -188,7 +184,6 @@ public class SharedPreferencesUtils {
     public static final String START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT = "start_autoplay_visible_area_offset_portrait";
     public static final String START_AUTOPLAY_VISIBLE_AREA_OFFSET_LANDSCAPE = "start_autoplay_visible_area_offset_landscape";
     public static final String MUTE_NSFW_VIDEO = "mute_nsfw_video";
-    public static final String VIDEO_PLAYER_IGNORE_NAV_BAR = "video_player_ignore_nav_bar";
     public static final String SAVE_FRONT_PAGE_SCROLLED_POSITION = "save_front_page_scrolled_position";
     // Reopen on the screen the user left, at the place they left it, showing the posts that were
     // already loaded. Overrides SAVE_FRONT_PAGE_SCROLLED_POSITION on Home when both are on: that
@@ -202,7 +197,6 @@ public class SharedPreferencesUtils {
     public static final String AUTO_CHECK_FOR_UPDATES = "auto_check_for_updates";
     public static final String INCLUDE_PRERELEASES = "include_prereleases";
     public static final String LAST_UPDATE_CHECK_TIME = "last_update_check_time";
-    public static final String DATA_SAVING_MODE_PREFERENCE = "data_saving_mode_preference";
     public static final String DATA_SAVING_MODE = "data_saving_mode";
     public static final String DATA_SAVING_MODE_OFF = "0";
     public static final String DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA = "1";
@@ -240,7 +234,6 @@ public class SharedPreferencesUtils {
     // Post swipe actions. The stored value is what is in settings_post_swipe_actions_values, so the
     // first two have to keep the numbers the old two-action list gave them. The misspelling is the
     // one this block has always had; renaming it is its own change, not a rider on this one.
-    public static final int SWIPE_ACITON_NONE = -1;
     public static final int SWIPE_ACITON_UPVOTE = 0;
     public static final int SWIPE_ACITON_DOWNVOTE = 1;
     public static final int SWIPE_ACITON_SAVE = 2;
@@ -258,7 +251,6 @@ public class SharedPreferencesUtils {
     public static final int SWIPE_ACITON_OPEN_IN_NEW_WINDOW = 11;
     public static final int SWIPE_ACITON_CROSSPOST = 12;
     // Comment swipe actions: a separate namespace from the post ones above, never mixed with them.
-    public static final int COMMENT_SWIPE_ACITON_NONE = -1;
     public static final int COMMENT_SWIPE_ACITON_UPVOTE = 0;
     public static final int COMMENT_SWIPE_ACITON_DOWNVOTE = 1;
     public static final int COMMENT_SWIPE_ACITON_SAVE = 2;
@@ -351,7 +343,6 @@ public class SharedPreferencesUtils {
     public static final String SWIPE_ACTION_SENSITIVITY_IN_COMMENTS = "swipe_action_sensitivity_in_comments";
     public static final String NAVIGATION_DRAWER_SWIPE_AREA = "navigation_drawer_swipe_area";
     public static final String COMMENT_THREAD_CONTINUITY_CAPACITY = "comment_thread_continuity_capacity";
-    public static final String CURRENT_VERSION = "current_version";
     public static final String SHOW_GALLERY_MEDIA_AS_GRID = "show_gallery_media_as_grid";
     public static final String SHOW_POST_AND_COMMENT_TOOLBAR_ITEMS_BASED_ON_SPACE = "show_post_and_comment_toolbar_items_based_on_space";
 
@@ -468,16 +459,9 @@ public class SharedPreferencesUtils {
 
     public static final String DEFAULT_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit_preferences";
     public static final String SHARED_PREFERENCES_FILE = DEFAULT_PREFERENCES_FILE;
-    public static final String SUBSCRIBE_TO_SUB_WHEN_SCROLLING_THROUGH_POSTS_AFTER_SUB_BROWSING_HISTORY_KEY = "subscribe_to_subs_when_scrolling_through_posts_after_sub_browsing_history";
     public static final String MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.main_page_tabs";
     public static final String MAIN_PAGE_TAB_COUNT = "_main_page_tab_count";
     public static final String MAIN_PAGE_SHOW_TAB_NAMES = "_main_page_show_tab_names";
-    public static final String MAIN_PAGE_TAB_1_TITLE = "_main_page_tab_1_title";
-    public static final String MAIN_PAGE_TAB_2_TITLE = "_main_page_tab_2_title";
-    public static final String MAIN_PAGE_TAB_3_TITLE = "_main_page_tab_3_title";
-    public static final String MAIN_PAGE_TAB_4_TITLE = "_main_page_tab_4_title";
-    public static final String MAIN_PAGE_TAB_5_TITLE = "_main_page_tab_5_title";
-    public static final String MAIN_PAGE_TAB_6_TITLE = "_main_page_tab_6_title";
     public static final String MAIN_PAGE_TAB_1_POST_TYPE = "_main_page_tab_1_post_type";
     public static final String MAIN_PAGE_TAB_2_POST_TYPE = "_main_page_tab_2_post_type";
     public static final String MAIN_PAGE_TAB_3_POST_TYPE = "_main_page_tab_3_post_type";
@@ -527,7 +511,6 @@ public class SharedPreferencesUtils {
     public static final String OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB = "other_activities_bottom_app_bar_fab";
 
 
-    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS = 0;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH = 1;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_CHANGE_SORT_TYPE = 2;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_CHANGE_POST_LAYOUT = 3;
@@ -577,7 +560,6 @@ public class SharedPreferencesUtils {
     public static final String ACCOUNT_IMAGE_URL = "account_image_url";
     public static final String REDGIFS_ACCESS_TOKEN = "redgifs_access_token";
     // Cached application-only (anonymous/userless) Reddit OAuth token
-    public static final String ANONYMOUS_ACCESS_TOKEN = "anonymous_access_token";
     public static final String INBOX_COUNT = "inbox_count";
 
     public static final String NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.navigation_drawer";
@@ -619,7 +601,6 @@ public class SharedPreferencesUtils {
 
     public static final String INTERNAL_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.internal";
     public static final String HAS_REQUESTED_NOTIFICATION_PERMISSION = "has_requested_notification_permission";
-    public static final String DO_NOT_SHOW_REDDIT_API_INFO_V2_AGAIN = "do_not_show_reddit_api_info_v2_again";
     public static final String MATERIAL_YOU_SENTRY_COLOR = "material_you_sentry_color";
     public static final String DEFAULT_THEME_APPLIED = "default_theme_applied";
     public static final String DEFAULT_THEME_IN_PROGRESS = "default_theme_in_progress";
@@ -644,46 +625,11 @@ public class SharedPreferencesUtils {
     public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 
     //Legacy Settings
-    public static final String MAIN_PAGE_TAB_1_TITLE_LEGACY = "main_page_tab_1_title";
-    public static final String MAIN_PAGE_TAB_2_TITLE_LEGACY = "main_page_tab_2_title";
-    public static final String MAIN_PAGE_TAB_3_TITLE_LEGACY = "main_page_tab_3_title";
-    public static final String MAIN_PAGE_TAB_4_TITLE_LEGACY = "main_page_tab_4_title";
-    public static final String MAIN_PAGE_TAB_5_TITLE_LEGACY = "main_page_tab_5_title";
-    public static final String MAIN_PAGE_TAB_6_TITLE_LEGACY = "main_page_tab_6_title";
-    public static final String MAIN_PAGE_TAB_1_POST_TYPE_LEGACY = "main_page_tab_1_post_type";
-    public static final String MAIN_PAGE_TAB_2_POST_TYPE_LEGACY = "main_page_tab_2_post_type";
-    public static final String MAIN_PAGE_TAB_3_POST_TYPE_LEGACY = "main_page_tab_3_post_type";
-    public static final String MAIN_PAGE_TAB_4_POST_TYPE_LEGACY = "main_page_tab_4_post_type";
-    public static final String MAIN_PAGE_TAB_5_POST_TYPE_LEGACY = "main_page_tab_5_post_type";
-    public static final String MAIN_PAGE_TAB_6_POST_TYPE_LEGACY = "main_page_tab_6_post_type";
-    public static final String MAIN_PAGE_TAB_1_NAME_LEGACY = "main_page_tab_1_name";
-    public static final String MAIN_PAGE_TAB_2_NAME_LEGACY = "main_page_tab_2_name";
-    public static final String MAIN_PAGE_TAB_3_NAME_LEGACY = "main_page_tab_3_name";
-    public static final String MAIN_PAGE_TAB_4_NAME_LEGACY = "main_page_tab_4_name";
-    public static final String MAIN_PAGE_TAB_5_NAME_LEGACY = "main_page_tab_5_name";
-    public static final String MAIN_PAGE_TAB_6_NAME_LEGACY = "main_page_tab_6_name";
 
-    public static final String SORT_TYPE_ALL_POST_LEGACY = "sort_type_all_post";
-    public static final String SORT_TIME_ALL_POST_LEGACY = "sort_time_all_post";
-    public static final String SORT_TYPE_POPULAR_POST_LEGACY = "sort_type_popular_post";
-    public static final String SORT_TIME_POPULAR_POST_LEGACY = "sort_time_popular_post";
 
-    public static final String POST_LAYOUT_POPULAR_POST_LEGACY = "post_layout_popular_post";
-    public static final String POST_LAYOUT_ALL_POST_LEGACY = "post_layout_all_post";
 
-    public static final String NSFW_KEY_LEGACY = "nsfw";
-    public static final String BLUR_NSFW_KEY_LEGACY = "blur_nsfw";
-    public static final String BLUR_SPOILER_KEY_LEGACY = "blur_spoiler";
-    public static final String CONFIRM_TO_EXIT_LEGACY = "confirm_to_exit";
-    public static final String OPEN_LINK_IN_APP_LEGACY = "open_link_in_app";
-    public static final String AUTOMATICALLY_TRY_REDGIFS_LEGACY = "automatically_try_redgifs";
 
-    public static final String DO_NOT_SHOW_REDDIT_API_INFO_AGAIN_LEGACY = "do_not_show_reddit_api_info_again";
-    public static final String HIDE_THE_NUMBER_OF_AWARDS_LEGACY = "hide_the_number_of_awards";
-    public static final String HIDE_COMMENT_AWARDS_LEGACY = "hide_comment_awards";
-    public static final String IMMERSIVE_INTERFACE_IGNORE_NAV_BAR_KEY_LEGACY = "immersive_interface_ignore_nav_bar";
     public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
 
     //Current account
-    public static final String APPLICATION_ONLY_ACCESS_TOKEN_LEGACY = "app_only_access_token";
 }

@@ -87,7 +87,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewSubredditDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
-import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.SidebarFragment;
@@ -1316,11 +1315,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Subscribe
     public void onChangeNSFWEvent(ChangeNSFWEvent changeNSFWEvent) {
         sectionsPagerAdapter.changeNSFW(changeNSFWEvent.nsfw);
-    }
-
-    @Subscribe
-    public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
-        finish();
     }
 
     @Override
