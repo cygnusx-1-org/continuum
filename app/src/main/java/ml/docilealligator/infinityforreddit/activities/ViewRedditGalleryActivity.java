@@ -37,6 +37,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import app.futured.hauler.DragDirection;
@@ -46,6 +49,10 @@ import com.google.gson.Gson;
 import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -88,8 +95,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     public static final String EXTRA_POST_JSON = "EPJ";
     public static final String EXTRA_GALLERY_ITEM_INDEX = "EGII";
     /**
-     * Change image by swiping up and down instead of sideways. Then a swipe left closes the
-     * gallery and a swipe right opens the post and its comments.
+     * Change image by swiping up and down instead of sideways. Then a swipe left goes back to the
+     * posts and a swipe right opens the post and its comments.
      */
     public static final String EXTRA_VERTICAL_SWIPE = "EVS";
     /**
@@ -97,6 +104,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
      * pager on it, and back returns to the list. The same left and right swipes as above.
      */
     public static final String EXTRA_SCROLL_LIST = "ESL";
+    /** How many rows of the scrolling list play their clip at once. */
+    private static final int MAX_PLAYING_ROWS = 3;
     /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
     private static final String STATE_RESUME_PAGE = "RP";
     private static final String STATE_SHOWING_LIST = "SSL";
@@ -124,6 +133,11 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     private int resumePage = -1;
     private boolean verticalSwipe;
     private boolean showingList;
+    // Whether the list may play its gifs and videos by itself, under the app's Video Autoplay settings.
+    private boolean autoplayMedia;
+    // The rows whose clip is playing: the most visible few, so a screenful of gifs does not mean a
+    // screenful of decoders.
+    private final Set<GalleryListViewHolder> playingRows = new LinkedHashSet<>();
     // Set when a swipe left or right means something here: left closes the gallery, right opens the
     // post. Null when the gallery pages sideways, where those swipes belong to the pager.
     @Nullable
@@ -257,6 +271,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         subredditName = post.getSubredditName();
         isNsfw = post.isNSFW();
 
+        autoplayMedia = shouldAutoplayMedia();
         verticalSwipe = getIntent().getBooleanExtra(EXTRA_VERTICAL_SWIPE, false);
         boolean scrollList = getIntent().getBooleanExtra(EXTRA_SCROLL_LIST, false);
         binding.viewPagerViewRedditGalleryActivity.setVertical(verticalSwipe);
@@ -295,8 +310,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     }
 
     /**
-     * A swipe left closes the gallery and a swipe right opens the post and its comments, wherever
-     * the swipe is on the screen. Only while nothing here pages sideways -- the list, or the pager
+     * A swipe left goes back to the posts and a swipe right opens the post and its comments,
+     * wherever the swipe is on the screen. Only while nothing here pages sideways -- the list, or the pager
      * when it pages up and down -- and not while a picture is zoomed in, where a sideways drag
      * pans it.
      */
@@ -312,7 +327,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             if (Math.abs(distanceX) < minimumDistance || Math.abs(distanceX) < 2 * Math.abs(distanceY)) {
                 return false;
             }
-            if (distanceX < 0) {
+            if (distanceX > 0) {
                 finish();
             } else {
                 Intent intent = new Intent(ViewRedditGalleryActivity.this, ViewPostDetailActivity.class);
@@ -354,12 +369,22 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
         @Override
         public void onViewRecycled(@NonNull GalleryListViewHolder holder) {
+            stopPlaying(holder);
             Glide.with(ViewRedditGalleryActivity.this).clear(holder.binding.imageViewItemGalleryListEntry);
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(@NonNull GalleryListViewHolder holder) {
+            stopPlaying(holder);
         }
     }
 
     private class GalleryListViewHolder extends RecyclerView.ViewHolder {
         final ItemGalleryListEntryBinding binding;
+        @Nullable
+        Post.Gallery item;
+        @Nullable
+        ExoPlayer player;
 
         GalleryListViewHolder(ItemGalleryListEntryBinding binding) {
             super(binding.getRoot());
@@ -376,15 +401,18 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
 
         void bind(Post.Gallery item) {
+            this.item = item;
             // The source's own shape reserves the row's height before the picture arrives, so the
             // list does not jump as images load.
             binding.imageViewItemGalleryListEntry.setRatio(
                     item.sourceWidth > 0 && item.sourceHeight > 0 ? (float) item.sourceHeight / item.sourceWidth : 0f);
+            // A clip that plays by itself needs no badge to say it can be played.
             binding.playBadgeImageViewItemGalleryListEntry.setVisibility(
-                    item.mediaType == Post.Gallery.TYPE_IMAGE ? View.GONE : View.VISIBLE);
+                    item.mediaType == Post.Gallery.TYPE_IMAGE || (autoplayMedia && clipOf(item) != null)
+                            ? View.GONE : View.VISIBLE);
             // The resolution-bounded still Reddit publishes, whatever the item is: the source is
             // several thousand pixels wide, and a video's own url is an mp4 an ImageView cannot
-            // show. A GIF or a video plays when the item is opened.
+            // show. The clip, where there is one, plays over the still while the row is on screen.
             String still = item.feedPreviewUrl;
             if (still == null && item.mediaType != Post.Gallery.TYPE_VIDEO) {
                 still = item.url;
@@ -409,6 +437,122 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
     }
 
+    /** The clip a row plays, or null for a still picture and for a GIF Reddit gave no mp4 for. */
+    @Nullable
+    private static String clipOf(Post.Gallery item) {
+        if (item.mediaType == Post.Gallery.TYPE_VIDEO) {
+            return item.url;
+        }
+        return item.mediaType == Post.Gallery.TYPE_GIF ? item.mp4Url : null;
+    }
+
+    /**
+     * The same rule the feed applies: Video Autoplay set to never, or to Wi-Fi only while on mobile
+     * data, means nothing plays by itself, and Autoplay NSFW Videos excludes NSFW posts.
+     */
+    private boolean shouldAutoplayMedia() {
+        String setting = sharedPreferences.getString(
+                SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
+        boolean allowed = SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON.equals(setting)
+                || (SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI.equals(setting)
+                && Utils.getConnectedNetwork(this) == Utils.NETWORK_TYPE_WIFI);
+        return allowed && (!isNsfw || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true));
+    }
+
+    /**
+     * Plays the clips of the rows showing most of themselves, up to {@link #MAX_PLAYING_ROWS}, and
+     * stops the rest. Run when the list comes to rest, not while it moves: a row flung past never
+     * starts a download.
+     */
+    private void updatePlayback() {
+        if (!autoplayMedia || !showingList) {
+            return;
+        }
+        RecyclerView list = binding.recyclerViewViewRedditGalleryActivity;
+        List<GalleryListViewHolder> wanted = new ArrayList<>();
+        List<Integer> visibleHeights = new ArrayList<>();
+        for (int i = 0; i < list.getChildCount(); i++) {
+            View child = list.getChildAt(i);
+            RecyclerView.ViewHolder holder = list.getChildViewHolder(child);
+            if (!(holder instanceof GalleryListViewHolder)) {
+                continue;
+            }
+            GalleryListViewHolder row = (GalleryListViewHolder) holder;
+            int visible = Math.min(child.getBottom(), list.getHeight()) - Math.max(child.getTop(), 0);
+            if (row.item != null && clipOf(row.item) != null && visible > 0) {
+                wanted.add(row);
+                visibleHeights.add(visible);
+            }
+        }
+        while (wanted.size() > MAX_PLAYING_ROWS) {
+            int least = visibleHeights.indexOf(Collections.min(visibleHeights));
+            wanted.remove(least);
+            visibleHeights.remove(least);
+        }
+        for (GalleryListViewHolder playing : new ArrayList<>(playingRows)) {
+            if (!wanted.contains(playing)) {
+                stopPlaying(playing);
+            }
+        }
+        for (GalleryListViewHolder row : wanted) {
+            if (row.player == null) {
+                startPlaying(row);
+            }
+        }
+    }
+
+    private void startPlaying(GalleryListViewHolder row) {
+        String clip = row.item == null ? null : clipOf(row.item);
+        if (clip == null) {
+            return;
+        }
+        ExoPlayer player = new ExoPlayer.Builder(this).build();
+        player.setVolume(0f);
+        player.setRepeatMode(Player.REPEAT_MODE_ALL);
+        row.player = player;
+        playingRows.add(row);
+        row.binding.playerViewItemGalleryListEntry.setPlayer(player);
+        row.binding.playerViewItemGalleryListEntry.setVisibility(View.VISIBLE);
+        player.setMediaItem(MediaItem.fromUri(clip));
+        player.setPlayWhenReady(true);
+        player.prepare();
+    }
+
+    private void stopPlaying(GalleryListViewHolder row) {
+        playingRows.remove(row);
+        row.binding.playerViewItemGalleryListEntry.setPlayer(null);
+        row.binding.playerViewItemGalleryListEntry.setVisibility(View.GONE);
+        if (row.player != null) {
+            row.player.release();
+            row.player = null;
+        }
+    }
+
+    private void stopAllPlaying() {
+        for (GalleryListViewHolder row : new ArrayList<>(playingRows)) {
+            stopPlaying(row);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        stopAllPlaying();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        binding.recyclerViewViewRedditGalleryActivity.post(this::updatePlayback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopAllPlaying();
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
+
     /** Lays every image out in one scrolling list. The pager is not created until an image is tapped. */
     private void showList(int scrollTo) {
         showingList = true;
@@ -419,16 +563,26 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         if (binding.recyclerViewViewRedditGalleryActivity.getAdapter() == null) {
             binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
             binding.recyclerViewViewRedditGalleryActivity.setAdapter(new GalleryListAdapter());
+            binding.recyclerViewViewRedditGalleryActivity.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        updatePlayback();
+                    }
+                }
+            });
         }
         if (scrollTo > 0 && scrollTo < gallery.size()) {
             binding.recyclerViewViewRedditGalleryActivity.scrollToPosition(scrollTo);
         }
+        binding.recyclerViewViewRedditGalleryActivity.post(this::updatePlayback);
     }
 
     /** Opens the pager, with zoom, download and share, on one image of the list. */
     private void showPager(int index) {
         showingList = false;
         backToList.setEnabled(true);
+        stopAllPlaying();
         binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.GONE);
         binding.viewPagerViewRedditGalleryActivity.setVisibility(View.VISIBLE);
         createPagerAdapter();

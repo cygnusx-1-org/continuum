@@ -2,6 +2,16 @@
 
 ---
 
+Unreleased
+============
+**Fixed**
+* Media Focused galleries with Swipe Up and Down or Scrolling Gallery on: the swipes were the wrong way round. A swipe left now goes back to the posts and a swipe right opens the post and its comments
+
+**New**
+* Scrolling Gallery: GIFs and videos play by themselves as they scroll into view (up to three at a time, muted), under the Video Autoplay and Autoplay NSFW Videos settings. A GIF Reddit published no mp4 for, or one cached before this version, stays a still until opened
+
+---
+
 8.3.3.9.1.27 / 2026-11-8
 ============
 **New**
