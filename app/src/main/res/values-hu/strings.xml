@@ -469,11 +469,6 @@
     <string name="settings_post_compact_thumbnail_size">"Indexkép mérete"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Bélyegkép megjelenítése baloldalt"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Miniatűr megjelenítése a jobb oldalon"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Az oszlopok száma a poszt feedben"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portré"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Tájlép"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portré (csukott állapotban)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Fekvő (csukott állapotban)"</string>
     <string name="settings_swap_tap_and_long_title">"A koppintás és a hosszú nyomás felcseréléje a hozzászólásoknál"</string>
     <string name="settings_swipe_to_go_back_title">"Jobbra csúsztatás a visszalépéshez"</string>
     <string name="settings_swipe_to_go_back_summary">"Nem alkalmazható az összes oldalon"</string>
@@ -672,10 +667,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_subreddit_default_sort_time_title">"Subreddit alapértelmezett rendezésí idő"</string>
     <string name="settings_user_default_sort_type_title">"Felhasználó alapértelmezett rendezésí típus"</string>
     <string name="settings_user_default_sort_time_title">"Felhasználó alapértelmezett rendezésí idő"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Koppints a média megjelenítéséhez gallléria elrendezésben."</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Cseréld ki a koppintást és nyomd meg hosszan a galéria elrendezésében: koppintással megnyitja a médiát, hosszan megnyomva megnyitja a bejegyzést és a hozzá tartozó megjegyzéseket"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Csak médiabejegyzések"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"A galéria elrendezésében csak a kép, a GIF, a videó és a galéria bejegyzései jelenjenek meg. A szöveges, szavazás- és linkbejegyzések el vannak rejtve"</string>
     <string name="settings_hide_post_type">"Poszt típus elrejtése"</string>
     <string name="settings_post_type_triangle_indicator">"Bejegyzéstípus háromszög jelző"</string>
     <string name="settings_post_type_triangle_indicator_summary">"A bejegyzés típusának megjelenítése színes háromszögként a miniatűrön kompakt elrendezésben szöveges jelvény helyett"</string>
@@ -837,7 +828,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="favorites">"Kedvencek"</string>
     <string name="all">"Minden"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Galléria elrendezés"</string>
     <string name="elapsed_time_just_now">"Épp most"</string>
     <string name="elapsed_time_a_minute_ago">"1 perc"</string>
     <string name="elapsed_time_minutes_ago">"%1$d perc"</string>
@@ -1698,8 +1688,6 @@ Az alap az indigó amoled téma"</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Közvetlen"</string>
-    <string name="settings_backup_accounts_client_id_title">"Biztonsági mentési fiókok és ügyfél-azonosító"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Tartalmazza a felhasználói fiókokat és az ügyfél-azonosítót a biztonsági mentési fájlban (ajánlott)"</string>
     <string name="password_cannot_be_empty">"A jelszó nem lehet üres"</string>
     <string name="title_activity_settings">"Beállítások"</string>
     <string name="title_activity_login">"Bejelentkezés"</string>

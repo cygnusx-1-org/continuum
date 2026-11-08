@@ -84,7 +84,7 @@ class LoadMorePostsWithoutSortTest {
             null, "-", false, PostType.READ_POSTS,
             null, null, null, null, null, null,
             null, null, null,
-            ReadPostType.READ_POSTS, null, false
+            ReadPostType.READ_POSTS, null
         )
     }
 
@@ -136,7 +136,7 @@ class LoadMorePostsWithoutSortTest {
             accessToken, accountName, false, PostType.READ_POSTS,
             null, null, null, null, null, null,
             null, null, null,
-            ReadPostType.READ_POSTS, null, false
+            ReadPostType.READ_POSTS, null
         )
         awaitMainUntil { plainRequests.isNotEmpty() || oauthRequests.isNotEmpty() }
         return plainRequests to oauthRequests

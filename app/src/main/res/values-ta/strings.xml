@@ -474,11 +474,6 @@
     <string name="settings_post_compact_thumbnail_size">"சிறுபட அளவு"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"சிறுபடத்தை இடதில் காட்டு"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"வலதுபுறத்தில் சிறுபடத்தைக் காட்டு"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"போஸ்ட் ஃபீடில் உள்ள நெடுவரிசைகளின் எண்ணிக்கை"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"உருவப்படம்"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"நிலப்பரப்பு"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"உருவப்படம் (அவிழ்க்கப்பட்டது)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"நிலப்பரப்பு (அவிழ்க்கப்பட்டது)"</string>
     <string name="settings_swap_tap_and_long_title">"கருத்துகளில் தட்டு மற்றும் நீண்டழுத்தை பண்டமாற்று"</string>
     <string name="settings_swipe_to_go_back_title">"பின்செல்ல வலப்புறம் தேய்"</string>
     <string name="settings_swipe_to_go_back_summary">"எல்லா பக்கங்களுக்கும் செயல்படாது"</string>
@@ -674,10 +669,6 @@
     <string name="settings_subreddit_default_sort_time_title">"சப்ரெடிட் இயல்புநிலை வரிசைப்படுத்தும் நேரம்"</string>
     <string name="settings_user_default_sort_type_title">"பயனர் இயல்புநிலை வரிசை வகை"</string>
     <string name="settings_user_default_sort_time_title">"பயனர் இயல்புநிலை வரிசைப்படுத்தும் நேரம்"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"கேலரி அமைப்பில் மீடியாவைக் காட்ட கிளிக் செய்யவும்"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"கேலரி தளவமைப்பில் தட்டவும் மற்றும் நீண்ட நேரம் அழுத்தவும் மாற்றவும்: தட்டவும் மீடியாவை திறக்கிறது, நீண்ட அழுத்தினால் இடுகையையும் அதன் கருத்துகளையும் திறக்கிறது"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"மீடியா இடுகைகள் மட்டும்"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"கேலரி அமைப்பில், படம், GIF, வீடியோ மற்றும் கேலரி இடுகைகளை மட்டும் காட்டு. உரை, வாக்கெடுப்பு மற்றும் இணைப்பு இடுகைகள் மறைக்கப்பட்டுள்ளன"</string>
     <string name="settings_hide_post_type">"இடுகை வகையை மறை"</string>
     <string name="settings_post_type_triangle_indicator">"போஸ்ட் வகை முக்கோண காட்டி"</string>
     <string name="settings_post_type_triangle_indicator_summary">"உரை பேட்ஜுக்குப் பதிலாக சிறிய அமைப்பில் சிறுபடத்தில் வண்ண முக்கோணமாக இடுகை வகையைக் காட்டு"</string>
@@ -839,7 +830,6 @@
     <string name="favorites">"பிடித்தவை"</string>
     <string name="all">"அனைத்தும்"</string>
     <string name="link_post_layout_auto">"தானாக"</string>
-    <string name="post_layout_gallery">"காட்சியக தளவமைப்பு"</string>
     <string name="elapsed_time_just_now">"இப்போது தான்"</string>
     <string name="elapsed_time_a_minute_ago">"1 நிமிடம்"</string>
     <string name="elapsed_time_minutes_ago">"%1$d நிமிடங்கள்"</string>
@@ -1695,8 +1685,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"நேரடி"</string>
-    <string name="settings_backup_accounts_client_id_title">"காப்பு கணக்குகள் மற்றும் கிளையன்ட் ஐடி"</string>
-    <string name="settings_backup_accounts_client_id_summary">"காப்பு கோப்பில் பயனர் கணக்குகள் மற்றும் கிளையண்ட் ஐடியைச் சேர்க்கவும் (பரிந்துரைக்கப்பட்டது)"</string>
     <string name="password_cannot_be_empty">"கடவுச்சொல் காலியாக இருக்கக்கூடாது"</string>
     <string name="title_activity_settings">"அமைப்புகள்"</string>
     <string name="title_activity_login">"உள்நுழைக"</string>

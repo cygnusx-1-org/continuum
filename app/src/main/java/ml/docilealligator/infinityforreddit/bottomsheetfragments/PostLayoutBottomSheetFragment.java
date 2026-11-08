@@ -41,16 +41,12 @@ public class PostLayoutBottomSheetFragment extends LandscapeExpandedRoundedBotto
             ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_COMPACT_2);
             dismiss();
         });
-        binding.galleryLayoutTextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
-            ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_GALLERY);
-            dismiss();
-        });
         binding.cardLayout3TextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
             ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_CARD_3);
             dismiss();
         });
-        binding.cardLayoutCleanTextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
-            ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN);
+        binding.mediaFocusedLayoutTextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
+            ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED);
             dismiss();
         });
 

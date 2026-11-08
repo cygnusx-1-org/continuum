@@ -34,7 +34,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -149,8 +148,6 @@ public abstract class PostFragmentBase extends Fragment {
     protected MenuItem lazyModeItem;
     @Nullable
     protected LinearLayoutManagerBugFixed mLinearLayoutManager;
-    @Nullable
-    protected StaggeredGridLayoutManager mStaggeredGridLayoutManager;
     protected boolean hasPost;
     protected long postFragmentId;
     protected Handler lazyModeHandler;
@@ -207,14 +204,8 @@ public abstract class PostFragmentBase extends Fragment {
             public void run() {
                 if (isInLazyMode && !isLazyModePaused && getPostAdapter() != null) {
                     int nPosts = getPostAdapter().getItemCount();
-                    if (getCurrentPosition() == -1) {
-                        if (mLinearLayoutManager != null) {
-                            setCurrentPosition(mLinearLayoutManager.findFirstVisibleItemPosition());
-                        } else {
-                            StaggeredGridLayoutManager staggered = Objects.requireNonNull(mStaggeredGridLayoutManager);
-                            int[] into = new int[staggered.getSpanCount()];
-                            setCurrentPosition(staggered.findFirstVisibleItemPositions(into)[0]);
-                        }
+                    if (getCurrentPosition() == -1 && mLinearLayoutManager != null) {
+                        setCurrentPosition(mLinearLayoutManager.findFirstVisibleItemPosition());
                     }
 
                     if (getCurrentPosition() != RecyclerView.NO_POSITION && nPosts > getCurrentPosition()) {
@@ -222,8 +213,6 @@ public abstract class PostFragmentBase extends Fragment {
                         smoothScroller.setTargetPosition(getCurrentPosition());
                         if (mLinearLayoutManager != null) {
                             mLinearLayoutManager.startSmoothScroll(smoothScroller);
-                        } else {
-                            Objects.requireNonNull(mStaggeredGridLayoutManager).startSmoothScroll(smoothScroller);
                         }
                     }
                 }
@@ -344,7 +333,6 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true).observe(getViewLifecycleOwner(), mediaOnly -> applyMediaOnlyPosts());
 
         SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE).observe(getViewLifecycleOwner(), s -> {
             if (getPostAdapter() != null && getPostAdapter().setCompactThumbnailSizeDp(Integer.parseInt(s))) {
@@ -548,11 +536,9 @@ public abstract class PostFragmentBase extends Fragment {
     protected abstract void refreshAdapter();
 
     /**
-     * Tells {@code adapter} how wide a post is, from the list's width and the columns it is laid
-     * out in now -- on every change of either, since a change of post layout can change the columns
-     * without the width moving. The pixels are the item as laid out: a multi-column feed's
-     * decoration insets each one ({@link StaggeredGridLayoutManagerItemOffsetDecoration}), and a
-     * picture decoded for the column rather than the card is a decode at the wrong size.
+     * Tells {@code adapter} how wide a post is, from the list's width -- on every change of it.
+     * The feed is one column, so an item is as wide as the list; a picture decoded for any other
+     * width is a decode at the wrong size.
      *
      * <p>Runs from a posted layout callback, which can land after the fragment has let go of its
      * context, so its resources come from the activity rather than {@code getResources()}.
@@ -561,64 +547,7 @@ public abstract class PostFragmentBase extends Fragment {
         if (recyclerViewWidth <= 0) {
             return;
         }
-        int columns = mStaggeredGridLayoutManager != null
-                ? Math.max(1, mStaggeredGridLayoutManager.getSpanCount()) : 1;
-        int columnWidth = recyclerViewWidth / columns;
-        int itemWidthPx = columns > 1
-                ? columnWidth - StaggeredGridLayoutManagerItemOffsetDecoration.totalHorizontalOffset(
-                        mActivity.getResources().getDimensionPixelSize(R.dimen.staggeredLayoutManagerItemOffset), columns)
-                : columnWidth;
-        adapter.provideItemWidth(Utils.convertPxToDp(columnWidth, mActivity), itemWidthPx, columns > 1);
-    }
-
-    protected final int getNColumns(Resources resources) {
-        final boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
-        if (resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT, "2");
-                default:
-                    if (getResources().getBoolean(R.bool.isTablet)) {
-                        if (foldEnabled) {
-                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED, "2");
-                        } else {
-                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "2");
-                        }
-                    }
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "1");
-            }
-        } else {
-            switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT, "2");
-                default:
-                    if (getResources().getBoolean(R.bool.isTablet) && foldEnabled) {
-                        return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED, "2");
-                    }
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE, "2");
-            }
-        }
-    }
-
-    /**
-     * Swipe actions only work in a one-column feed, and the layout decides the columns, so a layout
-     * change can turn them on or off: from the two-column Gallery layout to a card layout they were
-     * never attached, and into it they stayed attached to a feed they cannot work in.
-     */
-    protected final void syncSwipeActions(RecyclerView recyclerView, int nColumns) {
-        if (touchHelper == null) {
-            return;
-        }
-        boolean enabled = nColumns == 1 && mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false);
-        swipeActionEnabled = enabled;
-        // Detach first, always. The helper is an item decoration as well as a touch listener, and a
-        // layout change clears every decoration, the helper's own among them; attaching to the list
-        // it is already attached to is a no-op, so without this it would stay "attached" with its
-        // decoration gone and its touch listener still eating the gestures.
-        touchHelper.attachToRecyclerView(null, 1);
-        if (enabled) {
-            touchHelper.attachToRecyclerView(recyclerView, 1);
-        }
+        adapter.provideItemWidth(Utils.convertPxToDp(recyclerViewWidth, mActivity), recyclerViewWidth);
     }
 
     public final void changePostLayout(int postLayout) {
@@ -626,23 +555,6 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     public abstract void changePostLayout(int postLayout, boolean temporary);
-
-    /**
-     * Whether the feed should be showing media posts only right now: the "Media Posts Only"
-     * setting, which belongs to the gallery layout and applies to no other one (issue #377).
-     */
-    protected final boolean shouldShowMediaOnlyPosts() {
-        return postLayout == SharedPreferencesUtils.POST_LAYOUT_GALLERY
-                && mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true);
-    }
-
-    /**
-     * Push {@link #shouldShowMediaOnlyPosts()} onto the view model backing this feed. Called when
-     * the feed is bound, whenever the post layout changes, and whenever the setting changes -- so
-     * switching away from the gallery layout brings the hidden posts straight back. The view model
-     * ignores a value it already holds, and this may run before it exists at all.
-     */
-    protected abstract void applyMediaOnlyPosts();
 
     @Nullable
     public final Boolean getMasterMutingOption() {
@@ -1059,13 +971,10 @@ public abstract class PostFragmentBase extends Fragment {
             return;
         }
 
-        if (mLinearLayoutManager != null) {
-            mLinearLayoutManager.scrollToPositionWithOffset(target, 0);
-        } else if (mStaggeredGridLayoutManager != null) {
-            mStaggeredGridLayoutManager.scrollToPositionWithOffset(target, 0);
-        } else {
+        if (mLinearLayoutManager == null) {
             return;
         }
+        mLinearLayoutManager.scrollToPositionWithOffset(target, 0);
         if (isInLazyMode) {
             lazyModeRunnable.resetOldPosition();
         }
@@ -1332,7 +1241,7 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Subscribe
     public void onChangeEnableSwipeActionSwitchEvent(ChangeEnableSwipeActionSwitchEvent changeEnableSwipeActionSwitchEvent) {
-        if (getNColumns(getResources()) == 1 && touchHelper != null) {
+        if (touchHelper != null) {
             swipeActionEnabled = changeEnableSwipeActionSwitchEvent.enableSwipeAction;
             if (changeEnableSwipeActionSwitchEvent.enableSwipeAction) {
                 touchHelper.attachToRecyclerView(getPostRecyclerView(), 1);
@@ -1493,79 +1402,6 @@ public abstract class PostFragmentBase extends Fragment {
 
         void resetOldPosition() {
             currentPosition = -1;
-        }
-    }
-
-    protected static class StaggeredGridLayoutManagerItemOffsetDecoration extends RecyclerView.ItemDecoration {
-
-        private final int mHalfOffset;
-        private final int mTotalHorizontalOffset;
-        private final int mCard3Margin;
-        private final int mCard3VerticalSpace;
-        private final int mNColumns;
-
-        StaggeredGridLayoutManagerItemOffsetDecoration(int itemOffset, int nColumns) {
-            // Callers only build this for a multi-column feed, but the count comes from a
-            // preference string, and a restored or hand-edited backup can carry a 0 that
-            // StaggeredGridLayoutManager itself accepts. Clamping keeps the divisions below safe.
-            mNColumns = Math.max(1, nColumns);
-            mCard3VerticalSpace = -itemOffset / 4;
-            // Card Top items carry their own 16dp horizontal margin (layout_marginStart /
-            // layout_marginEnd in the item_post_card_3_* layouts, and applyCompactItemLayoutParams
-            // for the compact variant). The decoration cancels it back out so that layout ends up
-            // with the same gaps as the others. itemOffset is that same 16dp.
-            mCard3Margin = itemOffset;
-            mHalfOffset = itemOffset / 2;
-            // StaggeredGridLayoutManager hands every span exactly totalSpace / spanCount, so the
-            // items only come out the same width if each one is inset by the same *total* amount.
-            // Splitting that constant total unevenly across the span is what puts a half-offset
-            // margin at the outer edges and a half-offset gutter between columns while keeping the
-            // widths equal. The outer columns used to be a quarter-offset wider than the inner
-            // ones, which made their cards a different height and drifted the columns out of
-            // alignment as the feed was scrolled (#373).
-            mTotalHorizontalOffset = totalHorizontalOffset(itemOffset, mNColumns);
-        }
-
-        /** What every item of an {@code nColumns}-column feed is inset by, left and right together. */
-        static int totalHorizontalOffset(int itemOffset, int nColumns) {
-            int columns = Math.max(1, nColumns);
-            return itemOffset / 2 * (columns + 1) / columns;
-        }
-
-        StaggeredGridLayoutManagerItemOffsetDecoration(@NonNull Context context, @DimenRes int itemOffsetId, int nColumns) {
-            this(context.getResources().getDimensionPixelSize(itemOffsetId), nColumns);
-        }
-
-        @OptIn(markerClass = UnstableApi.class)
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
-                                   @NonNull RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-
-            StaggeredGridLayoutManager.LayoutParams layoutParams = (StaggeredGridLayoutManager.LayoutParams) view.getLayoutParams();
-
-            int spanIndex = layoutParams.getSpanIndex();
-
-            // Derive the left inset by subtracting the right one from the constant total, so that
-            // the integer division can shift where a gutter falls by a pixel but can never make one
-            // column wider than another.
-            int right = mHalfOffset * (spanIndex + 1) / mNColumns;
-            int left = mTotalHorizontalOffset - right;
-
-            if (parent.getAdapter() != null) {
-                RecyclerView.ViewHolder viewHolder = parent.getChildViewHolder(view);
-                if (viewHolder instanceof PostMaterial3CardVideoAutoplayViewHolder ||
-                        viewHolder instanceof PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
-                        viewHolder instanceof PostMaterial3CardWithPreviewViewHolder ||
-                        viewHolder instanceof PostMaterial3CardGalleryTypeViewHolder ||
-                        viewHolder instanceof PostMaterial3CardTextTypeViewHolder) {
-                    outRect.set(left - mCard3Margin, mCard3VerticalSpace,
-                            right - mCard3Margin, mCard3VerticalSpace);
-                    return;
-                }
-            }
-
-            outRect.set(left, 0, right, 0);
         }
     }
 }

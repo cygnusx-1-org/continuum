@@ -478,11 +478,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_post_compact_thumbnail_size">"Küçük resim boyutu"</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">"Küçük Resmi Solda Göster"</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">"Sağdaki Küçük Resmi Göster"</string>
-    <string name="settings_number_of_columns_in_post_feed_title">"Gönderi Akışındaki Sütun Sayısı"</string>
-    <string name="settings_number_of_columns_in_post_feed_portrait_title">"Portre"</string>
-    <string name="settings_number_of_columns_in_post_feed_landscape_title">"Manzara"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Portre (Katlanmamış)"</string>
-    <string name="settings_number_of_columns_in_post_feed_unfolded_landscape_title">"Manzara (Katlanmamış)"</string>
     <string name="settings_swap_tap_and_long_title">"Yorumlarda Dokunmayı ve Uzun Dokunmayı Değiştirme"</string>
     <string name="settings_swipe_to_go_back_title">"Geri Dönmek İçin Sağa Kaydır"</string>
     <string name="settings_swipe_to_go_back_summary">"Tüm Sayfalara Uygulanamaz"</string>
@@ -681,10 +676,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_subreddit_default_sort_time_title">"Subreddit Varsayılan Sıralama Zamanı"</string>
     <string name="settings_user_default_sort_type_title">"Kullanıcı Varsayılan Sıralama Türü"</string>
     <string name="settings_user_default_sort_time_title">"Kullanıcı Varsayılan Sıralama Zamanı"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Medyayı Galeri Düzeninde Göstermek İçin Tıkla"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Galeri düzeninde dokunma ve uzun basmayı değiştirin: dokunma medyayı açar, uzun basmak gönderiyi ve yorumlarını açar"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Yalnızca Medya Gönderileri"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Galeri düzeninde yalnızca görsel, GIF, video ve galeri gönderilerini gösterin. Metin, anket ve bağlantı gönderileri gizlendi"</string>
     <string name="settings_hide_post_type">"Gönderi Türünü Gizle"</string>
     <string name="settings_post_type_triangle_indicator">"Gönderi Türü Üçgen Göstergesi"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Gönderi türünü küçük resimde metin rozeti yerine kompakt düzende renkli bir üçgen olarak göster"</string>
@@ -846,7 +837,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="favorites">"Favoriler"</string>
     <string name="all">"Tümü"</string>
     <string name="link_post_layout_auto">"Otomatik"</string>
-    <string name="post_layout_gallery">"Galeri Düzeni"</string>
     <string name="elapsed_time_just_now">"Şimdi"</string>
     <string name="elapsed_time_a_minute_ago">"1 Dakika"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Dakika"</string>
@@ -1710,8 +1700,6 @@ Tekrar denemek için dokun."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Doğrudan"</string>
-    <string name="settings_backup_accounts_client_id_title">"Yedekleme Hesapları ve Müşteri Kimliği"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Yedekleme dosyasına kullanıcı hesaplarını ve İstemci Kimliğini ekleyin (önerilir)"</string>
     <string name="password_cannot_be_empty">"Şifre boş olamaz"</string>
     <string name="title_activity_settings">"Ayarlar"</string>
     <string name="title_activity_login">"Oturum aç"</string>

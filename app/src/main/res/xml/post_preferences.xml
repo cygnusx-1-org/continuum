@@ -34,10 +34,6 @@
         app:summary="@string/settings_post_feed_top_buffer_summary"
         app:title="@string/settings_post_feed_top_buffer_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_number_of_columns_in_post_feed_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.NumberOfColumnsInPostFeedPreferenceFragment" />
-
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="hide_post_type"
@@ -152,18 +148,18 @@
         app:title="@string/settings_post_compact_layout_toolbar_hidden_by_default_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="@string/post_layout_gallery" />
+        app:title="@string/post_layout_media_focused" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        android:defaultValue="true"
-        app:key="click_to_show_media_in_gallery_layout"
-        app:summary="@string/settings_click_to_show_media_in_gallery_layout_summary"
-        app:title="@string/settings_click_to_show_media_in_gallery_layout" />
+        app:defaultValue="false"
+        app:key="media_focused_vertical_gallery_swipe"
+        app:summary="@string/settings_media_focused_vertical_gallery_swipe_summary"
+        app:title="@string/settings_media_focused_vertical_gallery_swipe_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        android:defaultValue="true"
-        app:key="media_only_posts_in_gallery_layout"
-        app:summary="@string/settings_media_only_posts_in_gallery_layout_summary"
-        app:title="@string/settings_media_only_posts_in_gallery_layout_title" />
+        app:defaultValue="false"
+        app:key="media_focused_scrolling_gallery"
+        app:summary="@string/settings_media_focused_scrolling_gallery_summary"
+        app:title="@string/settings_media_focused_scrolling_gallery_title" />
 
 </PreferenceScreen>

@@ -2,6 +2,33 @@
 
 ---
 
+Unreleased
+============
+**New**
+* Two options for galleries opened from the Media Focused layout, in Settings > Post:
+  * Swipe Up and Down Through a Gallery: change image by swiping up and down instead of sideways
+  * Scrolling Gallery: the gallery opens as one scrolling list of every image, and a tap opens an image
+  * With either on, a swipe left closes the gallery and a swipe right opens the post and its comments
+
+**Changed**
+* Card Clean is now called Media Focused
+
+**Fixed**
+* Backup and restore now carry every setting between devices, phone to tablet and back:
+  * Restoring one of this app's backups replaces a settings file key for key. A setting the backup device left at its default now goes back to its default on this device too; before, this device kept whatever it had. Older backups (Infinity's among them), which name no accounts, still only add to what is here
+  * The Security settings (app lock, secure mode, authentication for the account section) are in the backup
+  * Custom fonts are in the backup, so a font set to Custom still shows after a restore on another device
+  * Download folders and the update-check and app-lock timestamps stay as the device has them. A folder chosen on one device is a permission only that device has, so restored onto another it pointed nowhere and downloads failed without saying why
+  * Settings stored as a set of strings are restored; before they were silently skipped
+* Reset All Settings now resets every setting: each account's settings, main page tabs and filters, anonymous's too, and the settings that belong to no account. Before it cleared only the main settings, the main page tabs and the NSFW and spoiler file, and left the sort orders, layouts, navigation drawer, post history, bottom button and the rest as they were. It asks first what it will reset, and restarts the app when done. Custom themes and the security settings are left alone
+
+**Removed**
+* Settings > Post > The Number of Columns in Post Feed. The feed is always one column, on phones, tablets, folded or not, in either orientation. The multi-column grid code behind it is gone with it
+* The Gallery layout, with its number-of-columns, "Click to Show Media in Gallery Layout" and "Media Posts Only" settings, and the video autoplay it was given in beta.9. Media Focused (formerly Card Clean) is the layout for it. A feed or default saved on Gallery shows its posts as Card Top until another layout is chosen
+* Two unused strings left from when the backup could leave out accounts and the Client ID
+
+---
+
 8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
 **New**

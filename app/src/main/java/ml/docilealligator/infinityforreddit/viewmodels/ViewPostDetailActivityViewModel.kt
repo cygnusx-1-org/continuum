@@ -83,8 +83,7 @@ class ViewPostDetailActivityViewModel(
         sortTime: SortType.Time?,
         postFilter: PostFilter?,
         @ReadPostType readPostType: Int,
-        readPostsList: ReadPostsListInterface?,
-        mediaOnly: Boolean
+        readPostsList: ReadPostsListInterface?
     ) {
         viewModelScope.launch {
             if (_loadMorePostsState.value.status == LoadingMorePostsStatus.LOADING
@@ -216,7 +215,7 @@ class ViewPostDetailActivityViewModel(
 
                         val cursorBeforePage = lastListingCursor
                         val addedPosts =
-                            finalizePosts(response, accountName, postFilter, mediaOnly, readPostsList, changePage)
+                            finalizePosts(response, accountName, postFilter, readPostsList, changePage)
                         barrenPages++
                         // Stop on anything gained, on the end of the listing, on a cursor that did
                         // not move (asking again would re-read the same page), and on the cap. The
@@ -257,7 +256,7 @@ class ViewPostDetailActivityViewModel(
                     val response = lookup.load(readPosts.map { it.id })
 
                     if (response.isSuccessful) {
-                        finalizePosts(response, accountName, postFilter, mediaOnly, readPostsList, changePage)
+                        finalizePosts(response, accountName, postFilter, readPostsList, changePage)
                     } else {
                         _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.FAILED)
                     }
@@ -272,7 +271,6 @@ class ViewPostDetailActivityViewModel(
     private fun parsePostsSync(
         response: String?,
         postFilter: PostFilter?,
-        mediaOnly: Boolean,
         readPostsList: ReadPostsListInterface?
     ): ArrayList<Post>? {
         val newPosts = ArrayList<Post>()
@@ -291,10 +289,7 @@ class ViewPostDetailActivityViewModel(
                     }
                     val data = allPostsData.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY)
                     val post = ParsePost.parseBasicData(data)
-                    // mediaOnly is the gallery feed's "Media Posts Only" setting, carried over so
-                    // swiping past the posts the feed handed us does not start turning up the text
-                    // and link posts it was hiding (issue #377).
-                    if (PostFilter.isPostAllowed(post, postFilter) && (!mediaOnly || post.isMediaPost)) {
+                    if (PostFilter.isPostAllowed(post, postFilter)) {
                         newPosts.add(post)
                         newPostsIds.add(post.id)
                     }
@@ -326,12 +321,11 @@ class ViewPostDetailActivityViewModel(
         response: Response<String>,
         accountName: String,
         postFilter: PostFilter?,
-        mediaOnly: Boolean,
         readPostsList: ReadPostsListInterface?,
         changePage: Boolean
     ): Boolean {
         val newPosts = withContext(Dispatchers.Default) {
-            parsePostsSync(response.body(), postFilter, mediaOnly, readPostsList)?.also {
+            parsePostsSync(response.body(), postFilter, readPostsList)?.also {
                 // As the feeds do, so a post swiped to shows the anonymous account's own save.
                 if (accountName == Account.ANONYMOUS_ACCOUNT) {
                     AnonymousPostState.apply(redditDataRoomDatabase.readPostDao(), accountName, it)
