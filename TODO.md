@@ -16,6 +16,7 @@ Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.28` 
   - A feed or default layout saved on Slide or Gallery now shows Card Top (see "Removed experiments"). Nothing migrates the saved value, on purpose.
   - Reset All Settings (PR #68): set a few things in different screens (a layout, a sort order, the navigation drawer, a filter), reset, and check that all of them are back at their defaults after the app restarts. Custom themes and the security settings should be unchanged.
   - The settings home and settings search.
+  - Cleanup in `.28` (nothing was meant to change): Settings > Video no longer has the Ignore Navigation Bar in Video Player switch (it did nothing); the login page still works and its Allow button still rewrites (its script bridge was renamed); the app updater still asks to allow installs; saving media and setting a wallpaper still work (their old-Android branches were removed); dragging and swiping in the feed still behave (the old drawing-order code in the item touch helper went).
 
 ## Removed experiments (so they are not tried again the same way)
 
@@ -74,7 +75,14 @@ The adapter went from 7,911 lines to about 3,700. Every family of rows is in its
 
 ## Audit leftovers
 
-Found but left alone as larger or riskier than a quick win:
+A code audit was done on 2026-11-08 (PR #74, shipped in `.28`): lint-confirmed unused resources and their translations, 127 unused imports, 16 dead classes and events, about 100 unused constants, about 670 lines of commented-out code, Android-version checks that minSdk 24 makes constant, the download and login tracing logs, and the lint errors. Left alone, as larger or riskier than a quick win:
+
+- **The sticky scroll anchor** (`userAnchorPos` and `userAnchorOffset` in `PostFragment`, `Anchor.stickyPosition` and `stickyOffset` in `ScrollAnchor`, their saved-state keys and tests) exists to survive the lossy multi-column rotation round trip. The feed is one column now, so it looks dead. Remove it together with the tests, after a rotation check on a phone.
+- **Duplicated code**, biggest first (sizes are lines in the largest repeated block from a duplicate scan; not refactored, because the shared shapes need design): `CustomThemeWrapper` (134 lines repeated inside itself); `ViewImgurVideoFragment` and `ViewRedditGalleryVideoFragment` (96); `CommentsListingRecyclerViewAdapter` and `CommentsRecyclerViewAdapterNew` (79); `PostDetailRecyclerViewAdapterNew` and `PostRecyclerViewAdapter` (77); the toolbar and insets set-up shared by `MainActivity`, `SearchResultActivity` and the three detail activities (39 and 36); `PostPollActivity` and `PostTextActivity` (36); `DownloadMediaService` and `DownloadRedditVideoService` (21); `LoginActivity` and `LoginChromeCustomTabActivity` (18). The status-bar and navigation-bar height lookups are repeated in many activities.
+- **Names that no longer say what they do**: `LollipopBugFixedWebView` no longer fixes anything (it only sets the anonymous keyboard flag); a rename touches layouts. `AdjustableTouchSlopItemTouchHelper` is a vendored copy of AndroidX and still carries `mOverdrawChild` bookkeeping that nothing reads.
+- **33 `TODO` comments** are in the code; each is a decision about whether the work is still wanted. `ObsoleteSdkInt` is clean; `DiscouragedPrivateApi`, `NotifyDataSetChanged` (47) and `UseKtx` (55) lint notes were not touched.
+- `Log.d` calls that remain are the "ignoring X" exception logs and the refresh-rate diagnostics, on purpose.
+- Before the audit:
 
 - `RestoreSettings` shares its repeated steps through `restoreRows` and `restoreFilters`; the remaining per-table blocks (anonymous subscriptions, themes, accounts) each have their own rules and the restore test is the safety net.
 - The hand-written dp conversions are done; the remaining `getDisplayMetrics().density` reads are the adapters' `mScale` fields and two vendored library files.
