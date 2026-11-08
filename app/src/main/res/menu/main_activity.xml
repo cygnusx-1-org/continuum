@@ -43,9 +43,6 @@
                 <item
                     android:id="@+id/action_post_layout_compact"
                     android:title="@string/post_layout_compact_2" />
-                <item
-                    android:id="@+id/action_post_layout_gallery"
-                    android:title="@string/post_layout_gallery" />
             </group>
         </menu>
     </item>

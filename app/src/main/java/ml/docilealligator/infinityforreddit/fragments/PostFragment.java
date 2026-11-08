@@ -1172,7 +1172,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE}) {
             SharedPreferencesLiveDataKt.booleanLiveData(mPostHistorySharedPreferences,
                             AccountScope.key(mActivity.accountName, hideReadPostsKey), false)
-                    .observe(getViewLifecycleOwner(), hide -> applyMediaOnlyPosts());
+                    .observe(getViewLifecycleOwner(), hide -> applyHideReadPosts());
         }
 
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, true).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
@@ -1325,7 +1325,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         // Before the first observe, so the initial value costs no pipeline rebuild. Both
         // initializeAndBindPostViewModel paths land here. This also re-reads the hide-read setting,
         // which a view model handed back by ViewModelProvider may predate.
-        applyMediaOnlyPosts();
+        applyHideReadPosts();
 
         // Also before the first observe: the source has to know whether its first load comes from
         // disk before that load is asked for. The key is set even with nothing to restore, because
@@ -2058,14 +2058,12 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             provideItemWidth(mAdapter);
             refreshAdapter();
         }
-
-        applyMediaOnlyPosts();
     }
 
-    @Override
-    protected void applyMediaOnlyPosts() {
+    /** Re-reads the Hide Read Posts Automatically settings into the view model backing this feed, if it exists yet. */
+    private void applyHideReadPosts() {
         if (mPostViewModel != null) {
-            mPostViewModel.applyFeedFilters(shouldShowMediaOnlyPosts());
+            mPostViewModel.updateHideReadPosts();
         }
     }
 
@@ -2252,8 +2250,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                     new ArrayList<>(mAdapter.snapshot()), postType, subredditName,
                     concatenatedSubredditNames, username, where, multiRedditPath, query, trendingSource,
-                    ReadPostType.INVALID, postFilter, sortType, readPostsList,
-                    shouldShowMediaOnlyPosts()));
+                    ReadPostType.INVALID, postFilter, sortType, readPostsList));
         }
     }
 

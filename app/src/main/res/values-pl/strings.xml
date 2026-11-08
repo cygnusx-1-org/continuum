@@ -677,10 +677,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_subreddit_default_sort_time_title">"Domyślny typ sortowania czasu subredditów"</string>
     <string name="settings_user_default_sort_type_title">"Domyślny typ sortowania użytkowników"</string>
     <string name="settings_user_default_sort_time_title">"Domyślny typ sortowania czasu użytkowników"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Kliknij by pokazać media w układzie galerii"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Zamień dotknięcie i długie naciśnięcie w układzie galerii: dotknięcie otwiera multimedia, długie naciśnięcie otwiera post i komentarze"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Tylko posty multimedialne"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"W układzie galerii wyświetlaj tylko obrazy, GIF, wideo i posty z galerii. Posty tekstowe, ankiety i linki są ukryte"</string>
     <string name="settings_hide_post_type">"Ukryj typ posta"</string>
     <string name="settings_post_type_triangle_indicator">"Trójkątny wskaźnik typu posta"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Pokaż typ postu jako kolorowy trójkąt na miniaturze w układzie kompaktowym zamiast plakietki tekstowej"</string>
@@ -842,7 +838,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="favorites">"Ulubione"</string>
     <string name="all">"Wszystkie"</string>
     <string name="link_post_layout_auto">"Automatycznie"</string>
-    <string name="post_layout_gallery">"Layout galerii"</string>
     <string name="elapsed_time_just_now">"Właśnie teraz"</string>
     <string name="elapsed_time_a_minute_ago">"Minutę temu"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minut temu"</string>

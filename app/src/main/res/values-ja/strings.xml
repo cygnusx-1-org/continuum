@@ -680,10 +680,6 @@
     <string name="settings_subreddit_default_sort_time_title">"Subreddit のデフォルトのソート時間"</string>
     <string name="settings_user_default_sort_type_title">"ユーザーデフォルトの並べ替えタイプ"</string>
     <string name="settings_user_default_sort_time_title">"ユーザーデフォルトのソート時間"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"クリックしてギャラリービューでメディアを見る"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"ギャラリー レイアウトでタップと長押しを入れ替えます: タップするとメディアが開き、長押しすると投稿とそのコメントが開きます"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"メディア投稿のみ"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"ギャラリー レイアウトでは、画像、GIF、ビデオ、ギャラリーの投稿のみを表示します。テキスト、投票、リンクの投稿は非表示になります"</string>
     <string name="settings_hide_post_type">"投稿の種類を非表示にする"</string>
     <string name="settings_post_type_triangle_indicator">"ポスト型三角インジケーター"</string>
     <string name="settings_post_type_triangle_indicator_summary">"投稿タイプをテキストバッジではなくコンパクトなレイアウトのサムネイル上に色付きの三角形として表示します"</string>
@@ -845,7 +841,6 @@
     <string name="favorites">"お気に入り"</string>
     <string name="all">"全て"</string>
     <string name="link_post_layout_auto">"自動"</string>
-    <string name="post_layout_gallery">"ギャラリーレイアウト"</string>
     <string name="elapsed_time_just_now">"たった今"</string>
     <string name="elapsed_time_a_minute_ago">"1分"</string>
     <string name="elapsed_time_minutes_ago">"%1$d分"</string>

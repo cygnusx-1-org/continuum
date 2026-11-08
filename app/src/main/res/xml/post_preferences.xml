@@ -151,19 +151,4 @@
         app:key="post_compact_layout_toolbar_hidden_by_default"
         app:title="@string/settings_post_compact_layout_toolbar_hidden_by_default_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="@string/post_layout_gallery" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        android:defaultValue="true"
-        app:key="click_to_show_media_in_gallery_layout"
-        app:summary="@string/settings_click_to_show_media_in_gallery_layout_summary"
-        app:title="@string/settings_click_to_show_media_in_gallery_layout" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        android:defaultValue="true"
-        app:key="media_only_posts_in_gallery_layout"
-        app:summary="@string/settings_media_only_posts_in_gallery_layout_summary"
-        app:title="@string/settings_media_only_posts_in_gallery_layout_title" />
-
 </PreferenceScreen>

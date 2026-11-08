@@ -417,9 +417,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     private void bindPostViewModel() {
-        // Before the first observe, so the initial value costs no pipeline rebuild.
-        applyMediaOnlyPosts();
-
         // Before the first observe, which is what starts the first load.
         mHistoryPostViewModel.setRefreshPrewarmer(compactThumbnailPreloader);
 
@@ -629,15 +626,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             provideItemWidth(mAdapter);
             refreshAdapter();
         }
-
-        applyMediaOnlyPosts();
-    }
-
-    @Override
-    protected void applyMediaOnlyPosts() {
-        if (mHistoryPostViewModel != null) {
-            mHistoryPostViewModel.setMediaOnly(shouldShowMediaOnlyPosts());
-        }
     }
 
     @Override
@@ -792,7 +780,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                 new ArrayList<>(mAdapter.snapshot()), PostType.READ_POSTS,
                 null, null, null, null,
-                null, null, null, readPostType, postFilter, null, null,
-                shouldShowMediaOnlyPosts()));
+                null, null, null, readPostType, postFilter, null, null));
     }
 }

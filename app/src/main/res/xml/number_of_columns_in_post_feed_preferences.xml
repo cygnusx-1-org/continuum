@@ -37,23 +37,4 @@
         app:title="@string/settings_number_of_columns_in_post_feed_unfolded_landscape_title"
         app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        android:title="@string/post_layout_gallery" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="2"
-        app:entries="@array/settings_number_of_columns_in_post_feed"
-        app:entryValues="@array/settings_number_of_columns_in_post_feed"
-        app:key="number_of_columns_in_post_feed_portrait_gallery_layout"
-        app:title="@string/settings_number_of_columns_in_post_feed_portrait_title"
-        app:useSimpleSummaryProvider="true" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="2"
-        app:entries="@array/settings_number_of_columns_in_post_feed"
-        app:entryValues="@array/settings_number_of_columns_in_post_feed"
-        app:key="number_of_columns_in_post_feed_landscape_gallery_layout"
-        app:title="@string/settings_number_of_columns_in_post_feed_landscape_title"
-        app:useSimpleSummaryProvider="true" />
-
 </PreferenceScreen>

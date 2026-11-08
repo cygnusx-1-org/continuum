@@ -344,7 +344,6 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true).observe(getViewLifecycleOwner(), mediaOnly -> applyMediaOnlyPosts());
 
         SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE).observe(getViewLifecycleOwner(), s -> {
             if (getPostAdapter() != null && getPostAdapter().setCompactThumbnailSizeDp(Integer.parseInt(s))) {
@@ -574,36 +573,26 @@ public abstract class PostFragmentBase extends Fragment {
     protected final int getNColumns(Resources resources) {
         final boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
         if (resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT, "2");
-                default:
-                    if (getResources().getBoolean(R.bool.isTablet)) {
-                        if (foldEnabled) {
-                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED, "2");
-                        } else {
-                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "2");
-                        }
-                    }
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "1");
+            if (getResources().getBoolean(R.bool.isTablet)) {
+                if (foldEnabled) {
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED, "2");
+                } else {
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "2");
+                }
             }
+            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "1");
         } else {
-            switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT, "2");
-                default:
-                    if (getResources().getBoolean(R.bool.isTablet) && foldEnabled) {
-                        return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED, "2");
-                    }
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE, "2");
+            if (getResources().getBoolean(R.bool.isTablet) && foldEnabled) {
+                return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED, "2");
             }
+            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE, "2");
         }
     }
 
     /**
-     * Swipe actions only work in a one-column feed, and the layout decides the columns, so a layout
-     * change can turn them on or off: from the two-column Gallery layout to a card layout they were
-     * never attached, and into it they stayed attached to a feed they cannot work in.
+     * Swipe actions only work in a one-column feed, so a change in the number of columns can turn
+     * them on or off: they must not stay attached to a feed they cannot work in, nor be left off
+     * once it is back to one.
      */
     protected final void syncSwipeActions(RecyclerView recyclerView, int nColumns) {
         if (touchHelper == null) {
@@ -626,23 +615,6 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     public abstract void changePostLayout(int postLayout, boolean temporary);
-
-    /**
-     * Whether the feed should be showing media posts only right now: the "Media Posts Only"
-     * setting, which belongs to the gallery layout and applies to no other one (issue #377).
-     */
-    protected final boolean shouldShowMediaOnlyPosts() {
-        return postLayout == SharedPreferencesUtils.POST_LAYOUT_GALLERY
-                && mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true);
-    }
-
-    /**
-     * Push {@link #shouldShowMediaOnlyPosts()} onto the view model backing this feed. Called when
-     * the feed is bound, whenever the post layout changes, and whenever the setting changes -- so
-     * switching away from the gallery layout brings the hidden posts straight back. The view model
-     * ignores a value it already holds, and this may run before it exists at all.
-     */
-    protected abstract void applyMediaOnlyPosts();
 
     @Nullable
     public final Boolean getMasterMutingOption() {
