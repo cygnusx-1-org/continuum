@@ -2,7 +2,7 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.28 / 2026-11-8
 ============
 **New**
 * Scrolling Gallery: GIFs and videos play by themselves as they scroll into view (up to three at a time, muted), under the Video Autoplay and Autoplay NSFW Videos settings. A GIF Reddit published no mp4 for, or one cached before this version, stays a still until opened
@@ -10,6 +10,10 @@ Unreleased
 
 **Changed**
 * The Swipe Up and Down Through a Gallery and Scrolling Gallery options, which 8.3.3.9.1.27 tied to the Media Focused layout, now apply to every gallery: from any layout, from a post's details and from a gallery in a comment. They are under Settings > Post > Gallery Viewer, with the values already chosen kept
+* Housekeeping, nothing to see: unused resources, classes, settings keys and Android-version checks removed
+
+**Removed**
+* The Ignore Navigation Bar in Video Player switch in Settings > Video: it had no effect
 
 **Fixed**
 * With Swipe Up and Down or Scrolling Gallery on, the swipes were the wrong way round. A swipe left now goes back to the posts and a swipe right opens the post and its comments
