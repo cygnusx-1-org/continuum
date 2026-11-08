@@ -135,3 +135,6 @@ notes/*
 android-button-masher/*
 
 .kotlin
+
+# Working notes for the owner and the assistant; kept locally, not published
+/TODO.md
