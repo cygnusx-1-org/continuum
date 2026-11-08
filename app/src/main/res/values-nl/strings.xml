@@ -680,10 +680,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_subreddit_default_sort_time_title">"Subreddit standaard sorteertijd"</string>
     <string name="settings_user_default_sort_type_title">"Gebruiker standaard sorteertype"</string>
     <string name="settings_user_default_sort_time_title">"Standaard sorteertijd gebruiken"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Klik om Media in Gallerij Lay-Out te Tonen"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Wisselen met tikken en lang indrukken in galerijindeling: tikken opent de media, lang indrukken opent het bericht en de bijbehorende opmerkingen"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Alleen mediaberichten"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Toon in de galerijindeling alleen afbeeldingen, GIF, video- en galerijberichten. Tekst-, poll- en linkberichten zijn verborgen"</string>
     <string name="settings_hide_post_type">"Verberg Post Type"</string>
     <string name="settings_post_type_triangle_indicator">"Posttype driehoekige indicator"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Toon berichttype als een gekleurde driehoek op de miniatuur in compacte lay-out in plaats van een tekstbadge"</string>
@@ -845,7 +841,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="favorites">"Favorieten"</string>
     <string name="all">"Alles"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Gallerij Lay-Out"</string>
     <string name="elapsed_time_just_now">"Zojuist"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuut"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minuten"</string>

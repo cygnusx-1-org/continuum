@@ -100,8 +100,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // under that key; resumeFromCache additionally asks the first load to come from disk. Both are
     // null/false when the setting is off, which is what makes the whole feature cost nothing.
     //
-    // volatile for the same reason mediaOnly below is: the feed observes the setting now, so these
-    // are written from the main thread the moment the user toggles it, which can be in the middle
+    // volatile because the feed observes the setting, so these are written from the main thread the moment the user toggles it, which can be in the middle
     // of a load running on the paging executor. Without it that load reads a stale key, does not
     // accumulate its page, and the feed silently keeps not caching itself -- intermittently, which
     // is the worst way to have the bug this change exists to fix.
@@ -142,20 +141,6 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private int mergedPages;
     @Nullable
     private String subredditOnlyName;
-
-    /**
-     * Whether the feed reading this source is showing media posts only, so that a page carrying no
-     * media is a page it will display nothing from (issue #377).
-     *
-     * <p>Only pagination consults this. The posts themselves are never dropped here -- the feed
-     * filters them on the way out of the view model, which is what lets the setting be turned off
-     * without refetching -- so all this changes is when a load is allowed to stop.
-     *
-     * <p>Written from the main thread when the setting or the post layout changes, read on the
-     * paging executor while a load runs, hence volatile. A change does not invalidate the source:
-     * pages already loaded stay, and only the next load sees the new value.
-     */
-    private volatile boolean mediaOnly;
 
     /**
      * Gets a refreshed page's first screen ready to draw before the feed shows it; see
@@ -327,10 +312,6 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         return null;
     }
 
-    public void setMediaOnly(boolean mediaOnly) {
-        this.mediaOnly = mediaOnly;
-    }
-
     /**
      * Load a page the feed can actually show something from.
      *
@@ -341,21 +322,18 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
      * no posts and no "no posts found" -- the latter is gated on end-of-pagination, which never
      * arrives either.
      *
-     * <p>Three things empty a page out from under the feed: a post filter that excludes everything
-     * on it, "Media Posts Only" on a page of text and link posts, and Reddit repeating a cursor so
-     * that {@link #transformData} discards the lot as duplicates. All three land here as a page with
-     * nothing to present and a next key still in hand, and the answer to all three is the same one
-     * {@link #loadUserPostsWithKey} already applies on the user listing: keep following the next key
-     * until a page yields something, and hand back everything gathered on the way as one page.
-     *
-     * <p>Nothing is discarded while hopping. The non-media and filtered-out posts are still returned
-     * and still cached, so turning the setting back off shows them without a refetch.
+     * <p>Two things empty a page out from under the feed: a post filter that excludes everything
+     * on it, and Reddit repeating a cursor so that {@link #transformData} discards the lot as
+     * duplicates. Both land here as a page with nothing to present and a next key still in hand, and
+     * the answer to both is the same one {@link #loadUserPostsWithKey} already applies on the user
+     * listing: keep following the next key until a page yields something, and hand back everything
+     * gathered on the way as one page.
      *
      * <p>If {@link #MAX_BARREN_PAGE_HOPS} pages go by with nothing to show, the page comes back with
      * a null next key. That is a deliberate lie about the listing being over, and the honest option
      * -- keeping the key -- is worse: it restores exactly the blank screen this exists to remove,
-     * whereas ending pagination lets the feed say "no posts found", which is what a listing with no
-     * media in its first several hundred posts effectively means.
+     * whereas ending pagination lets the feed say "no posts found", which is what a listing with
+     * nothing to show in its first several hundred posts effectively means.
      */
     @NonNull
     @Override
@@ -505,7 +483,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             @SuppressWarnings("unchecked")
             LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
             String nextKey = page.getNextKey();
-            if (nextKey == null || presentsSomething(page.getData())) {
+            if (nextKey == null || !page.getData().isEmpty()) {
                 return Futures.immediateFuture(result);
             }
 
@@ -521,26 +499,6 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             return Futures.transform(loadPastBarrenPages(nextParams, hopsSoFar + 1),
                     tail -> concatenatePages(page, tail), executor);
         }, executor);
-    }
-
-    /**
-     * Whether the feed will render at least one of these posts. Read posts are not considered: a
-     * feed hiding those can still empty a page out, but that filter lives in the view model and the
-     * source is not told about it.
-     */
-    private boolean presentsSomething(List<Post> pagePosts) {
-        if (pagePosts.isEmpty()) {
-            return false;
-        }
-        if (!mediaOnly) {
-            return true;
-        }
-        for (Post post : pagePosts) {
-            if (post.isMediaPost()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

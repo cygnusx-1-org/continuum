@@ -684,10 +684,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_subreddit_default_sort_time_title">"Ordenación de tiempo por defecto de subreddit"</string>
     <string name="settings_user_default_sort_type_title">"Ordenación por defecto del usuario"</string>
     <string name="settings_user_default_sort_time_title">"Orden de tiempo por defecto del usuario"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Pulsa para mostrar los medios en el diseño de galería"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Intercambie toque y mantenga presionado en el diseño de la galería: toque abre los medios, mantenga presionado abre la publicación y sus comentarios"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Solo publicaciones en medios"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"En el diseño de la galería, muestra solo imágenes, GIF, videos y publicaciones de la galería. Las publicaciones de texto, encuestas y enlaces están ocultas"</string>
     <string name="settings_hide_post_type">"Ocultar el tipo de publicación"</string>
     <string name="settings_post_type_triangle_indicator">"Indicador triangular del tipo de publicación"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Mostrar el tipo de publicación como un triángulo de color en la miniatura en un diseño compacto en lugar de una insignia de texto"</string>
@@ -849,7 +845,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="favorites">"Favoritos"</string>
     <string name="all">"Todos"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Diseño de galería"</string>
     <string name="elapsed_time_just_now">"Ahora mismo"</string>
     <string name="elapsed_time_a_minute_ago">"Hace 1 Minuto"</string>
     <string name="elapsed_time_minutes_ago">"Hace %1$d minutos"</string>

@@ -685,10 +685,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_subreddit_default_sort_time_title">"Tempo di ordinamento predefinito Subreddit"</string>
     <string name="settings_user_default_sort_type_title">"Tipo di ordinamento predefinito Utente"</string>
     <string name="settings_user_default_sort_time_title">"Tempo di ordinamento predefinito Utente"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Clicca per mostrare i media nel layout a galleria"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Scambia tocco e pressione prolungata nel layout della galleria: tocco apre il contenuto multimediale, pressione lunga apre il post e i relativi commenti"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Solo post multimediali"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Nel layout della galleria, mostra solo immagini, GIF, video e post della galleria. I post di testo, sondaggi e collegamenti sono nascosti"</string>
     <string name="settings_hide_post_type">"Nascondi tipo di post"</string>
     <string name="settings_post_type_triangle_indicator">"Indicatore triangolare del tipo di post"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Mostra il tipo di post come un triangolo colorato sulla miniatura in layout compatto invece di un badge di testo"</string>
@@ -850,7 +846,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="favorites">"Preferiti"</string>
     <string name="all">"Tutti"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Layout a galleria"</string>
     <string name="elapsed_time_just_now">"Giusto ora"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuto"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minuti"</string>

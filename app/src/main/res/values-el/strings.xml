@@ -677,10 +677,6 @@
     <string name="settings_subreddit_default_sort_time_title">"Προεπιλεγμένος Χρόνος Ταξινόμησης Subreddit"</string>
     <string name="settings_user_default_sort_type_title">"Προεπιλεγμένος Τύπος Ταξινόμησης Χρήστη"</string>
     <string name="settings_user_default_sort_time_title">"Προεπιλεγμένος Χρόνος Ταξινόμησης Χρήστη"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Κάνε κλικ για Εμφάνιση Πολυμέσων στη Διάταξη Συλλογής"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Εναλλάξου το πάτημα και το παρατεταμένο πάτημα στη διάταξη της γκαλερί: το πάτημα ανοίγει το μέσο, το παρατεταμένο πάτημα ανοίγει την ανάρτηση και τα σχόλιά της"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Μόνο αναρτήσεις μέσων"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Στη διάταξη γκαλερί, εμφάνισε μόνο αναρτήσεις εικόνων, GIF, βίντεο και γκαλερί. Οι αναρτήσεις κειμένου, δημοσκόπησης και συνδέσμων είναι κρυφές"</string>
     <string name="settings_hide_post_type">"Απόκρυψη Τύπου Ανάρτησης"</string>
     <string name="settings_post_type_triangle_indicator">"Τριγωνική ένδειξη τύπου ανάρτησης"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Εμφάνιση τύπου ανάρτησης ως χρωματιστό τρίγωνο στη μικρογραφία σε συμπαγή διάταξη αντί για σήμα κειμένου"</string>
@@ -842,7 +838,6 @@
     <string name="favorites">"Αγαπημένα"</string>
     <string name="all">"Ολα"</string>
     <string name="link_post_layout_auto">"Αυτόματο"</string>
-    <string name="post_layout_gallery">"Διάταξη Συλλογής"</string>
     <string name="elapsed_time_just_now">"Μόλις Τώρα"</string>
     <string name="elapsed_time_a_minute_ago">"1 Λεπτό"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Λεπτά"</string>

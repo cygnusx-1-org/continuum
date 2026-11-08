@@ -72,7 +72,6 @@
         <item>@string/post_layout_card_3</item>
         <item>@string/post_layout_card_clean</item>
         <item>@string/post_layout_compact_2</item>
-        <item>@string/post_layout_gallery</item>
     </string-array>
 
     <string-array name="settings_default_post_layout_values">
@@ -80,7 +79,6 @@
         <item>4</item>
         <item>6</item>
         <item>5</item>
-        <item>2</item>
     </string-array>
 
     <string-array name="settings_default_link_post_layout">
@@ -88,7 +86,6 @@
         <item>@string/post_layout_card</item>
         <item>@string/post_layout_card_3</item>
         <item>@string/post_layout_card_clean</item>
-        <item>@string/post_layout_gallery</item>
         <item>@string/post_layout_compact_2</item>
     </string-array>
 
@@ -97,7 +94,6 @@
         <item>0</item>
         <item>4</item>
         <item>6</item>
-        <item>2</item>
         <item>5</item>
     </string-array>
 

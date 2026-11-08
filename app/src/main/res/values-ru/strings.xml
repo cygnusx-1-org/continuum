@@ -683,10 +683,6 @@
     <string name="settings_subreddit_default_sort_time_title">"Время сортировки в сабреддите"</string>
     <string name="settings_user_default_sort_type_title">"Тип сортировки пользователя"</string>
     <string name="settings_user_default_sort_time_title">"Время сортировки пользователя"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Открывать мультимедиа нажатием в режиме галереи"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Поменяй местами касание и долгое нажатие в макете галереи: нажатие открывает медиафайл, длительное нажатие открывает публикацию и комментарии к ней."</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Только сообщения в СМИ"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"В макете галереи показывать только изображения, GIF, видео и публикации галереи. Текст, опросы и ссылки скрыты."</string>
     <string name="settings_hide_post_type">"Скрыть тип поста"</string>
     <string name="settings_post_type_triangle_indicator">"Треугольный индикатор типа публикации"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Показывать тип сообщения в виде цветного треугольника на миниатюре в компактном макете вместо текстового значка."</string>
@@ -848,7 +844,6 @@
     <string name="favorites">"Избранное"</string>
     <string name="all">"Все"</string>
     <string name="link_post_layout_auto">"Автовыбор"</string>
-    <string name="post_layout_gallery">"Галерея"</string>
     <string name="elapsed_time_just_now">"Только что"</string>
     <string name="elapsed_time_a_minute_ago">"1 минута"</string>
     <string name="elapsed_time_minutes_ago">"%1$d мин."</string>

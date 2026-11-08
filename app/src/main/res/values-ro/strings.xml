@@ -684,10 +684,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_subreddit_default_sort_time_title">"Timp de Sortare Implicit pentru Subreddit"</string>
     <string name="settings_user_default_sort_type_title">"Tip de Sortare Implicit pentru Utilizator"</string>
     <string name="settings_user_default_sort_time_title">"Timp de Sortare Implicit pentru Utilizator"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Apăsă pentru a Afișa Fișierele Media din Galerie"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Schimbă atinge și apasă lung în aspectul galeriei: atinge deschide media, apasă lung deschide postarea și comentariile acesteia"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Numai postări media"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"În aspectul galeriei, afișează numai imagini, GIF, videoclipuri și postări din galerie. Postările de text, sondaj și link sunt ascunse"</string>
     <string name="settings_hide_post_type">"Ascunde Tipul de Postare"</string>
     <string name="settings_post_type_triangle_indicator">"Indicator triunghiular pentru tipul postării"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Afișează tipul postării ca triunghi colorat pe miniatură într-un aspect compact în loc de o insignă text"</string>
@@ -849,7 +845,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="favorites">"Favorite"</string>
     <string name="all">"Toate"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_gallery">"Aspectul Galeriei"</string>
     <string name="elapsed_time_just_now">"Chiar acum"</string>
     <string name="elapsed_time_a_minute_ago">"1 minut"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minute"</string>

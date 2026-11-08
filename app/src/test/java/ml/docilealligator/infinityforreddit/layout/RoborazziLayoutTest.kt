@@ -89,7 +89,7 @@ import org.robolectric.annotation.GraphicsMode
 class RoborazziLayoutTest(private val case: Case) {
 
     /** Post layout family, which is what decides the column count. See [columnsFor]. */
-    enum class Family { CARD, CARD_3, COMPACT_2, GALLERY, NONE }
+    enum class Family { CARD, CARD_3, COMPACT_2, NONE }
 
     enum class Orientation { PORTRAIT, LANDSCAPE }
 
@@ -192,9 +192,6 @@ class RoborazziLayoutTest(private val case: Case) {
             // Compact, both thumbnail sides.
             LayoutSpec("compact2", R.layout.item_post_compact_2, Family.COMPACT_2),
             LayoutSpec("compact2Right", R.layout.item_post_compact_2_right_thumbnail, Family.COMPACT_2),
-            // Gallery.
-            LayoutSpec("gallery", R.layout.item_post_gallery, Family.GALLERY),
-            LayoutSpec("galleryGalleryType", R.layout.item_post_gallery_gallery_type, Family.GALLERY),
             // Listings and comment rows. commentCollapsed must stay pixel-identical to comment for
             // every element they share — that pairing is the reason it is covered.
             LayoutSpec("subreddit", R.layout.item_subreddit_listing, Family.NONE),
@@ -505,7 +502,6 @@ class RoborazziLayoutTest(private val case: Case) {
             when {
                 family == Family.NONE -> 1
                 orientation == Orientation.LANDSCAPE -> 2
-                family == Family.GALLERY -> 2
                 else -> if (isTablet) 2 else 1 // CARD, CARD_3, COMPACT_2
             }
 

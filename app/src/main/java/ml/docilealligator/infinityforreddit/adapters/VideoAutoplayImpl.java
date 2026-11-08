@@ -18,6 +18,7 @@ import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.Tracks;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TimeBar;
@@ -32,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
+import ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout;
 import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -51,11 +53,15 @@ import retrofit2.Call;
 @UnstableApi
 public abstract class VideoAutoplayImpl implements ToroPlayer {
     View itemView;
+    MaxHeightSquareFrameLayout previewFrameLayout;
+    AspectRatioFrameLayout aspectRatioFrameLayout;
     GifImageView previewImageView;
     ImageView errorLoadingRedgifsImageView;
     PlayerView videoPlayer;
-    @Nullable
-    final Controls controls;
+    ImageView videoQualityButton;
+    ImageView muteButton;
+    ImageView fullscreenButton;
+    ImageView playPauseButton;
     @Nullable
     Container container;
     @Nullable
@@ -95,62 +101,46 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
     @Nullable
     public FetchShortClipVideo.Cancellable fetchShortClipVideoCancellable;
     boolean isManuallyPaused;
+    private Drawable playDrawable;
+    private Drawable pauseDrawable;
     boolean setDefaultResolutionAlready;
 
     private final PostVideoHost host;
     private final BaseActivity mActivity;
 
-    /**
-     * The controls a feed card lays over its player. A tile that plays muted and bare, as the
-     * gallery layout's does, has none, and passes null in their place.
-     */
-    static final class Controls {
-        final ImageView videoQualityButton;
-        final ImageView muteButton;
-        final ImageView fullscreenButton;
-        final ImageView playPauseButton;
-        final DefaultTimeBar progressBar;
-        final Drawable playDrawable;
-        final Drawable pauseDrawable;
-
-        Controls(ImageView videoQualityButton, ImageView muteButton, ImageView fullscreenButton,
-                 ImageView playPauseButton, DefaultTimeBar progressBar,
-                 Drawable playDrawable, Drawable pauseDrawable) {
-            this.videoQualityButton = videoQualityButton;
-            this.muteButton = muteButton;
-            this.fullscreenButton = fullscreenButton;
-            this.playPauseButton = playPauseButton;
-            this.progressBar = progressBar;
-            this.playDrawable = playDrawable;
-            this.pauseDrawable = pauseDrawable;
-        }
-    }
-
-    public VideoAutoplayImpl(View itemView, GifImageView previewImageView,
-                             ImageView errorLoadingRedgifsImageView, PlayerView videoPlayer,
-                             @Nullable Controls controls, PostVideoHost host) {
+    public VideoAutoplayImpl(View itemView, MaxHeightSquareFrameLayout previewFrameLayout,
+                             AspectRatioFrameLayout aspectRatioFrameLayout,
+                             GifImageView previewImageView, ImageView errorLoadingRedgifsImageView,
+                             PlayerView videoPlayer, ImageView videoQualityButton, ImageView muteButton, ImageView fullscreenButton,
+                             ImageView playPauseButton, DefaultTimeBar progressBar,
+                             Drawable playDrawable, Drawable pauseDrawable,
+                             PostVideoHost host) {
         this.host = host;
         this.mActivity = host.activity();
         this.itemView = itemView;
+        this.previewFrameLayout = previewFrameLayout;
+        this.aspectRatioFrameLayout = aspectRatioFrameLayout;
         this.previewImageView = previewImageView;
         this.errorLoadingRedgifsImageView = errorLoadingRedgifsImageView;
         this.videoPlayer = videoPlayer;
-        this.controls = controls;
-        if (controls != null) {
-            wireControls(controls);
-        }
-    }
+        this.videoQualityButton = videoQualityButton;
+        this.muteButton = muteButton;
+        this.fullscreenButton = fullscreenButton;
+        this.playPauseButton = playPauseButton;
+        this.playDrawable = playDrawable;
+        this.pauseDrawable = pauseDrawable;
 
-    private void wireControls(Controls controls) {
-        controls.muteButton.setOnClickListener(view -> {
+        aspectRatioFrameLayout.setOnClickListener(null);
+
+        muteButton.setOnClickListener(view -> {
             if (helper != null) {
                 if (helper.getVolume() != 0) {
-                    controls.muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_mute_24dp));
+                    muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_mute_24dp));
                     helper.setVolume(0f);
                     volume = 0f;
                     host.fragment().videoAutoplayChangeMutingOption(true);
                 } else {
-                    controls.muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
+                    muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
                     helper.setVolume(1f);
                     volume = 1f;
                     host.fragment().videoAutoplayChangeMutingOption(false);
@@ -158,7 +148,7 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
             }
         });
 
-        controls.fullscreenButton.setOnClickListener(view -> {
+        fullscreenButton.setOnClickListener(view -> {
             Post post = getPost();
             if (post != null) {
                 markPostRead(post, true);
@@ -171,7 +161,7 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
             }
         });
 
-        controls.playPauseButton.setOnClickListener(view -> {
+        playPauseButton.setOnClickListener(view -> {
             if (isPlaying()) {
                 pause();
                 isManuallyPaused = true;
@@ -182,7 +172,7 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
             }
         });
 
-        controls.progressBar.addListener(new TimeBar.OnScrubListener() {
+        progressBar.addListener(new TimeBar.OnScrubListener() {
             @Override
             public void onScrubStart(TimeBar timeBar, long position) {
 
@@ -201,11 +191,11 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
             }
         });
 
-        previewImageView.setOnClickListener(view -> controls.fullscreenButton.performClick());
+        previewImageView.setOnClickListener(view -> fullscreenButton.performClick());
 
         videoPlayer.setOnClickListener(view -> {
             if (host.easierToWatchInFullScreen() && videoPlayer.isControllerFullyVisible()) {
-                controls.fullscreenButton.performClick();
+                fullscreenButton.performClick();
             }
         });
     }
@@ -244,64 +234,15 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
         volume = mute ? 0f : 1f;
         if (helper != null && helper.getPlayer() != null) {
             helper.setVolume(volume);
-            if (controls != null && controls.muteButton.getVisibility() == View.VISIBLE) {
-                showMuteState(controls.muteButton);
+            if (muteButton.getVisibility() == View.VISIBLE) {
+                muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity,
+                        volume != 0f ? R.drawable.ic_unmute_24dp : R.drawable.ic_mute_24dp));
             }
         }
-    }
-
-    private void showQualityChoice(ImageView button) {
-        button.setVisibility(View.VISIBLE);
-        button.setOnClickListener(view -> {
-            if (helper == null) {
-                return;
-            }
-            TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(mActivity, mActivity.getString(R.string.select_video_quality), helper.getPlayer(), C.TRACK_TYPE_VIDEO);
-            builder.setShowDisableOption(true);
-            builder.setAllowAdaptiveSelections(false);
-            Dialog dialog = builder.setTheme(R.style.MaterialAlertDialogTheme).build();
-            dialog.show();
-            if (dialog instanceof AlertDialog) {
-                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(host.customThemeWrapper().getPrimaryTextColor());
-                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(host.customThemeWrapper().getPrimaryTextColor());
-            }
-        });
     }
 
     void resetVolume() {
         volume = 0f;
-    }
-
-    /** Shows {@code button} with the icon for the volume the clip has now. */
-    private void showMuteState(ImageView button) {
-        button.setVisibility(View.VISIBLE);
-        button.setImageDrawable(ContextCompat.getDrawable(mActivity,
-                volume != 0f ? R.drawable.ic_unmute_24dp : R.drawable.ic_mute_24dp));
-    }
-
-    /**
-     * Lets go of the post this player was bound to, for the next one to bind: its clip, its
-     * pending lookups, and whatever its controls were showing.
-     */
-    void reset() {
-        mediaUri = null;
-        if (fetchRedgifsOrStreamableVideoCall != null && !fetchRedgifsOrStreamableVideoCall.isCanceled()) {
-            fetchRedgifsOrStreamableVideoCall.cancel();
-            fetchRedgifsOrStreamableVideoCall = null;
-        }
-        if (fetchShortClipVideoCancellable != null) {
-            fetchShortClipVideoCancellable.cancel();
-            fetchShortClipVideoCancellable = null;
-        }
-        errorLoadingRedgifsImageView.setVisibility(View.GONE);
-        if (controls != null) {
-            controls.videoQualityButton.setVisibility(View.GONE);
-            controls.muteButton.setVisibility(View.GONE);
-        }
-        if (!isManuallyPaused) {
-            resetVolume();
-        }
-        setDefaultResolutionAlready = false;
     }
 
     private void savePlaybackInfo(int order, @Nullable PlaybackInfo playbackInfo) {
@@ -508,10 +449,7 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
                             Player.EVENT_PLAY_WHEN_READY_CHANGED,
                             Player.EVENT_PLAYBACK_STATE_CHANGED,
                             Player.EVENT_PLAYBACK_SUPPRESSION_REASON_CHANGED)) {
-                        if (controls != null) {
-                            controls.playPauseButton.setImageDrawable(
-                                    Util.shouldShowPlayButton(player) ? controls.playDrawable : controls.pauseDrawable);
-                        }
+                        playPauseButton.setImageDrawable(Util.shouldShowPlayButton(player) ? playDrawable : pauseDrawable);
                     }
                     if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
                             && player.getPlaybackState() == Player.STATE_ENDED) {
@@ -527,9 +465,21 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
                     ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                     if (!trackGroups.isEmpty()) {
                         if (getPost().isNormalVideo()) {
-                            if (controls != null) {
-                                showQualityChoice(controls.videoQualityButton);
-                            }
+                            videoQualityButton.setVisibility(View.VISIBLE);
+                            videoQualityButton.setOnClickListener(view -> {
+                                if (helper == null) {
+                                    return;
+                                }
+                                TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(mActivity, mActivity.getString(R.string.select_video_quality), helper.getPlayer(), C.TRACK_TYPE_VIDEO);
+                                builder.setShowDisableOption(true);
+                                builder.setAllowAdaptiveSelections(false);
+                                Dialog dialog = builder.setTheme(R.style.MaterialAlertDialogTheme).build();
+                                dialog.show();
+                                if (dialog instanceof AlertDialog) {
+                                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(host.customThemeWrapper().getPrimaryTextColor());
+                                    ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(host.customThemeWrapper().getPrimaryTextColor());
+                                }
+                            });
 
                             if (!setDefaultResolutionAlready) {
                                 int desiredResolution = 0;
@@ -599,14 +549,17 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
                                     volume = host.fragment().getMasterMutingOption() || forceMuted ? 0f : 1f;
                                 }
                                 helper.setVolume(volume);
-                                if (controls != null) {
-                                    showMuteState(controls.muteButton);
+                                muteButton.setVisibility(View.VISIBLE);
+                                if (volume != 0f) {
+                                    muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
+                                } else {
+                                    muteButton.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_mute_24dp));
                                 }
                                 break;
                             }
                         }
-                    } else if (controls != null) {
-                        controls.muteButton.setVisibility(View.GONE);
+                    } else {
+                        muteButton.setVisibility(View.GONE);
                     }
                 }
 
@@ -623,10 +576,8 @@ public abstract class VideoAutoplayImpl implements ToroPlayer {
                         return;
                     }
                     // Don't clear the preview image - just hide it
-                    // This allows it to be shown again if the player is released while scrolling.
-                    // Hidden but kept in the layout: a gallery tile is sized by its still, and
-                    // would collapse around the clip without it.
-                    previewImageView.setVisibility(View.INVISIBLE);
+                    // This allows it to be shown again if the player is released while scrolling
+                    previewImageView.setVisibility(View.GONE);
                 }
 
                 @Override

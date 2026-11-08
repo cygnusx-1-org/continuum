@@ -57,14 +57,11 @@ object AccountScopedKeys {
         "show_divider_in_compact_layout", "show_thumbnail_on_the_left_in_compact_layout",
         "long_press_to_hide_toolbar_in_compact_layout",
         "post_compact_layout_toolbar_hidden_by_default",
-        "click_to_show_media_in_gallery_layout", "media_only_posts_in_gallery_layout",
 
         // Number of columns in the post feed
         "number_of_columns_in_post_feed_portrait", "number_of_columns_in_post_feed_landscape",
         "number_of_columns_in_post_feed_portrait_unfolded",
         "number_of_columns_in_post_feed_landscape_unfolded",
-        "number_of_columns_in_post_feed_portrait_gallery_layout",
-        "number_of_columns_in_post_feed_landscape_gallery_layout",
 
         // Interface.
         "main_activity_fab_action", "other_activities_fab_action",

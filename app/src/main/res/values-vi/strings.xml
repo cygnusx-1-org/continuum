@@ -677,10 +677,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_subreddit_default_sort_time_title">"Thời gian sắp xếp subreddit mặc định"</string>
     <string name="settings_user_default_sort_type_title">"Loại sắp xếp người dùng mặc định"</string>
     <string name="settings_user_default_sort_time_title">"Thời gian sắp xếp người dùng mặc định"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Nhấn để hiện phương tiện trong bố cục thư viện"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Hoán đổi thao tác nhấn và nhấn giữ trong bố cục thư viện: nhấn để mở phương tiện, nhấn và giữ sẽ mở bài đăng và bình luận trong đó"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Chỉ bài đăng trên phương tiện truyền thông"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"Trong bố cục thư viện, chỉ hiển thị hình ảnh, GIF, video và bài đăng trong thư viện. Bài đăng văn bản, cuộc thăm dò và liên kết bị ẩn"</string>
     <string name="settings_hide_post_type">"Ẩn loại bài đăng"</string>
     <string name="settings_post_type_triangle_indicator">"Chỉ báo tam giác loại bài đăng"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Hiển thị loại bài đăng dưới dạng hình tam giác màu trên hình thu nhỏ ở bố cục nhỏ gọn thay vì huy hiệu văn bản"</string>
@@ -842,7 +838,6 @@ Tự động phát video bị tắt."</string>
     <string name="favorites">"Yêu thích"</string>
     <string name="all">"Tất cả"</string>
     <string name="link_post_layout_auto">"Tự động"</string>
-    <string name="post_layout_gallery">"Bố cục bộ sưu tập"</string>
     <string name="elapsed_time_just_now">"Vừa ngay lúc này"</string>
     <string name="elapsed_time_a_minute_ago">"1 phút"</string>
     <string name="elapsed_time_minutes_ago">"%1$d phút"</string>

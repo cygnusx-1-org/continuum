@@ -685,10 +685,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_subreddit_default_sort_time_title">"Ordenação padrão por tempo em subreddits"</string>
     <string name="settings_user_default_sort_type_title">"Ordenação padrão em usuários"</string>
     <string name="settings_user_default_sort_time_title">"Ordenação padrão por tempo em usuários"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout">"Clicar para exibir mídia na estrutura de galeria"</string>
-    <string name="settings_click_to_show_media_in_gallery_layout_summary">"Trocar toque e pressionar longamente no layout da galeria: tocar abre a mídia, pressionar longamente abre a postagem e seus comentários"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_title">"Somente postagens de mídia"</string>
-    <string name="settings_media_only_posts_in_gallery_layout_summary">"No layout da galeria, mostre apenas postagens de imagem, GIF, vídeo e galeria. Postagens de texto, enquetes e links estão ocultas"</string>
     <string name="settings_hide_post_type">"Ocultar tipo de postagem"</string>
     <string name="settings_post_type_triangle_indicator">"Indicador triangular do tipo de postagem"</string>
     <string name="settings_post_type_triangle_indicator_summary">"Mostrar tipo de postagem como um triângulo colorido na miniatura em layout compacto em vez de um emblema de texto"</string>
@@ -850,7 +846,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="favorites">"Favoritos"</string>
     <string name="all">"Todos"</string>
     <string name="link_post_layout_auto">"Automático"</string>
-    <string name="post_layout_gallery">"Estrutura de galeria"</string>
     <string name="elapsed_time_just_now">"Agora"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuto"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minutos"</string>
