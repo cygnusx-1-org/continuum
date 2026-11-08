@@ -1,10 +1,10 @@
 # TODO
 
-Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.27` is the current stable release (tag `v8.3.3.9.1.27`, published), built from master with no pull request open. It rolls up everything since `8.3.3.9.1.26`, including the betas `8.3.3.9.1.27-beta.1` to `beta.9`, which were the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping).
+Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.28` is the current stable release (tag `v8.3.3.9.1.28`), built from master with no pull request open. It rolls up everything since `8.3.3.9.1.26`, including the betas `8.3.3.9.1.27-beta.1` to `beta.9`, which were the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping).
 
 ## Waiting on the owner
 
-- [ ] **Phone-check `8.3.3.9.1.27`, which is everything since `.26`.** Nothing since `8.3.3.9.1.25-beta.6` has ever been confirmed on a phone. Riskiest first:
+- [ ] **Phone-check `8.3.3.9.1.28`, which is everything since `.26`.** Nothing since `8.3.3.9.1.25-beta.6` has ever been confirmed on a phone. Riskiest first:
   - Backup and restore between the phone and the tablet (PR #65): back up on one, restore on the other. Check that a setting left at its default on the source is at its default on the target, that the app lock and a custom font come across, and that downloads still go to the target's own folder (download folders and the last-run times are deliberately not carried).
   - Media Focused gallery options (PR #67), in Settings > Post: with "Swipe Up and Down Through a Gallery" on, the gallery pages up and down and the up/down touch swap works (also with a zoomed image and a video); with "Scrolling Gallery" on, the list scrolls and a tap opens an image; with either on, a swipe left closes the gallery and a swipe right opens the post, but not while a picture is zoomed in.
   - The feed is always one column (PR #66), including the tablet, which used to default to two.
