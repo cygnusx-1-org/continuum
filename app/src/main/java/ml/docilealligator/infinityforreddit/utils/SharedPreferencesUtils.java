@@ -286,7 +286,6 @@ public class SharedPreferencesUtils {
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
     // The three gallery viewer options. The first two are stored under the keys they shipped with,
     // when they were tied to one layout, so that choosing them again is not needed.
-    public static final String GALLERY_VERTICAL_SWIPE = "media_focused_vertical_gallery_swipe";
     public static final String GALLERY_SCROLLING_LIST = "media_focused_scrolling_gallery";
     public static final String GALLERY_IMAGE_NUMBERS = "gallery_image_numbers";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
