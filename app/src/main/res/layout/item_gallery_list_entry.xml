@@ -43,6 +43,23 @@
             android:contentDescription="@null"
             app:tint="@android:color/white" />
 
+        <!-- The picture's place in the gallery, small in the top left corner. -->
+        <TextView
+            android:id="@+id/index_text_view_item_gallery_list_entry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:background="@drawable/bg_gallery_item_number"
+            android:fontFamily="?attr/font_family"
+            android:paddingStart="10dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="3dp"
+            android:textColor="#B8F7FF"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
         <ImageView
             android:id="@+id/error_image_view_item_gallery_list_entry"
             android:layout_width="72dp"

@@ -104,6 +104,18 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
      * pager on it, and back returns to the list. The same left and right swipes as above.
      */
     public static final String EXTRA_SCROLL_LIST = "ESL";
+    /**
+     * Puts the gallery options of Settings > Post (swiping up and down, the scrolling list) onto an
+     * intent that opens a gallery. The one place that reads them, so every screen that opens a
+     * gallery carries them the same way.
+     */
+    public static void putMediaFocusedOptions(Intent intent, SharedPreferences preferences) {
+        intent.putExtra(EXTRA_VERTICAL_SWIPE,
+                preferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE, false));
+        intent.putExtra(EXTRA_SCROLL_LIST,
+                preferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_SCROLLING_GALLERY, false));
+    }
+
     /** How many rows of the scrolling list play their clip at once. */
     private static final int MAX_PLAYING_ROWS = 3;
     /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
@@ -359,7 +371,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
         @Override
         public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
-            holder.bind(gallery.get(position));
+            holder.bind(gallery.get(position), position);
         }
 
         @Override
@@ -391,6 +403,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             this.binding = binding;
             if (typeface != null) {
                 binding.captionTextViewItemGalleryListEntry.setTypeface(typeface);
+                binding.indexTextViewItemGalleryListEntry.setTypeface(typeface);
             }
             itemView.setOnClickListener(view -> {
                 int position = getBindingAdapterPosition();
@@ -400,8 +413,9 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             });
         }
 
-        void bind(Post.Gallery item) {
+        void bind(Post.Gallery item, int position) {
             this.item = item;
+            binding.indexTextViewItemGalleryListEntry.setText(String.valueOf(position + 1));
             // The source's own shape reserves the row's height before the picture arrives, so the
             // list does not jump as images load.
             binding.imageViewItemGalleryListEntry.setRatio(

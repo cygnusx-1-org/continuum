@@ -3684,10 +3684,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
                 if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_MEDIA_FOCUSED) {
-                    intent.putExtra(ViewRedditGalleryActivity.EXTRA_VERTICAL_SWIPE,
-                            mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_VERTICAL_GALLERY_SWIPE, false));
-                    intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST,
-                            mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_FOCUSED_SCROLLING_GALLERY, false));
+                    ViewRedditGalleryActivity.putMediaFocusedOptions(intent, mSharedPreferences);
                 }
                 mActivity.startActivity(intent);
             } else {

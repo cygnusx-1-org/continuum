@@ -178,6 +178,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final OkHttpClient mShortClipOkHttpClient;
     private final OkHttpClient mImageHostOkHttpClient;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
+    private final SharedPreferences mSharedPreferences;
     private final SharedPreferences mPostHistorySharedPreferences;
     private final VideoMuteManager mVideoMuteManager;
     private final RequestManager mGlide;
@@ -308,6 +309,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mVideoMuteManager = videoMuteManager;
         mGlide = glide;
+        mSharedPreferences = sharedPreferences;
         mMaxResolution = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
         mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
@@ -1857,6 +1859,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
+                ViewRedditGalleryActivity.putMediaFocusedOptions(intent, mSharedPreferences);
                 mActivity.startActivity(intent);
             }
         }
@@ -2688,6 +2691,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         commentMedia.setPostType(Post.GALLERY_TYPE);
         Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
         intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, commentMedia);
+        ViewRedditGalleryActivity.putMediaFocusedOptions(intent, mSharedPreferences);
         mActivity.startActivity(intent);
     }
 

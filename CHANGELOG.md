@@ -5,9 +5,11 @@
 Unreleased
 ============
 **Fixed**
+* The Swipe Up and Down and Scrolling Gallery options now also apply when you open a gallery from a post's details screen (and from a gallery in a comment), not only from the feed; before, the details screen always opened the sideways carousel
 * Media Focused galleries with Swipe Up and Down or Scrolling Gallery on: the swipes were the wrong way round. A swipe left now goes back to the posts and a swipe right opens the post and its comments
 
 **New**
+* Scrolling Gallery: each image shows its number again, small in the top left corner
 * Scrolling Gallery: GIFs and videos play by themselves as they scroll into view (up to three at a time, muted), under the Video Autoplay and Autoplay NSFW Videos settings. A GIF Reddit published no mp4 for, or one cached before this version, stays a still until opened
 
 ---
