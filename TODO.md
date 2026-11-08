@@ -1,11 +1,10 @@
 # TODO
 
-Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.26` is the last stable release. Betas `8.3.3.9.1.27-beta.1` to `beta.9` were published after it and are the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping). Seven pull requests are open and not merged: #63 (remove the Gallery layout), #65 (backup and restore), #66 (the feed is always one column), #69 (the re-recorded goldens, on #66), #67 (Card Clean is now Media Focused, with two gallery options), #68 (Reset All Settings), and #64 (this file).
+Things deliberately left alone, and why. State as of 2026-11-08: `8.3.3.9.1.27` is the current stable release, built from master with no pull request open. It rolls up everything since `8.3.3.9.1.26`, including the betas `8.3.3.9.1.27-beta.1` to `beta.9`, which were the last betas ever: from now on releases are stable only, with a plain version (see Release housekeeping).
 
 ## Waiting on the owner
 
-- [ ] **Merge the open pull requests and ship the next stable release.** Order: #63, #65, #66, #69, #67, #68, then #64. #66 is stacked on #63, #69 and #67 on #66, so after each merge retarget the next to master and merge master into it. The next release is `8.3.3.9.1.27` (plain, no `-beta`): it rolls up everything since `.26`.
-- [ ] **Phone-check what changed since `8.3.3.9.1.26`.** Nothing since `8.3.3.9.1.25-beta.6` has ever been confirmed on a phone. Riskiest first:
+- [ ] **Phone-check `8.3.3.9.1.27`, which is everything since `.26`.** Nothing since `8.3.3.9.1.25-beta.6` has ever been confirmed on a phone. Riskiest first:
   - Backup and restore between the phone and the tablet (PR #65): back up on one, restore on the other. Check that a setting left at its default on the source is at its default on the target, that the app lock and a custom font come across, and that downloads still go to the target's own folder (download folders and the last-run times are deliberately not carried).
   - Media Focused gallery options (PR #67), in Settings > Post: with "Swipe Up and Down Through a Gallery" on, the gallery pages up and down and the up/down touch swap works (also with a zoomed image and a video); with "Scrolling Gallery" on, the list scrolls and a tap opens an image; with either on, a swipe left closes the gallery and a swipe right opens the post, but not while a picture is zoomed in.
   - The feed is always one column (PR #66), including the tablet, which used to default to two.

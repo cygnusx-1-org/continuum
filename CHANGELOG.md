@@ -2,7 +2,7 @@
 
 ---
 
-Unreleased
+8.3.3.9.1.27 / 2026-11-8
 ============
 **New**
 * Two options for galleries opened from the Media Focused layout, in Settings > Post:
