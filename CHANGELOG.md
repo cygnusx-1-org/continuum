@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.29 / 2026-11-8
+============
+**Fixed**
+* Swipe Up and Down Through a Gallery did nothing: the screen around the gallery took every up and down drag before the gallery could use it. It now changes image, and a zoomed picture is panned instead of paged away from. The Scrolling Gallery is a separate option and is unchanged
+
+---
+
 8.3.3.9.1.28 / 2026-11-8
 ============
 **New**
