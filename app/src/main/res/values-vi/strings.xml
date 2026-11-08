@@ -1694,8 +1694,6 @@ Nhấn để thử lại."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"trực tiếp"</string>
-    <string name="settings_backup_accounts_client_id_title">"Tài khoản dự phòng và ID khách hàng"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Bao gồm tài khoản người dùng và ID khách hàng trong tệp sao lưu (được khuyến nghị)"</string>
     <string name="password_cannot_be_empty">"Mật khẩu không được để trống"</string>
     <string name="title_activity_settings">"Cài đặt"</string>
     <string name="title_activity_login">"Đăng nhập"</string>
