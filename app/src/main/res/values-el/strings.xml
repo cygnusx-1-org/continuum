@@ -1707,8 +1707,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Απευθείας"</string>
-    <string name="settings_backup_accounts_client_id_title">"Λογαριασμοί αντιγράφων ασφαλείας και αναγνωριστικό πελάτη"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Συμπερίλαβε λογαριασμούς χρήστη και Αναγνωριστικό πελάτη στο αρχείο αντιγράφου ασφαλείας (συνιστάται)"</string>
     <string name="password_cannot_be_empty">"Ο κωδικός πρόσβασης δεν μπορεί να είναι κενός"</string>
     <string name="title_activity_settings">"Ρυθμίσεις"</string>
     <string name="title_activity_login">"Συνδέσου"</string>

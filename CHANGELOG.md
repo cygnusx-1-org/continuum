@@ -2,6 +2,21 @@
 
 ---
 
+Unreleased
+============
+**Fixed**
+* Backup and restore now carry every setting between devices, phone to tablet and back:
+  * Restoring replaces a settings file key for key. A setting the backup device left at its default now goes back to its default on this device too; before, this device kept whatever it had
+  * The Security settings (app lock, secure mode, authentication for the account section) are in the backup
+  * Custom fonts are in the backup, so a font set to Custom still shows after a restore on another device
+  * Download folders and the update-check and app-lock timestamps stay as the device has them. A folder chosen on one device is a permission only that device has, so restored onto another it pointed nowhere and downloads failed without saying why
+  * Settings stored as a set of strings are restored; before they were silently skipped
+
+**Removed**
+* Two unused strings left from when the backup could leave out accounts and the Client ID
+
+---
+
 8.3.3.9.1.27-beta.9 / 2026-11-7
 ============
 **New**

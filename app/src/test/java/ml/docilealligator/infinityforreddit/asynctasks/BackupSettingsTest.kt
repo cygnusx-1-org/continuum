@@ -50,6 +50,7 @@ class BackupSettingsTest {
     private lateinit var defaultPreferences: SharedPreferences
     private lateinit var sortType: SharedPreferences
     private lateinit var bottomAppBar: SharedPreferences
+    private lateinit var security: SharedPreferences
     private lateinit var database: RedditDataRoomDatabase
 
     @Before
@@ -71,9 +72,11 @@ class BackupSettingsTest {
         defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         sortType = file(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)
         bottomAppBar = file(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)
-        for (preferences in listOf(defaultPreferences, sortType, bottomAppBar)) {
+        security = file(SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE)
+        for (preferences in listOf(defaultPreferences, sortType, bottomAppBar, security)) {
             preferences.edit().clear().commit()
         }
+        fontsDirectory().deleteRecursively()
 
         database = RedditDataRoomDatabase.createInMemoryForTest(context)
     }
@@ -85,6 +88,8 @@ class BackupSettingsTest {
 
     private fun file(name: String): SharedPreferences =
         context.getSharedPreferences(name, Context.MODE_PRIVATE)
+
+    private fun fontsDirectory(): File = context.getExternalFilesDir("fonts")!!
 
     private fun key(accountName: String?, base: String) = AccountScope.key(accountName, base)
 
@@ -221,9 +226,57 @@ class BackupSettingsTest {
             SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
+            SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE,
         )) {
             val entry = BuildConfig.VERSION_NAME + "/" + name + BackupSettings.PREFERENCES_FILE_SUFFIX
             assertTrue(entry, names.contains(entry))
+        }
+    }
+
+    @Test
+    fun `settings that only mean something on this device are left out`() {
+        defaultPreferences.edit()
+            .putString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "content://phone/tree/images")
+            .putString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "content://phone/tree/nsfw")
+            .putLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 123L)
+            .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")
+            .commit()
+
+        val backedUp = backedUpFile(backUp(), SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE)
+
+        for (deviceBound in BackupSettings.DEVICE_BOUND_KEYS) {
+            assertFalse(deviceBound + " belongs to the device that wrote it", backedUp.containsKey(deviceBound))
+        }
+        assertEquals("2", backedUp[key("alice", SharedPreferencesUtils.THEME_KEY)])
+    }
+
+    @Test
+    fun `the security settings are in the backup, without the time they were last used`() {
+        security.edit()
+            .putBoolean(SharedPreferencesUtils.APP_LOCK, true)
+            .putString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, "60000")
+            .putLong(SharedPreferencesUtils.LAST_FOREGROUND_TIME, 99L)
+            .commit()
+
+        val backedUp = backedUpFile(backUp(), SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE)
+
+        assertEquals(true, backedUp[SharedPreferencesUtils.APP_LOCK])
+        assertEquals("60000", backedUp[SharedPreferencesUtils.APP_LOCK_TIMEOUT])
+        assertFalse(backedUp.containsKey(SharedPreferencesUtils.LAST_FOREGROUND_TIME))
+    }
+
+    @Test
+    fun `the custom font files are in the backup`() {
+        fontsDirectory().mkdirs()
+        File(fontsDirectory(), "font_family.ttf").writeBytes(byteArrayOf(1, 2, 3))
+        File(fontsDirectory(), "title_font_family.ttf").writeBytes(byteArrayOf(4, 5))
+
+        val zip = backUp()
+
+        for ((name, bytes) in mapOf("font_family.ttf" to byteArrayOf(1, 2, 3), "title_font_family.ttf" to byteArrayOf(4, 5))) {
+            val header = zip.getFileHeader(BuildConfig.VERSION_NAME + "/fonts/" + name)
+            assertNotNull("no font entry named " + name, header)
+            assertTrue(zip.getInputStream(header).use { it.readBytes() }.contentEquals(bytes))
         }
     }
 }

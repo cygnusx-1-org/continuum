@@ -1695,8 +1695,6 @@
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"நேரடி"</string>
-    <string name="settings_backup_accounts_client_id_title">"காப்பு கணக்குகள் மற்றும் கிளையன்ட் ஐடி"</string>
-    <string name="settings_backup_accounts_client_id_summary">"காப்பு கோப்பில் பயனர் கணக்குகள் மற்றும் கிளையண்ட் ஐடியைச் சேர்க்கவும் (பரிந்துரைக்கப்பட்டது)"</string>
     <string name="password_cannot_be_empty">"கடவுச்சொல் காலியாக இருக்கக்கூடாது"</string>
     <string name="title_activity_settings">"அமைப்புகள்"</string>
     <string name="title_activity_login">"உள்நுழைக"</string>

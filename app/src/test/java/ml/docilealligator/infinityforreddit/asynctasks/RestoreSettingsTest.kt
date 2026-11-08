@@ -111,6 +111,7 @@ class RestoreSettingsTest {
         database: RedditDataRoomDatabase,
         databaseJson: List<Pair<String, String>>,
         backedUpFiles: List<Pair<String, Map<String, Serializable>>> = emptyList(),
+        fonts: Map<String, ByteArray> = emptyMap(),
     ) {
         val source = File(context.cacheDir, "backup-source")
         source.deleteRecursively()
@@ -119,6 +120,13 @@ class RestoreSettingsTest {
         for ((name, contents) in backedUpFiles) {
             ObjectOutputStream(FileOutputStream(File(versionDir, name + ".txt"))).use {
                 it.writeObject(HashMap(contents))
+            }
+        }
+        if (fonts.isNotEmpty()) {
+            val fontsDir = File(versionDir, "fonts")
+            fontsDir.mkdirs()
+            for ((name, bytes) in fonts) {
+                File(fontsDir, name).writeBytes(bytes)
             }
         }
         if (databaseJson.isNotEmpty()) {
@@ -159,6 +167,82 @@ class RestoreSettingsTest {
                 override fun failed(errorMessage: String) = Unit
             },
         )
+    }
+
+    @Test
+    fun `a setting the backup does not mention goes back to its default`() {
+        defaultPreferences.edit()
+            .putString(SharedPreferencesUtils.THEME_KEY, "7")
+            .putBoolean(SharedPreferencesUtils.APP_LOCK, true)
+            .commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2",
+            )
+        )
+
+        assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
+        assertFalse("left at its default on the device that made the backup, so on this one too",
+            defaultPreferences.contains(SharedPreferencesUtils.APP_LOCK))
+    }
+
+    @Test
+    fun `this device's own download folders and times are not replaced`() {
+        defaultPreferences.edit()
+            .putString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "content://tablet/tree/images")
+            .putLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 5L)
+            .commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION to "content://phone/tree/images",
+                SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION to "content://phone/tree/gifs",
+                SharedPreferencesUtils.THEME_KEY to "2",
+            )
+        )
+
+        assertEquals("content://tablet/tree/images",
+            defaultPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, null))
+        assertFalse("a folder this device never chose is not taken from the phone",
+            defaultPreferences.contains(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION))
+        assertEquals(5L, defaultPreferences.getLong(SharedPreferencesUtils.LAST_UPDATE_CHECK_TIME, 0L))
+        assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
+    }
+
+    @Test
+    fun `a set of strings comes back as a set`() {
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                "some_multi_choice" to hashSetOf("a", "b"),
+            )
+        )
+
+        assertEquals(setOf("a", "b"), defaultPreferences.getStringSet("some_multi_choice", null))
+    }
+
+    @Test
+    fun `the security settings come back`() {
+        restore(
+            SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.APP_LOCK to true,
+                SharedPreferencesUtils.APP_LOCK_TIMEOUT to "60000",
+            )
+        )
+
+        val security = file(SharedPreferencesUtils.SECURITY_SHARED_PREFERENCES_FILE)
+        assertTrue(security.getBoolean(SharedPreferencesUtils.APP_LOCK, false))
+        assertEquals("60000", security.getString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, null))
+    }
+
+    @Test
+    fun `the custom font files come back where the app looks for them`() {
+        val fontsDirectory = context.getExternalFilesDir("fonts")!!
+        fontsDirectory.deleteRecursively()
+
+        restore(mock<RedditDataRoomDatabase>(), emptyList(), fonts = mapOf("font_family.ttf" to byteArrayOf(1, 2, 3)))
+
+        assertTrue(File(fontsDirectory, "font_family.ttf").readBytes().contentEquals(byteArrayOf(1, 2, 3)))
     }
 
     @Test

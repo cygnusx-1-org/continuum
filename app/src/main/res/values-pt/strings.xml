@@ -1714,8 +1714,6 @@ Toque para tentar novamente."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Direto"</string>
-    <string name="settings_backup_accounts_client_id_title">"Contas de cópia de segurança e ID de cliente"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Incluir contas de utilizador e ID de cliente no ficheiro de cópia de segurança (recomendado)"</string>
     <string name="password_cannot_be_empty">"A palavra-passe não pode ficar vazia"</string>
     <string name="title_activity_settings">"Definições"</string>
     <string name="title_activity_login">"Entrar"</string>

@@ -1709,8 +1709,6 @@ Reddit 视频分辨率较低。
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"直接"</string>
-    <string name="settings_backup_accounts_client_id_title">"备份帐户和客户端 ID"</string>
-    <string name="settings_backup_accounts_client_id_summary">"在备份文件中包含用户帐户和客户端 ID（推荐）"</string>
     <string name="password_cannot_be_empty">"密码不能为空"</string>
     <string name="title_activity_settings">"设置"</string>
     <string name="title_activity_login">"登录"</string>

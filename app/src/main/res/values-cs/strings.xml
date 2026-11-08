@@ -1717,8 +1717,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="proxy_http">"HTTP"</string>
     <string name="proxy_socks">"SOCKS"</string>
     <string name="proxy_direct">"Přímý"</string>
-    <string name="settings_backup_accounts_client_id_title">"Záložní účty a ID klienta"</string>
-    <string name="settings_backup_accounts_client_id_summary">"Zahrnout uživatelské účty a ID klienta do záložního souboru (doporučeno)"</string>
     <string name="password_cannot_be_empty">"Heslo nemůže být prázdné"</string>
     <string name="title_activity_settings">"Nastavení"</string>
     <string name="title_activity_login">"Přihlas se"</string>
