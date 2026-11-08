@@ -1352,7 +1352,7 @@
     <string name="delete_all_read_posts_success">Delete all read posts successfully</string>
     <string name="delete_all_user_tags_success">User tags deleted</string>
     <string name="reset_all_settings_success">Reset all settings successfully</string>
-    <string name="reset_all_settings_confirmation">Every account's settings, main page tabs, and post and comment filters go back to the defaults, and so do the settings that belong to no account, such as the API keys, the download folders and the proxy. Custom themes and the security settings are left as they are.\n\nThere is no undo — a backup keeps a copy.</string>
+    <string name="reset_all_settings_confirmation">Every account\'s settings, main page tabs, and post and comment filters go back to the defaults, and so do the settings that belong to no account, such as the API keys, the download folders and the proxy. Custom themes and the security settings are left as they are.\n\nThere is no undo — a backup keeps a copy.</string>
 
     <string name="username_preview">u/edgan</string>
     <string name="subreddit_preview">r/redditjr</string>
