@@ -4,12 +4,16 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
+import java.util.function.BooleanSupplier;
 
 public class ViewPagerBugFixed extends ViewPager {
     private boolean vertical;
+    @Nullable
+    private BooleanSupplier keepsDrag;
 
     public ViewPagerBugFixed(@NonNull Context context) {
         super(context);
@@ -33,6 +37,23 @@ public class ViewPagerBugFixed extends ViewPager {
         setOverScrollMode(vertical ? OVER_SCROLL_NEVER : OVER_SCROLL_ALWAYS);
     }
 
+    /**
+     * While this says yes, a vertical pager leaves an up or down drag to the page under the finger
+     * instead of turning it into a page change: a zoomed picture is panned, not paged away from.
+     * (A sideways pager asks the page itself, which a vertical one cannot, its axes being swapped.)
+     */
+    public void setKeepsDrag(@Nullable BooleanSupplier keepsDrag) {
+        this.keepsDrag = keepsDrag;
+    }
+
+    @Override
+    protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
+        if (vertical) {
+            return keepsDrag != null && keepsDrag.getAsBoolean();
+        }
+        return super.canScroll(v, checkV, dx, x, y);
+    }
+
     /** {@code ev} with its x and y exchanged, in the pager's own proportions; applying it twice undoes it. */
     private MotionEvent swapAxes(MotionEvent ev) {
         float width = getWidth();
@@ -44,7 +65,13 @@ public class ViewPagerBugFixed extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         try {
-            return super.onTouchEvent(vertical ? swapAxes(ev) : ev);
+            if (!vertical) {
+                return super.onTouchEvent(ev);
+            }
+            // Handed back as it came, since whatever looks at the event next expects the screen's axes.
+            boolean handled = super.onTouchEvent(swapAxes(ev));
+            swapAxes(ev);
+            return handled;
         } catch (IllegalArgumentException ignore) {
             Log.d("ViewPagerBugFixed", "onTouchEvent: ignoring IllegalArgumentException", ignore);
         }
@@ -54,6 +81,11 @@ public class ViewPagerBugFixed extends ViewPager {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (vertical && ev.getActionMasked() == MotionEvent.ACTION_DOWN && getParent() != null) {
+            // The scrolling wrappers above this take any up or down drag for their own before the
+            // pager can claim it; their say ends when they are asked to let go.
+            getParent().requestDisallowInterceptTouchEvent(true);
+        }
         try {
             boolean intercepted = super.onInterceptTouchEvent(vertical ? swapAxes(ev) : ev);
             if (vertical) {
