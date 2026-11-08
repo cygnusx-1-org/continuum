@@ -7,6 +7,9 @@
 **Removed**
 * Swipe Up and Down Through a Gallery, in Settings > Post > Gallery Viewer. It never worked well, and the Scrolling Gallery does the job. The gallery opens as the usual swipe viewer again unless Scrolling Gallery is on
 
+**Fixed**
+* Dragging up on a gallery post's images, with the post first in the feed, scrolled the feed under the header and only then collapsed it. The header now collapses as it does when you drag anywhere else on the post
+
 ---
 
 8.3.3.9.1.30 / 2026-11-8
