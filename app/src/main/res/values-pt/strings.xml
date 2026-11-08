@@ -435,8 +435,6 @@ Toque para tentar novamente."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Botões de Voto à Direita"</string>
     <string name="settings_mute_video_title">"Vídeos Sem Som"</string>
     <string name="settings_mute_nsfw_video_title">"Mudo NSFW Vídeos"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignorar Barra de Navegação no Reprodutor de Vídeo"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Impedir que o Controlador de Vídeo Tenha Margem Extra"</string>
     <string name="settings_main_page_back_button_action">"Ação do botão de retroceder da página principal"</string>
     <string name="settings_confirm_to_exit">"Confirmar para Sair"</string>
     <string name="settings_open_navigation_drawer">"Abrir gaveta de navegação"</string>

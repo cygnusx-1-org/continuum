@@ -5,7 +5,6 @@ import androidx.compose.runtime.setValue
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.widget.Toast
@@ -143,10 +142,8 @@ class SetReminderActivity: BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                enableEdgeToEdge()
-            }
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            enableEdgeToEdge()
         }
 
         mViewModel = ViewModelProvider.create(

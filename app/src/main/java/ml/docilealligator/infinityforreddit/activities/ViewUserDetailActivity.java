@@ -321,101 +321,84 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         setSupportActionBar(binding.toolbarViewUserDetailActivity);
         setToolbarGoToTop(binding.toolbarViewUserDetailActivity);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-                }
-
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        topSystemBarHeight = allInsets.top;
-
-                        int padding16 = (int) Utils.convertDpToPixel(16, ViewUserDetailActivity.this);
-
-                        setMargins(fab,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                padding16 + allInsets.right,
-                                padding16 + allInsets.bottom);
-
-                        binding.viewPagerViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        binding.toolbarConstraintLayoutViewUserDetailActivity.setPadding(
-                                padding16 + allInsets.left,
-                                binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingTop(),
-                                padding16 + allInsets.right,
-                                binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingBottom());
-
-                        setMargins(binding.toolbarViewUserDetailActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.tabLayoutViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        return insets;
-                    }
-                });
-                showToast = true;
-            }
-
-            View decorView = window.getDecorView();
-            if (isChangeStatusBarIconColor()) {
-                binding.appbarLayoutViewUserDetail.addOnOffsetChangedListener(new AppBarStateChangeListener() {
-                    @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                        if (state == State.COLLAPSED) {
-                            decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
-                            binding.tabLayoutViewUserDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutViewUserDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
-                            binding.tabLayoutViewUserDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutViewUserDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
-                    }
-                });
+        Window window = getWindow();
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                window.setDecorFitsSystemWindows(false);
             } else {
-                binding.appbarLayoutViewUserDetail.addOnOffsetChangedListener(new AppBarStateChangeListener() {
-                    @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                        if (state == State.COLLAPSED) {
-                            binding.tabLayoutViewUserDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutViewUserDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            binding.tabLayoutViewUserDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutViewUserDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
-                    }
-                });
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    topSystemBarHeight = allInsets.top;
+
+                    int padding16 = (int) Utils.convertDpToPixel(16, ViewUserDetailActivity.this);
+
+                    setMargins(fab,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            padding16 + allInsets.right,
+                            padding16 + allInsets.bottom);
+
+                    binding.viewPagerViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    binding.toolbarConstraintLayoutViewUserDetailActivity.setPadding(
+                            padding16 + allInsets.left,
+                            binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingTop(),
+                            padding16 + allInsets.right,
+                            binding.toolbarConstraintLayoutViewUserDetailActivity.getPaddingBottom());
+
+                    setMargins(binding.toolbarViewUserDetailActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.tabLayoutViewUserDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    return insets;
+                }
+            });
+            showToast = true;
+        }
+
+        View decorView = window.getDecorView();
+        if (isChangeStatusBarIconColor()) {
+            binding.appbarLayoutViewUserDetail.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+                @Override
+                public void onStateChanged(AppBarLayout appBarLayout, State state) {
+                    if (state == State.COLLAPSED) {
+                        decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
+                        binding.tabLayoutViewUserDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
+                        binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
+                        binding.tabLayoutViewUserDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
+                        binding.tabLayoutViewUserDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutViewUserDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
+                    }
+                }
+            });
         } else {
             binding.appbarLayoutViewUserDetail.addOnOffsetChangedListener(new AppBarStateChangeListener() {
                 @Override
                 public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                    if (state == State.EXPANDED) {
-                        binding.tabLayoutViewUserDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                        binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                        binding.tabLayoutViewUserDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                    } else if (state == State.COLLAPSED) {
+                    if (state == State.COLLAPSED) {
                         binding.tabLayoutViewUserDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                         binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                         binding.tabLayoutViewUserDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        binding.tabLayoutViewUserDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutViewUserDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutViewUserDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
                     }
                 }
             });

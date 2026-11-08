@@ -89,40 +89,38 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
 
         mViewPager2 = binding.viewPagerHistoryActivity;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutHistoryActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutHistoryActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(binding.toolbarHistoryActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.viewPagerHistoryActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    return insets;
                 }
-
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarHistoryActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.viewPagerHistoryActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        return insets;
-                    }
-                });
-                //adjustToolbar(binding.toolbarHistoryActivity);
-            }
+            });
+            //adjustToolbar(binding.toolbarHistoryActivity);
         }
 
         setSupportActionBar(binding.toolbarHistoryActivity);

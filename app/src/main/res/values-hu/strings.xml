@@ -427,8 +427,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Szavazó gombok a jobb oldalon"</string>
     <string name="settings_mute_video_title">"Videók némítása"</string>
     <string name="settings_mute_nsfw_video_title">"Videók némítása NSFW"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Navigációs sáv mellőzése a videólejátszóban"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"A videóvezérlő extra margójának megakadályozása"</string>
     <string name="settings_main_page_back_button_action">"Főoldal Vissza gomb Művelet"</string>
     <string name="settings_confirm_to_exit">"Kilépés megerősítése"</string>
     <string name="settings_open_navigation_drawer">"Navigációs fiók megnyitása"</string>

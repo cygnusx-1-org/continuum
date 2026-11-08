@@ -435,8 +435,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"顶踩按钮放置在右侧"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
     <string name="settings_mute_nsfw_video_title">"静音 NSFW 视频"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"视频播放器中忽略导航栏"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"防止视频控制栏有额外的外边距"</string>
     <string name="settings_main_page_back_button_action">"主页返回按钮动作"</string>
     <string name="settings_confirm_to_exit">"确认退出"</string>
     <string name="settings_open_navigation_drawer">"打开导航抽屉"</string>

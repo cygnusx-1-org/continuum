@@ -57,7 +57,7 @@ class PreloadWindowTest {
 
     @Test
     fun aScreenFullOfRowsIsCappedAhead() {
-        // Thirty rows on screen, as in a tablet's staggered grid: two screens would be sixty.
+        // Thirty rows on screen, as in a tall tablet window: two screens would be sixty.
         val positions = PreloadWindow.positions(0, 29, 500, scrollingUp = false)
 
         assertEquals((30 until 30 + PreloadWindow.MAX_AHEAD).toList(), positions)

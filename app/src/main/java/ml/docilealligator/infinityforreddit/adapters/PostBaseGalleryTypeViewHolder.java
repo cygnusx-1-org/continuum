@@ -154,7 +154,7 @@ public abstract class PostBaseGalleryTypeViewHolder extends PostBaseViewHolder i
         LinearLayoutManagerBugFixed layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
         galleryRecyclerView.setLayoutManager(layoutManager);
         PostGalleryGridLayoutItemDecoration itemDecoration =
-                new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, 2);
+                new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.galleryGridItemOffset, 2);
         galleryRecyclerView.addItemDecoration(itemDecoration);
 
         galleryRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

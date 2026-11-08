@@ -430,8 +430,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"वोट बटन दाईं तरफ "</string>
     <string name="settings_mute_video_title">"मौन वीडियोज "</string>
     <string name="settings_mute_nsfw_video_title">"म्यूट NSFW वीडियो"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"वीडियो प्लेयर में नेवीगेशन बार का छिपना"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"वीडियो कंट्रोलर द्वारा अतिरिक्त हाशिया लेने पर रोक "</string>
     <string name="settings_main_page_back_button_action">"मुख्य पृष्ठ बैक बटन क्रिया"</string>
     <string name="settings_confirm_to_exit">"एप छोड़ने की पुष्टि "</string>
     <string name="settings_open_navigation_drawer">"नेवीगेशन दराज खोलें"</string>

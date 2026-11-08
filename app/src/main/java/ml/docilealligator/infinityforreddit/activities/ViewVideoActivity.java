@@ -173,7 +173,6 @@ public class ViewVideoActivity extends AppCompatActivity
     public static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
-
     @Nullable
     public Typeface typeface;
 
@@ -373,7 +372,6 @@ public class ViewVideoActivity extends AppCompatActivity
         binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
         binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
 
-
         LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
         // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
         // edge dead-zone so a swipe from the very edge isn't treated as a scrub.
@@ -463,7 +461,6 @@ public class ViewVideoActivity extends AppCompatActivity
             overridePendingTransition(0, slide);
         });
 
-
         if (savedInstanceState == null) {
             if (!getResources().getBoolean(R.bool.isTablet)
                     && mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
@@ -547,10 +544,6 @@ public class ViewVideoActivity extends AppCompatActivity
             player.addListener(new Player.Listener() {
                 @Override
                 public void onVideoSizeChanged(VideoSize videoSize) {
-                    Log.d(ROTATION_TAG, "onVideoSizeChanged: width=" + videoSize.width
-                            + " height=" + videoSize.height
-                            + " unappliedRotationDegrees=" + videoSize.unappliedRotationDegrees
-                            + " currentRotation=" + currentRotation);
                     if (videoSize.width > 0 && videoSize.height > 0) {
                         originalVideoWidth = videoSize.width;
                         originalVideoHeight = videoSize.height;
@@ -610,20 +603,17 @@ public class ViewVideoActivity extends AppCompatActivity
         // If subredditName is null and we have a post object, get it from the post
         if (viewVideoViewModel.getSubredditName() == null && post != null) {
             viewVideoViewModel.setSubredditName(post.getSubredditName());
-            Log.d("ViewVideoActivity", "Got subredditName from post: " + viewVideoViewModel.getSubredditName());
         }
 
         // If id is null and we have a post object, get it from the post
         if (viewVideoViewModel.getId() == null && post != null) {
             viewVideoViewModel.setId(post.getId());
-            Log.d("ViewVideoActivity", "Got id from post: " + viewVideoViewModel.getId());
         }
 
         // If this is a Tumblr post, ensure videoType is VIDEO_TYPE_DIRECT
         // This handles cases where the calling intent might not set EXTRA_VIDEO_TYPE appropriately for Tumblr MP4s.
-        if (post != null && post.isTumblr()) { // Assuming post.isTumblr() method exists
+        if (post != null && post.isTumblr()) {
             if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_DIRECT) {
-                Log.d("ViewVideoActivity", "Tumblr post detected. Overriding videoType to DIRECT. Original type: " + viewVideoViewModel.getVideoType());
                 viewVideoViewModel.setVideoType(VIDEO_TYPE_DIRECT);
             }
         }
@@ -945,7 +935,6 @@ public class ViewVideoActivity extends AppCompatActivity
                 }
             }
         });
-
 
         viewVideoViewModel.getErrorResId().observe(this, messageRes -> {
             if (messageRes == null) {
@@ -1301,7 +1290,6 @@ public class ViewVideoActivity extends AppCompatActivity
         binding.getNestedScrollView().setScrollEnabled(enabled);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_video_activity, menu);
@@ -1464,7 +1452,7 @@ public class ViewVideoActivity extends AppCompatActivity
     }
 
     private void requestPermissionAndDownload() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1648,7 +1636,6 @@ public class ViewVideoActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
         outState.putInt("currentRotation", currentRotation);
     }
-
 
     @Override
     public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {

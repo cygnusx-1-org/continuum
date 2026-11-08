@@ -434,8 +434,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Кнопки голосования справа"</string>
     <string name="settings_mute_video_title">"Видео без звука"</string>
     <string name="settings_mute_nsfw_video_title">"Без звука NSFW Видео"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Не использовать панель навигации в видеопроигрывателе"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Предотвращает случайные нажатия"</string>
     <string name="settings_main_page_back_button_action">"Действие кнопки возврата на главную страницу"</string>
     <string name="settings_confirm_to_exit">"Подтверждать выход"</string>
     <string name="settings_open_navigation_drawer">"Открыть панель навигации"</string>

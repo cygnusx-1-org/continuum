@@ -308,109 +308,90 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         mViewPager2 = binding.viewPagerViewSubredditDetailActivity;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-                }
-
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        topSystemBarHeight = allInsets.top;
-
-                        int padding16 = (int) Utils.convertDpToPixel(16, ViewSubredditDetailActivity.this);
-
-                        setMargins(fab,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                padding16 + allInsets.right,
-                                padding16 + allInsets.bottom);
-
-                        binding.viewPagerViewSubredditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        binding.toolbarConstraintLayoutViewSubredditDetailActivity.setPadding(
-                                padding16 + allInsets.left,
-                                binding.toolbarConstraintLayoutViewSubredditDetailActivity.getPaddingTop(),
-                                padding16 + allInsets.right,
-                                binding.toolbarConstraintLayoutViewSubredditDetailActivity.getPaddingBottom());
-
-                        setMargins(binding.toolbar,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-                        applyBannerSetting();
-
-                        binding.tabLayoutViewSubredditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        return insets;
-                    }
-                });
-
-                showToast = true;
-            }
-
-            View decorView = window.getDecorView();
-            if (isChangeStatusBarIconColor()) {
-                binding.appbarLayoutViewSubredditDetailActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
-                    @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
-                        if (state == State.COLLAPSED) {
-                            mAppBarCollapsed = true;
-                            decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
-                            binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            mAppBarCollapsed = false;
-                            decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
-                            binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
-                    }
-                });
+        Window window = getWindow();
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                window.setDecorFitsSystemWindows(false);
             } else {
-                binding.appbarLayoutViewSubredditDetailActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
-                    @Override
-                    public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                        if (state == State.COLLAPSED) {
-                            mAppBarCollapsed = true;
-                            binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
-                        } else if (state == State.EXPANDED) {
-                            mAppBarCollapsed = false;
-                            binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                            binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                        }
-                    }
-                });
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    topSystemBarHeight = allInsets.top;
+
+                    int padding16 = (int) Utils.convertDpToPixel(16, ViewSubredditDetailActivity.this);
+
+                    setMargins(fab,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            padding16 + allInsets.right,
+                            padding16 + allInsets.bottom);
+
+                    binding.viewPagerViewSubredditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    binding.toolbarConstraintLayoutViewSubredditDetailActivity.setPadding(
+                            padding16 + allInsets.left,
+                            binding.toolbarConstraintLayoutViewSubredditDetailActivity.getPaddingTop(),
+                            padding16 + allInsets.right,
+                            binding.toolbarConstraintLayoutViewSubredditDetailActivity.getPaddingBottom());
+
+                    setMargins(binding.toolbar,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+                    applyBannerSetting();
+
+                    binding.tabLayoutViewSubredditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    return insets;
+                }
+            });
+
+            showToast = true;
+        }
+
+        View decorView = window.getDecorView();
+        if (isChangeStatusBarIconColor()) {
+            binding.appbarLayoutViewSubredditDetailActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+                @Override
+                public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
+                    if (state == State.COLLAPSED) {
+                        mAppBarCollapsed = true;
+                        decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
+                        binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        mAppBarCollapsed = false;
+                        decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
+                        binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
+                    }
+                }
+            });
         } else {
             binding.appbarLayoutViewSubredditDetailActivity.addOnOffsetChangedListener(new AppBarStateChangeListener() {
                 @Override
                 public void onStateChanged(AppBarLayout appBarLayout, State state) {
-                    if (state == State.EXPANDED) {
-                        mAppBarCollapsed = false;
-                        binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
-                        binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
-                        binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
-                    } else if (state == State.COLLAPSED) {
+                    if (state == State.COLLAPSED) {
                         mAppBarCollapsed = true;
                         binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                         binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                         binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
+                    } else if (state == State.EXPANDED) {
+                        mAppBarCollapsed = false;
+                        binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
+                        binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
                     }
                 }
             });

@@ -3527,7 +3527,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 adapter.setIsGridLayout(true);
                 layoutManager = new GridLayoutManager(mActivity, 3);
                 PostGalleryGridLayoutItemDecoration itemDecoration =
-                        new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, 2);
+                        new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.galleryGridItemOffset, 2);
                 binding.galleryRecyclerViewItemPostDetailGallery.addItemDecoration(itemDecoration);
             } else {
                 layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);

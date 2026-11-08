@@ -431,8 +431,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Stemknoppen aan rechterkant tonen"</string>
     <string name="settings_mute_video_title">"Video's dempen"</string>
     <string name="settings_mute_nsfw_video_title">"Dempen NSFW Video's"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Navigatiebalk verbergen in videospeler"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Voorkom dat de navigatiebalk extra opvulling heeft"</string>
     <string name="settings_main_page_back_button_action">"Hoofdpagina Knop Terug Actie"</string>
     <string name="settings_confirm_to_exit">"Afsluiten bevestigen"</string>
     <string name="settings_open_navigation_drawer">"Navigatiemenu openen"</string>

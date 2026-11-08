@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -193,35 +192,33 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         parentPosition = intent.getIntExtra(EXTRA_PARENT_POSITION_KEY, 0);
         applyCustomTheme();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.commentAppbarLayout);
-            }
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.commentAppbarLayout);
+        }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
-                        setMargins(binding.commentToolbar,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
+                    setMargins(binding.commentToolbar,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
 
-                        binding.linearLayoutCommentActivity.setPadding(
-                                allInsets.left,
-                                0,
-                                allInsets.right,
-                                allInsets.bottom
-                        );
+                    binding.linearLayoutCommentActivity.setPadding(
+                            allInsets.left,
+                            0,
+                            allInsets.right,
+                            allInsets.bottom
+                    );
 
-                        return WindowInsetsCompat.CONSUMED;
-                    }
-                });
-            }
+                    return WindowInsetsCompat.CONSUMED;
+                }
+            });
         }
 
         mGlide = Glide.with(this);

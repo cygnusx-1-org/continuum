@@ -428,8 +428,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Przyciski do głosowania po prawej"</string>
     <string name="settings_mute_video_title">"Wycisz filmy"</string>
     <string name="settings_mute_nsfw_video_title">"Wycisz NSFW Filmy"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignoruj pasek nawigacji w odtwarzaczu wideo"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Zapobiegaj posiadaniu dodatkowego marginesu przez kontroler wideo"</string>
     <string name="settings_main_page_back_button_action">"Strona główna Przycisk Wstecz"</string>
     <string name="settings_confirm_to_exit">"Potwierdź aby wyjść"</string>
     <string name="settings_open_navigation_drawer">"Otwórz pasek nawigacji"</string>

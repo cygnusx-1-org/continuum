@@ -428,8 +428,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Κουμπιά Ψήφου στα Δεξιά"</string>
     <string name="settings_mute_video_title">"Σίγαση βίντεο"</string>
     <string name="settings_mute_nsfw_video_title">"Σίγαση NSFW βίντεο"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Αγνόηση Μπάρας Πλοήγησης κατά την Αναπαραγωγή Βίντεο"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Αποτρέπει τα Χειριστήρια του Βίντεο να έχουν έξτρα περιθώριο"</string>
     <string name="settings_main_page_back_button_action">"Ενέργεια Κουμπιού Πίσω Κυρίας Σελίδας"</string>
     <string name="settings_confirm_to_exit">"Επιβεβαίωση για Έξοδο"</string>
     <string name="settings_open_navigation_drawer">"Άνοιγμα Συρταριού Πλοήγησης"</string>

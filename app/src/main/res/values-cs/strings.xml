@@ -435,8 +435,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Hlasovací tlačítka napravo"</string>
     <string name="settings_mute_video_title">"Ztlumit videa"</string>
     <string name="settings_mute_nsfw_video_title">"Ztlumit NSFW videa"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignorovat navigační lištu v přehrávači videí"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Zabránit ovládání videa mít dodatečný okraj"</string>
     <string name="settings_main_page_back_button_action">"Akce tlačítka zpět na hlavní stránce"</string>
     <string name="settings_confirm_to_exit">"Potvrdit pro odchod"</string>
     <string name="settings_open_navigation_drawer">"Otevřít navigační panel"</string>

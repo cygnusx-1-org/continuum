@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.bottomsheetfragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,24 +44,22 @@ public class SetAsWallpaperBottomSheetFragment extends LandscapeExpandedRoundedB
             dismiss();
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            binding.homeScreenTextViewSetAsWallpaperBottomSheetFragment.setVisibility(View.VISIBLE);
-            binding.lockScreenTextViewSetAsWallpaperBottomSheetFragment.setVisibility(View.VISIBLE);
+        binding.homeScreenTextViewSetAsWallpaperBottomSheetFragment.setVisibility(View.VISIBLE);
+        binding.lockScreenTextViewSetAsWallpaperBottomSheetFragment.setVisibility(View.VISIBLE);
 
-            binding.homeScreenTextViewSetAsWallpaperBottomSheetFragment.setOnClickListener(view -> {
-                if (mActivity instanceof SetAsWallpaperCallback) {
-                    ((SetAsWallpaperCallback) mActivity).setToHomeScreen(viewPagerPosition);
-                }
-                dismiss();
-            });
+        binding.homeScreenTextViewSetAsWallpaperBottomSheetFragment.setOnClickListener(view -> {
+            if (mActivity instanceof SetAsWallpaperCallback) {
+                ((SetAsWallpaperCallback) mActivity).setToHomeScreen(viewPagerPosition);
+            }
+            dismiss();
+        });
 
-            binding.lockScreenTextViewSetAsWallpaperBottomSheetFragment.setOnClickListener(view -> {
-                if (mActivity instanceof SetAsWallpaperCallback) {
-                    ((SetAsWallpaperCallback) mActivity).setToLockScreen(viewPagerPosition);
-                }
-                dismiss();
-            });
-        }
+        binding.lockScreenTextViewSetAsWallpaperBottomSheetFragment.setOnClickListener(view -> {
+            if (mActivity instanceof SetAsWallpaperCallback) {
+                ((SetAsWallpaperCallback) mActivity).setToLockScreen(viewPagerPosition);
+            }
+            dismiss();
+        });
 
         if (mActivity instanceof ViewVideoActivity) {
             if (((ViewVideoActivity) mActivity).typeface != null) {

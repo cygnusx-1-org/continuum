@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -114,10 +113,8 @@ class CopyMultiRedditActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                enableEdgeToEdge()
-            }
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            enableEdgeToEdge()
         }
 
         val multipath = intent.getStringExtra(EXTRA_MULTIPATH) ?: ""

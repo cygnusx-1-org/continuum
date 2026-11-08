@@ -435,8 +435,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"투표버튼 우측으로 이동"</string>
     <string name="settings_mute_video_title">"둥영상 음소거"</string>
     <string name="settings_mute_nsfw_video_title">"음소거 NSFW 동영상"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"영상에서 내비게이션 바 무시"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"비디오 컨트롤러에 추가 여백이 발생하는 것을 방지"</string>
     <string name="settings_main_page_back_button_action">"메인 페이지 뒤로 버튼 동작"</string>
     <string name="settings_confirm_to_exit">"나갈 때 확인"</string>
     <string name="settings_open_navigation_drawer">"네비게이션 드로어 열기"</string>

@@ -112,56 +112,54 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
 
         attachSliderPanelIfApplicable();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutInboxActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutInboxActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(binding.toolbarInboxActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.viewPagerInboxActivity.setPadding(
+                            allInsets.left,
+                            0,
+                            allInsets.right,
+                            0);
+
+                    setMargins(binding.fabInboxActivity,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            (int) Utils.convertDpToPixel(16, InboxActivity.this) + allInsets.right,
+                            (int) Utils.convertDpToPixel(16, InboxActivity.this) + allInsets.bottom);
+
+                    setMargins(binding.tabLayoutInboxActivity,
+                            allInsets.left,
+                            BaseActivity.IGNORE_MARGIN,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    return insets;
                 }
+            });
 
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarInboxActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.viewPagerInboxActivity.setPadding(
-                                allInsets.left,
-                                0,
-                                allInsets.right,
-                                0);
-
-                        setMargins(binding.fabInboxActivity,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                (int) Utils.convertDpToPixel(16, InboxActivity.this) + allInsets.right,
-                                (int) Utils.convertDpToPixel(16, InboxActivity.this) + allInsets.bottom);
-
-                        setMargins(binding.tabLayoutInboxActivity,
-                                allInsets.left,
-                                BaseActivity.IGNORE_MARGIN,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        return insets;
-                    }
-                });
-
-            }
         }
 
         binding.toolbarInboxActivity.setTitle(R.string.inbox);

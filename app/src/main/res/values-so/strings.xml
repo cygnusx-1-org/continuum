@@ -425,8 +425,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Badhamada Codka ee Midigta"</string>
     <string name="settings_mute_video_title">"Muqaalka aamus"</string>
     <string name="settings_mute_nsfw_video_title">"aamusi NSFW Fiidyowyo"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"iska daa marin hagaha ee ku dhex jira Fiidiyowga"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Ka hortag Fiidiyowga Xakamaynta inuu yeesho Margin Dheeraad ah"</string>
     <string name="settings_main_page_back_button_action">"Bogga ugu weyn ee badhanka dambe"</string>
     <string name="settings_confirm_to_exit">"Xaqiiji inaad ka baxdo"</string>
     <string name="settings_open_navigation_drawer">"Fur khaanada dhexsocodka"</string>

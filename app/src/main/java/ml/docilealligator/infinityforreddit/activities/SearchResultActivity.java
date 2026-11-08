@@ -194,49 +194,47 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
 
         mViewPager2 = binding.viewPagerSearchResultActivity;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutSearchResultActivity);            }
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutSearchResultActivity);            }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-                }
-
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarSearchResultActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.viewPagerSearchResultActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        setMargins(binding.fabSearchResultActivity,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                (int) Utils.convertDpToPixel(16, SearchResultActivity.this) + allInsets.right,
-                                (int) Utils.convertDpToPixel(16, SearchResultActivity.this) + allInsets.bottom);
-
-                        setMargins(binding.tabLayoutSearchResultActivity,
-                                allInsets.left,
-                                BaseActivity.IGNORE_MARGIN,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        return insets;
-                    }
-                });
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(binding.toolbarSearchResultActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.viewPagerSearchResultActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    setMargins(binding.fabSearchResultActivity,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            (int) Utils.convertDpToPixel(16, SearchResultActivity.this) + allInsets.right,
+                            (int) Utils.convertDpToPixel(16, SearchResultActivity.this) + allInsets.bottom);
+
+                    setMargins(binding.tabLayoutSearchResultActivity,
+                            allInsets.left,
+                            BaseActivity.IGNORE_MARGIN,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    return insets;
+                }
+            });
         }
 
         setSupportActionBar(binding.toolbarSearchResultActivity);

@@ -65,39 +65,37 @@ public class SearchUsersResultActivity extends BaseActivity implements ActivityT
 
         attachSliderPanelIfApplicable();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutSearchUsersResultActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutSearchUsersResultActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(binding.toolbarSearchUsersResultActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.frameLayoutSearchUsersResultActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+
+                    return insets;
                 }
-
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(binding.toolbarSearchUsersResultActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.frameLayoutSearchUsersResultActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
-
-                        return insets;
-                    }
-                });
-                //adjustToolbar(binding.toolbarSearchUsersResultActivity);
-            }
+            });
+            //adjustToolbar(binding.toolbarSearchUsersResultActivity);
         }
 
         setSupportActionBar(binding.toolbarSearchUsersResultActivity);

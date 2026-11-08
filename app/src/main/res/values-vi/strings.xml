@@ -428,8 +428,6 @@ Nhấn để thử lại."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Nút Vote ở bên phải"</string>
     <string name="settings_mute_video_title">"Tắt tiếng Video"</string>
     <string name="settings_mute_nsfw_video_title">"Tắt tiếng NSFW Video"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Bỏ qua thanh điều hướng trong trình phát video"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Ngăn trình điều khiển video có thêm lề"</string>
     <string name="settings_main_page_back_button_action">"Trang chủ nút quay lại hành động"</string>
     <string name="settings_confirm_to_exit">"Xác nhận để thoát"</string>
     <string name="settings_open_navigation_drawer">"Mở ngăn điều hướng"</string>

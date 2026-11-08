@@ -70,47 +70,45 @@ public class UserMultiselectionActivity extends BaseActivity implements Activity
 
         applyCustomTheme();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutUsersMultiselectionActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutUsersMultiselectionActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                                    | WindowInsetsCompat.Type.displayCutout()
+                    );
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                    setMargins(binding.toolbarSubscribedUsersMultiselectionActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.recyclerViewSubscribedSubscribedUsersMultiselectionActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+
+                    return WindowInsetsCompat.CONSUMED;
                 }
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = insets.getInsets(
-                                WindowInsetsCompat.Type.systemBars()
-                                        | WindowInsetsCompat.Type.displayCutout()
-                        );
+            });
+            //adjustToolbar(binding.toolbarSubscribedUsersMultiselectionActivity);
 
-                        setMargins(binding.toolbarSubscribedUsersMultiselectionActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
+            //int navBarHeight = getNavBarHeight();
 
-                        binding.recyclerViewSubscribedSubscribedUsersMultiselectionActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
-
-                        return WindowInsetsCompat.CONSUMED;
-                    }
-                });
-                //adjustToolbar(binding.toolbarSubscribedUsersMultiselectionActivity);
-
-                //int navBarHeight = getNavBarHeight();
-
-                //if (navBarHeight > 0) {
-                //    binding.recyclerViewSubscribedSubscribedUsersMultiselectionActivity.setPadding(0, 0, 0, navBarHeight);
-                //}
-            }
+            //if (navBarHeight > 0) {
+            //    binding.recyclerViewSubscribedSubscribedUsersMultiselectionActivity.setPadding(0, 0, 0, navBarHeight);
+            //}
         }
 
         setSupportActionBar(binding.toolbarSubscribedUsersMultiselectionActivity);

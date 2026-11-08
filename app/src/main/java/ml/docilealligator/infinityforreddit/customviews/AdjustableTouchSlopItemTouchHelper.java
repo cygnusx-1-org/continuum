@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
@@ -107,7 +106,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
 
     private static final String TAG = "ItemTouchHelper";
 
-    private static final boolean DEBUG = false;
 
     private static final int ACTIVE_POINTER_ID_NONE = -1;
 
@@ -247,7 +245,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
     /**
      * If drag & drop is supported, we use child drawing order to bring them to front.
      */
-    private RecyclerView.ChildDrawingOrderCallback mChildDrawingOrderCallback = null;
 
     /**
      * This keeps a reference to the child dragged by the user. Even after user stops dragging,
@@ -281,9 +278,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView,
                                              @NonNull MotionEvent event) {
             mGestureDetector.onTouchEvent(event);
-            if (DEBUG) {
-                Log.d(TAG, "intercept: x:" + event.getX() + ",y:" + event.getY() + ", " + event);
-            }
             final int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 mActivePointerId = event.getPointerId(0);
@@ -310,9 +304,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
                 // in a non scroll orientation, if distance change is above threshold, we
                 // can select the item
                 final int index = event.findPointerIndex(mActivePointerId);
-                if (DEBUG) {
-                    Log.d(TAG, "pointer index " + index);
-                }
                 if (index >= 0) {
                     checkSelectForSwipe(action, event, index);
                 }
@@ -326,10 +317,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         @Override
         public void onTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent event) {
             mGestureDetector.onTouchEvent(event);
-            if (DEBUG) {
-                Log.d(TAG,
-                        "on touch: x:" + mInitialTouchX + ",y:" + mInitialTouchY + ", :" + event);
-            }
             if (mVelocityTracker != null) {
                 mVelocityTracker.addMovement(event);
             }
@@ -562,7 +549,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
             // child but that should perform good enough as it is very hard to start dragging a
             // new child before the previous one settles.
             mOverdrawChild = selected.itemView;
-            addChildDrawingOrderCallback();
         }
         int actionStateMask = (1 << (DIRECTION_FLAG_COUNT + DIRECTION_FLAG_COUNT * actionState))
                 - 1;
@@ -1272,40 +1258,10 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         return 0;
     }
 
-    private void addChildDrawingOrderCallback() {
-        if (Build.VERSION.SDK_INT >= 21) {
-            return; // we use elevation on Lollipop
-        }
-        if (mChildDrawingOrderCallback == null) {
-            mChildDrawingOrderCallback = new RecyclerView.ChildDrawingOrderCallback() {
-                @Override
-                public int onGetChildDrawingOrder(int childCount, int i) {
-                    if (mOverdrawChild == null) {
-                        return i;
-                    }
-                    int childPosition = mOverdrawChildPosition;
-                    if (childPosition == -1) {
-                        childPosition = mRecyclerView.indexOfChild(mOverdrawChild);
-                        mOverdrawChildPosition = childPosition;
-                    }
-                    if (i == childCount - 1) {
-                        return childPosition;
-                    }
-                    return i < childPosition ? i : i + 1;
-                }
-            };
-        }
-        mRecyclerView.setChildDrawingOrderCallback(mChildDrawingOrderCallback);
-    }
-
     @SuppressWarnings({"WeakerAccess", "ReferenceEquality"}) /* synthetic access */
     void removeChildDrawingOrderCallbackIfNecessary(View view) {
         if (view == mOverdrawChild) {
             mOverdrawChild = null;
-            // only remove if we've added
-            if (mChildDrawingOrderCallback != null) {
-                mRecyclerView.setChildDrawingOrderCallback(null);
-            }
         }
     }
 
@@ -2340,10 +2296,6 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
                         mInitialTouchX = x;
                         mInitialTouchY = y;
                         mDx = mDy = 0f;
-                        if (DEBUG) {
-                            Log.d(TAG,
-                                    "onlong press: x:" + mInitialTouchX + ",y:" + mInitialTouchY);
-                        }
                         if (mCallback.isLongPressDragEnabled()) {
                             select(vh, ACTION_STATE_DRAG);
                         }
@@ -2480,15 +2432,13 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
                 int actionState,
                 boolean isCurrentlyActive
         ) {
-            if (Build.VERSION.SDK_INT >= 21) {
-                if (isCurrentlyActive) {
-                    Object originalElevation = view.getTag(R.id.item_touch_helper_previous_elevation);
-                    if (originalElevation == null) {
-                        originalElevation = ViewCompat.getElevation(view);
-                        float newElevation = 1f + findMaxElevation(recyclerView, view);
-                        ViewCompat.setElevation(view, newElevation);
-                        view.setTag(R.id.item_touch_helper_previous_elevation, originalElevation);
-                    }
+            if (isCurrentlyActive) {
+                Object originalElevation = view.getTag(R.id.item_touch_helper_previous_elevation);
+                if (originalElevation == null) {
+                    originalElevation = ViewCompat.getElevation(view);
+                    float newElevation = 1f + findMaxElevation(recyclerView, view);
+                    ViewCompat.setElevation(view, newElevation);
+                    view.setTag(R.id.item_touch_helper_previous_elevation, originalElevation);
                 }
             }
 
@@ -2528,13 +2478,11 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
 
         @Override
         public void clearView(@NonNull View view) {
-            if (Build.VERSION.SDK_INT >= 21) {
-                final Object tag = view.getTag(R.id.item_touch_helper_previous_elevation);
-                if (tag instanceof Float) {
-                    ViewCompat.setElevation(view, (Float) tag);
-                }
-                view.setTag(R.id.item_touch_helper_previous_elevation, null);
+            final Object tag = view.getTag(R.id.item_touch_helper_previous_elevation);
+            if (tag instanceof Float) {
+                ViewCompat.setElevation(view, (Float) tag);
             }
+            view.setTag(R.id.item_touch_helper_previous_elevation, null);
 
             view.setTranslationX(0f);
             view.setTranslationY(0f);

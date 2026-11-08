@@ -175,46 +175,44 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
         attachSliderPanelIfApplicable();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.appbarLayoutViewMultiRedditDetailActivity);
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.appbarLayoutViewMultiRedditDetailActivity);
+        }
+
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false);
+            } else {
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    setMargins(fab,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            (int) Utils.convertDpToPixel(16,
+                            ViewMultiRedditDetailActivity.this) + allInsets.right,
+                                    (int) Utils.convertDpToPixel(16, ViewMultiRedditDetailActivity.this) + allInsets.bottom);
+
+                    binding.frameLayoutViewMultiRedditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    setMargins(binding.toolbarViewMultiRedditDetailActivity,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    return insets;
                 }
+            });
 
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        setMargins(fab,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                (int) Utils.convertDpToPixel(16,
-                                ViewMultiRedditDetailActivity.this) + allInsets.right,
-                                        (int) Utils.convertDpToPixel(16, ViewMultiRedditDetailActivity.this) + allInsets.bottom);
-
-                        binding.frameLayoutViewMultiRedditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        setMargins(binding.toolbarViewMultiRedditDetailActivity,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        return insets;
-                    }
-                });
-
-            }
         }
 
         initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);

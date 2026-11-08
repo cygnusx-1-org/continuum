@@ -3,8 +3,6 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 import android.app.WallpaperManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.media.ThumbnailUtils;
-import android.os.Build;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -29,9 +27,6 @@ public class SetAsWallpaper {
                     int height = metrics.heightPixels;
                     int width = metrics.widthPixels;
 
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        bitmapFinal = ThumbnailUtils.extractThumbnail(bitmapFinal, width, height);
-                    }
 
                     float imageAR = (float) bitmapFinal.getWidth() / (float) bitmapFinal.getHeight();
                     float screenAR = (float) width / (float) height;
@@ -47,21 +42,13 @@ public class SetAsWallpaper {
                 try {
                     switch (setTo) {
                         case WallpaperSetter.HOME_SCREEN:
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_SYSTEM);
-                            }
+                            manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_SYSTEM);
                             break;
                         case WallpaperSetter.LOCK_SCREEN:
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_LOCK);
-                            }
+                            manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_LOCK);
                             break;
                         case WallpaperSetter.BOTH_SCREENS:
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
-                            } else {
-                                manager.setBitmap(bitmapFinal);
-                            }
+                            manager.setBitmap(bitmapFinal, rect, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
                             break;
                     }
 

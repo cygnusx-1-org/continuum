@@ -432,8 +432,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"வலதில் வாக்குப் பொத்தான்கள்"</string>
     <string name="settings_mute_video_title">"காணொளிகளை ஒளியடக்கு"</string>
     <string name="settings_mute_nsfw_video_title">"மியூட் NSFW வீடியோக்கள்"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"காணொளி இயக்கியில் வழிசெலுத்தல் பட்டையைப் புறக்கணி"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"வீடியோ கன்ட்ரோலருக்கு கூடுதல் விளிம்பு இருப்பதைத் தடுக்கவும்"</string>
     <string name="settings_main_page_back_button_action">"முதன்மை பக்கம் பின் பட்டன் செயல்"</string>
     <string name="settings_confirm_to_exit">"வெளியேற உறுதிசெய்"</string>
     <string name="settings_open_navigation_drawer">"வழிசெலுத்தல் அலமாரியைத் திற"</string>

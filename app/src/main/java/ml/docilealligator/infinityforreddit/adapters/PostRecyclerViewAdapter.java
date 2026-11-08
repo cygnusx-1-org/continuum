@@ -430,7 +430,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE,
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE);
             mCompactThumbnailBoxSizePx = Math.round(mCompactThumbnailSizeDp * mScale);
-            mGalleryGridCellInsetPx = resources.getDimensionPixelSize(R.dimen.staggeredLayoutManagerItemOffset) / 2;
+            mGalleryGridCellInsetPx = resources.getDimensionPixelSize(R.dimen.galleryGridItemOffset) / 2;
             mGlide = Glide.with(mActivity);
             mMaxResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
             mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
@@ -2751,6 +2751,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /** Carries a muting choice made on one video to every video bound in the list. */
+    @OptIn(markerClass = UnstableApi.class)
     public void applyMuteToVideos(RecyclerView recyclerView, boolean mute) {
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(recyclerView.getChildAt(i));

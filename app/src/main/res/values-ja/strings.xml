@@ -434,8 +434,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"評価ボタンを右側に表示"</string>
     <string name="settings_mute_video_title">"動画をミュート再生"</string>
     <string name="settings_mute_nsfw_video_title">"NSFW ビデオをミュート"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"動画プレーヤーでナビゲーションバーを無視"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"動画コントローラーが余分な余白を使用することを防止します"</string>
     <string name="settings_main_page_back_button_action">"メイン ページの戻るボタンのアクション"</string>
     <string name="settings_confirm_to_exit">"アプリの終了確認を表示"</string>
     <string name="settings_open_navigation_drawer">"ナビゲーションドロワーを開く"</string>

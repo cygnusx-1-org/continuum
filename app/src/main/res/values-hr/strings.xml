@@ -426,8 +426,6 @@
     <string name="settings_vote_buttons_on_the_right_title">"Tipke za glasanje na desnoj strani"</string>
     <string name="settings_mute_video_title">"Isključi ton na videozapisima"</string>
     <string name="settings_mute_nsfw_video_title">"Isključi zvuk NSFW Videozapisi"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignoriraj navigacijsku traku u video playeru"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Onemogući dodatnu marginu na video kontroleru"</string>
     <string name="settings_main_page_back_button_action">"Glavna stranica gumb Natrag Radnja"</string>
     <string name="settings_confirm_to_exit">"Potvrdi izlaz"</string>
     <string name="settings_open_navigation_drawer">"Otvor navigacijsku ladicu"</string>

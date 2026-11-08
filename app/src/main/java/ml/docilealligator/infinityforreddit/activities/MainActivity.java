@@ -356,60 +356,58 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         applyCustomTheme();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = getWindow();
+        Window window = getWindow();
 
-            if (isChangeStatusBarIconColor()) {
-                addOnOffsetChangedListener(binding.includedAppBar.appbarLayoutMainActivity);
-            }
+        if (isChangeStatusBarIconColor()) {
+            addOnOffsetChangedListener(binding.includedAppBar.appbarLayoutMainActivity);
+        }
 
-            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
-                binding.drawerLayout.setStatusBarBackgroundColor(Color.TRANSPARENT);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    binding.drawerLayout.setFitsSystemWindows(false);
-                    window.setDecorFitsSystemWindows(false);
-                } else {
-                    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-                }
-
-                ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
-                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
-                    @NonNull
-                    @Override
-                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
-
-                        binding.navigationViewMainActivity.setPadding(allInsets.left, 0, 0, 0);
-
-                        setMargins(fab,
-                                BaseActivity.IGNORE_MARGIN,
-                                BaseActivity.IGNORE_MARGIN,
-                                (int) Utils.convertDpToPixel(16,
-                                MainActivity.this) + allInsets.right,
-                                        (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.bottom);
-
-                        binding.includedAppBar.viewPagerMainActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
-
-                        setMargins(binding.includedAppBar.toolbar,
-                                allInsets.left,
-                                allInsets.top,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        setMargins(binding.includedAppBar.tabLayoutMainActivity,
-                                allInsets.left,
-                                BaseActivity.IGNORE_MARGIN,
-                                allInsets.right,
-                                BaseActivity.IGNORE_MARGIN);
-
-                        binding.navDrawerFooterMainActivity.setPadding(0, 0, 0, allInsets.bottom);
-                        return insets;
-                    }
-                });
-
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
+            binding.drawerLayout.setStatusBarBackgroundColor(Color.TRANSPARENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                binding.drawerLayout.setFitsSystemWindows(false);
+                window.setDecorFitsSystemWindows(false);
             } else {
-                binding.drawerLayout.setStatusBarBackgroundColor(mCustomThemeWrapper.getColorPrimaryDark());
+                window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             }
+
+            ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
+
+                    binding.navigationViewMainActivity.setPadding(allInsets.left, 0, 0, 0);
+
+                    setMargins(fab,
+                            BaseActivity.IGNORE_MARGIN,
+                            BaseActivity.IGNORE_MARGIN,
+                            (int) Utils.convertDpToPixel(16,
+                            MainActivity.this) + allInsets.right,
+                                    (int) Utils.convertDpToPixel(16, MainActivity.this) + allInsets.bottom);
+
+                    binding.includedAppBar.viewPagerMainActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
+
+                    setMargins(binding.includedAppBar.toolbar,
+                            allInsets.left,
+                            allInsets.top,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    setMargins(binding.includedAppBar.tabLayoutMainActivity,
+                            allInsets.left,
+                            BaseActivity.IGNORE_MARGIN,
+                            allInsets.right,
+                            BaseActivity.IGNORE_MARGIN);
+
+                    binding.navDrawerFooterMainActivity.setPadding(0, 0, 0, allInsets.bottom);
+                    return insets;
+                }
+            });
+
+        } else {
+            binding.drawerLayout.setStatusBarBackgroundColor(mCustomThemeWrapper.getColorPrimaryDark());
         }
 
         setSupportActionBar(binding.includedAppBar.toolbar);

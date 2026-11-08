@@ -330,7 +330,7 @@ internal object PreloadWindow {
     const val MIN_AHEAD = 12
 
     /**
-     * However many fit, no more than this. A tablet's staggered grid can show thirty rows at once, and
+     * However many fit, no more than this. A tall tablet window of compact rows can show thirty at once, and
      * two screens of those would push the thumbnails the user is about to reach out of the cache.
      */
     const val MAX_AHEAD = 40

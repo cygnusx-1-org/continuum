@@ -435,8 +435,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Abstimmungsknöpfe auf der rechten Seite"</string>
     <string name="settings_mute_video_title">"Videos stummschalten"</string>
     <string name="settings_mute_nsfw_video_title">"NSFW-Videos stummschalten"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Navigationsleiste im Video-Player ignorieren"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Kein extra Rand beim Video-Controller"</string>
     <string name="settings_main_page_back_button_action">"Hauptseite Zurück-Tasten Aktion"</string>
     <string name="settings_confirm_to_exit">"Verlassen bestätigen"</string>
     <string name="settings_open_navigation_drawer">"Navigationsleiste öffnen"</string>

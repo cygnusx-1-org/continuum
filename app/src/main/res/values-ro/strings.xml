@@ -435,8 +435,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_vote_buttons_on_the_right_title">"Butoanele de vot în partea dreaptă"</string>
     <string name="settings_mute_video_title">"Oprire sunet videoclipuri"</string>
     <string name="settings_mute_nsfw_video_title">"Dezactivează NSFW Videoclipuri"</string>
-    <string name="settings_video_player_ignore_nav_bar_title">"Ignoră bara de navigare în player-ul video"</string>
-    <string name="settings_video_player_ignore_nav_bar_summary">"Împiedică player-ul video din a avea margine suplimentară"</string>
     <string name="settings_main_page_back_button_action">"Acțiune Butonului Înapoi în Pagina Principală"</string>
     <string name="settings_confirm_to_exit">"Confirmare ieșire"</string>
     <string name="settings_open_navigation_drawer">"Deschide Panoul de Navigare"</string>
