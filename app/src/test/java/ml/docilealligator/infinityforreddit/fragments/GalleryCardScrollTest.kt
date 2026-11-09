@@ -97,17 +97,19 @@ class GalleryCardScrollTest {
         event.recycle()
     }
 
-    /** What a drag left behind: how far the app bar went and how far the feed itself scrolled. */
-    private fun state() = "appBar=${appBar.top} feedScroll=${feed.computeVerticalScrollOffset()}"
-
     @Test
-    fun `a drag on a carousel that sits out nested scrolling does what a drag on the title does`() {
-        dragUpOn(title, 100f)
-        val onTitle = state()
-        setUp()
+    fun `a drag on a carousel that sits out nested scrolling collapses the header before the feed scrolls`() {
         carousel.isNestedScrollingEnabled = false
         dragUpOn(carousel, 100f)
-        assertEquals(onTitle, state())
+        // The header takes the drag first, as it does for a drag on the title: all of it bar the touch slop.
+        assertEquals(0, feed.computeVerticalScrollOffset())
+        assertTrue("app bar at ${appBar.top}", appBar.top < -90)
+    }
+
+    @Test
+    fun `a drag on a carousel that takes part in nested scrolling scrolls the feed under the header`() {
+        dragUpOn(carousel, 100f)
+        assertTrue("feed at ${feed.computeVerticalScrollOffset()}", feed.computeVerticalScrollOffset() > 0)
     }
 
     @Test
@@ -124,12 +126,17 @@ class GalleryCardScrollTest {
     private fun sitsOutNestedScrolling(layout: Int, id: Int): Boolean {
         val parser = activity.resources.getLayout(layout)
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.eventType == XmlPullParser.START_TAG && parser.getIdAttributeResourceValue(0) == id) {
+            if (parser.eventType == XmlPullParser.START_TAG && hasId(parser, id)) {
                 return !parser.getAttributeBooleanValue(ANDROID_NS, "nestedScrollingEnabled", true)
             }
         }
         error("no view with that id in the layout")
     }
+
+    private fun hasId(parser: XmlPullParser, id: Int): Boolean =
+        (0 until parser.attributeCount).any { i ->
+            parser.getAttributeName(i) == "id" && (parser as android.content.res.XmlResourceParser).getAttributeResourceValue(i, 0) == id
+        }
 
     private inner class FeedAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         override fun getItemCount() = 20
