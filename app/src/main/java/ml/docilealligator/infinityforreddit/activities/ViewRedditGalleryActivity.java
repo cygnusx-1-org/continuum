@@ -121,7 +121,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     // Resume where I left off: which item of the gallery was open. The gallery itself replays in the
     // extras, so this needs no network of its own.
     private int resumePage = -1;
-    private boolean verticalSwipe;
     // Whether each row of the scrolling list shows its place in the gallery.
     private boolean showImageNumbers;
     private boolean showingList;
@@ -264,16 +263,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         isNsfw = post.isNSFW();
 
         autoplayMedia = shouldAutoplayMedia();
-        // Settings > Post > Gallery. With the first on, a swipe left goes back to the posts and a swipe
-        // right opens the post and its comments, as it does with the second.
-        verticalSwipe = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_VERTICAL_SWIPE, false);
+        // Settings > Post > Gallery Viewer.
         boolean scrollList = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_SCROLLING_LIST, false);
         showImageNumbers = sharedPreferences.getBoolean(SharedPreferencesUtils.GALLERY_IMAGE_NUMBERS, true);
-        binding.viewPagerViewRedditGalleryActivity.setVertical(verticalSwipe);
-        binding.viewPagerViewRedditGalleryActivity.setKeepsDrag(this::isPictureZoomedIn);
-        if (verticalSwipe || scrollList) {
-            // An up or down drag changes image or scrolls the list, so it cannot also close the
-            // gallery; a swipe left does that.
+        if (scrollList) {
+            // An up or down drag scrolls the list, so it cannot also close the gallery; a swipe left
+            // does that.
             binding.haulerViewViewRedditGalleryActivity.setDragEnabled(false);
             sideSwipeDetector = new GestureDetector(this, new SideSwipeListener());
         } else if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
@@ -307,14 +302,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
     /**
      * A swipe left goes back to the posts and a swipe right opens the post and its comments,
-     * wherever the swipe is on the screen. Only while nothing here pages sideways -- the list, or the pager
-     * when it pages up and down -- and not while a picture is zoomed in, where a sideways drag
-     * pans it.
+     * wherever the swipe is on the screen. Only on the list: the pager pages sideways itself.
      */
     private class SideSwipeListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onFling(@Nullable MotionEvent down, @NonNull MotionEvent up, float velocityX, float velocityY) {
-            if (down == null || !(showingList || verticalSwipe) || isPictureZoomedIn()) {
+            if (down == null || !showingList) {
                 return false;
             }
             float distanceX = up.getX() - down.getX();
@@ -333,17 +326,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             }
             return true;
         }
-    }
-
-    private boolean isPictureZoomedIn() {
-        if (showingList) {
-            return false;
-        }
-        Fragment current = getSupportFragmentManager().findFragmentByTag(
-                "android:switcher:" + binding.viewPagerViewRedditGalleryActivity.getId()
-                        + ":" + binding.viewPagerViewRedditGalleryActivity.getCurrentItem());
-        return current instanceof ViewRedditGalleryImageOrGifFragment
-                && ((ViewRedditGalleryImageOrGifFragment) current).isZoomedIn();
     }
 
     private class GalleryListAdapter extends RecyclerView.Adapter<GalleryListViewHolder> {

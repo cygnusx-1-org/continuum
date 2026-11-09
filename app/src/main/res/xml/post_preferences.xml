@@ -152,12 +152,6 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
-        app:key="media_focused_vertical_gallery_swipe"
-        app:summary="@string/settings_gallery_vertical_swipe_summary"
-        app:title="@string/settings_gallery_vertical_swipe_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="media_focused_scrolling_gallery"
         app:summary="@string/settings_gallery_scrolling_list_summary"
         app:title="@string/settings_gallery_scrolling_list_title" />

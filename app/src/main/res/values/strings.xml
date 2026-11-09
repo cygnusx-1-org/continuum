@@ -948,8 +948,6 @@
     <string name="post_layout_card_3">Card Top</string>
     <string name="post_layout_media_focused">Media Focused</string>
     <string name="settings_category_gallery_viewer_title">Gallery Viewer</string>
-    <string name="settings_gallery_vertical_swipe_title">Swipe Up and Down Through a Gallery</string>
-    <string name="settings_gallery_vertical_swipe_summary">Change image by swiping up and down instead of sideways. Swipe left to go back to the posts and right to open the post and its comments</string>
     <string name="settings_gallery_scrolling_list_title">Scrolling Gallery</string>
     <string name="settings_gallery_scrolling_list_summary">A gallery opens as one scrolling list of every image, and a tap opens an image. GIFs and videos play by themselves as they scroll into view, under the Video Autoplay settings. Swipe left to go back to the posts and right to open the post and its comments</string>
     <string name="settings_gallery_image_numbers_title">Image Numbers</string>

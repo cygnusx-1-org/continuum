@@ -335,15 +335,6 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         applyRotation();
     }
 
-    /**
-     * Whether the picture is zoomed in, where a sideways drag pans it rather than swiping the
-     * gallery away.
-     */
-    public boolean isZoomedIn() {
-        SubsamplingScaleImageView ssiv = binding.imageViewViewRedditGalleryImageOrGifFragment.getSSIV();
-        return ssiv != null && ssiv.isReady() && ssiv.getScale() > ssiv.getMinScale() * 1.02f;
-    }
-
     private void applyRotation() {
         SubsamplingScaleImageView ssiv = binding.imageViewViewRedditGalleryImageOrGifFragment.getSSIV();
         if (media.mediaType != Post.Gallery.TYPE_GIF && ssiv != null) {

@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.31 / 2026-11-8
+============
+**Removed**
+* Swipe Up and Down Through a Gallery, in Settings > Post > Gallery Viewer. It never worked well, and the Scrolling Gallery does the job. The gallery opens as the usual swipe viewer again unless Scrolling Gallery is on
+
+---
+
 8.3.3.9.1.30 / 2026-11-8
 ============
 **Fixed**
