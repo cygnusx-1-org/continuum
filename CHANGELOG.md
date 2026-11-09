@@ -2,6 +2,19 @@
 
 ---
 
+8.3.3.9.1.32 / 2026-11-9
+============
+**Fixed**
+* Mute Videos now also applies to videos playing in the feed and in a post. Before, it only reached the full-screen player, so turning it on and Mute Autoplaying Videos off still played sound in the feed
+* Remember Mute no longer lifts Mute Videos or Mute NSFW Videos in a post. Unmuting a video in the feed or a post used to un-silence NSFW videos the setting is meant to keep quiet
+* Tapping a mute button no longer flips the Mute Autoplaying Videos switch in Settings. The remembered choice is kept separately, and changing that switch, or turning Remember Mute on, starts from the setting again
+* Mute settings are read each time a video starts, so a post that is open no longer keeps the values from when it opened
+
+**Changed**
+* The four mute settings sit together at the top of Settings > Video
+
+---
+
 8.3.3.9.1.31 / 2026-11-8
 ============
 **Removed**

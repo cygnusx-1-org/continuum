@@ -73,6 +73,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeHideTheNumberOfVotesEve
 import ml.docilealligator.infinityforreddit.events.ChangeLongPressToHideToolbarInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteAutoplayingVideosEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteNSFWVideoEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeMuteVideoEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeOnlyDisablePreviewInVideoAndGifPostsEvent;
@@ -546,6 +547,16 @@ public abstract class PostFragmentBase extends Fragment {
     @Nullable
     public final Boolean getMasterMutingOption() {
         return mVideoMuteManager.getMasterMutingOption();
+    }
+
+    /** Mute Videos, or Mute NSFW Videos on an NSFW post: silent whatever the remembered choice is. */
+    public final boolean forcesMute(boolean isNsfw) {
+        return mVideoMuteManager.forcesMute(isNsfw);
+    }
+
+    /** Whether an autoplaying video begins silent. */
+    public final boolean startsMuted(boolean isNsfw) {
+        return mVideoMuteManager.startsMuted(isNsfw);
     }
 
     public final void videoAutoplayChangeMutingOption(boolean isMute) {
@@ -1147,9 +1158,9 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Subscribe
     public void onChangeMuteAutoplayingVideosEvent(ChangeMuteAutoplayingVideosEvent changeMuteAutoplayingVideosEvent) {
-        mVideoMuteManager.setMuted(changeMuteAutoplayingVideosEvent.muteAutoplayingVideos);
+        // The setting is the starting state again, so a choice remembered from a tap is dropped.
+        mVideoMuteManager.forgetRememberedMute();
         if (getPostAdapter() != null) {
-            getPostAdapter().setMuteAutoplayingVideos(changeMuteAutoplayingVideosEvent.muteAutoplayingVideos);
             refreshAdapter();
         }
     }
@@ -1157,6 +1168,16 @@ public abstract class PostFragmentBase extends Fragment {
     @Subscribe
     public void onChangeRememberMutingOptionInPostFeedEvent(ChangeRememberMutingOptionInPostFeedEvent event) {
         mVideoMuteManager.setRememberMuteOption(event.rememberMutingOptionInPostFeedEvent);
+        if (getPostAdapter() != null) {
+            refreshAdapter();
+        }
+    }
+
+    @Subscribe
+    public void onChangeMuteVideoEvent(ChangeMuteVideoEvent event) {
+        if (getPostAdapter() != null) {
+            refreshAdapter();
+        }
     }
 
     @Subscribe
@@ -1216,7 +1237,6 @@ public abstract class PostFragmentBase extends Fragment {
     @Subscribe
     public void onChangeMuteNSFWVideoEvent(ChangeMuteNSFWVideoEvent changeMuteNSFWVideoEvent) {
         if (getPostAdapter() != null) {
-            getPostAdapter().setMuteNSFWVideo(changeMuteNSFWVideoEvent.muteNSFWVideo);
             refreshAdapter();
         }
     }

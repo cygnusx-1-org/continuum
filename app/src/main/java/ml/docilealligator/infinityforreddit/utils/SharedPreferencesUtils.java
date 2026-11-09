@@ -303,6 +303,7 @@ public class SharedPreferencesUtils {
     public static final String APPLY_MATERIAL_YOU = "apply_material_you";
     public static final String VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION = "video_player_automatic_landscape_orientation";
     public static final String REMEMBER_MUTING_OPTION_IN_POST_FEED = "remember_muting_option_in_post_feed";
+    public static final String REMEMBERED_MUTE_STATE = "remembered_mute_state";
     public static final String DEFAULT_LINK_POST_LAYOUT_KEY = "default_link_post_layout";
     public static final String HIDE_ACCOUNT_KARMA_NAV_BAR = "hide_account_karma";
     public static final String LOCK_SCREEN_ANIMATION = "lock_screen_animation";

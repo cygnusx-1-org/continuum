@@ -234,12 +234,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mShowAbsoluteNumberOfVotes;
     private boolean mAutoplay = false;
     private boolean mAutoplayNsfwVideos;
-    private boolean mMuteAutoplayingVideos;
     private boolean mShowThumbnailOnTheLeftInCompactLayout;
     private boolean mHidePostTypeIndicator;
     private boolean mHideImageCountInGallery;
     private double mStartAutoplayVisibleAreaOffset;
-    private boolean mMuteNSFWVideo;
     private boolean mLongPressToHideToolbarInCompactLayout;
     private boolean mCompactLayoutToolbarHiddenByDefault;
     private boolean mDataSavingMode = false;
@@ -327,7 +325,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 mAutoplay = networkType == Utils.NETWORK_TYPE_WIFI;
             }
             mAutoplayNsfwVideos = sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true);
-            mMuteAutoplayingVideos = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_AUTOPLAYING_VIDEOS, true);
             mShowThumbnailOnTheLeftInCompactLayout = sharedPreferences.getBoolean(
                     SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
             mHidePostTypeIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false);
@@ -337,8 +334,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mStartAutoplayVisibleAreaOffset = resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
                     sharedPreferences.getInt(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT, 75) / 100.0 :
                     sharedPreferences.getInt(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_LANDSCAPE, 50) / 100.0;
-
-            mMuteNSFWVideo = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_NSFW_VIDEO, false);
 
             mLongPressToHideToolbarInCompactLayout = sharedPreferences.getBoolean(SharedPreferencesUtils.LONG_PRESS_TO_HIDE_TOOLBAR_IN_COMPACT_LAYOUT, false);
             mCompactLayoutToolbarHiddenByDefault = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_COMPACT_LAYOUT_TOOLBAR_HIDDEN_BY_DEFAULT, false);
@@ -1216,13 +1211,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 .listener(toroPlayer.previewRequestListener)
                                 .into(toroPlayer.previewImageView);
                     }
-                    asVideo.toroPlayer.setForceMuted(post.isNSFW() && mMuteNSFWVideo);
+                    asVideo.toroPlayer.setForceMuted(mFragment.forcesMute(post.isNSFW()));
                     if (!asVideo.toroPlayer.isManuallyPaused) {
-                        if (mFragment.getMasterMutingOption() == null) {
-                            asVideo.toroPlayer.setVolume(mMuteAutoplayingVideos || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
-                        } else {
-                            asVideo.toroPlayer.setVolume(mFragment.getMasterMutingOption() || (post.isNSFW() && mMuteNSFWVideo) ? 0f : 1f);
-                        }
+                        asVideo.toroPlayer.setVolume(mFragment.startsMuted(post.isNSFW()) ? 0f : 1f);
                     }
 
                     asVideo.toroPlayer.loadVideo();
@@ -2761,10 +2752,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
-    public void setMuteAutoplayingVideos(boolean muteAutoplayingVideos) {
-        mMuteAutoplayingVideos = muteAutoplayingVideos;
-    }
-
     public void setShowThumbnailOnTheLeftInCompactLayout(boolean showThumbnailOnTheLeftInCompactLayout) {
         mShowThumbnailOnTheLeftInCompactLayout = showThumbnailOnTheLeftInCompactLayout;
     }
@@ -2775,10 +2762,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setStartAutoplayVisibleAreaOffset(double startAutoplayVisibleAreaOffset) {
         this.mStartAutoplayVisibleAreaOffset = startAutoplayVisibleAreaOffset / 100.0;
-    }
-
-    public void setMuteNSFWVideo(boolean muteNSFWVideo) {
-        this.mMuteNSFWVideo = muteNSFWVideo;
     }
 
     public void setLongPressToHideToolbarInCompactLayout(boolean longPressToHideToolbarInCompactLayout) {

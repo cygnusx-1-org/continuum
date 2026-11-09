@@ -207,9 +207,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mShowAbsoluteNumberOfVotes;
     private boolean mAutoplay = false;
     private final boolean mAutoplayNsfwVideos;
-    private final boolean mMuteAutoplayingVideos;
     private final double mStartAutoplayVisibleAreaOffset;
-    private final boolean mMuteNSFWVideo;
     private boolean mDataSavingMode;
     private final boolean mDisableImagePreview;
     private final boolean mOnlyDisablePreviewInVideoAndGifPosts;
@@ -344,14 +342,11 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             mAutoplay = networkType == Utils.NETWORK_TYPE_WIFI;
         }
         mAutoplayNsfwVideos = sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true);
-        mMuteAutoplayingVideos = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_AUTOPLAYING_VIDEOS, true);
 
         Resources resources = activity.getResources();
         mStartAutoplayVisibleAreaOffset = resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
                 sharedPreferences.getInt(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT, 75) / 100.0 :
                 sharedPreferences.getInt(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_LANDSCAPE, 50) / 100.0;
-
-        mMuteNSFWVideo = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_NSFW_VIDEO, false);
 
         String dataSavingModeString = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
@@ -989,11 +984,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     // silently re-muted a video they had just unmuted.
                     ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume(manuallyMuted ? 0f : 1f);
                 } else if (!((PostDetailBaseVideoAutoplayViewHolder) holder).isManuallyPaused) {
-                    if (mVideoMuteManager.getRememberMuteOption()) {
-                        ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume(mVideoMuteManager.isMuted() ? 0f : 1f);
-                    } else {
-                        ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume((mMuteAutoplayingVideos || (mPost.isNSFW() && mMuteNSFWVideo)) ? 0f : 1f);
-                    }
+                    ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume(mVideoMuteManager.startsMuted(mPost.isNSFW()) ? 0f : 1f);
                 }
 
                 /*if (mPost.isRedgifs() && !mPost.isLoadedStreamableVideoAlready()) {
@@ -3052,7 +3043,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
                                 if (mimeType != null && mimeType.contains("audio")) {
                                     if (mVideoMuteManager.getMasterMutingOption() != null) {
-                                        volume = mVideoMuteManager.getMasterMutingOption() ? 0f : 1f;
+                                        // Remembering the reader's choice never lifts Mute Videos
+                                        // or Mute NSFW Videos, as it does not in the feed.
+                                        volume = mVideoMuteManager.getMasterMutingOption()
+                                                || mVideoMuteManager.forcesMute(mPost.isNSFW()) ? 0f : 1f;
                                     }
                                     helper.setVolume(volume);
                                     muteButton.setVisibility(View.VISIBLE);
