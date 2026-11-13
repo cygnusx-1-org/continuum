@@ -49,6 +49,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     private static final String TAG = "APIKeysPrefFragment";
     private static final int CLIENT_ID_LENGTH = 22;
     private static final int GIPHY_API_KEY_LENGTH = 32;
+    private static final String PENDING_RESTART_STATE = "pending_restart_state";
 
     @Inject
     @Named("default")
@@ -70,7 +71,12 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mRestartOnBackCallback = new OnBackPressedCallback(false) {
+        // A rotation recreates the fragment; without this the pending restart was forgotten and
+        // leaving the screen kept the values read at startup.
+        if (savedInstanceState != null) {
+            mPendingRestart = savedInstanceState.getBoolean(PENDING_RESTART_STATE, false);
+        }
+        mRestartOnBackCallback = new OnBackPressedCallback(mPendingRestart) {
             @Override
             public void handleOnBackPressed() {
                 AppRestartHelper.triggerAppRestart(requireContext());
@@ -135,6 +141,12 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(PENDING_RESTART_STATE, mPendingRestart);
+    }
+
+    @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         PreferenceManager preferenceManager = getPreferenceManager();
         // Use default shared preferences file for client ID
@@ -159,6 +171,31 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             Log.e(TAG, "Could not find Enable Overrides preference: " + SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY);
             return;
         }
+
+        // The switch picks which Client ID, User Agent and Redirect URI are used, and the last two
+        // are read once at startup (APIUtils.initConfigurableFields), so flipping it has to restart
+        // the app just as editing any of them does. Otherwise getClientId() follows the switch at
+        // once while REDIRECT_URI keeps the startup value, and the next login sends one app's Client
+        // ID with another's Redirect URI, which Reddit refuses as an invalid redirect_uri.
+        enableOverridesPref.setOnPreferenceChangeListener((preference, newValue) -> {
+            // Committed by hand, like the fields below: the restart kills the process, and the
+            // framework's own write is an apply() that may not have reached disk by then.
+            SharedPreferences prefs = preference.getContext().getSharedPreferences(
+                    SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+            boolean success = prefs.edit()
+                    .putBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, (Boolean) newValue)
+                    .commit();
+            if (!success) {
+                // Refusing the change leaves the switch where it was, so it doesn't show a state
+                // that was never saved.
+                Log.e(TAG, "Failed to save Enable Overrides.");
+                return false;
+            }
+            markRestartPendingAndWarn();
+            // True lets the framework flip the switch and enable or disable the rows depending on it.
+            return true;
+        });
+
         String summary = getString(R.string.settings_enable_api_key_overrides_summary);
         String highlight = "RedReader";
         int start = summary.lastIndexOf(highlight);
