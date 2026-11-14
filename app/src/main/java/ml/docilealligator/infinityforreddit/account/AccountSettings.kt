@@ -81,9 +81,6 @@ object AccountSettings {
      * removed, so the two accounts end up agreeing rather than the destination keeping a setting
      * the source never had. Runs one way — the source file entries are only ever read.
      *
-     * Anonymous can be a destination but is never offered as a source, which is a rule of the
-     * picker rather than of this code; passing it as one would work.
-     *
      * Blocking. Call it off the main thread.
      */
     @SuppressLint("ApplySharedPref")

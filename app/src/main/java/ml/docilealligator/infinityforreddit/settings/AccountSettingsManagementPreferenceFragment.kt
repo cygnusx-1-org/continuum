@@ -57,27 +57,30 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
         val resetAccountSettingsPreference =
             findPreference<Preference>(SharedPreferencesUtils.RESET_ACCOUNT_SETTINGS)
 
-        if (copySettingsPreference != null) {
+        // Anonymous is offered as a source, so a signed-in account always has somebody to copy from.
+        // Anonymous itself has somebody only once an account has been added.
+        val isAnonymous = Account.isAnonymous(mActivity.accountName)
+        val accountViewModel = ViewModelProvider(this,
+            AccountViewModel.Factory(executor, redditDataRoomDatabase))[AccountViewModel::class.java]
+        accountViewModel.accountsExceptCurrentAccountLiveData.observe(this) { accounts ->
+            val hasAnother = !isAnonymous || !accounts.isNullOrEmpty()
+
             // Disabled rather than hidden when there is nobody to copy from: the row keeps its place
             // in the group, so the rounded corners below it do not move with the account count.
-            val accountViewModel = ViewModelProvider(this,
-                AccountViewModel.Factory(executor, redditDataRoomDatabase))[AccountViewModel::class.java]
-            accountViewModel.accountsExceptCurrentAccountLiveData.observe(this) { accounts ->
-                val hasAnother = !accounts.isNullOrEmpty()
-                copySettingsPreference.isEnabled = hasAnother
-                copySettingsPreference.setSummary(
-                    if (hasAnother) R.string.settings_copy_settings_from_account_summary
-                    else R.string.settings_copy_settings_from_account_no_other_summary)
-            }
+            copySettingsPreference?.isEnabled = hasAnother
+            copySettingsPreference?.setSummary(
+                if (hasAnother) R.string.settings_copy_settings_from_account_summary
+                else R.string.settings_copy_settings_from_account_no_other_summary)
+        }
 
-            copySettingsPreference.setOnPreferenceClickListener {
-                val fragment = AccountChooserBottomSheetFragment()
-                fragment.arguments = Bundle().apply {
-                    putBoolean(AccountChooserBottomSheetFragment.EXTRA_EXCLUDE_CURRENT_ACCOUNT, true)
-                }
-                fragment.show(parentFragmentManager, fragment.tag)
-                true
+        copySettingsPreference?.setOnPreferenceClickListener {
+            val fragment = AccountChooserBottomSheetFragment()
+            fragment.arguments = Bundle().apply {
+                putBoolean(AccountChooserBottomSheetFragment.EXTRA_EXCLUDE_CURRENT_ACCOUNT, true)
+                putBoolean(AccountChooserBottomSheetFragment.EXTRA_INCLUDE_ANONYMOUS, true)
             }
+            fragment.show(parentFragmentManager, fragment.tag)
+            true
         }
 
         resetAccountSettingsPreference?.setOnPreferenceClickListener {
