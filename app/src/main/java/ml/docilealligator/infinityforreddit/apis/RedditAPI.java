@@ -98,8 +98,10 @@ public interface RedditAPI {
     Call<String> searchUsers(@Query("q") String profileName, @Query("after") @Nullable String after,
                              @Query("sort") SortType.Type sort, @Query("include_over_18") int nsfw);
 
+    // raw_json=1: the response's comment/message body is parsed into the local model, and without it
+    // Reddit html-escapes '>', '<' and '&', which then surface as "&gt;" in Edit (issue #497).
     @FormUrlEncoded
-    @POST("api/comment")
+    @POST("api/comment?raw_json=1")
     Call<String> sendCommentOrReplyToMessage(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
 
     @FormUrlEncoded
@@ -153,8 +155,10 @@ public interface RedditAPI {
     @POST(".")
     Call<String> uploadMediaToAWS(@PartMap() Map<String, RequestBody> params, @Part() MultipartBody.Part file);
 
+    // raw_json=1: an edited comment's returned body replaces the local one; see
+    // sendCommentOrReplyToMessage (issue #497).
     @FormUrlEncoded
-    @POST("/api/editusertext")
+    @POST("/api/editusertext?raw_json=1")
     Call<String> editPostOrComment(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
 
     @FormUrlEncoded
