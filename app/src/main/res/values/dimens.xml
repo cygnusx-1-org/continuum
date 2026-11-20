@@ -18,9 +18,11 @@
     <dimen name="shadowbox_panel_icon_size">24dp</dimen>
     <!-- Width the comment score column is given when the toolbar has room for it, matching
          upstream Infinity's fixed 64dp column: the arrows then sit the same distance apart
-         whether the score reads "6" or "11356". It is a minimum, not a width, and CommentToolbar
-         gives it up as its first compaction step, so a row that cannot afford it falls back to
-         the score's own width rather than dropping a button. Override per screen-size qualifier
-         if a wider column is ever wanted on tablets. -->
+         whether the score reads "6" or "11356". It is a minimum, not a width, so a score wider
+         than it still fits. CommentToolbar swaps it for a narrower fixed column, measured from
+         the widest score text, at any width where a comment with every optional item (chevron
+         and child-count badge included) could not afford it - for every row at that width, with
+         replies or without, so neighbouring rows keep their arrows on the same pixels. Override
+         per screen-size qualifier if a wider column is ever wanted on tablets. -->
     <dimen name="comment_score_min_width">64dp</dimen>
 </resources>
