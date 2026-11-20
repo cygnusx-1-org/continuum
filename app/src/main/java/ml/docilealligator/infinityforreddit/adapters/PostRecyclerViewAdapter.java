@@ -6319,6 +6319,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             super(itemView);
         }
 
+        /**
+         * Moves the thumbnail down to meet the title's capital letters (issue #500). Called after
+         * {@link #setBaseView}, which applies the title typeface the offset is measured from; the
+         * title's size and typeface never change after that, so one offset serves every post the
+         * holder binds. Compact and Compact 2 only: the Card 2 compact-link rows extend this holder
+         * too, but they centre the thumbnail instead of pinning it to the top, so a top margin would
+         * move theirs by half the offset.
+         */
+        void alignThumbnailToTitle() {
+            CompactTitleAlignment.alignThumbnailsToTitle(titleTextView, relativeLayout,
+                    noPreviewPostImageFrameLayout);
+        }
+
         void setupUsernameView(BadgedNameTextView usernameTextView) {
             this.usernameTextView = usernameTextView;
 
@@ -6724,6 +6737,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCompact,
                     binding.dividerItemPostCompact);
             setupUsernameView(binding.usernameTextViewItemPostCompact);
+            alignThumbnailToTitle();
         }
     }
 
@@ -6761,6 +6775,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCompactRightThumbnail,
                     binding.dividerItemPostCompactRightThumbnail);
             setupUsernameView(binding.usernameTextViewItemPostCompactRightThumbnail);
+            alignThumbnailToTitle();
         }
     }
 
@@ -6872,6 +6887,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     binding.dividerItemPostCompact2);
             setupUsernameView(binding.usernameTextViewItemPostCompact2);
+            alignThumbnailToTitle();
         }
     }
 
@@ -6909,6 +6925,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     binding.dividerItemPostCompact2RightThumbnail);
             setupUsernameView(binding.usernameTextViewItemPostCompact2RightThumbnail);
+            alignThumbnailToTitle();
         }
     }
 

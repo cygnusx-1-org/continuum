@@ -107,7 +107,8 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -156,7 +157,8 @@
             android:background="@drawable/thumbnail_compact_layout_rounded_edge"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0">
 
             <ImageView
                 android:id="@+id/image_view_no_preview_link_item_post_compact"
@@ -187,7 +189,9 @@
             app:layout_constraintBottom_toTopOf="@id/flow_layout_item_post_compact"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/barrier2"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed" />
 
         <com.nex3z.flowlayout.FlowLayout
             android:id="@+id/flow_layout_item_post_compact"
