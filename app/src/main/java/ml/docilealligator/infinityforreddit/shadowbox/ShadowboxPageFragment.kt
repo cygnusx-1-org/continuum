@@ -324,10 +324,18 @@ abstract class ShadowboxPageFragment : Fragment() {
      * builds its player before this screen's onStop. A prepared player holds a hardware decoder
      * whether or not it is playing, and low-end devices have few; three pages' worth sitting
      * underneath is what made the full viewer's own player fail to open on those.
+     *
+     * The host also calls it on every page change for each page more than one away from the one in
+     * front. The pager keeps more pages built than its offscreen limit asks for, and a page held
+     * there for nothing must not keep a decoder and a buffer either. Calling it on a page that has
+     * already let go does nothing.
      */
     open fun releaseMedia() {}
 
-    /** The screen is back in front: build back whatever [releaseMedia] let go of. */
+    /**
+     * The screen is back in front, or this page is back within one of the page in front: build
+     * back whatever [releaseMedia] let go of. Does nothing on a page that has not let anything go.
+     */
     open fun restoreMedia() {}
 
     /** The page's panel has been built and bound; a page can add its own controls to it here. */

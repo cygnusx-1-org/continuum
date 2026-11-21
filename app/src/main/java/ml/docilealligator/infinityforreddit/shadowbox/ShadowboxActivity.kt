@@ -48,6 +48,7 @@ import retrofit2.Retrofit
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.math.abs
 
 /**
  * Shadowbox Mode: a fullscreen pager that flips through the current feed one post per page.
@@ -232,7 +233,9 @@ class ShadowboxActivity : BaseActivity() {
         // megabytes decoded -- cannot be held in Glide's memory cache across two neighbours to
         // make up for it. A page built early has its pictures in its own views, which no cache
         // evicts. The cost is that a video page either side prepares its player, the same trade
-        // the feed makes for autoplay.
+        // the feed makes for autoplay -- held to a few seconds of buffer while it waits, by
+        // ShadowboxLoadControl, and let go of once the page drifts further off; see
+        // retainMediaNear.
         binding.viewPager2ShadowboxActivity.offscreenPageLimit = 1
         launchPosition = launchPosition.coerceIn(0, posts.size - 1)
         val launchPage = adapter.pageForPostIndex(launchPosition)
@@ -283,6 +286,7 @@ class ShadowboxActivity : BaseActivity() {
             fetchMorePosts()
         }
         stopPlaybackExcept(postIndex)
+        retainMediaNear(page)
         if (postIndex in posts.indices) {
             markPostRead(posts[postIndex], postIndex)
         }
@@ -298,6 +302,30 @@ class ShadowboxActivity : BaseActivity() {
         for (fragment in supportFragmentManager.fragments) {
             if (fragment is ShadowboxPageFragment && fragment.position != postIndex) {
                 fragment.pausePlayback()
+            }
+        }
+    }
+
+    /**
+     * Lets go of the media on every page more than [MEDIA_RETENTION_PAGES] from [page], and builds
+     * back what an earlier call let go of on the pages within it.
+     *
+     * The offscreen limit is not the number of pages alive. The pager's RecyclerView also keeps the
+     * last pages it scrolled past in its view cache, and FragmentStateAdapter lets a page's fragment
+     * go only once its view leaves that cache. Through a run of video posts, those pages kept their
+     * players prepared and their buffers full behind the user.
+     */
+    private fun retainMediaNear(page: Int) {
+        val adapter = this.adapter ?: return
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment !is ShadowboxPageFragment) {
+                continue
+            }
+            val distance = abs(adapter.pageForPostIndex(fragment.position) - page)
+            if (distance <= MEDIA_RETENTION_PAGES) {
+                fragment.restoreMedia()
+            } else {
+                fragment.releaseMedia()
             }
         }
     }
@@ -532,11 +560,8 @@ class ShadowboxActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        for (fragment in supportFragmentManager.fragments) {
-            if (fragment is ShadowboxPageFragment) {
-                fragment.restoreMedia()
-            }
-        }
+        // Only the pages within reach get their media back; onPause let go of every page's.
+        retainMediaNear(binding.viewPager2ShadowboxActivity.currentItem)
     }
 
     override fun onPause() {
@@ -578,5 +603,8 @@ class ShadowboxActivity : BaseActivity() {
 
         /** How many fetches this mode's filter may empty before it stops asking for more. */
         private const val MAX_BARREN_FETCHES = 5
+
+        /** How many pages either side of the one in front keep their media; matches the offscreen limit. */
+        private const val MEDIA_RETENTION_PAGES = 1
     }
 }

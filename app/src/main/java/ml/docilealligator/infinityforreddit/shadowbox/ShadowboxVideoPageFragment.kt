@@ -184,6 +184,9 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         this.trackSelector = trackSelector
         val player = ExoPlayer.Builder(host)
             .setTrackSelector(trackSelector)
+            // Its own, not the default: a page buffers while it waits to be swiped to, and at the
+            // default buffer a few waiting pages ran the heap out. See ShadowboxLoadControl.
+            .setLoadControl(ShadowboxLoadControl())
             .setRenderersFactory(DefaultRenderersFactory(host).setEnableDecoderFallback(true))
             .setSeekBackIncrementMs(Constants.VIDEO_SEEK_BACK_INCREMENT_MS)
             .setSeekForwardIncrementMs(Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS)
@@ -299,6 +302,8 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     override fun releaseMedia() {
+        // Also how a page that was never revealed, or was already let go, is left alone: the host
+        // calls this on every page change for every page out of reach, not only once.
         if (player == null) {
             return
         }
