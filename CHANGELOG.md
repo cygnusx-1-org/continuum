@@ -2,6 +2,12 @@
 
 ---
 
+8.4.0.1 / 2026-11-23
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+Restarted the app on Enable Overrides toggle to fix redirect_uri login errors
+
 8.3.3.9.3 / 2026-11-13
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
