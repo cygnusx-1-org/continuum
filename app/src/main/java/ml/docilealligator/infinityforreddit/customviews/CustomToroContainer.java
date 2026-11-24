@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.widget.Container;
 
 public class CustomToroContainer extends Container {
     private final Rect occluderRect = new Rect();

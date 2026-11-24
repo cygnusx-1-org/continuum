@@ -2,8 +2,8 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class DeleteTheme {
 

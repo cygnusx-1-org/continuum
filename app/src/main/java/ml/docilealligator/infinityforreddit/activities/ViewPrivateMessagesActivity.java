@@ -24,11 +24,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.PrivateMessagesDetailRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewPrivateMessagesBinding;
 import ml.docilealligator.infinityforreddit.events.PassPrivateMessageEvent;
 import ml.docilealligator.infinityforreddit.events.PassPrivateMessageIndexEvent;
@@ -113,17 +113,26 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                     Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                    binding.getRoot().setPadding(
+                            0,
+                            0,
+                            0,
+                            allInsets.bottom
+                    );
+
                     setMargins(binding.toolbarViewPrivateMessagesActivity,
                             allInsets.left,
                             allInsets.top,
                             allInsets.right,
-                            BaseActivity.IGNORE_MARGIN);
+                            BaseActivity.IGNORE_MARGIN
+                    );
 
                     binding.linearLayoutViewPrivateMessagesActivity.setPadding(
                             allInsets.left,
                             0,
                             allInsets.right,
-                            allInsets.bottom);
+                            0
+                    );
 
                     return insets;
                 }

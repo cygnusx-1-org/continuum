@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.post
 import android.net.Uri
 import android.os.Handler
 import androidx.annotation.WorkerThread
-import ml.docilealligator.infinityforreddit.FetchVideoLinkListener
+import ml.docilealligator.infinityforreddit.video.FetchVideoLinkListener
 import ml.docilealligator.infinityforreddit.utils.HtmlBodyUtils
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils
 import okhttp3.Call

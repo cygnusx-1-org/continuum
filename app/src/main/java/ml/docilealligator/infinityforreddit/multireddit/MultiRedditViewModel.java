@@ -8,7 +8,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import java.util.List;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class MultiRedditViewModel extends ViewModel {
     private final MultiRedditRepository mMultiRedditRepository;

@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import java.util.List;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class CommentFilterUsageViewModel extends ViewModel {
     private final LiveData<List<CommentFilterUsage>> mCommentFilterUsageListLiveData;

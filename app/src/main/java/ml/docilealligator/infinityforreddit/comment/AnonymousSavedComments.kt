@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.comment
 import android.content.Context
 import androidx.annotation.WorkerThread
 import ml.docilealligator.infinityforreddit.Infinity
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 

@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.fragments;
 
-import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo.INDEX_UNSET;
-import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo.TIME_UNSET;
+import static ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo.INDEX_UNSET;
+import static ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo.TIME_UNSET;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -66,9 +66,9 @@ import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
-import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
-import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
-import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoCreator;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.media.VolumeInfo;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

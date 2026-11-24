@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.recentsearchquery;
 import android.os.Handler;
 import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 
 public class InsertRecentSearchQuery {

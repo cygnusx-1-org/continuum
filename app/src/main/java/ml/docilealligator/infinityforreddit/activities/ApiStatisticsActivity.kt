@@ -10,7 +10,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.adapters.ApiStatListItem
 import ml.docilealligator.infinityforreddit.adapters.ApiStatisticsRecyclerViewAdapter
 import ml.docilealligator.infinityforreddit.adapters.WindowValue

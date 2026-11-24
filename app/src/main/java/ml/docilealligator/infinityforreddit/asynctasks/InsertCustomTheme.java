@@ -3,8 +3,8 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 
 public class InsertCustomTheme {

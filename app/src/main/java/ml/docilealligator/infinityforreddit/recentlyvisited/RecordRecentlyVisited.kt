@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.recentlyvisited
 import android.content.SharedPreferences
 import java.util.Locale
 import java.util.concurrent.Executor
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils

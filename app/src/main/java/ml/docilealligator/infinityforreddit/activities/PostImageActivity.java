@@ -39,7 +39,6 @@ import javax.inject.Named;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.FlairRequirementController;
@@ -48,6 +47,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserB
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityPostImageBinding;
 import ml.docilealligator.infinityforreddit.events.SubmitImagePostEvent;
 import ml.docilealligator.infinityforreddit.events.SubmitVideoOrGifPostEvent;
@@ -173,6 +173,13 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                     Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                    binding.getRoot().setPadding(
+                            0,
+                            0,
+                            0,
+                            allInsets.bottom
+                    );
+
                     setMargins(binding.toolbarPostImageActivity,
                             allInsets.left,
                             allInsets.top,
@@ -183,7 +190,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
                             allInsets.left,
                             0,
                             allInsets.right,
-                            allInsets.bottom
+                            0
                     );
 
                     return WindowInsetsCompat.CONSUMED;

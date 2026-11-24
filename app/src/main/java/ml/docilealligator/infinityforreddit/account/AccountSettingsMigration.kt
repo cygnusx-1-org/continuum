@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import java.util.concurrent.Executor
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.DisableNsfwForeverMigration
 import ml.docilealligator.infinityforreddit.utils.OldApiInfoMigration
 import ml.docilealligator.infinityforreddit.utils.SharedLinkDomainMigration

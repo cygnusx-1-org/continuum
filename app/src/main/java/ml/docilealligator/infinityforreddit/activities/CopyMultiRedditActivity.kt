@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -55,12 +54,12 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.bumptech.glide.request.RequestOptions
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlinx.coroutines.launch
-import ml.docilealligator.infinityforreddit.ActionState
-import ml.docilealligator.infinityforreddit.ActionStateError
-import ml.docilealligator.infinityforreddit.DataLoadState
+import ml.docilealligator.infinityforreddit.state.ActionState
+import ml.docilealligator.infinityforreddit.state.ActionStateError
+import ml.docilealligator.infinityforreddit.state.DataLoadState
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.customviews.compose.AppTheme
 import ml.docilealligator.infinityforreddit.customviews.compose.CustomLoadingIndicator
@@ -214,7 +213,7 @@ class CopyMultiRedditActivity : BaseActivity() {
                     contentWindowInsets = if (isImmersiveInterfaceEnabled) WindowInsets.safeDrawing else WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                 ) { innerPadding ->
                     when(multiRedditState) {
-                        is DataLoadState.Loading -> {
+                        is DataLoadState.Idle, DataLoadState.Loading -> {
                             Box(modifier = Modifier
                                 .fillMaxSize()
                                 .background(Color(LocalAppTheme.current.backgroundColor))

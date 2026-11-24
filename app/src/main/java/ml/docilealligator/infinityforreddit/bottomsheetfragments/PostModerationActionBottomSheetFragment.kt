@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
-import ml.docilealligator.infinityforreddit.PostModerationActionHandler
+import ml.docilealligator.infinityforreddit.moderation.PostModerationActionHandler
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment
 import ml.docilealligator.infinityforreddit.databinding.FragmentModerationActionBottomSheetBinding

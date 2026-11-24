@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.customviews.compose
 
+import android.R.attr.contentDescription
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable

@@ -1218,7 +1218,7 @@ public class ParsePost {
             post.setPostType(Post.VIDEO_TYPE);
             post.setIsStreamable(true);
             post.setVideoUrl(url);
-            post.setStreamableShortCode(url.substring(url.lastIndexOf("/") + 1));
+            post.setStreamableShortCode(Uri.parse(url).getLastPathSegment());
             return;
         }
 

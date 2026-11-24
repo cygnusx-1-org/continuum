@@ -11,7 +11,7 @@ import java.io.File
 import java.io.ObjectInputStream
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.BuildConfig
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData

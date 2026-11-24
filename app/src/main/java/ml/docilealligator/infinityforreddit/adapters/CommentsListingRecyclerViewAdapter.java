@@ -32,7 +32,6 @@ import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
 import java.util.Locale;
 import java.util.Objects;
-import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -71,6 +70,7 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntr
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
+import ml.docilealligator.infinityforreddit.state.NetworkState;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;

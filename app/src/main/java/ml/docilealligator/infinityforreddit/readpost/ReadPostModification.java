@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.readpost;
 
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class ReadPostModification {
     public static void insertReadPost(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,

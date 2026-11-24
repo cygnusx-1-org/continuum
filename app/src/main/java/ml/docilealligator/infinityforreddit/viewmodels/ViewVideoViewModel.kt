@@ -13,13 +13,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import ml.docilealligator.infinityforreddit.AppResult
+import ml.docilealligator.infinityforreddit.result.AppResult
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.VReddItReturnType
+import ml.docilealligator.infinityforreddit.video.VReddItReturnType
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt
 import ml.docilealligator.infinityforreddit.extensions.getFileNameFromUrlString
-import ml.docilealligator.infinityforreddit.fetchVideoLink
+import ml.docilealligator.infinityforreddit.video.fetchVideoLink
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo
 import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils

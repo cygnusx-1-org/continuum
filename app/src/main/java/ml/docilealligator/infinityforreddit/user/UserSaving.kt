@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.user
 
 import android.os.Handler
 import java.util.concurrent.Executor
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 
 /**
  * Saving a user: purely local, never a Reddit call, and available while logged out.

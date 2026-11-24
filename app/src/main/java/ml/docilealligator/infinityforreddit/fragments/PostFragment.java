@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.fragments;
 
-import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo.INDEX_UNSET;
-import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo.TIME_UNSET;
+import static ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo.INDEX_UNSET;
+import static ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo.TIME_UNSET;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -48,7 +48,6 @@ import kotlin.jvm.functions.Function1;
 import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubredditNames;
 import ml.docilealligator.infinityforreddit.Infinity;
-import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -79,6 +78,7 @@ import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragme
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
+import ml.docilealligator.infinityforreddit.moderation.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.post.FeedCache;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
@@ -101,9 +101,9 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
-import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
-import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
-import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoCreator;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.media.VolumeInfo;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

@@ -79,7 +79,6 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.account.AccountViewModel;
@@ -97,6 +96,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.SortTypeBottomS
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityMainBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
@@ -577,6 +577,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     } else {
                         setEnabled(false);
                         triggerBackPress();
+                        setEnabled(true);
                     }
                 }
             }
@@ -1129,6 +1130,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             }
                         } else if (stringId == R.string.reminders) {
                             intent = new Intent(MainActivity.this, ReminderListingActivity.class);
+                        } else if (stringId == R.string.mod_mail) {
+                            intent = new Intent(MainActivity.this, ModMailActivity.class);
                         } else if (stringId == R.string.light_theme) {
                             mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_LIGHT).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);

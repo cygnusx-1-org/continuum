@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.CustomizeThemeRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.ServerAPI;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteTheme;
@@ -37,6 +36,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeSettingsItem;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.OnlineCustomThemeMetadata;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomizeThemeBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -359,7 +359,7 @@ public class CustomizeThemeActivity extends BaseActivity {
             ArrayList<CustomThemeSettingsItem> settingsItems = customThemeSettingsItems;
             if (settingsItems == null) {
                 // The online download has not landed yet; there is nothing to preview.
-                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
             Intent intent = new Intent(this, CustomThemePreviewActivity.class);
@@ -374,12 +374,12 @@ public class CustomizeThemeActivity extends BaseActivity {
                 // Either the database read or the online download is still in flight, so there is
                 // nothing to save yet. Both halves report the same way; a bare `adapter != null`
                 // check used to make the database case a silent no-op.
-                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
             themeName = themeAdapter.getThemeName();
             if (themeName.equals("")) {
-                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.no_theme_name, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), R.string.no_theme_name, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
             CustomTheme customTheme = CustomTheme.convertSettingsItemsToCustomTheme(settingsItems, themeName);
@@ -542,7 +542,7 @@ public class CustomizeThemeActivity extends BaseActivity {
         if (isFinishing() || isDestroyed()) {
             return;
         }
-        Snackbar.make(binding.coordinatorCustomizeThemeActivity,
+        Snackbar.make(binding.getRoot(),
                 getString(R.string.theme_name_already_taken, themeName),
                 Snackbar.LENGTH_LONG).show();
     }
@@ -656,7 +656,7 @@ public class CustomizeThemeActivity extends BaseActivity {
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeActivity,
                 binding.collapsingToolbarLayoutCustomizeThemeActivity, binding.toolbarCustomizeThemeActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeThemeActivity);
-        binding.coordinatorCustomizeThemeActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         binding.progressBarCustomizeThemeActivity.setIndicatorColor(mCustomThemeWrapper.getColorAccent());
     }
 }

@@ -123,6 +123,13 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                     Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                    binding.getRoot().setPadding(
+                            0,
+                            0,
+                            0,
+                            allInsets.bottom
+                    );
+
                     setMargins(binding.toolbarEditPostActivity,
                             allInsets.left,
                             allInsets.top,
@@ -133,7 +140,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                             allInsets.left,
                             0,
                             allInsets.right,
-                            allInsets.bottom
+                            0
                     );
 
                     return WindowInsetsCompat.CONSUMED;
@@ -171,7 +178,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 finish();
             } else if (result instanceof EditPostResult.Failure) {
                 String message = ((EditPostResult.Failure) result).getMessage();
-                Snackbar.make(binding.coordinatorLayoutEditPostActivity,
+                Snackbar.make(binding.getRoot(),
                         message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -237,7 +244,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
 
     @Override
     protected void applyCustomTheme() {
-        binding.coordinatorLayoutEditPostActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutEditPostActivity, null, binding.toolbarEditPostActivity);
         binding.postTitleTextViewEditPostActivity.setTextColor(mCustomThemeWrapper.getPostTitleColor());
         binding.dividerEditPostActivity.setBackgroundColor(mCustomThemeWrapper.getPostTitleColor());
@@ -287,7 +294,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         if (isSubmitting) {
             return;
         }
-        Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(binding.getRoot(), R.string.posting, Snackbar.LENGTH_SHORT).show();
         editPostViewModel.editPost(mAccessToken, mFullName,
                 binding.postContentEditTextEditPostActivity.getText().toString());
     }
@@ -304,7 +311,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, false);
+                        binding.getRoot(), imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -313,7 +320,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, true);
+                        binding.getRoot(), imageUri, uploadedImages, true);
                 // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
                 // field pointing at a URI that is about to be removed.
                 capturedImageUri = null;

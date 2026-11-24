@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.apis
 import ml.docilealligator.infinityforreddit.thing.SortType
 import retrofit2.Call
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
@@ -348,5 +349,72 @@ interface RedditAPIKt {
     suspend fun getInfoOauth(
         @Query("id") id: String,
         @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
+    @GET("/api/mod/conversations")
+    suspend fun getModMailConversations(
+        @HeaderMap headers: Map<String, String>,
+        @Query("state") state: String,
+        @Query("sort") sort: String,
+        @Query("after") after: String?
+    ): Response<String>
+
+    @GET("/api/mod/conversations/{id}")
+    suspend fun getModMailConversation(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
+    @FormUrlEncoded
+    @POST("/api/mod/conversations/{id}")
+    suspend fun replyToModMailConversation(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>,
+        @FieldMap params: Map<String, String>
+    ): Response<String>
+
+    @POST("/api/mod/conversations/{id}/{action}")
+    suspend fun executeModMailConversationAction(
+        @Path("id") id: String,
+        @Path("action") action: String,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
+    @DELETE("/api/mod/conversations/{id}/highlight")
+    suspend fun unhighlightModMailConversation(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
+    @FormUrlEncoded
+    @POST("/api/mod/conversations/{action}")
+    suspend fun toggleModMailConversationsRead(
+        @Path("action") action: String,
+        @HeaderMap headers: Map<String, String>,
+        //A comma-separated list of items
+        @FieldMap params: Map<String, String>
+    ): Response<String>
+
+    @POST("/api/mod/conversations/{id}/{action}")
+    suspend fun executeModMailUserAction(
+        @Path("id") id: String,
+        @Path("action") action: String,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
+    @FormUrlEncoded
+    @POST("/api/mod/conversations/{id}/mute")
+    suspend fun muteModMailUserAction(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>,
+        @FieldMap params: Map<String, String>
+    ): Response<String>
+
+    @FormUrlEncoded
+    @POST("/api/mod/conversations/{id}/temp_ban")
+    suspend fun tempBanModMailUserAction(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>,
+        @FieldMap params: Map<String, String>
     ): Response<String>
 }

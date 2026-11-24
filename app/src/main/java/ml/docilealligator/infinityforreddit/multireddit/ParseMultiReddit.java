@@ -5,7 +5,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONException;

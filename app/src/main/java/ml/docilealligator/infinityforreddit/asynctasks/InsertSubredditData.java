@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 
 public class InsertSubredditData {

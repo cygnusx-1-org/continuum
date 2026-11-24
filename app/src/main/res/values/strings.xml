@@ -50,6 +50,7 @@
     <string name="comment_filter_preference_activity_label">Comment Filter</string>
     <string name="customize_comment_filter_activity_label">Customize Comment Filter</string>
     <string name="copy_multireddit_activity_label">Copy MultiReddit</string>
+    <string name="mod_mail_activity_label">ModMail</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -117,6 +118,10 @@
     <string name="action_back_content_description">Back</string>
     <string name="action_more_post_options">More Post Options</string>
     <string name="action_open_clipboard_reddit_link">Open Reddit Link in the Clipboard</string>
+    <string name="action_refresh_mod_mail_conversations">Refresh Conversations</string>
+    <string name="action_refresh_mod_mail_messages_in_conversation">Refresh Messages</string>
+    <string name="action_user_mod_action">User Actions</string>
+    <string name="action_view_user_info">View User Info</string>
 
     <string name="parse_json_response_error">Error occurred when parsing the JSON response</string>
     <string name="retrieve_token_error">Error Retrieving the token</string>
@@ -483,6 +488,7 @@
     <string name="label_account">Account</string>
     <string name="label_reddit">Reddit</string>
     <string name="label_post">Post</string>
+    <string name="label_moderation">Moderation</string>
     <string name="label_preferences">Preferences</string>
 
     <string name="account_switched">Account Switched. So all other pages are gone.</string>
@@ -2008,6 +2014,7 @@
     <string name="content_description_hidden">Hidden</string>
     <string name="content_description_saved">Saved</string>
     <string name="content_description_scan_qr_code">Scan QR code</string>
+    <string name="content_description_toolbar_menu_icon">Options</string>
 
     <string name="comment">Comment</string>
     <string name="enable_reply_notifications">Receive reply notifications</string>
@@ -2030,8 +2037,8 @@
     <string name="download_video">Download Video</string>
     <string name="download_all_gallery_images">Download All Gallery Images</string>
 
-    <string name="proxy_http">HTTP</string>
-    <string name="proxy_socks">SOCKS</string>
+    <string name="proxy_http" translatable="false">HTTP</string>
+    <string name="proxy_socks" translatable="false">SOCKS</string>
     <string name="proxy_direct">Direct</string>
 
     <string name="settings_backup_accounts_client_id_title">Backup Accounts and Client ID</string>
@@ -2144,4 +2151,61 @@
     <string name="reminder_time">Reminder time</string>
     <string name="reminder_already_set_for_post">You already have a reminder for this post at this time.</string>
     <string name="reminder_already_set_for_comment">You already have a reminder for this comment at this time.</string>
+
+    <string name="mod_mail">Mod Mail</string>
+    <string name="mod_mail_unread">Unread</string>
+    <string name="mod_mail_recent">Recent</string>
+    <string name="mod_mail_mod">Mod</string>
+    <string name="mod_mail_user">User</string>
+    <string name="refresh_conversation_failed">Cannot refresh the conversation</string>
+    <string name="could_not_load_mod_mail_with_reason">Couldn\'t load mod mail. Reason: %1$s.</string>
+    <string name="mods_only">Mods Only</string>
+    <string name="new_mod_mail_message_hint">Message</string>
+    <string name="mod_mail_reply_as_subreddit">Reply as subreddit</string>
+    <string name="mod_mail_reply_as">Reply as %1$s</string>
+    <string name="could_not_send_message">Could not send message.</string>
+    <string name="could_not_send_message_with_reason">Could not send message. Error: %1$s</string>
+    <string name="mod_action_highlighted_by">Highlighted by %1$s.</string>
+    <string name="mod_action_unhighlighted_by">Unhighlighted by %1$s.</string>
+    <string name="mod_action_archived_by">Archived by %1$s.</string>
+    <string name="mod_action_unarchived_by">Unarchived by %1$s.</string>
+    <string name="mod_action_reported_to_admins_by">Reported to admins by %1$s.</string>
+    <string name="mod_action_muted_by">Muted by %1$s.</string>
+    <string name="mod_action_unmuted_by">Unmuted by %1$s.</string>
+    <string name="mod_action_unknown_action_by">Unknown action by %1$s.</string>
+    <string name="mod_action_unknown_user">unknown user</string>
+    <string name="no_mod_mail">No mod mail.</string>
+    <string name="archive">Archive</string>
+    <string name="unarchive">Unarchive</string>
+    <string name="highlight">Highlight</string>
+    <string name="unhighlight">Unhighlight</string>
+    <string name="read">Read</string>
+    <string name="unread">Unread</string>
+    <string name="archived">Archived</string>
+    <string name="archive_failed">Failed to archive</string>
+    <string name="archive_failed_with_reason">Failed to archive. Error: %1$s</string>
+    <string name="unarchived">Unarchived</string>
+    <string name="unarchive_failed">Failed to unarchive</string>
+    <string name="unarchive_failed_with_reason">Failed to unarchive. Error: %1$s</string>
+    <string name="highlighted">Highlighted</string>
+    <string name="highlight_failed">Failed to highlight</string>
+    <string name="highlight_failed_with_reason">Failed to highlight. Error: %1$s</string>
+    <string name="unhighlighted">Unhighlighted</string>
+    <string name="unhighlight_failed">Failed to unhighlight</string>
+    <string name="unhighlight_failed_with_reason">Failed to unhighlight. Error: %1$s</string>
+    <string name="read_failed">Failed to read</string>
+    <string name="read_failed_with_reason">Failed to read. Error: %1$s</string>
+    <string name="unread_failed">Failed to unread</string>
+    <string name="unread_failed_with_reason">Failed to unread. Error: %1$s</string>
+    <string name="ban">Ban</string>
+    <string name="ban_user">Ban %1$s</string>
+    <string name="ban_reason_hint">Reason</string>
+    <string name="ban_duration_hint">Duration: (0 - 999) days</string>
+    <string name="perma_ban">Permanent Ban</string>
+    <string name="ban_mod_note_hint">Mod note</string>
+    <string name="ban_mod_note_description">Only mods can see this</string>
+    <string name="unban">Unban</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="remove_from_approved_users">Remove from approved users</string>
 </resources>

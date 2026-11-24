@@ -25,9 +25,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCreateMultiRedditBinding;
 import ml.docilealligator.infinityforreddit.multireddit.CreateMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit;
@@ -80,6 +80,13 @@ public class CreateMultiRedditActivity extends BaseActivity {
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                     Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                    binding.getRoot().setPadding(
+                            0,
+                            0,
+                            0,
+                            allInsets.bottom
+                    );
+
                     setMargins(binding.toolbarCreateMultiRedditActivity,
                             allInsets.left,
                             allInsets.top,
@@ -90,7 +97,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
                             allInsets.left,
                             0,
                             allInsets.right,
-                            allInsets.bottom
+                            0
                     );
 
                     return WindowInsetsCompat.CONSUMED;
@@ -153,7 +160,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
             Editable nameText = binding.multiRedditNameEditTextCreateMultiRedditActivity.getText();
             String name = nameText == null ? "" : nameText.toString();
             if (name.isEmpty()) {
-                Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.no_multi_reddit_name, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), R.string.no_multi_reddit_name, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
             Editable descriptionText = binding.descriptionEditTextCreateMultiRedditActivity.getText();
@@ -163,7 +170,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
                 String token = accessToken;
                 if (token == null) {
                     // The request would only 401; report it the way a rejected create reports.
-                    Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.create_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(), R.string.create_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
                     return true;
                 }
                 String jsonModel = new MultiRedditJSONModel(name, description,
@@ -179,9 +186,9 @@ public class CreateMultiRedditActivity extends BaseActivity {
                             @Override
                             public void failed(int errorCode) {
                                 if (errorCode == 409) {
-                                    Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.duplicate_multi_reddit, Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), R.string.duplicate_multi_reddit, Snackbar.LENGTH_SHORT).show();
                                 } else {
-                                    Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.create_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), R.string.create_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -196,7 +203,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
 
                             @Override
                             public void failed(int errorType) {
-                                Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.duplicate_multi_reddit, Snackbar.LENGTH_SHORT).show();
+                                Snackbar.make(binding.getRoot(), R.string.duplicate_multi_reddit, Snackbar.LENGTH_SHORT).show();
                             }
                         });
             }
@@ -242,7 +249,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
 
     @Override
     protected void applyCustomTheme() {
-        binding.coordinatorLayoutCreateMultiRedditActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCreateMultiRedditActivity,
                 binding.collapsingToolbarLayoutCreateMultiRedditActivity, binding.toolbarCreateMultiRedditActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCreateMultiRedditActivity);
@@ -268,7 +275,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
         binding.visibilityChipCreateMultiRedditActivity.setChipStrokeColor(ColorStateList.valueOf(mCustomThemeWrapper.getFilledCardViewBackgroundColor()));
 
         if (typeface != null) {
-            Utils.setFontToAllTextViews(binding.coordinatorLayoutCreateMultiRedditActivity, typeface);
+            Utils.setFontToAllTextViews(binding.getRoot(), typeface);
             binding.selectSubredditChipCreateMultiRedditActivity.setTypeface(typeface);
             binding.visibilityChipCreateMultiRedditActivity.setTypeface(typeface);
         }

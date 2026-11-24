@@ -115,7 +115,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
-import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
+import ml.docilealligator.infinityforreddit.video.videoautoplay.DurationAwareSeekPlayer;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewVideoViewModel;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;

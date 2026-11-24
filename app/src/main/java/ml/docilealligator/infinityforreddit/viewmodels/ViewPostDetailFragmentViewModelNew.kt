@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.paging.PagingSource
 import com.google.gson.Gson
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -24,10 +23,10 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import ml.docilealligator.infinityforreddit.AppResult
-import ml.docilealligator.infinityforreddit.PostDetailCommentsCache
+import ml.docilealligator.infinityforreddit.result.AppResult
+import ml.docilealligator.infinityforreddit.comment.PostDetailCommentsCache
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.RedditError
 import ml.docilealligator.infinityforreddit.SingleLiveEvent
 import ml.docilealligator.infinityforreddit.account.Account

@@ -13,7 +13,7 @@ import java.io.FileOutputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.util.concurrent.Executor
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper

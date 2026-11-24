@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.apimonitor
 
 import android.content.SharedPreferences
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit

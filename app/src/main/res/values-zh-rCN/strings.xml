@@ -14,7 +14,7 @@
     <string name="edit_comment_activity_label">"编辑评论"</string>
     <string name="view_message_activity_label">"收件箱"</string>
     <string name="settings_activity_label">"设置"</string>
-    <string name="account_saved_thing_activity_label">"已保存"</string>
+    <string name="account_saved_thing_activity_label">"已收藏"</string>
     <string name="create_multi_reddit_activity_label">"创建 MultiReddit"</string>
     <string name="subreddit_multiselection_activity_label">"选择多个版块"</string>
     <string name="user_multiselection_activity_label">"选择用户"</string>
@@ -41,7 +41,7 @@
     <string name="multireddit_selection_activity_label">"选择一个 MultiReddit"</string>
     <string name="post_gallery_activity_label">"相册帖"</string>
     <string name="wiki_activity_label">"维基"</string>
-    <string name="edit_profile_activity_label">"编辑档案"</string>
+    <string name="edit_profile_activity_label">"编辑个人主页"</string>
     <string name="post_poll_activity_label">"投票帖"</string>
     <string name="history_activity_read_posts_label">"已读帖子"</string>
     <string name="history_activity_subtitle">"存储在此设备上"</string>
@@ -54,7 +54,7 @@
     <string name="action_download">"下载"</string>
     <string name="action_refresh">"刷新"</string>
     <string name="action_add_comment">"添加评论"</string>
-    <string name="action_save_post">"保存帖子"</string>
+    <string name="action_save_post">"收藏帖子"</string>
     <string name="action_unsave_post">"取消保存帖子"</string>
     <string name="action_view_crosspost_parent">"查看转发原帖"</string>
     <string name="action_search">"搜索"</string>
@@ -144,7 +144,7 @@
     <string name="response_error_with_code_and_message">"响应错误：%1$d。留言：%2$s"</string>
     <string name="quarantined_subreddit">"隔离的 Reddit 子版块"</string>
     <string name="unknown_error">"未知错误"</string>
-    <string name="search_subreddits_error">"搜索子版块错误。
+    <string name="search_subreddits_error">"搜索版块错误。
 点击以重试。"</string>
     <string name="search_users_error">"搜索用户错误。
 点击以重试。"</string>
@@ -170,7 +170,7 @@
 %1$s"</string>
     <string name="since_info">"创建于：
 %1$s"</string>
-    <string name="profile">"档案"</string>
+    <string name="profile">"个人主页"</string>
     <string name="subscriptions">"订阅"</string>
     <string name="multi_reddit">"MultiReddit"</string>
     <string name="user_multi_reddit">"用户多reddit"</string>
@@ -193,10 +193,10 @@
     <string name="saved_user">"已保存"</string>
     <string name="inbox">"收件箱"</string>
     <string name="inbox_with_count">"收件箱 (%1$,d)"</string>
-    <string name="upvoted">"顶过"</string>
-    <string name="downvoted">"踩过"</string>
+    <string name="upvoted">"已赞"</string>
+    <string name="downvoted">"已踩"</string>
     <string name="hidden">"已隐藏"</string>
-    <string name="saved">"已保存"</string>
+    <string name="saved">"已收藏"</string>
     <string name="saved_posts">"已保存的帖子"</string>
     <string name="saved_comments">"已保存评论"</string>
     <string name="reminders">"提醒"</string>
@@ -359,9 +359,9 @@
     <string name="sort_hot">"热门"</string>
     <string name="sort_new">"最新"</string>
     <string name="sort_random">"随机"</string>
-    <string name="sort_rising">"趋势"</string>
-    <string name="sort_top">"最高人气"</string>
-    <string name="sort_controversial">"正在热议"</string>
+    <string name="sort_rising">"上升"</string>
+    <string name="sort_top">"最高"</string>
+    <string name="sort_controversial">"争议"</string>
     <string name="sort_relevance">"相关"</string>
     <string name="sort_comments">"评论"</string>
     <string name="sort_activity">"活跃"</string>
@@ -374,7 +374,7 @@
     <string name="sort_time_week">"一周"</string>
     <string name="sort_time_month">"一月"</string>
     <string name="sort_time_year">"一年"</string>
-    <string name="sort_time_all_time">"有史以来"</string>
+    <string name="sort_time_all_time">"全部"</string>
     <string name="no_activity_found_for_share">"未找到可处理共享动作的应用"</string>
     <string name="no_activity_found_for_external_browser">"没有应用可以处理“在外部应用中打开”操作"</string>
     <string name="archived_post_vote_unavailable">"帖子已存档。无法投票。"</string>
@@ -400,7 +400,7 @@
     <string name="posting_gallery">"相册发布中"</string>
     <string name="posting_poll">"发布民意调查"</string>
     <string name="please_wait">"请稍等。"</string>
-    <string name="add_account">"添加帐户"</string>
+    <string name="add_account">"添加账号"</string>
     <string name="anonymous_account">"匿名"</string>
     <string name="log_out">"注销"</string>
     <string name="press_here_to_login">"点此登录"</string>
@@ -440,16 +440,16 @@
     <string name="remove_flair">"移除标签"</string>
     <string name="only_allow_64_chars">"只允许少于 64 个字符"</string>
     <string name="view_all_comments">"点此查看所有评论"</string>
-    <string name="notification_summary_account">"帐户"</string>
+    <string name="notification_summary_account">"账号"</string>
     <string name="notification_summary_message">"新消息"</string>
     <string name="notification_summary_subreddit">"版块"</string>
     <string name="notification_summary_award">"奖励"</string>
     <string name="notification_new_messages">"%1$d 条新消息"</string>
-    <string name="label_account">"帐户"</string>
+    <string name="label_account">"账号"</string>
     <string name="label_reddit">"Reddit"</string>
     <string name="label_post">"帖子"</string>
     <string name="label_preferences">"偏好设置"</string>
-    <string name="account_switched">"帐户已切换，所有其他页面已重置。"</string>
+    <string name="account_switched">"账号已切换，所有其他页面已重置。"</string>
     <string name="settings_notification_master_title">"通知"</string>
     <string name="settings_notification_enable_notification_title">"开启通知"</string>
     <string name="settings_notification_interval_title">"检查通知的时间间隔"</string>
@@ -480,14 +480,14 @@
     <string name="only_for_logged_in_user">"仅登录用户可用"</string>
     <string name="settings_enable_bottom_app_bar_title">"开启底部导航栏"</string>
     <string name="settings_category_post_and_comment_title">"帖子和评论"</string>
-    <string name="settings_vote_buttons_on_the_right_title">"顶踩按钮放置在右侧"</string>
+    <string name="settings_vote_buttons_on_the_right_title">"赞踩按钮放置在右侧"</string>
     <string name="settings_volume_keys_navigate_comments_title">"在帖子内使用音量键浏览评论"</string>
     <string name="settings_volume_keys_navigate_posts_title">"使用音量键浏览帖子"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
     <string name="settings_mute_nsfw_video_title">"静音 NSFW 视频"</string>
     <string name="settings_video_player_ignore_nav_bar_title">"视频播放器中忽略导航栏"</string>
     <string name="settings_video_player_ignore_nav_bar_summary">"防止视频控制栏有额外的外边距"</string>
-    <string name="settings_main_page_back_button_action">"主页返回按钮动作"</string>
+    <string name="settings_main_page_back_button_action">"首页返回按钮动作"</string>
     <string name="settings_confirm_to_exit">"确认退出"</string>
     <string name="settings_open_navigation_drawer">"打开导航抽屉"</string>
     <string name="settings_category_comment_title">"评论"</string>
@@ -565,7 +565,7 @@
     <string name="settings_open_source_summary">"如果您喜欢此应用，请在 Github 上 Star"</string>
     <string name="settings_email_title">"电子邮件"</string>
     <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
-    <string name="settings_reddit_account_title">"Reddit 帐户"</string>
+    <string name="settings_reddit_account_title">"Reddit 账号"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"版块"</string>
     <string name="settings_subreddit_summary">"r/continuumreddit"</string>
@@ -658,11 +658,11 @@
     <string name="settings_swipe_actions_threshold">"判定阈值"</string>
     <string name="settings_pull_to_refresh_title">"下拉刷新"</string>
     <string name="settings_security_title">"安全"</string>
-    <string name="settings_require_authentication_to_show_accounts">"需要身份验证才能显示帐户"</string>
+    <string name="settings_require_authentication_to_show_accounts">"需要身份验证才能显示账号"</string>
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"在紧凑布局下长按隐藏工具栏"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"默认隐藏紧凑布局中的工具栏"</string>
     <string name="settings_customize_bottom_app_bar_title">"自定义底部导航栏"</string>
-    <string name="settings_main_activity_bottom_app_bar_group_summary">"主页"</string>
+    <string name="settings_main_activity_bottom_app_bar_group_summary">"首页"</string>
     <string name="settings_other_activities_bottom_app_bar_group_summary">"其他页面"</string>
     <string name="settings_bottom_app_bar_option_count">"选项数量"</string>
     <string name="settings_bottom_app_bar_option_1">"选项 1"</string>
@@ -774,7 +774,7 @@ Reddit 视频分辨率较低。
     <string name="settings_credits_love_animation_title">"喜爱动画"</string>
     <string name="settings_swipe_between_posts_title">"在帖子间滑动"</string>
     <string name="settings_navigation_drawer_title">"导航抽屉"</string>
-    <string name="settings_collapse_account_section_title">"折叠帐户区域"</string>
+    <string name="settings_collapse_account_section_title">"折叠账号区域"</string>
     <string name="settings_collapse_reddit_section_title">"折叠 Reddit 区域"</string>
     <string name="settings_collapse_post_section_title">"折叠帖子区域"</string>
     <string name="settings_collapse_preferences_section_title">"折叠偏好区域"</string>
@@ -801,7 +801,7 @@ Reddit 视频分辨率较低。
     <string name="settings_separate_post_and_comments_summary">"视频自动播放将在帖子详情页面禁用"</string>
     <string name="settings_swap_post_and_comments_in_split_mode_title">"交换帖子和评论双方"</string>
     <string name="settings_swap_post_and_comments_in_split_mode_summary">"分屏显示左侧评论右侧帖子"</string>
-    <string name="settings_navigation_drawer_enable_hide_karma_title">"隐藏账户声望"</string>
+    <string name="settings_navigation_drawer_enable_hide_karma_title">"隐藏账号声望"</string>
     <string name="settings_secure_mode_title">"安全模式"</string>
     <string name="settings_secure_mode_summary">"不允许屏幕截图或录屏。在最近应用界面没有预览图。"</string>
     <string name="settings_credits_lock_screen_animation_title">"锁屏动画"</string>
@@ -833,7 +833,7 @@ Reddit 视频分辨率较低。
     <string name="settings_show_author_avatar_title">"显示作者头像"</string>
     <string name="settings_disable_profile_avatar_animation_title">"禁用个人资料头像动画"</string>
     <string name="settings_show_user_prefix_title">"显示用户前缀"</string>
-    <string name="settings_hide_upvote_ratio_title">"隐藏顶帖比例"</string>
+    <string name="settings_hide_upvote_ratio_title">"隐藏好评率"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"危险"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"增加该值以更高分辨率显示预览，但应用程序可能会意外崩溃"</string>
     <string name="settings_post_feed_max_resolution_title">"帖子预览最大分辨率（宽 * 高）"</string>
@@ -1124,9 +1124,9 @@ Reddit 视频分辨率较低。
     <string name="theme_item_tab_layout_with_collapsed_collapsing_toolbar_text_color_detail">"应用于：分页布局文字颜色（已折叠的工具栏）"</string>
     <string name="theme_item_tab_layout_with_collapsed_collapsing_toolbar_tab_indicator">"已折叠的工具栏中分页布局的分页指示器颜色"</string>
     <string name="theme_item_tab_layout_with_collapsed_collapsing_toolbar_tab_indicator_detail">"应用于：分页布局中的分页指示器颜色（已折叠的工具栏）"</string>
-    <string name="theme_item_upvoted_color">"顶帖颜色"</string>
+    <string name="theme_item_upvoted_color">"已赞颜色"</string>
     <string name="theme_item_upvoted_color_detail">"应用于：投票按钮和分数（已按顶）"</string>
-    <string name="theme_item_downvoted_color">"踩帖颜色"</string>
+    <string name="theme_item_downvoted_color">"已踩颜色"</string>
     <string name="theme_item_downvoted_color_detail">"应用于：投票按钮和分数（已按踩）"</string>
     <string name="theme_item_post_type_background_color">"帖子类型背景色"</string>
     <string name="theme_item_post_type_background_color_detail">"应用于：帖子类型的背景（图像、文本、视频、动图、链接）"</string>
@@ -1162,8 +1162,8 @@ Reddit 视频分辨率较低。
     <string name="theme_item_locked_icon_tint_detail">"应用于：已锁定图标"</string>
     <string name="theme_item_crosspost_icon_tint">"转发图标的颜色"</string>
     <string name="theme_item_crosspost_icon_tint_detail">"应用于：转发图标"</string>
-    <string name="theme_item_upvote_ratio_icon_tint">"顶帖率图标颜色"</string>
-    <string name="theme_item_upvote_ratio_icon_tint_detail">"应用于：顶帖率图标"</string>
+    <string name="theme_item_upvote_ratio_icon_tint">"好评率图标颜色"</string>
+    <string name="theme_item_upvote_ratio_icon_tint_detail">"应用于：好评率图标"</string>
     <string name="theme_item_stickied_post_icon_tint">"置顶帖图标的颜色"</string>
     <string name="theme_item_stickied_post_icon_tint_detail">"适用于：置顶帖图标"</string>
     <string name="theme_item_no_preview_post_type_icon_tint">"无预览帖子类型图标颜色"</string>
@@ -1323,7 +1323,7 @@ Reddit 视频分辨率较低。
     <string name="downloading_reddit_video_failed_cannot_mux">"下载失败：无法合并视频和音频"</string>
     <string name="downloading_reddit_video_failed_cannot_save_mux_video">"下载失败：无法将视频保存到公共目录"</string>
     <string name="downloading">"正在下载"</string>
-    <string name="downloading_media_finished">"下载完成"</string>
+    <string name="downloading_media_finished">"已下载"</string>
     <string name="downloading_image_or_gif_failed_cannot_get_destination_directory">"下载失败：无法访问目标目录"</string>
     <string name="downloading_media_failed_cannot_download_media">"下载失败"</string>
     <string name="downloading_media_failed_cannot_save_to_destination_directory">"下载失败：无法将文件保存至目标目录"</string>
@@ -1368,7 +1368,7 @@ Reddit 视频分辨率较低。
     <string name="insert_link">"插入链接"</string>
     <string name="text_hint">"文本"</string>
     <string name="link_hint">"链接"</string>
-    <string name="unlock_account_section">"解锁帐户部分"</string>
+    <string name="unlock_account_section">"解锁账号部分"</string>
     <string name="unlock">"解锁"</string>
     <string name="submit_post">"提交帖子"</string>
     <string name="refresh">"刷新"</string>
@@ -1553,7 +1553,7 @@ Reddit 视频分辨率较低。
     <string name="default_in_array">"默认"</string>
     <string name="off">"关闭"</string>
     <string name="only_on_cellular_data">"仅在蜂窝数据下"</string>
-    <string name="upvote">"顶"</string>
+    <string name="upvote">"赞"</string>
     <string name="downvote">"踩"</string>
     <string name="select">"选择"</string>
     <string name="exclude_subreddit">"排除此版块"</string>
@@ -1608,13 +1608,13 @@ Reddit 视频分辨率较低。
     <string name="app_lock_timeout_24_hours">"24 小时"</string>
     <string name="submit_change_avatar">"提供修改头像"</string>
     <string name="submit_change_banner">"提交修改横幅"</string>
-    <string name="submit_save_profile">"提交保存档案"</string>
-    <string name="action_edit_profile">"编辑档案"</string>
+    <string name="submit_save_profile">"正在保存个人资料"</string>
+    <string name="action_edit_profile">"编辑个人主页"</string>
     <string name="remove_avatar">"删除头像"</string>
     <string name="remove_banner">"删除横幅"</string>
     <string name="display_name_text">"显示名称"</string>
-    <string name="display_name_hint">"在您的档案上显示"</string>
-    <string name="display_name_description">"显示给查看您档案的用户，不会更改您的用户名。"</string>
+    <string name="display_name_hint">"在您的个人主页上显示"</string>
+    <string name="display_name_description">"显示给查看您个人主页的用户，不会更改您的用户名。"</string>
     <string name="about_you_text">"关于您"</string>
     <string name="about_you_hint">"您的简单自我介绍"</string>
     <string name="message_remove_avatar_success">"删除头像成功"</string>
@@ -1625,8 +1625,8 @@ Reddit 视频分辨率较低。
     <string name="message_change_avatar_failed">"修改头像失败 %s"</string>
     <string name="message_change_banner_success">"修改横幅成功"</string>
     <string name="message_change_banner_failed">"修改横幅失败 %s"</string>
-    <string name="message_save_profile_success">"保存档案成功"</string>
-    <string name="message_save_profile_failed">"保存档案失败 %s"</string>
+    <string name="message_save_profile_success">"保存个人资料成功"</string>
+    <string name="message_save_profile_failed">"保存个人资料失败 %s"</string>
     <string name="select_a_ttf_font">"选择一个 ttf 字体文件"</string>
     <string name="unable_to_get_font_file">"无法获取您的字体"</string>
     <string name="unable_to_load_font">"无法加载自定义字体"</string>

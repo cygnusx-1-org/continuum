@@ -10,7 +10,7 @@ import androidx.paging.PagingData;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import retrofit2.Retrofit;
 
 public class CustomThemeViewModel extends ViewModel {

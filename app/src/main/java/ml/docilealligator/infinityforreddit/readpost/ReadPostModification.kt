@@ -1,6 +1,6 @@
 package ml.docilealligator.infinityforreddit.readpost
 
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import kotlin.math.max
 
 suspend fun insertReadPost(

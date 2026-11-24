@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.subscribedsubreddit;
 
 import androidx.lifecycle.LiveData;
 import java.util.List;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class SubscribedSubredditRepository {
     private final SubscribedSubredditDao mSubscribedSubredditDao;

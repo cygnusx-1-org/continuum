@@ -1,5 +1,9 @@
 package ml.docilealligator.infinityforreddit.customviews.compose
 
+import android.R.attr.maxLines
+import android.R.attr.minLines
+import android.R.attr.singleLine
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.OutlinedTextField
@@ -8,6 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import com.bumptech.glide.integration.compose.placeholder
 
 @Composable
 fun CustomTextField(
@@ -44,6 +50,9 @@ fun CustomTextField(
     singleLine: Boolean = false,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange: (String) -> Unit
 ) {
     OutlinedTextField(
@@ -65,6 +74,9 @@ fun CustomTextField(
             unfocusedBorderColor = Color(LocalAppTheme.current.secondaryTextColor),
             cursorColor = Color(LocalAppTheme.current.colorPrimary)
         ),
+        trailingIcon = trailingIcon,
+        shape = shape,
+        keyboardOptions = keyboardOptions,
         onValueChange = onValueChange
     )
 }

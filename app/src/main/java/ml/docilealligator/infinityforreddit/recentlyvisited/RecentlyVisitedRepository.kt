@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.recentlyvisited
 
 import androidx.lifecycle.LiveData
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 
 class RecentlyVisitedRepository(
     redditDataRoomDatabase: RedditDataRoomDatabase,

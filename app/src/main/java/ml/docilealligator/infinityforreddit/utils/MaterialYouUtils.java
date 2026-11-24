@@ -11,9 +11,9 @@ import android.util.Log;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import org.greenrobot.eventbus.EventBus;
 

@@ -9,7 +9,7 @@ import androidx.paging.PagingData;
 import androidx.paging.PagingLiveData;
 import java.util.concurrent.Executor;
 import kotlinx.coroutines.CoroutineScope;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import retrofit2.Retrofit;
 
 public class OnlineCustomThemeRepository {

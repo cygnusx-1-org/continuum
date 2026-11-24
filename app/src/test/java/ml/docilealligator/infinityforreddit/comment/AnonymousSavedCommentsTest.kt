@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.comment
 
 import androidx.test.core.app.ApplicationProvider
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.Account
 import org.junit.After

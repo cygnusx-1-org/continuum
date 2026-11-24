@@ -13,7 +13,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountSettings
 import ml.docilealligator.infinityforreddit.account.AccountStoredData

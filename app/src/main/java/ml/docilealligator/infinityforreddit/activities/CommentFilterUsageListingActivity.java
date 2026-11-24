@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.CommentFilterUsageRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentFilterUsageOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.NewCommentFilterUsageBottomSheetFragment;
@@ -33,6 +32,7 @@ import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsageView
 import ml.docilealligator.infinityforreddit.commentfilter.DeleteCommentFilterUsage;
 import ml.docilealligator.infinityforreddit.commentfilter.SaveCommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCommentFilterUsageListingBinding;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 

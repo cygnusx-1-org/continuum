@@ -1,5 +1,8 @@
 package ml.docilealligator.infinityforreddit
 
+import ml.docilealligator.infinityforreddit.module.AppComponent
+import ml.docilealligator.infinityforreddit.module.DaggerAppComponent
+
 /**
  * Minimal application for Robolectric activity tests. The real [Infinity.onCreate] installs a
  * process-global EventBus (set-once, so it throws on the second test) and starts background

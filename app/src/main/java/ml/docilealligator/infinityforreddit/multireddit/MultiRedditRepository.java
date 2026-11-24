@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import androidx.lifecycle.LiveData;
 import java.util.List;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class MultiRedditRepository {
     private final MultiRedditDao mMultiRedditDao;

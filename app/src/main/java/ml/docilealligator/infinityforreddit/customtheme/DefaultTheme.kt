@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.customtheme
 import android.content.Context
 import android.content.SharedPreferences
 import java.util.concurrent.Executor
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 

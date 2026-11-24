@@ -40,11 +40,11 @@ import javax.inject.Named;
 import kotlin.Unit;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditCommentBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.RichTextJSONConverter;
@@ -148,6 +148,13 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                     Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                    binding.getRoot().setPadding(
+                            0,
+                            0,
+                            0,
+                            allInsets.bottom
+                    );
+
                     setMargins(binding.toolbarEditCommentActivity,
                             allInsets.left,
                             allInsets.top,
@@ -158,7 +165,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                             allInsets.left,
                             0,
                             allInsets.right,
-                            allInsets.bottom
+                            0
                     );
 
                     return WindowInsetsCompat.CONSUMED;
@@ -262,7 +269,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 });
             } else if (result instanceof EditCommentResult.Failure) {
                 String message = ((EditCommentResult.Failure) result).getMessage();
-                Snackbar.make(binding.coordinatorLayoutEditCommentActivity,
+                Snackbar.make(binding.getRoot(),
                         message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -313,7 +320,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
     @Override
     protected void applyCustomTheme() {
-        binding.coordinatorLayoutEditCommentActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutEditCommentActivity, null, binding.toolbarEditCommentActivity);
         binding.commentEditTextEditCommentActivity.setTextColor(mCustomThemeWrapper.getCommentColor());
 
@@ -357,7 +364,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         if (isSubmitting) {
             return;
         }
-        Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(binding.getRoot(), R.string.posting, Snackbar.LENGTH_SHORT).show();
 
         String content = binding.commentEditTextEditCommentActivity.getText().toString();
         Map<String, String> params = new HashMap<>();
@@ -368,7 +375,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 params.put(APIUtils.RICHTEXT_JSON_KEY, new RichTextJSONConverter().constructRichTextJSON(this, content, uploadedImages, giphyGif));
                 params.put(APIUtils.TEXT_KEY, "");
             } catch (JSONException e) {
-                Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
                 return;
             }
         } else {
@@ -414,7 +421,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, false);
+                        binding.getRoot(), imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -423,7 +430,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, true);
+                        binding.getRoot(), imageUri, uploadedImages, true);
                 // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
                 // field pointing at a URI that is about to be removed.
                 capturedImageUri = null;

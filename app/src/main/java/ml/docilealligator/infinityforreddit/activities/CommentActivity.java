@@ -52,7 +52,6 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import kotlin.Unit;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
@@ -62,6 +61,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesB
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCommentBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
@@ -205,6 +205,13 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                         Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
+                        binding.getRoot().setPadding(
+                                0,
+                                0,
+                                0,
+                                allInsets.bottom
+                        );
+
                         setMargins(binding.commentToolbar,
                                 allInsets.left,
                                 allInsets.top,
@@ -215,7 +222,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                                 allInsets.left,
                                 0,
                                 allInsets.right,
-                                allInsets.bottom
+                                0
                         );
 
                         return WindowInsetsCompat.CONSUMED;
@@ -442,7 +449,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 });
             } else if (result instanceof SendCommentResult.Failure) {
                 String errorMessage = ((SendCommentResult.Failure) result).getMessage();
-                Snackbar.make(binding.commentCoordinatorLayout,
+                Snackbar.make(binding.getRoot(),
                         (errorMessage == null || errorMessage.isEmpty()) ? getString(R.string.send_comment_failed) : errorMessage,
                         Snackbar.LENGTH_SHORT).show();
             }
@@ -524,7 +531,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
     @Override
     protected void applyCustomTheme() {
-        binding.commentCoordinatorLayout.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.commentAppbarLayout, null, binding.commentToolbar);
         binding.commentParentTitleTextView.setTextColor(customThemeWrapper.getPostTitleColor());
         binding.commentDivider.setBackgroundColor(mCustomThemeWrapper.getDividerColor());
@@ -593,19 +600,19 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         }
 
         if (binding.commentCommentEditText.getText() == null || binding.commentCommentEditText.getText().toString().isEmpty()) {
-            Snackbar.make(binding.commentCoordinatorLayout, R.string.comment_content_required, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), R.string.comment_content_required, Snackbar.LENGTH_SHORT).show();
             return;
         }
 
         Account account = selectedAccount;
         if (account == null) {
-            Snackbar.make(binding.commentCoordinatorLayout, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
             return;
         }
 
         // The send button's disabled state and this "sending" snackbar are driven by the ViewModel's
         // isSubmitting observer, so they survive a rotation mid-send.
-        sendingSnackbar = Snackbar.make(binding.commentCoordinatorLayout, R.string.sending_comment, Snackbar.LENGTH_INDEFINITE);
+        sendingSnackbar = Snackbar.make(binding.getRoot(), R.string.sending_comment, Snackbar.LENGTH_INDEFINITE);
         sendingSnackbar.show();
 
         Retrofit newAuthenticatorOauthRetrofit = mOauthRetrofit.newBuilder()
@@ -676,7 +683,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.commentCommentEditText,
-                        binding.commentCoordinatorLayout, imageUri, uploadedImages, false);
+                        binding.getRoot(), imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -686,7 +693,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.commentCommentEditText,
-                        binding.commentCoordinatorLayout, imageUri, uploadedImages, true);
+                        binding.getRoot(), imageUri, uploadedImages, true);
                 // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
                 // field pointing at a URI that is about to be removed.
                 capturedImageUri = null;

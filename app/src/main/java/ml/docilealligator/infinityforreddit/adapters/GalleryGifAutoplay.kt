@@ -2,11 +2,11 @@ package ml.docilealligator.infinityforreddit.adapters
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector
-import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer
-import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil
-import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo
-import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container
+import ml.docilealligator.infinityforreddit.video.videoautoplay.PlayerSelector
+import ml.docilealligator.infinityforreddit.video.videoautoplay.ToroPlayer
+import ml.docilealligator.infinityforreddit.video.videoautoplay.ToroUtil
+import ml.docilealligator.infinityforreddit.video.videoautoplay.media.PlaybackInfo
+import ml.docilealligator.infinityforreddit.video.videoautoplay.widget.Container
 
 /**
  * Autoplay for the gifs inside a gallery post's pager (issue #382).

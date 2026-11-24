@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.network
 
 import android.content.Context
 import android.util.Log
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.utils.APIUtils
 import okhttp3.Interceptor

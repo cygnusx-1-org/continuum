@@ -5,7 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.post.Post

@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.utils
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.AccountScope
 
 /**

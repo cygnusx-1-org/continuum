@@ -22,7 +22,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings
 import ml.docilealligator.infinityforreddit.asynctasks.RestoreSettings
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat

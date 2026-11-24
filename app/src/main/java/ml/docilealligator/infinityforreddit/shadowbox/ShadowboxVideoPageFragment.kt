@@ -34,7 +34,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils
 import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
-import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer
+import ml.docilealligator.infinityforreddit.video.videoautoplay.DurationAwareSeekPlayer
 
 /**
  * A video page (or a GIF served as mp4): its own ExoPlayer, set up the way

@@ -1,7 +1,7 @@
 package ml.docilealligator.infinityforreddit.commentfilter;
 
 import java.util.concurrent.Executor;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase;
 
 public class DeleteCommentFilterUsage {
     public static void deleteCommentFilterUsage(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,

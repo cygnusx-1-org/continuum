@@ -30,7 +30,7 @@ import com.google.android.material.textfield.TextInputLayout
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.Constants
 import ml.docilealligator.infinityforreddit.R
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.database.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.adapters.PostFilterRulesRecyclerViewAdapter
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AddPostFilterRuleBottomSheetFragment
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.NewPostFilterUsageBottomSheetFragment

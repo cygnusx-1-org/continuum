@@ -1,0 +1,16 @@
+package ml.docilealligator.infinityforreddit.video;
+
+import androidx.annotation.Nullable;
+import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
+
+public interface FetchVideoLinkListener {
+    default void onFetchRedditVideoLinkSuccess(Post post, String fileName) {}
+    default void onFetchImgurVideoLinkSuccess(@Nullable String videoUrl, @Nullable String videoDownloadUrl, String fileName) {}
+    default void onFetchRedgifsVideoLinkSuccess(String webm, String mp4) {}
+    default void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {}
+    default void onFetchShortClipVideoLinkSuccess(String videoUrl) {}
+    default void onChangeFileName(String fileName) {}
+    default void onFetchVideoFallbackDirectUrlSuccess(@Nullable String videoFallbackDirectUrl) {}
+    default void failed(@Nullable Integer messageRes) {}
+}
