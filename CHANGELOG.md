@@ -2,6 +2,12 @@
 
 ---
 
+8.4.0.2 / 2026-11-25
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Error fetching video #498
+
 8.4.0.1 / 2026-11-23
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
