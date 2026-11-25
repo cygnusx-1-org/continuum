@@ -156,7 +156,9 @@ import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.utils.VideoHttpErrorLog;
 import ml.docilealligator.infinityforreddit.video.FetchVideoLinkListener;
+import ml.docilealligator.infinityforreddit.video.RedditDashFallback;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoPlayerViewHelper;
@@ -4720,10 +4722,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             // plays on under the new post's still -- and takes that still down with its next
             // frame. Letting it go here is also what makes a switch to the direct-URL fallback
             // take effect, since the old helper would otherwise keep the source that just failed.
-            if (helper != null && initializedUri != null && !initializedUri.equals(videoUri)) {
+            //
+            // A Reddit video that has already fallen back to DASH binds to DASH: without that, a
+            // rebind of the same post would go back to the HLS playlist that failed.
+            Uri uri = RedditDashFallback.playbackUri(videoUri);
+            if (helper != null && initializedUri != null && !initializedUri.equals(uri)) {
                 release();
             }
-            mediaUri = videoUri;
+            mediaUri = uri;
         }
 
         void setVolume(float volume) {
@@ -4883,17 +4889,25 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         void loadFallbackDirectVideo() {
             Post post = getPost();
             if (post.getVideoFallBackDirectUrl() != null) {
-                // Held across the rebind below: binding a different URI lets go of the player that
-                // just failed, and a released player has no container to ask for the pass that
-                // starts the replacement.
-                Container settled = container;
-                bindVideoUri(Uri.parse(post.getVideoFallBackDirectUrl()));
                 post.setVideoDownloadUrl(post.getVideoFallBackDirectUrl());
                 post.setVideoUrl(post.getVideoFallBackDirectUrl());
                 post.setLoadedStreamableVideoAlready(true);
-                if (settled != null) {
-                    settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
-                }
+                switchSource(Uri.parse(post.getVideoFallBackDirectUrl()));
+            }
+        }
+
+        /**
+         * Rebinds this card to {@code uri} after its current source failed, and starts it.
+         *
+         * <p>The container is held across the rebind: binding a different URI lets go of the
+         * player that just failed, and a released player has no container to ask for the pass
+         * that starts the replacement.
+         */
+        void switchSource(Uri uri) {
+            Container settled = container;
+            bindVideoUri(uri);
+            if (settled != null) {
+                settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
             }
         }
 
@@ -5071,6 +5085,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                     @Override
                     public void onPlayerError(@NonNull PlaybackException error) {
+                        VideoHttpErrorLog.log("feed", error);
+                        // A Reddit video whose HLS playlist is missing still has its DASH
+                        // manifest. Never offered for DASH itself, so a failure there carries on
+                        // to the direct-URL fallback below.
+                        Uri dashUri = RedditDashFallback.fallbackFor("feed", mediaUri);
+                        if (dashUri != null) {
+                            switchSource(dashUri);
+                            return;
+                        }
                         Post post = getPost();
                         if (post.getVideoFallBackDirectUrl() == null || post.getVideoFallBackDirectUrl().equals(java.util.Objects.requireNonNull(mediaUri).toString())) {
                             errorLoadingRedgifsImageView.setVisibility(View.VISIBLE);

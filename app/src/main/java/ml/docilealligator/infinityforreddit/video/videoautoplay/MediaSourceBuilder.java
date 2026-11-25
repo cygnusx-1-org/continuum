@@ -39,6 +39,7 @@ import androidx.media3.exoplayer.source.LoopingMediaSource;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.MediaSourceEventListener;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import ml.docilealligator.infinityforreddit.video.RefusedPlaylistLoadErrorPolicy;
 
 /**
  * @author eneim (2018/01/24).
@@ -72,12 +73,16 @@ public interface MediaSourceBuilder {
                             .createMediaSource(MediaItem.fromUri(uri));
                     break;
                 case C.CONTENT_TYPE_DASH:
+                    // A refused manifest fails at once rather than after three retries: see
+                    // RefusedPlaylistLoadErrorPolicy. The HLS branch below does the same.
                     result = new DashMediaSource.Factory(
                             new DefaultDashChunkSource.Factory(mediaDataSourceFactory), manifestDataSourceFactory)
+                            .setLoadErrorHandlingPolicy(new RefusedPlaylistLoadErrorPolicy())
                             .createMediaSource(MediaItem.fromUri(uri));
                     break;
                 case C.CONTENT_TYPE_HLS:
                     result = new HlsMediaSource.Factory(mediaDataSourceFactory) //
+                            .setLoadErrorHandlingPolicy(new RefusedPlaylistLoadErrorPolicy())
                             .createMediaSource(MediaItem.fromUri(uri));
                     break;
                 case C.CONTENT_TYPE_OTHER:

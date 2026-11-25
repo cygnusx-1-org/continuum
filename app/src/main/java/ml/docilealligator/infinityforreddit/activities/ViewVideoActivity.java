@@ -74,7 +74,9 @@ import androidx.media3.datasource.cache.SimpleCache;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.dash.DashMediaSource;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
+import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.AspectRatioFrameLayout;
@@ -115,6 +117,8 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.utils.VideoHttpErrorLog;
+import ml.docilealligator.infinityforreddit.video.RefusedPlaylistLoadErrorPolicy;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.DurationAwareSeekPlayer;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewVideoViewModel;
 import okhttp3.OkHttpClient;
@@ -594,6 +598,7 @@ public class ViewVideoActivity extends AppCompatActivity
                 public void onPlayerError(@NonNull PlaybackException error) {
                     Log.e(ROTATION_TAG, "onPlayerError: errorCode=" + error.errorCode
                             + " (" + error.getErrorCodeName() + ") msg=" + error.getMessage(), error);
+                    VideoHttpErrorLog.log("fullscreen", error);
                 }
 
                 @Override
@@ -956,7 +961,7 @@ public class ViewVideoActivity extends AppCompatActivity
                 if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {
                     // Prepare the player with the source.
                     player.prepare();
-                    player.setMediaSource(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
+                    player.setMediaSource(buildRedditStreamSource(uri));
                     preparePlayer(savedInstanceState);
                 } else {
                     // Prepare the player with the source.
@@ -978,6 +983,25 @@ public class ViewVideoActivity extends AppCompatActivity
             binding.getLoadingIndicator().setVisibility(View.GONE);
             Toast.makeText(this, messageRes, Toast.LENGTH_LONG).show();
         });
+    }
+
+    /**
+     * The source for a Reddit-hosted video: its HLS playlist, or the DASH manifest the view model
+     * falls back to when that playlist is missing (see RedditDashFallback). The type and quality
+     * handling in onTracksChanged go by video type, not by source, so both get the same treatment.
+     */
+    @OptIn(markerClass = UnstableApi.class)
+    private MediaSource buildRedditStreamSource(Uri uri) {
+        MediaItem mediaItem = MediaItem.fromUri(uri);
+        RefusedPlaylistLoadErrorPolicy policy = new RefusedPlaylistLoadErrorPolicy();
+        if (Util.inferContentType(uri) == C.CONTENT_TYPE_DASH) {
+            return new DashMediaSource.Factory(dataSourceFactory)
+                    .setLoadErrorHandlingPolicy(policy)
+                    .createMediaSource(mediaItem);
+        }
+        return new HlsMediaSource.Factory(dataSourceFactory)
+                .setLoadErrorHandlingPolicy(policy)
+                .createMediaSource(mediaItem);
     }
 
     private void applyCustomTheme() {

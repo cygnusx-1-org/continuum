@@ -144,7 +144,9 @@ import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.utils.VideoHttpErrorLog;
 import ml.docilealligator.infinityforreddit.video.FetchVideoLinkListener;
+import ml.docilealligator.infinityforreddit.video.RedditDashFallback;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.video.videoautoplay.ExoPlayerViewHelper;
@@ -2799,7 +2801,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
 
         void bindVideoUri(Uri videoUri) {
-            mediaUri = videoUri;
+            // A Reddit video that has already fallen back to DASH binds to DASH; see
+            // RedditDashFallback.
+            mediaUri = RedditDashFallback.playbackUri(videoUri);
         }
 
         /**
@@ -2845,13 +2849,30 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
             if (mPost == null) return;
             if (mPost.getVideoFallBackDirectUrl() != null) {
-                mediaUri = Uri.parse(mPost.getVideoFallBackDirectUrl());
                 mPost.setVideoDownloadUrl(mPost.getVideoFallBackDirectUrl());
                 mPost.setVideoUrl(mPost.getVideoFallBackDirectUrl());
                 mPost.setLoadedStreamableVideoAlready(true);
-                if (container != null) {
-                    container.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
-                }
+                switchSource(Uri.parse(mPost.getVideoFallBackDirectUrl()));
+            }
+        }
+
+        /**
+         * Rebinds this row to {@code uri} after its current source failed, and starts it.
+         *
+         * <p>The player that failed is let go here rather than in {@link #bindVideoUri}: a helper
+         * keeps the source it was built for, so without it the switch went on replaying the one
+         * that just failed. bindVideoUri must not do it, since updatePost rebinds this row in
+         * place with a freshly parsed post whose video URL differs in its signature, and the
+         * video playing on it has to survive that. The container is held across the release,
+         * because a released player has no container to ask for the pass that starts the
+         * replacement.
+         */
+        void switchSource(Uri uri) {
+            Container settled = container;
+            release();
+            bindVideoUri(uri);
+            if (settled != null) {
+                settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
             }
         }
 
@@ -3015,7 +3036,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                     @Override
                     public void onPlayerError(@NonNull PlaybackException error) {
+                        VideoHttpErrorLog.log("post detail", error);
                         if (mPost == null) {
+                            return;
+                        }
+
+                        // A Reddit video whose HLS playlist is missing still has its DASH
+                        // manifest. Never offered for DASH itself, so a failure there carries on
+                        // to the direct-URL fallback below.
+                        Uri dashUri = RedditDashFallback.fallbackFor("post detail", mediaUri);
+                        if (dashUri != null) {
+                            switchSource(dashUri);
                             return;
                         }
 

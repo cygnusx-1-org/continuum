@@ -23,6 +23,7 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -34,6 +35,9 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils
 import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
+import ml.docilealligator.infinityforreddit.utils.VideoHttpErrorLog
+import ml.docilealligator.infinityforreddit.video.RedditDashFallback
+import ml.docilealligator.infinityforreddit.video.RefusedPlaylistLoadErrorPolicy
 import ml.docilealligator.infinityforreddit.video.videoautoplay.DurationAwareSeekPlayer
 
 /**
@@ -54,6 +58,8 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
      * settings point at. Redgifs and MLB publish a ladder of separate files rather than a track
      * ladder inside one stream, so for those two the preference can only be honoured by swapping
      * the URL -- the same thing ViewVideoViewModel.dataSavingPlaybackUri does for the full player.
+     * For a Reddit video, the DASH manifest once its HLS playlist has failed (see
+     * [RedditDashFallback]).
      */
     private var playbackUri: Uri = Uri.EMPTY
 
@@ -89,10 +95,11 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private var isMute = false
 
     /**
-     * Whether this is the Reddit-hosted HLS stream, which is the only thing here with a track
-     * ladder to choose from and the only one whose first audio track is mono.
+     * Whether this is a Reddit-hosted stream -- the HLS playlist, or the DASH manifest it falls
+     * back to -- which is the only thing here with a track ladder to choose from and the only one
+     * whose first audio track is mono.
      */
-    private var isRedditHls = false
+    private var isRedditStream = false
 
     /** Both track overrides below are chosen from the first track list and not revisited. */
     private var appliedDefaultResolution = false
@@ -194,10 +201,11 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         this.player = player
         binding.playerViewShadowboxMediaVideo.player = DurationAwareSeekPlayer(player)
 
-        playbackUri = dataSavingPlaybackUri(uri)
-        // v.redd.it hands out an HLS playlist; everything else the pager plays inline is a plain
-        // mp4 -- the same split MediaSourceBuilder.DEFAULT makes for the feed's autoplay.
-        isRedditHls = Util.inferContentType(playbackUri) == C.CONTENT_TYPE_HLS
+        playbackUri = RedditDashFallback.playbackUri(dataSavingPlaybackUri(uri))
+        // v.redd.it hands out an HLS playlist, or a DASH manifest once that has failed; everything
+        // else the pager plays inline is a plain mp4 -- the same split MediaSourceBuilder.DEFAULT
+        // makes for the feed's autoplay.
+        isRedditStream = isAdaptiveStream(playbackUri)
         player.setMediaSource(buildMediaSource(playbackUri))
 
         player.repeatMode = if (sharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
@@ -254,14 +262,16 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
                     TAG, "onPlayerError: errorCode=" + error.errorCode + " (" +
                         error.errorCodeName + ") uri=" + playbackUri, error
                 )
+                VideoHttpErrorLog.log("shadowbox", error)
                 _binding?.progressBarShadowboxMediaVideo?.visibility = View.INVISIBLE
                 // A downgraded URL is derived rather than confirmed, so it can name a file the
                 // host never transcoded. Walking back up to the posted one keeps a data-saving
-                // 404 from showing an error where the full-size file would have played. Failing
-                // that, the post's direct-URL fallback, the way the feed's row does; failing that
+                // 404 from showing an error where the full-size file would have played. Then a
+                // Reddit video's DASH manifest, for when its HLS playlist is missing. Failing
+                // those, the post's direct-URL fallback, the way the feed's row does; failing that
                 // too, say so -- a page left on its poster with a pause button up looked like a
                 // video that was playing.
-                if (!retryAtPostedQuality() && !retryAtFallbackUrl()) {
+                if (!retryAtPostedQuality() && !retryAtDash() && !retryAtFallbackUrl()) {
                     showPlaybackError()
                 }
             }
@@ -372,11 +382,22 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
             .setCache(simpleCache)
             .setUpstreamDataSourceFactory(OkHttpDataSource.Factory(okHttpClient).setUserAgent(APIUtils.USER_AGENT))
         val mediaItem = MediaItem.fromUri(source)
-        return if (Util.inferContentType(source) == C.CONTENT_TYPE_HLS) {
-            HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
-        } else {
-            ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+        // A refused playlist fails at once rather than after three retries, so the DASH retry
+        // starts without a wait; see RefusedPlaylistLoadErrorPolicy.
+        return when (Util.inferContentType(source)) {
+            C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(dataSourceFactory)
+                .setLoadErrorHandlingPolicy(RefusedPlaylistLoadErrorPolicy())
+                .createMediaSource(mediaItem)
+            C.CONTENT_TYPE_DASH -> DashMediaSource.Factory(dataSourceFactory)
+                .setLoadErrorHandlingPolicy(RefusedPlaylistLoadErrorPolicy())
+                .createMediaSource(mediaItem)
+            else -> ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
         }
+    }
+
+    private fun isAdaptiveStream(source: Uri): Boolean {
+        val type = Util.inferContentType(source)
+        return type == C.CONTENT_TYPE_HLS || type == C.CONTENT_TYPE_DASH
     }
 
     /**
@@ -427,7 +448,7 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
      */
     private fun applyDefaultResolution(tracks: Tracks) {
         val player = player ?: return
-        if (appliedDefaultResolution || !isRedditHls) {
+        if (appliedDefaultResolution || !isRedditStream) {
             return
         }
         appliedDefaultResolution = true
@@ -480,13 +501,13 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     /**
-     * Reddit video HLS usually carries two audio tracks, the first of them mono; ViewVideoActivity
+     * A Reddit video usually carries two audio tracks, the first of them mono; ViewVideoActivity
      * picks the second for that reason, and without the same override this page plays a Reddit
      * video in mono where the full player has it in stereo.
      */
     private fun applyStereoAudioTrack(tracks: Tracks) {
         val trackSelector = trackSelector ?: return
-        if (appliedStereoAudioTrack || !isRedditHls) {
+        if (appliedStereoAudioTrack || !isRedditStream) {
             return
         }
         for (group in tracks.groups) {
@@ -545,6 +566,16 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     /**
+     * Re-prepares on a Reddit video's DASH manifest after its HLS playlist failed. Returns whether
+     * it did. Never offered for a DASH URI, so this happens once per player, and the video is
+     * remembered so a retry from the error overlay starts on DASH too.
+     */
+    private fun retryAtDash(): Boolean {
+        val dashUri = RedditDashFallback.fallbackFor("shadowbox", playbackUri) ?: return false
+        return prepareAgain(dashUri)
+    }
+
+    /**
      * Re-prepares on the post's direct-URL fallback, once, after the posted file failed. Returns
      * whether it did. The post itself is left alone: the feed's row rewrites the post's video URL
      * when it does this, but these pages share Post objects with the feed, and what the full
@@ -566,7 +597,7 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private fun prepareAgain(source: Uri): Boolean {
         val player = player ?: return false
         playbackUri = source
-        isRedditHls = Util.inferContentType(source) == C.CONTENT_TYPE_HLS
+        isRedditStream = isAdaptiveStream(source)
         player.setMediaSource(buildMediaSource(source))
         player.prepare()
         return true

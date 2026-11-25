@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ml.docilealligator.infinityforreddit.result.AppResult
 import ml.docilealligator.infinityforreddit.R
+import ml.docilealligator.infinityforreddit.video.RedditDashFallback
 import ml.docilealligator.infinityforreddit.video.VReddItReturnType
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt
@@ -70,7 +71,7 @@ class ViewVideoViewModel(
     /** The MLB twin of [redgifsSdVariantFailed]; see [MlbUrlUtils.postedVariant]. */
     private var mlbLowBitrateFailed = false
 
-    private val _videoUri = MutableStateFlow(dataSavingPlaybackUri(videoUri))
+    private val _videoUri = MutableStateFlow(playableUri(videoUri))
     val videoUriLiveData = _videoUri.asLiveData()
 
     private val _errorResId = MutableStateFlow<Int?>(null)
@@ -109,13 +110,22 @@ class ViewVideoViewModel(
     }
 
     /**
+     * [dataSavingPlaybackUri], then the DASH manifest in place of a Reddit video's HLS playlist
+     * when that playlist has already failed in this process -- in the feed, say, before the user
+     * tapped through to here. See [RedditDashFallback]. Same initializer-order rule as above.
+     */
+    private fun playableUri(uri: Uri?): Uri? {
+        return dataSavingPlaybackUri(uri)?.let { RedditDashFallback.playbackUri(it) }
+    }
+
+    /**
      * Single point where a resolved URI becomes available. Clearing [errorResId] here is what keeps
      * it sticky *only* while there is nothing playable: with no URI the error is the only thing that
      * can hide ViewVideoActivity's loading indicator, but once a URI exists that activity's URI
      * observer hides it, so a stale error must not keep toasting over a working video.
      */
     private fun publishVideoUri(rawUri: Uri?) {
-        val uri = dataSavingPlaybackUri(rawUri)
+        val uri = playableUri(rawUri)
 
         // A null URI means the fetch produced nothing playable. Recording an error here rather than
         // at each call site is what makes the invariant structural: every caller either publishes
@@ -340,6 +350,16 @@ class ViewVideoViewModel(
                 publishVideoUri(postedUri)
                 return
             }
+        }
+
+        // A Reddit video whose HLS playlist is missing -- for hours after posting, sometimes --
+        // still has its DASH manifest. Never offered for a DASH URI, so this runs once, and a
+        // failure on DASH carries on to the direct-URL fallback below. The video type stays as it
+        // is: ViewVideoActivity builds a DASH source for it from the URL.
+        val dashUri = RedditDashFallback.fallbackFor("fullscreen", mediaItem?.localConfiguration?.uri)
+        if (dashUri != null) {
+            publishVideoUri(dashUri)
+            return
         }
 
         val fallbackUrl = videoFallbackDirectUrl
