@@ -181,6 +181,32 @@ class AccountSettingsTest {
     }
 
     @Test
+    fun `anonymous can be copied from`() {
+        defaultPreferences.edit()
+            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "2")
+            .commit()
+        database.postFilterDao().insert(postFilter("NSFW", Account.ANONYMOUS_ACCOUNT))
+        database.postFilterUsageDao().insert(
+            PostFilterUsage("NSFW", Account.ANONYMOUS_ACCOUNT, PostFilterUsage.HOME_TYPE, null))
+        database.commentFilterDao().insert(commentFilter("Rude", Account.ANONYMOUS_ACCOUNT))
+        database.postFilterDao().insert(postFilter("alice's own", "alice"))
+
+        AccountSettings.copyBetweenAccounts(context, database, Account.ANONYMOUS_ACCOUNT, "alice")
+
+        assertEquals("2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("the source is only ever read",
+            "2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals(listOf("NSFW"),
+            database.postFilterDao().getAllPostFilters("alice").map { it.name })
+        assertEquals(listOf("Rude"),
+            database.commentFilterDao().getAllCommentFilters("alice").map { it.name })
+        assertEquals("the usage follows the filter it belongs to", 1,
+            database.postFilterUsageDao().getAllPostFilterUsage("NSFW", "alice").size)
+        assertEquals("the source keeps its own", 1,
+            database.postFilterDao().getAllPostFilters(Account.ANONYMOUS_ACCOUNT).size)
+    }
+
+    @Test
     fun `copying an account onto itself changes nothing`() {
         defaultPreferences.edit()
             .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")
