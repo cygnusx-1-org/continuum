@@ -338,6 +338,13 @@ abstract class ShadowboxPageFragment : Fragment() {
      */
     open fun restoreMedia() {}
 
+    /**
+     * The device is online again, or has moved to another network: a page whose media gave up
+     * because it could not reach the host can try again. Called by the host for every page it
+     * has; a page with nothing to retry, or whose media [releaseMedia] has let go, ignores it.
+     */
+    open fun onConnectionRestored() {}
+
     /** The page's panel has been built and bound; a page can add its own controls to it here. */
     protected open fun onPanelReady(panel: ShadowboxInfoPanel) {}
 

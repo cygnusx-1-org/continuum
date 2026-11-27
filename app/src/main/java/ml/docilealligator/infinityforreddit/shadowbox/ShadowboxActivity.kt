@@ -24,6 +24,7 @@ import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.activities.BaseActivity
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.databinding.ActivityShadowboxBinding
+import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent
 import ml.docilealligator.infinityforreddit.events.PostPositionUpdateEventToPostList
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList
@@ -40,6 +41,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils
 import ml.docilealligator.infinityforreddit.thing.SortType
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
+import ml.docilealligator.infinityforreddit.utils.Utils
 import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel
 import org.greenrobot.eventbus.EventBus
@@ -527,6 +529,34 @@ class ShadowboxActivity : BaseActivity() {
             }
         }
         pageAt(index)?.rebindPanel()
+    }
+
+    /**
+     * Gives the pages whose media could not reach its host another go once the device is online
+     * again. Every page either side of the one in front loads while it waits, so a dropout of a
+     * few seconds fails videos the user has not reached yet (issue #508), and a page that gave up
+     * otherwise stays that way until it is tapped, landed on, or let go and rebuilt.
+     *
+     * The event comes on each change of the default network's transport, so a dropout reaches
+     * here twice: going to [Utils.NETWORK_TYPE_OTHER], which is also what it reports with no
+     * network at all, and coming back. Only the second is worth a retry. A device online over
+     * something other than Wi-Fi or mobile data reports OTHER both ways and gets no retry here;
+     * its pages still try again when the user lands on them.
+     *
+     * Every page is told, not just those within reach: a page out of reach has had its media let
+     * go by [retainMediaNear], and so has every page while this screen is behind another one, and
+     * a page with no player ignores the call.
+     */
+    @Subscribe
+    fun onChangeNetworkStatusEvent(event: ChangeNetworkStatusEvent) {
+        if (event.connectedNetwork == Utils.NETWORK_TYPE_OTHER) {
+            return
+        }
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment is ShadowboxPageFragment) {
+                fragment.onConnectionRestored()
+            }
+        }
     }
 
     @Subscribe

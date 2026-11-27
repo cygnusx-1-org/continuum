@@ -76,6 +76,24 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private var playbackFailed = false
 
     /**
+     * Set when the player gave up on every file it had while this page was not the one in front:
+     * a neighbour, prepared ahead of the swipe. A page like that keeps its poster instead of
+     * putting the error overlay up, and builds a fresh player when the user lands on it.
+     *
+     * Most of these failures are a connection that dropped for a few seconds. Every page either
+     * side of the one in front loads while it waits, so a dropout fails pages the user has not
+     * reached yet, and the overlay then greeted them on a video that would have played fine.
+     */
+    private var failedOutOfSight = false
+
+    /**
+     * Whether the failure that ended the last player was the connection's -- it could not reach
+     * the host at all -- so a connection coming back is worth another try. A refused file or a
+     * decoder that would not open is not.
+     */
+    private var failedOnConnection = false
+
+    /**
      * Where a released player was, so the one built in its place carries on from there rather
      * than from the start. [C.TIME_UNSET] when there is nothing to carry on from.
      */
@@ -181,6 +199,8 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private fun buildPlayer() {
         val binding = _binding ?: return
         playbackFailed = false
+        failedOutOfSight = false
+        failedOnConnection = false
         binding.playbackErrorLinearLayoutShadowboxMediaVideo.visibility = View.GONE
         downgradeFailed = false
         fallbackTried = false
@@ -270,9 +290,15 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
                 // Reddit video's DASH manifest, for when its HLS playlist is missing. Failing
                 // those, the post's direct-URL fallback, the way the feed's row does; failing that
                 // too, say so -- a page left on its poster with a pause button up looked like a
-                // video that was playing.
+                // video that was playing. Only on the page in front, though: one the user is not
+                // looking at holds its failure until they land on it; see failedOutOfSight.
                 if (!retryAtPostedQuality() && !retryAtDash() && !retryAtFallbackUrl()) {
-                    showPlaybackError()
+                    failedOnConnection = isConnectionFailure(error)
+                    if (pageActive) {
+                        showPlaybackError()
+                    } else {
+                        holdFailureOutOfSight()
+                    }
                 }
             }
         }
@@ -619,6 +645,42 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     /**
+     * What a page the user is not looking at does once its player has given up: the poster goes
+     * back over whatever the surface was left showing, and the failure waits for the user to land
+     * here, when [onPageActive] tries again. See [failedOutOfSight].
+     */
+    private fun holdFailureOutOfSight() {
+        failedOutOfSight = true
+        showPoster()
+        updatePlayButton()
+    }
+
+    /** Whether [error] is the device failing to reach the host, rather than the host answering. */
+    private fun isConnectionFailure(error: PlaybackException): Boolean =
+        error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+
+    /**
+     * A fresh player in place of one that gave up, without the user asking for it: the user
+     * landed on the page, or the connection came back. Unlike [retryPlayback] it is no request to
+     * watch, so the autoplay rule still decides whether the video starts. Returns whether it
+     * built one.
+     *
+     * A page whose player [releaseMedia] has already let go is left to [restoreMedia], which
+     * builds a fresh one anyway; building here too would put two players on the page.
+     */
+    private fun retryAfterFailure(reason: String): Boolean {
+        if (player == null || !(playbackFailed || failedOutOfSight)) {
+            return false
+        }
+        Log.i(TAG, "Retrying after the player gave up ($reason): $uri")
+        releasePlayer()
+        showPoster()
+        buildPlayer()
+        return true
+    }
+
+    /**
      * The tap on the error overlay: a fresh player on the file the page started from, from the
      * start. The tap is also a request to watch, so with autoplay off it counts as pressing play.
      * The failure was as likely the device's as the file's -- a decoder that was busy elsewhere --
@@ -693,7 +755,18 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         // Autoplay off means the page comes up paused behind the play button. A video the user
         // started and then swiped away from comes back paused too, at the frame it stopped on.
         pageActive = true
+        // A page that gave up -- out of sight, or in front before the user swiped away -- gets a
+        // fresh player now that it is being looked at; buildPlayer applies the playback rule.
+        if (retryAfterFailure("page shown")) {
+            return
+        }
         applyPlayback()
+    }
+
+    override fun onConnectionRestored() {
+        if (failedOnConnection) {
+            retryAfterFailure("connection back")
+        }
     }
 
     override fun pausePlayback() {
