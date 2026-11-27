@@ -92,6 +92,7 @@ import retrofit2.Retrofit;
 public class CommentActivity extends BaseActivity implements UploadImageEnabledActivity,
         AccountChooserBottomSheetFragment.AccountChooserListener, GiphyDialogFragment.GifSelectionListener {
 
+    public static final String EXTRA_COMMENT_PARENT_AUTHOR_KEY = "ECPAK";
     public static final String EXTRA_COMMENT_PARENT_TITLE_KEY = "ECPTK";
     public static final String EXTRA_COMMENT_PARENT_BODY_KEY = "ECPBK";
     public static final String EXTRA_COMMENT_PARENT_BODY_MARKDOWN_KEY = "ECPBMK";
@@ -237,6 +238,22 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             finish();
 
             return;
+        }
+
+        // Shown for posts and comments alike, so the title and body below sit on the same pixels
+        // in both. Long-press copies the bare name, for typing u/name into the reply (#496).
+        String parentAuthor = intent.getStringExtra(EXTRA_COMMENT_PARENT_AUTHOR_KEY);
+        if (!TextUtils.isEmpty(parentAuthor)) {
+            binding.commentParentAuthorTextView.setVisibility(View.VISIBLE);
+            binding.commentParentAuthorTextView.setText(
+                    mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false)
+                            ? "u/" + parentAuthor : parentAuthor);
+            if (!"[deleted]".equals(parentAuthor)) {
+                binding.commentParentAuthorTextView.setOnLongClickListener(view -> {
+                    copyText(parentAuthor);
+                    return true;
+                });
+            }
         }
 
         String parentTitle = intent.getStringExtra(EXTRA_COMMENT_PARENT_TITLE_KEY);
@@ -547,9 +564,11 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
         parentSpoilerBackgroundColor = parentTextColor | 0xFF000000;
         binding.commentAccountNameTextView.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.commentParentAuthorTextView.setTextColor(mCustomThemeWrapper.getUsername());
 
         if (typeface != null) {
             binding.commentCommentEditText.setTypeface(typeface);
+            binding.commentParentAuthorTextView.setTypeface(typeface);
         }
 
         if (titleTypeface != null) {

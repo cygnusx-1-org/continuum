@@ -41,6 +41,17 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/comment_parent_author_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:textSize="?attr/font_default"
+                    android:fontFamily="?attr/font_family"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/comment_parent_title_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

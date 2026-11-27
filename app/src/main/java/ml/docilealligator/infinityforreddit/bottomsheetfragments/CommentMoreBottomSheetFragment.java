@@ -141,6 +141,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 binding.replyTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
                     Intent intent = new Intent(activity, CommentActivity.class);
                     intent.putExtra(CommentActivity.EXTRA_PARENT_DEPTH_KEY, comment.getDepth() + 1);
+                    intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_AUTHOR_KEY, comment.getAuthor());
                     intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_MARKDOWN_KEY, comment.getCommentMarkdown());
                     intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_KEY, comment.getCommentRawText());
                     intent.putExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY, comment.getFullName());

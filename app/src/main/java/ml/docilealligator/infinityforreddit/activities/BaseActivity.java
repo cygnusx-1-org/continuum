@@ -1033,6 +1033,20 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         }
     }
 
+    /** Copies {@code text} exactly as given, without the share-domain rewrite {@link #copyLink} applies. */
+    public void copyText(String text) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(ClipData.newPlainText("simple text", text));
+            // Android 13+ shows its own clipboard preview for every copy.
+            if (android.os.Build.VERSION.SDK_INT < 33) {
+                Toast.makeText(this, R.string.copy_success, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, R.string.copy_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void shareLink(String link) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
