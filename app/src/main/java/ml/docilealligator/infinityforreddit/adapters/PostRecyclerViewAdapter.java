@@ -3551,6 +3551,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
         Intent intent = new Intent(mActivity, CommentActivity.class);
         intent.putExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY, post.getFullName());
+        intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_AUTHOR_KEY, post.getAuthor());
         intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_TITLE_KEY, post.getTitle());
         intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_MARKDOWN_KEY, post.getSelfText());
         intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_KEY, post.getSelfTextPlain());

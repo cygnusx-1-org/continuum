@@ -1400,6 +1400,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                     Intent intent = new Intent(mActivity, CommentActivity.class);
                     intent.putExtra(CommentActivity.EXTRA_PARENT_DEPTH_KEY, comment.getDepth() + 1);
+                    intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_AUTHOR_KEY, comment.getAuthor());
                     intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_MARKDOWN_KEY, comment.getCommentMarkdown());
                     intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_KEY, comment.getCommentRawText());
                     intent.putExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY, comment.getFullName());
@@ -1669,9 +1670,29 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 mActivity.startActivity(intent);
             });
 
+            // Copies the bare name, for typing u/name into a reply (#496).
+            authorTextView.setOnLongClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return false;
+                }
+                Comment comment = getItem(position);
+                if (comment == null || comment.isAuthorDeleted()) {
+                    return false;
+                }
+                String author = comment.getAuthor();
+                if (author == null) {
+                    return false;
+                }
+                mActivity.copyText(author);
+                return true;
+            });
+
             authorIconImageView.setOnClickListener(view -> {
                 authorTextView.performClick();
             });
+
+            authorIconImageView.setOnLongClickListener(view -> authorTextView.performLongClick());
 
             expandButton.setOnClickListener(view -> {
                 if (!mCommentRecyclerViewAdapterCallback.toggleExpandComment(getBindingAdapterPosition())
